@@ -18,9 +18,11 @@ public class Program
         })
         .CreateLogger<Program>();
 
-    public static async Task Main()
+    public static async Task Main(string[] args) => await Start(args, CancellationToken.None);
+
+    public static async Task Start(string[] args, CancellationToken cancellationToken)
     {
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var ongoingTasks = new ConcurrentDictionary<Task, byte>();
 
         var listener = new TcpListener(IPAddress.Loopback, 5384);
@@ -68,7 +70,7 @@ public class Program
                 byte[] buffer = ArrayPool<byte>.Shared.Rent(1024);
                 try
                 {
-                    while (!cancellationToken.IsCancellationRequested)
+                    while (!cancellationToken.IsCancellationRequested && client.Connected && client.Available != 0)
                     {
                         int bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
                         if (bytesRead == 0)
@@ -76,14 +78,28 @@ public class Program
 
                         var clientMessage = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, bytesRead).Span);
 
-                        if (clientMessage?.Type == "chat")
+                        if (clientMessage == null) continue;
+
+                        if (clientMessage.Type == "disconnect")
                         {
-                            await SendJson(stream, new Message { Type = "info", Content = "Waiting" }, cancellationToken);
+                            Logger.LogInformation($"Client {clientId} requested to disconnect");
+                            break;
+                        }
+
+                        if (clientMessage.Type == "chat")
+                        {
+                            await SendJson(stream, new Message { Type = "waiting", Content = "Waiting" }, cancellationToken);
+                            cancellationToken.ThrowIfCancellationRequested();
                             // Simulate processing
                             await Task.Delay(2000, cancellationToken);
-                            await SendJson(stream, new Message { Type = "chat", Content = "Message" }, cancellationToken);
+                            await SendJson(stream, new Message { Type = "message", Content = "Message" }, cancellationToken);
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, $"Error while processing client {clientId}.");
+                    await SendJson(stream, new Message { Type = "error", Content = "Something went wrong" }, cancellationToken);
                 }
                 finally
                 {
