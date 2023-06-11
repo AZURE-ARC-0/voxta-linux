@@ -4,4 +4,4 @@ This is an early prototype of using Large Language Models, Text To Speech and Sp
 
 ## License
 
-[MIT](LICENSE.md)
+[GNU GPLv3](LICENSE.md)
