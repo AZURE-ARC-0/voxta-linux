@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate", "ChatMate.Plugin\ChatMate.csproj", "{A3423FB2-63F0-4A52-8484-E9A730C9869A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Plugin", "ChatMate.Plugin\ChatMate.Plugin.csproj", "{A3423FB2-63F0-4A52-8484-E9A730C9869A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Server", "ChatMate.Server\ChatMate.Server.csproj", "{FF8B0FCF-3971-4217-8B1D-C2CB7C964797}"
 EndProject
