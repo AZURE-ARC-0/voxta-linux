@@ -252,7 +252,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             // var mediaType = MediaFoundationEncoder.SelectMediaType(AudioSubtypes.MFAudioFormat_MP3, new WaveFormat(44100, 1), 0);
             // using var writer = new MediaFoundationEncoder(mediaType);
             var ms = new MemoryStream();
-            MediaFoundationEncoder.EncodeToMp3(reader, ms, 0);
+            MediaFoundationEncoder.EncodeToMp3(reader, ms, 16000);
             // writer.Encode(ms, reader, Guid.Empty);
             bytes = ms.ToArray();
         }
