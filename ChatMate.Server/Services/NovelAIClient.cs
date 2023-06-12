@@ -1,12 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Http.Headers;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using System.Web;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using NAudio.MediaFoundation;
+using NAudio.Wave;
 
 namespace ChatMate.Server.Services;
 
@@ -17,22 +17,25 @@ public class NovelAIOptions
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService
 {
-    private ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
+    private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
 
-    private readonly IOptions<NovelAIOptions> _options;
     private readonly IOptions<ChatMateServerOptions> _serverOptions;
     private readonly HttpClient _httpClient;
     private readonly string _model;
     private readonly object _parameters;
+    
+    static NovelAIClient()
+    {
+        MediaFoundationApi.Startup();
+    }
 
     public NovelAIClient(IOptions<NovelAIOptions> options, IOptions<ChatMateServerOptions> serverOptions, IHttpClientFactory httpClientFactory)
     {
-        _options = options;
         _serverOptions = serverOptions;
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_options.Value.Token}");
+        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.Value.Token}");
         _model = "clio-v1";
         _parameters = new
         {
@@ -135,7 +138,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
-        var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
         using var response = await _httpClient.SendAsync(request);
@@ -150,12 +153,13 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             var line = await reader.ReadLineAsync();
             if (line == null) break;
             if (!line.StartsWith("data:")) continue;
-            var json = JsonSerializer.Deserialize<SSEEvent>(line[5..]);
+            var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);
             if (json == null) break;
             if (json.token.Contains('\n')) break;
             sb.Append(json.token);
         }
         reader.Close();
+        
         return sb.ToString();
     }
 
@@ -164,65 +168,110 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         var id = Guid.NewGuid();
         if (!_pendingSpeechRequests.TryAdd(id, text))
             throw new Exception("Unable to save the speech to the pending requests.");
+        // TODO: Instead return a relative URL and let the client join
         return ValueTask.FromResult($"http://{_serverOptions.Value.IpAddress}:{_serverOptions.Value.Port}/speech?id={id}");
     }
 
-    public async Task HandleSpeechRequest(string rawRequest, NetworkStream responseStream)
+    public async Task HandleSpeechProxyRequestAsync(HttpProxyHandler proxy)
     {
-        var id = Guid.Parse(rawRequest.AsSpan("GET /speech?id=".Length, "aa4f7118-272c-4faa-953e-48de2fa3832d".Length));
-        var writer = new StreamWriter(responseStream, Encoding.ASCII, leaveOpen: true);
-        
-        if(!_pendingSpeechRequests.TryRemove(id, out var text))
+        var id = proxy.Query["id"];
+        if (!Guid.TryParse(id, out var guid))
         {
-            await writer.WriteAsync("HTTP/1.1 404 NotFound\r\n");
-            await writer.WriteAsync("Date: " + DateTime.UtcNow.ToString("R") + "\r\n");
-            await writer.WriteAsync("Content-Length: 0\r\n");
-            await writer.WriteAsync("\r\n");
-            await writer.FlushAsync();
+            await proxy.WriteTextResponseAsync(HttpStatusCode.BadRequest, "id is required");
             return;
         }
         
+        #warning Should be TryRemove
+        if(!_pendingSpeechRequests.TryGetValue(guid, out var text))
+        {
+            await proxy.WriteTextResponseAsync(HttpStatusCode.BadRequest, $"No pending speech with id {guid}");
+            return;
+        }
+
+        var querystring = new Dictionary<string, string>
+        {
+            ["text"] = text,
+            ["voice"] = "-1",
+            ["seed"] = "Naia",
+            ["opus"] = "true",
+            ["version"] = "v2"
+        };
         var uriBuilder = new UriBuilder(new Uri(_httpClient.BaseAddress!, "/ai/generate-voice"))
         {
-            Query = new NameValueCollection
-            {
-                ["text"] = text,
-                ["voice"] = "-1",
-                ["seed"] = "Naia",
-                ["opus"] = "true",
-                ["version"] = "v2"
-            }.ToString()
+            Query = await new FormUrlEncodedContent(querystring).ReadAsStringAsync()
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
+        using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
-        using var response = await _httpClient.SendAsync(request);
-        var bytes = await response.Content.ReadAsByteArrayAsync();
-        
-        await writer.WriteAsync("HTTP/1.1 200 OK\r\n");
-        await writer.WriteAsync("\r\n");
-        await writer.WriteAsync("Connection: keep-alive\r\n");
-        await writer.WriteAsync("Content-Type: audio/webm\r\n");
-        await writer.WriteAsync($"Content-Length: {bytes.Length}\r\n");
-        await writer.WriteAsync("\r\n");
-        await writer.FlushAsync();
-        
-        await responseStream.WriteAsync(bytes);
-        await responseStream.FlushAsync();
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         
         if (!response.IsSuccessStatusCode)
         {
+            var reason = await response.Content.ReadAsStringAsync();
             // TODO: Logger
-            Console.Error.WriteLine(await response.Content.ReadAsStreamAsync());
+            Console.Error.WriteLine(reason);
+            await proxy.WriteTextResponseAsync(HttpStatusCode.InternalServerError, "Unable to generate speech: " + reason);
         }
+
+        // TODO: Optimize later
+        var tmp = Path.GetTempFileName();
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        await File.WriteAllBytesAsync(tmp, bytes);
+        try
+        {
+            /* Option 1
+            await using var webmStream = new MediaFoundationReader(tmp);
+            using var outputStream = new MemoryStream();
+            var targetWaveFormat = new WaveFormat(44100, 1);
+            await using var waveWriter = new WaveFileWriter(outputStream, targetWaveFormat);
+            var buffer = new byte[targetWaveFormat.AverageBytesPerSecond];
+            int bytesRead;
+            while ((bytesRead = webmStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                waveWriter.Write(buffer, 0, bytesRead);
+            }
+            waveWriter.Flush();
+            outputStream.Seek(0, SeekOrigin.Begin);
+            bytes = outputStream.ToArray();
+            */
+            /* Option 2
+            using (var reader = new MediaFoundationReader(tmp))
+            {
+                var outFormat = new WaveFormat(44100, reader.WaveFormat.Channels);
+                var ms = new MemoryStream();
+                using (var resampler = new MediaFoundationResampler(reader, outFormat))
+                {
+                    // resampler.ResamplerQuality = 60;
+                    WaveFileWriter.WriteWavFileToStream(ms, resampler);
+                }
+                bytes = ms.ToArray();
+            }
+            */
+            /* Option 3 */
+            await using var reader = new MediaFoundationReader(tmp);
+            // var mediaType = MediaFoundationEncoder.SelectMediaType(AudioSubtypes.MFAudioFormat_MP3, new WaveFormat(44100, 1), 0);
+            // using var writer = new MediaFoundationEncoder(mediaType);
+            var ms = new MemoryStream();
+            MediaFoundationEncoder.EncodeToMp3(reader, ms, 0);
+            // writer.Encode(ms, reader, Guid.Empty);
+            bytes = ms.ToArray();
+        }
+        finally
+        {
+            File.Delete(tmp);
+        }
+
+        await File.WriteAllBytesAsync(@"C:\Temp\tmp.wav", bytes);
+        await proxy.WriteBytesResponseAsync(HttpStatusCode.OK, bytes, "audio/wav");
     }
 
     [Serializable]
-    private class SSEEvent
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private class NovelAIEventData
     {
-        public string token { get; init; }
+        public required string token { get; init; }
         public bool final { get; init; }
         public int ptr { get; init; }
-        public string error { get; init; }
+        public string? error { get; init; }
     }
 }

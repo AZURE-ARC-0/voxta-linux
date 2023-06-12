@@ -41,6 +41,7 @@ public class Program
         services.AddSingleton<ChatMateServer>();
         services.AddSingleton<ChatMateConnectionFactory>();
         services.AddTransient<ChatMateConnection>();
+        services.AddSingleton<HttpProxyHandlerFactory>();
         
         services.Configure<NovelAIOptions>(configuration.GetSection("ChatMate.Services:NovelAI"));
         services.AddSingleton<NovelAIClient>();

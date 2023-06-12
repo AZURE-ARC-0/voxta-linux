@@ -1,8 +1,7 @@
 ﻿using System.Buffers;
+using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
-using ChatMate.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -28,21 +27,24 @@ public class ChatMateConnection
     private readonly ILogger<ChatMateConnection> _logger;
     private readonly ITextGenService _textGen;
     private readonly ITextToSpeechService _speechGen;
+    private readonly HttpProxyHandlerFactory _proxyHandlerFactory;
 
-    public ChatMateConnection(ILoggerFactory loggerFactory, ITextGenService textGen, ITextToSpeechService speechGen)
+    public ChatMateConnection(ILoggerFactory loggerFactory, ITextGenService textGen, ITextToSpeechService speechGen, HttpProxyHandlerFactory proxyHandlerFactory)
     {
         _logger = loggerFactory.CreateLogger<ChatMateConnection>();
         _textGen = textGen;
         _speechGen = speechGen;
+        _proxyHandlerFactory = proxyHandlerFactory;
     }
 
     public async Task ProcessClientAsync(TcpClient client, Guid clientId, CancellationToken cancellationToken)
     {
+        _logger.BeginScope("Client {ClientId}", clientId);
         using (client)
         {
             try
             {
-                _logger.LogInformation("Client {ClientId} connected...", clientId);
+                _logger.LogInformation("Client connected");
                 var stream = client.GetStream();
 
                 var buffer = ArrayPool<byte>.Shared.Rent(1024);
@@ -58,14 +60,22 @@ public class ChatMateConnection
 
                         if (memory.Span.StartsWith("GET "u8))
                         {
+                            var proxy = _proxyHandlerFactory.Create(memory.Span, stream);
+                            _logger.LogInformation("HTTP Request {ProxyMethod} {ProxyPath}", proxy.Method, proxy.Path);
                             try
                             {
-                                var rawRequest = Encoding.UTF8.GetString(memory.Span);
-                                // TODO: Some kind of router
-                                await _speechGen.HandleSpeechRequest(rawRequest, stream);
+                                if (proxy is { Method: "GET", Path: "/speech" })
+                                {
+                                    await _speechGen.HandleSpeechProxyRequestAsync(proxy);
+                                }
+                                else
+                                {
+                                    await proxy.WriteTextResponseAsync(HttpStatusCode.NotFound, "Not Found");
+                                }
                             }
                             catch (Exception ex)
                             {
+                                await proxy.WriteTextResponseAsync(HttpStatusCode.InternalServerError, ex.Message);
                                 _logger.LogError(ex, "Error while processing HTTP GET {ClientId}", clientId);
                             }
                         }
@@ -75,11 +85,17 @@ public class ChatMateConnection
                             {
                                 var clientMessage = JsonSerializer.Deserialize<Message>(memory.Span);
 
-                                if (clientMessage == null) continue;
+                                if (clientMessage == null)
+                                {
+                                    _logger.LogError("Could not deserialize message");
+                                    continue;
+                                }
+
+                                _logger.LogInformation("Socket Request {Type} {Content}", clientMessage.Type, clientMessage.Content);
 
                                 if (clientMessage.Type == "disconnect")
                                 {
-                                    _logger.LogInformation("Client {ClientId} requested to disconnect", clientId);
+                                    _logger.LogInformation("Disconnect", clientId);
                                     break;
                                 }
 
@@ -94,13 +110,13 @@ public class ChatMateConnection
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "Error while processing client {ClientId}", clientId);
+                                _logger.LogError(ex, "Error");
                                 await SendJson(stream, new Message { Type = "error", Content = $"Server exception: {ex.Message}" }, cancellationToken);
                             }
                         }
                         else
                         {
-                            _logger.LogError("Unexpected packet for client {ClientId}", clientId);
+                            _logger.LogError("Unexpected packet");
                         }
                     }
                 }
@@ -111,15 +127,15 @@ public class ChatMateConnection
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("Client {ClientId} processing cancelled", clientId);
+                _logger.LogInformation("Processing cancelled");
             }
             catch (IOException)
             {
-                _logger.LogInformation("Client {ClientId} interrupted", clientId);
+                _logger.LogInformation("Interrupted");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while processing client {ClientId}", clientId);
+                _logger.LogError(ex, "Error");
             }
         }
     }

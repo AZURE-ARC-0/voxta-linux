@@ -1,9 +1,7 @@
-﻿using System.Net.Sockets;
-
-namespace ChatMate.Server;
+﻿namespace ChatMate.Server;
 
 public interface ITextToSpeechService
 {
     ValueTask<string> GenerateSpeechUrlAsync(string text);
-    Task HandleSpeechRequest(string rawRequest, NetworkStream responseStream);
+    Task HandleSpeechProxyRequestAsync(HttpProxyHandler proxy);
 }
