@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using ChatMate.Server.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -33,9 +34,18 @@ public class Program
         await server.Start(cancellationToken);
     }
 
-    public static void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
+    private static void ConfigureServices(IServiceCollection services, IConfigurationRoot configuration)
     {
+        services.AddHttpClient();
         services.Configure<ChatMateServerOptions>(configuration.GetSection("ChatMate.Server"));
         services.AddSingleton<ChatMateServer>();
+        services.AddSingleton<ChatMateConnectionFactory>();
+        services.AddTransient<ChatMateConnection>();
+        
+        services.Configure<NovelAIOptions>(configuration.GetSection("ChatMate.Services:NovelAI"));
+        services.AddSingleton<NovelAIClient>();
+
+        services.AddSingleton<ITextGenService>(sp => sp.GetRequiredService<NovelAIClient>());
+        services.AddSingleton<ITextToSpeechService>(sp => sp.GetRequiredService<NovelAIClient>());
     }
 }
