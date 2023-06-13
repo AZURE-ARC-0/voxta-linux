@@ -97,19 +97,16 @@ public class ChatMateConnection
 
                                 _logger.LogInformation("Socket Request {Type} {Content}", clientMessage.Type, clientMessage.Content);
 
-                                if (clientMessage.Type == "disconnect")
+                                if (clientMessage.Type == "Send")
                                 {
-                                    _logger.LogInformation("Disconnect");
-                                    break;
-                                }
-
-                                if (clientMessage.Type == "chat")
-                                {
+                                    _logger.LogDebug("Received chat message: {Text}", clientMessage.Content);
                                     var gen = await _textGen.GenerateTextAsync(_chatData, clientMessage.Content);
-                                    await SendJson(stream, new Message { Type = "message", Content = gen }, cancellationToken);
+                                    _logger.LogDebug("Generated chat reply: {Text}", gen);
+                                    await SendJson(stream, new Message { Type = "Reply", Content = gen }, cancellationToken);
                                     cancellationToken.ThrowIfCancellationRequested();
                                     var speechUrl = await _speechGen.GenerateSpeechUrlAsync(gen);
-                                    await SendJson(stream, new Message { Type = "speech", Content = speechUrl }, cancellationToken);
+                                    _logger.LogDebug("Generated speech URL: {SpeechUrl}", speechUrl);
+                                    await SendJson(stream, new Message { Type = "Speech", Content = speechUrl }, cancellationToken);
                                 }
                             }
                             catch (Exception ex)

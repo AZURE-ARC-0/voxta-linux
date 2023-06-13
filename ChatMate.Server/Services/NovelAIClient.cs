@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
 
@@ -27,15 +28,17 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
     private readonly HttpClient _httpClient;
     private readonly string _model;
     private readonly object _parameters;
-    
+    private readonly ILogger<NovelAIClient> _logger;
+
     static NovelAIClient()
     {
         MediaFoundationApi.Startup();
     }
 
-    public NovelAIClient(IOptions<NovelAIOptions> options, IOptions<ChatMateServerOptions> serverOptions, IHttpClientFactory httpClientFactory)
+    public NovelAIClient(IOptions<NovelAIOptions> options, IOptions<ChatMateServerOptions> serverOptions, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
     {
         _serverOptions = serverOptions;
+        _logger = loggerFactory.CreateLogger<NovelAIClient>();
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
@@ -192,8 +195,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         if (!response.IsSuccessStatusCode)
         {
             var reason = await response.Content.ReadAsStringAsync();
-            // TODO: Logger
-            Console.Error.WriteLine(reason);
+            _logger.LogError("Failed to generate speech: {Reason}", reason);
             await proxy.WriteTextResponseAsync(HttpStatusCode.InternalServerError, "Unable to generate speech: " + reason);
         }
 
@@ -236,7 +238,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             // var mediaType = MediaFoundationEncoder.SelectMediaType(AudioSubtypes.MFAudioFormat_MP3, new WaveFormat(44100, 1), 0);
             // using var writer = new MediaFoundationEncoder(mediaType);
             var ms = new MemoryStream();
-            MediaFoundationEncoder.EncodeToMp3(reader, ms, 16000);
+            MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
             // writer.Encode(ms, reader, Guid.Empty);
             bytes = ms.ToArray();
         }
