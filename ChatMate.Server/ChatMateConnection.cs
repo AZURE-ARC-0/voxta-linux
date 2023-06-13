@@ -28,6 +28,7 @@ public class ChatMateConnection
     private readonly ITextGenService _textGen;
     private readonly ITextToSpeechService _speechGen;
     private readonly HttpProxyHandlerFactory _proxyHandlerFactory;
+    private readonly ChatData _chatData;
 
     public ChatMateConnection(ILoggerFactory loggerFactory, ITextGenService textGen, ITextToSpeechService speechGen, HttpProxyHandlerFactory proxyHandlerFactory)
     {
@@ -35,11 +36,14 @@ public class ChatMateConnection
         _textGen = textGen;
         _speechGen = speechGen;
         _proxyHandlerFactory = proxyHandlerFactory;
+        _chatData = new ChatData();
     }
 
     public async Task ProcessClientAsync(TcpClient client, Guid clientId, CancellationToken cancellationToken)
     {
+        // TODO: Include in logs
         _logger.BeginScope("Client {ClientId}", clientId);
+        
         using (client)
         {
             try
@@ -64,7 +68,7 @@ public class ChatMateConnection
                             _logger.LogInformation("HTTP Request {ProxyMethod} {ProxyPath}", proxy.Method, proxy.Path);
                             try
                             {
-                                if (proxy is { Method: "GET", Path: "/speech" })
+                                if (proxy is { Method: "GET", Path: "/speech.mp3" })
                                 {
                                     await _speechGen.HandleSpeechProxyRequestAsync(proxy);
                                 }
@@ -95,13 +99,13 @@ public class ChatMateConnection
 
                                 if (clientMessage.Type == "disconnect")
                                 {
-                                    _logger.LogInformation("Disconnect", clientId);
+                                    _logger.LogInformation("Disconnect");
                                     break;
                                 }
 
                                 if (clientMessage.Type == "chat")
                                 {
-                                    var gen = await _textGen.GenerateTextAsync(clientMessage.Content);
+                                    var gen = await _textGen.GenerateTextAsync(_chatData, clientMessage.Content);
                                     await SendJson(stream, new Message { Type = "message", Content = gen }, cancellationToken);
                                     cancellationToken.ThrowIfCancellationRequested();
                                     var speechUrl = await _speechGen.GenerateSpeechUrlAsync(gen);

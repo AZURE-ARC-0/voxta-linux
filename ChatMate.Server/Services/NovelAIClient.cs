@@ -40,14 +40,14 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         _parameters = new
         {
             temperature = 1.05,
-            max_length = 80,
+            max_length = 40,
             min_length = 1,
             top_k = 80,
             top_p = 0.95,
             top_a = 0.075,
             tail_free_sampling = 0.967,
             repetition_penalty = 1.5,
-            repetition_penalty_range = 8000,
+            repetition_penalty_range = 8192,
             repetition_penalty_slope = 0.09,
             repetition_penalty_frequency = 0.03,
             repetition_penalty_presence = 0.005,
@@ -59,83 +59,52 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             order = new[] { 1, 3, 4, 0, 2 },
             bad_words_ids = new[]
             {
-                new[]
-                {
-                    3
-                },
-                new[]
-                {
-                    49356
-                },
-                new[]
-                {
-                    1431
-                },
-                new[]
-                {
-                    31715
-                },
-                new[]
-                {
-                    34387
-                },
-                new[]
-                {
-                    20765
-                },
-                new[]
-                {
-                    30702
-                },
-                new[]
-                {
-                    10691
-                },
-                new[]
-                {
-                    49333
-                },
-                new[]
-                {
-                    1266
-                },
-                new[]
-                {
-                    19438
-                },
-                new[]
-                {
-                    43145
-                },
-                new[]
-                {
-                    26523
-                },
-                new[]
-                {
-                    41471
-                },
-                new[]
-                {
-                    2936
-                },
+                new[] { 3 },
+                new[] { 49356 },
+                new[] { 1431 },
+                new[] { 31715 },
+                new[] { 34387 },
+                new[] { 20765 },
+                new[] { 30702 },
+                new[] { 10691 },
+                new[] { 49333 },
+                new[] { 1266 },
+                new[] { 19438 },
+                new[] { 43145 },
+                new[] { 26523 },
+                new[] { 41471 },
+                new[] { 2936 },
             },
+            stop_sequences = new[]
+            {
+                // TODO: This is User: and " (this may not be the most efficient way to go)
+                new[]{ 21978, 49287 },
+                new[]{ 49264 }
+            }
         };
     }
 
-    public async ValueTask<string> GenerateTextAsync(string text)
+    public async ValueTask<string> GenerateTextAsync(ChatData chatData, string text)
     {
+        // TODO: Keep a history and count tokens: https://novelai.net/tokenizer
+        // TODO: Move the context and settings to appsettings
+        chatData.Messages.Add(new ChatMessageData
+        {
+            User = chatData.UserName,
+            Text = text,
+        });
         var input = $"""
-        This is a conversation between the user and a virtual companion. She is beautiful, and subservient.
-        User: {text}
-        Kally:
-        """;
+        {chatData.Preamble}
+        {string.Join("\n", chatData.Messages.Select(x => $"{x.User}: \"{x.Text}\""))}
+        {chatData.BotName}: \"
+        """.ReplaceLineEndings("\n");
         var body = new
         {
             model = _model,
             input,
             parameters = _parameters
         };
+        Console.WriteLine(JsonSerializer.Serialize(body));
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
@@ -155,12 +124,24 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             if (!line.StartsWith("data:")) continue;
             var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);
             if (json == null) break;
-            if (json.token.Contains('\n')) break;
-            sb.Append(json.token);
+            // TODO: Determine which tokens are considered end tokens.
+            var token = json.token;
+            if (token is "~" or "\\") continue;
+            if (token.Contains('\n') || token.Contains('\"')) break;
+            sb.Append(token.Trim('~', '\\'));
+            // TODO: Determine a rule of thumb for when to stop.
+            // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
         reader.Close();
         
-        return sb.ToString();
+        var message = sb.ToString();
+        chatData.Messages.Add(new ChatMessageData
+        {
+            User = chatData.BotName,
+            Text = message
+        });
+        
+        return message;
     }
 
     public ValueTask<string> GenerateSpeechUrlAsync(string text)
@@ -169,7 +150,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         if (!_pendingSpeechRequests.TryAdd(id, text))
             throw new Exception("Unable to save the speech to the pending requests.");
         // TODO: Instead return a relative URL and let the client join
-        return ValueTask.FromResult($"http://{_serverOptions.Value.IpAddress}:{_serverOptions.Value.Port}/speech?id={id}");
+        return ValueTask.FromResult($"http://{_serverOptions.Value.IpAddress}:{_serverOptions.Value.Port}/speech.mp3?id={id}");
     }
 
     public async Task HandleSpeechProxyRequestAsync(HttpProxyHandler proxy)
