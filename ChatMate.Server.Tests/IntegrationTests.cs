@@ -45,7 +45,15 @@ public class ServerIntegrationTest
         _tcpClient.Close();
         _tcpClient.Dispose();
         _serverCts.Cancel();
-        _serverTask.Wait();
+        try
+        {
+            if (_serverTask is { IsCanceled: false, IsFaulted: false })
+                _serverTask.Wait();
+        }
+        catch (AggregateException)
+        {
+            // Ignore
+        }
     }
 
     [Test]
@@ -54,17 +62,28 @@ public class ServerIntegrationTest
         await SendJson(new Message { Type = "Send", Content = "Hello World!" });
 
         var reply = await ReceiveJson();
-        Assert.That(reply.Type, Is.EqualTo("Reply"));
-        
-        var speech = await ReceiveJson();
-        Assert.That(reply.Type, Is.EqualTo("Speech"));
-
-        var response = await HttpClient.GetAsync(speech.Content);
         Assert.Multiple(() =>
         {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/mpeg"));
-            Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000));
+            Assert.That(reply.Type, Is.EqualTo("Reply"));
+            Assert.That(reply.Content, Is.Not.Null.Or.Empty);
+        });
+
+        var speech = await ReceiveJson();
+        Assert.Multiple(() =>
+        {
+            Assert.That(speech.Type, Is.EqualTo("Speech"));
+            Assert.That(speech.Content, Does.StartWith("http"));
+        });
+
+        var response = await HttpClient.GetAsync(speech.Content);
+        if (!response.IsSuccessStatusCode)
+            Assert.Fail($"GET {speech.Content}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Content);
+            Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/mpeg"), speech.Content);
+            Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Content);
         });
     }
 

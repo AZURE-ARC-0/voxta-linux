@@ -14,7 +14,7 @@ public class HttpProxyHandlerFactory
         var parts = Encoding.ASCII.GetString(line).Split(' ');
         var uri = new Uri("http://localhost" + parts[1]);
         var query = HttpUtility.ParseQueryString(uri.Query);
-        return new HttpProxyHandler(parts[0], uri.AbsolutePath, query, stream);
+        return new HttpProxyHandler(parts[0], uri, query, stream);
     }
 }
 
@@ -22,15 +22,15 @@ public class HttpProxyHandler : IDisposable
 {
     private readonly NetworkStream _responseStream;
     public string Method { get; }
-    public string Path { get; }
+    public Uri Uri { get; }
     public NameValueCollection Query { get; }
     
     private readonly StreamWriter _writer;
 
-    public HttpProxyHandler(string method, string path, NameValueCollection query, NetworkStream responseStream)
+    public HttpProxyHandler(string method, Uri uri, NameValueCollection query, NetworkStream responseStream)
     {
         Method = method;
-        Path = path;
+        Uri = uri;
         Query = query;
         _responseStream = responseStream;
         _writer = new StreamWriter(responseStream, Encoding.ASCII, leaveOpen: true);

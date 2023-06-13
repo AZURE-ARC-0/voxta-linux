@@ -22,6 +22,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
     // Regex that filters anything that is not a letter a number or punctuation
     private static readonly Regex SanitizeMessage = new(@"[^a-zA-Z0-9 \.\!\?\,\;]", RegexOptions.Compiled);
     
+    // TODO: Clean up old speech requests after some time
     private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
 
     private readonly IOptions<ChatMateServerOptions> _serverOptions;
@@ -111,7 +112,6 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             input,
             parameters = _parameters
         };
-        Console.WriteLine(JsonSerializer.Serialize(body));
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
@@ -152,19 +152,19 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
     public ValueTask<string> GenerateSpeechUrlAsync(string text)
     {
-        var id = Guid.NewGuid();
+        var id = Crypto.CreateCryptographicallySecureGuid();
         if (!_pendingSpeechRequests.TryAdd(id, text))
             throw new Exception("Unable to save the speech to the pending requests.");
-        // TODO: Instead return a relative URL and let the client join
-        return ValueTask.FromResult($"http://{_serverOptions.Value.IpAddress}:{_serverOptions.Value.Port}/speech.mp3?id={id}");
+        // TODO: Instead return a relative URL and let the client join so we can add tunnel proxies
+        return ValueTask.FromResult($"http://{_serverOptions.Value.IpAddress}:{_serverOptions.Value.Port}/speech/{id}.mp3");
     }
 
     public async Task HandleSpeechProxyRequestAsync(HttpProxyHandler proxy)
     {
-        var id = proxy.Query["id"];
+        var id = Path.GetFileNameWithoutExtension(proxy.Uri.Segments[2]);
         if (!Guid.TryParse(id, out var guid))
         {
-            await proxy.WriteTextResponseAsync(HttpStatusCode.BadRequest, "id is required");
+            await proxy.WriteTextResponseAsync(HttpStatusCode.BadRequest, "Invalid speech ID");
             return;
         }
         
@@ -199,7 +199,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             await proxy.WriteTextResponseAsync(HttpStatusCode.InternalServerError, "Unable to generate speech: " + reason);
         }
 
-        // TODO: Optimize later
+        // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
         var tmp = Path.GetTempFileName();
         var bytes = await response.Content.ReadAsByteArrayAsync();
         await File.WriteAllBytesAsync(tmp, bytes);
@@ -247,8 +247,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             File.Delete(tmp);
         }
 
-        await File.WriteAllBytesAsync(@"C:\Temp\tmp.wav", bytes);
-        await proxy.WriteBytesResponseAsync(HttpStatusCode.OK, bytes, "audio/wav");
+        await proxy.WriteBytesResponseAsync(HttpStatusCode.OK, bytes, "audio/mpeg");
     }
 
     [Serializable]

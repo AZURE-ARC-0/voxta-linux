@@ -32,9 +32,12 @@ public sealed class ChatMateServer : IDisposable
             try
             {
                 var client = await _listener.AcceptTcpClientAsync(_cts.Token);
-                var clientProcessingTask = _connectionFactory.Create().ProcessClientAsync(client, Guid.NewGuid(), _cts.Token);
-                ongoingTasks.TryAdd(clientProcessingTask, 0);
-                _ = clientProcessingTask.ContinueWith(t => ongoingTasks.TryRemove(t, out _), _cts.Token);
+                var clientProcessingTask = _connectionFactory
+                    .Create()
+                    .ProcessClientAsync(client, _cts.Token)
+                    .ContinueWith(t => ongoingTasks.TryRemove(t, out _), _cts.Token);
+                if (!clientProcessingTask.IsFaulted)
+                    ongoingTasks.TryAdd(clientProcessingTask, 0);
             }
             catch (OperationCanceledException)
             {

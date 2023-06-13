@@ -29,6 +29,7 @@ public class ChatMateConnection
     private readonly ITextToSpeechService _speechGen;
     private readonly HttpProxyHandlerFactory _proxyHandlerFactory;
     private readonly ChatData _chatData;
+    private readonly Guid _clientId;
 
     public ChatMateConnection(ILoggerFactory loggerFactory, ITextGenService textGen, ITextToSpeechService speechGen, HttpProxyHandlerFactory proxyHandlerFactory)
     {
@@ -37,12 +38,12 @@ public class ChatMateConnection
         _speechGen = speechGen;
         _proxyHandlerFactory = proxyHandlerFactory;
         _chatData = new ChatData();
+        _clientId = Crypto.CreateCryptographicallySecureGuid();
     }
 
-    public async Task ProcessClientAsync(TcpClient client, Guid clientId, CancellationToken cancellationToken)
+    public async Task ProcessClientAsync(TcpClient client, CancellationToken cancellationToken)
     {
-        // TODO: Include in logs
-        _logger.BeginScope("Client {ClientId}", clientId);
+        _logger.BeginScope("Client {ClientId}", _clientId);
         
         using (client)
         {
@@ -59,28 +60,33 @@ public class ChatMateConnection
                         var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
                         if (bytesRead == 0)
                             break;
+                        if (bytesRead == buffer.Length)
+                        {
+                            _logger.LogError("Buffer too small");
+                            break;
+                        }
 
                         var memory = buffer.AsMemory(0, bytesRead);
 
                         if (memory.Span.StartsWith("GET "u8))
                         {
                             var proxy = _proxyHandlerFactory.Create(memory.Span, stream);
-                            _logger.LogInformation("HTTP Request {ProxyMethod} {ProxyPath}", proxy.Method, proxy.Path);
+                            _logger.LogInformation("HTTP Request {ProxyMethod} {ProxyPath}", proxy.Method, proxy.Uri.AbsolutePath);
                             try
                             {
-                                if (proxy is { Method: "GET", Path: "/speech.mp3" })
+                                if (proxy is { Method: "GET", Uri.Segments: [_, "speech/", _] })
                                 {
                                     await _speechGen.HandleSpeechProxyRequestAsync(proxy);
                                 }
                                 else
                                 {
-                                    await proxy.WriteTextResponseAsync(HttpStatusCode.NotFound, "Not Found");
+                                    await proxy.WriteTextResponseAsync(HttpStatusCode.NotFound, "Route Not Found");
                                 }
                             }
                             catch (Exception ex)
                             {
                                 await proxy.WriteTextResponseAsync(HttpStatusCode.InternalServerError, ex.Message);
-                                _logger.LogError(ex, "Error while processing HTTP GET {ClientId}", clientId);
+                                _logger.LogError(ex, "Error while processing HTTP GET");
                             }
                         }
                         else if (memory.Span.StartsWith("{"u8))
