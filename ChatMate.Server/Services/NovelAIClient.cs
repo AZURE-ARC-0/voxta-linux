@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Text.RegularExpressions;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
 
@@ -17,6 +18,9 @@ public class NovelAIOptions
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService
 {
+    // Regex that filters anything that is not a letter a number or punctuation
+    private static readonly Regex SanitizeMessage = new(@"[^a-zA-Z0-9 \.\!\?\,\;]", RegexOptions.Compiled);
+    
     private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
 
     private readonly IOptions<ChatMateServerOptions> _serverOptions;
@@ -126,9 +130,8 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             if (json == null) break;
             // TODO: Determine which tokens are considered end tokens.
             var token = json.token;
-            if (token is "~" or "\\") continue;
             if (token.Contains('\n') || token.Contains('\"')) break;
-            sb.Append(token.Trim('~', '\\'));
+            sb.Append(token);
             // TODO: Determine a rule of thumb for when to stop.
             // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
@@ -137,7 +140,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         var message = sb.ToString();
         chatData.Messages.Add(new ChatMessageData
         {
-            User = chatData.BotName,
+            User = SanitizeMessage.Replace(chatData.BotName, ""),
             Text = message
         });
         
