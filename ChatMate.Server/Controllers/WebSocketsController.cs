@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System.Net.Sockets;
+using System.Net.WebSockets;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatMate.Server;
@@ -31,14 +32,15 @@ public class WebSocketsController : ControllerBase
         {
             await chatSession.HandleWebSocketConnectionAsync(cancellationToken);
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+            _logger.Log(LogLevel.Information, "WebSocket connection closed");
+        }
+        catch (SocketException exc)
+        {
+            _logger.LogWarning(exc, "Unexpected socket exception");
         }
         catch (Exception exc)
         {
-            _logger.LogError(exc, "Error in websocket connection");
-        }
-        finally
-        {
-            _logger.Log(LogLevel.Information, "WebSocket connection closed");
+            _logger.LogError(exc, "Unexpected chat session error");
         }
     }
 }

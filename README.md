@@ -32,9 +32,25 @@ There is a test chat page at http://127.0.0.1:5384/chat
 
 ## Using in Virt-A-Mate
 
-Add the ChatMate.cslist to a Person atom.
+You need to open `whitelist_domains.json` to allow playing speech:
+
+```json
+{
+  "sites": [
+    // Add this line below (not this comment):
+    "127.0.0.1:5384",
+    // Leave the rest as is
+  ]
+}
+```
+
+You also need to go in the Security Settings and enable Web and Web Audio.
+
+Add `ChatMate.cslist` to a Person atom.
 
 You can open the plugin custom UI to see if the server is connected.
+
+To drive animations, you'll need to use events, and something like `Scripter` to decide how to act on those events. You can also start from a demo scene.
 
 ## Known issues
 
