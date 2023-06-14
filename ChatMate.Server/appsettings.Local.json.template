@@ -1,0 +1,16 @@
+﻿{
+  "ChatMate.Server": {
+    "TextGen": "OpenAI",
+    "SpeechGen": "NovelAI"
+  },
+  "ChatMate.Services": {
+    "NovelAI": {
+      "Token": ""
+    },
+    "OpenAI": {
+      "OrganizationId": "",
+      "ApiKey": "",
+      "Model": "gpt-3.5-turbo"
+    }
+  }
+}

@@ -47,8 +47,10 @@ public class OpenAIClient : ITextGenService
 
         response.EnsureSuccessStatusCode();
 
-        var apiResponse = await JsonSerializer.DeserializeAsync<dynamic>(await response.Content.ReadAsStreamAsync());
+        var apiResponse = (JsonElement?)await JsonSerializer.DeserializeAsync<dynamic>(await response.Content.ReadAsStreamAsync());
 
-        return apiResponse!.choices[0].message.content.ToString();
+        if (apiResponse == null) throw new NullReferenceException("OpenAI API response was null");
+
+        return apiResponse.Value.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
     }
 }
