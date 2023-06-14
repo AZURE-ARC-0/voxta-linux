@@ -1,104 +1,99 @@
 using System.Net;
-using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Text.Json;
+using ChatMate.Server;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
-namespace ChatMate.Server.Tests;
-
-[TestFixture]
-public class ServerIntegrationTest
+namespace WebSocketTests
 {
-    private static readonly HttpClient HttpClient = new();
-    
-    private Task _serverTask = null!;
-    private CancellationTokenSource _serverCts = null!;
-    private TcpClient _tcpClient = null!;
-    private NetworkStream _tcpStream = null!;
-
-    [SetUp]
-    public void Setup()
+    [TestFixture]
+    public class WebSocketTest
     {
-        _serverCts = new CancellationTokenSource();
-        _serverTask = Program.Start(Array.Empty<string>(), _serverCts.Token);
-        _tcpClient = new TcpClient();
-        const int maxAttempts = 10;
-        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        private WebSocketClient _wsClient = null!;
+        private WebSocket _wsConnection;
+        private TestServer _server;
+        private HttpClient _httpClient;
+
+        [SetUp]
+        public async Task SetUp()
+        {
+            var webDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "ChatMate.Server");
+            var builder = WebHost.CreateDefaultBuilder()
+                .UseStartup<Startup>()
+                .UseContentRoot(webDir);
+            builder.ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                config.AddJsonFile("appsettings.Local.json", optional: false, reloadOnChange: true);
+            });
+            _server = new TestServer(builder);
+            _httpClient = _server.CreateClient();
+            _wsClient = _server.CreateWebSocketClient();
+            var wsUri = new UriBuilder(_server.BaseAddress)
+            {
+                Scheme = "ws",
+                Path = "/ws"
+            }.Uri;
+            _wsConnection = await _wsClient.ConnectAsync(wsUri, CancellationToken.None);
+        }
+
+        [TearDown]
+        public async Task TearDown()
         {
             try
             {
-                _tcpClient.Connect("localhost", 5384);
-                _tcpStream = _tcpClient.GetStream();
-                break; // Server has started, break the loop
+                await _wsConnection.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             }
-            catch (SocketException)
+            catch (Exception)
             {
-                if (attempt == maxAttempts - 1)
-                    throw;
-
-                Task.Delay(100).Wait();
+                // ignored
             }
+            _server.Dispose();
         }
-    }
 
-    [TearDown]
-    public void Teardown()
-    {
-        _tcpClient.Close();
-        _tcpClient.Dispose();
-        _serverCts.Cancel();
-        try
+        [Test]
+        public async Task SendMessageAndGetReply()
         {
-            if (_serverTask is { IsCanceled: false, IsFaulted: false })
-                _serverTask.Wait();
-        }
-        catch (AggregateException)
-        {
-            // Ignore
-        }
-    }
+            await _wsConnection.SendAsync(
+                JsonSerializer.SerializeToUtf8Bytes(new Message {Type = "Send", Content = "Hello, world!"}),
+                WebSocketMessageType.Text,
+                true,
+                CancellationToken.None
+            );
 
-    [Test]
-    public async Task TestChatMessage()
-    {
-        await SendJson(new Message { Type = "Send", Content = "Hello World!" });
+            var buffer = new byte[1024];
+            var result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
+            var reply = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, result.Count).Span);
+            Assert.Multiple(() =>
+            {
+                Assert.That(reply.Type, Is.EqualTo("Reply"));
+                Assert.That(reply.Content, Is.Not.Null.Or.Empty);
+            });
 
-        var reply = await ReceiveJson();
-        Assert.Multiple(() =>
-        {
-            Assert.That(reply.Type, Is.EqualTo("Reply"));
-            Assert.That(reply.Content, Is.Not.Null.Or.Empty);
-        });
+            result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
+            var speech = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, result.Count).Span);
+            Assert.Multiple(() =>
+            {
+                Assert.That(speech.Type, Is.EqualTo("Speech"));
+                Assert.That(speech.Content, Does.StartWith("/speech"));
+            });
 
-        var speech = await ReceiveJson();
-        Assert.Multiple(() =>
-        {
-            Assert.That(speech.Type, Is.EqualTo("Speech"));
-            Assert.That(speech.Content, Does.StartWith("http"));
-        });
-
-        var response = await HttpClient.GetAsync(speech.Content);
-        if (!response.IsSuccessStatusCode)
-            Assert.Fail($"GET {speech.Content}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+            var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, speech.Content));
+            if (!response.IsSuccessStatusCode)
+                Assert.Fail($"GET {speech.Content}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
         
-        Assert.Multiple(() =>
-        {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Content);
-            Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/mpeg"), speech.Content);
-            Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Content);
-        });
-    }
-
-    private async Task<Message> ReceiveJson()
-    {
-        var buffer = new byte[1024];
-        var bytesRead = await _tcpStream.ReadAsync(buffer);
-        var receivedMessage = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, bytesRead).Span);
-        if (receivedMessage == null) throw new NullReferenceException("receivedMessage is null");
-        return receivedMessage;
-    }
-
-    private async Task SendJson(Message message)
-    {
-        var json = JsonSerializer.SerializeToUtf8Bytes(message);
-        await _tcpStream.WriteAsync(json.AsMemory(), CancellationToken.None);
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Content);
+                Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/mpeg"), speech.Content);
+                Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Content);
+            });
+        }
     }
 }

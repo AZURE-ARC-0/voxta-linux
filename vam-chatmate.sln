@@ -3,11 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Plugin", "ChatMate.Plugin\ChatMate.Plugin.csproj", "{A3423FB2-63F0-4A52-8484-E9A730C9869A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Server", "ChatMate.Server\ChatMate.Server.csproj", "{FF8B0FCF-3971-4217-8B1D-C2CB7C964797}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Server.Tests", "ChatMate.Server.Tests\ChatMate.Server.Tests.csproj", "{046C3C2A-CBD6-4D57-93C6-E3380C98F58B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{F4B78CA0-7DAD-48D0-9DDE-8EA5F0E6061E}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{F4B78CA0-7
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.VirtAMatePlugin", "ChatMate.VirtAMatePlugin\ChatMate.VirtAMatePlugin.csproj", "{7982F708-5B40-4572-911D-C1C565622D82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Server.Tests", "ChatMate.Server.Tests\ChatMate.Server.Tests.csproj", "{0945482E-2506-462E-8066-916D4F89EBBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,17 +25,17 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A3423FB2-63F0-4A52-8484-E9A730C9869A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A3423FB2-63F0-4A52-8484-E9A730C9869A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A3423FB2-63F0-4A52-8484-E9A730C9869A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{A3423FB2-63F0-4A52-8484-E9A730C9869A}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{FF8B0FCF-3971-4217-8B1D-C2CB7C964797}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF8B0FCF-3971-4217-8B1D-C2CB7C964797}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF8B0FCF-3971-4217-8B1D-C2CB7C964797}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF8B0FCF-3971-4217-8B1D-C2CB7C964797}.Release|Any CPU.Build.0 = Release|Any CPU
-		{046C3C2A-CBD6-4D57-93C6-E3380C98F58B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{046C3C2A-CBD6-4D57-93C6-E3380C98F58B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{046C3C2A-CBD6-4D57-93C6-E3380C98F58B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{046C3C2A-CBD6-4D57-93C6-E3380C98F58B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7982F708-5B40-4572-911D-C1C565622D82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7982F708-5B40-4572-911D-C1C565622D82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7982F708-5B40-4572-911D-C1C565622D82}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{7982F708-5B40-4572-911D-C1C565622D82}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{0945482E-2506-462E-8066-916D4F89EBBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0945482E-2506-462E-8066-916D4F89EBBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0945482E-2506-462E-8066-916D4F89EBBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0945482E-2506-462E-8066-916D4F89EBBA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

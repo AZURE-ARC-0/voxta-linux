@@ -3,5 +3,5 @@
 public interface ITextToSpeechService
 {
     ValueTask<string> GenerateSpeechUrlAsync(string text);
-    Task HandleSpeechProxyRequestAsync(HttpProxyHandler proxy);
+    Task HandleSpeechProxyRequestAsync(HttpResponse response, Guid id);
 }

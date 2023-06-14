@@ -25,7 +25,6 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
     // TODO: Clean up old speech requests after some time
     private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
 
-    private readonly IOptions<ChatMateServerOptions> _serverOptions;
     private readonly HttpClient _httpClient;
     private readonly string _model;
     private readonly object _parameters;
@@ -36,9 +35,8 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         MediaFoundationApi.Startup();
     }
 
-    public NovelAIClient(IOptions<NovelAIOptions> options, IOptions<ChatMateServerOptions> serverOptions, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
+    public NovelAIClient(IOptions<NovelAIOptions> options, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
     {
-        _serverOptions = serverOptions;
         _logger = loggerFactory.CreateLogger<NovelAIClient>();
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
@@ -156,22 +154,17 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         if (!_pendingSpeechRequests.TryAdd(id, text))
             throw new Exception("Unable to save the speech to the pending requests.");
         // TODO: Instead return a relative URL and let the client join so we can add tunnel proxies
-        return ValueTask.FromResult($"http://{_serverOptions.Value.IpAddress}:{_serverOptions.Value.Port}/speech/{id}.mp3");
+        return ValueTask.FromResult($"/speech/{id}.mp3");
     }
 
-    public async Task HandleSpeechProxyRequestAsync(HttpProxyHandler proxy)
+    public async Task HandleSpeechProxyRequestAsync(HttpResponse response, Guid id)
     {
-        var id = Path.GetFileNameWithoutExtension(proxy.Uri.Segments[2]);
-        if (!Guid.TryParse(id, out var guid))
-        {
-            await proxy.WriteTextResponseAsync(HttpStatusCode.BadRequest, "Invalid speech ID");
-            return;
-        }
-        
         #warning Should be TryRemove
-        if(!_pendingSpeechRequests.TryGetValue(guid, out var text))
+        if(!_pendingSpeechRequests.TryGetValue(id, out var text))
         {
-            await proxy.WriteTextResponseAsync(HttpStatusCode.BadRequest, $"No pending speech with id {guid}");
+            response.StatusCode = (int)HttpStatusCode.BadRequest;
+            response.ContentType = "text/plain";
+            await response.WriteAsync($"No pending speech with id {id}");
             return;
         }
 
@@ -190,18 +183,21 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+        using var response2 = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         
-        if (!response.IsSuccessStatusCode)
+        if (!response2.IsSuccessStatusCode)
         {
-            var reason = await response.Content.ReadAsStringAsync();
+            var reason = await response2.Content.ReadAsStringAsync();
             _logger.LogError("Failed to generate speech: {Reason}", reason);
-            await proxy.WriteTextResponseAsync(HttpStatusCode.InternalServerError, "Unable to generate speech: " + reason);
+            response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            response.ContentType = "text/plain";
+            await response.WriteAsync($"Unable to generate speech: {reason}");
+            return;
         }
 
         // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
         var tmp = Path.GetTempFileName();
-        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var bytes = await response2.Content.ReadAsByteArrayAsync();
         await File.WriteAllBytesAsync(tmp, bytes);
         try
         {
@@ -247,7 +243,9 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             File.Delete(tmp);
         }
 
-        await proxy.WriteBytesResponseAsync(HttpStatusCode.OK, bytes, "audio/mpeg");
+        response.StatusCode = (int)HttpStatusCode.OK;
+        response.ContentType = "audio/mpeg";
+        await response.BodyWriter.WriteAsync(bytes);
     }
 
     [Serializable]
