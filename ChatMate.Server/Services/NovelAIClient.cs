@@ -6,10 +6,8 @@ using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 
 namespace ChatMate.Server.Services;
 

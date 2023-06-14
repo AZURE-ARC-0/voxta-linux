@@ -21,9 +21,30 @@ public class Startup
         
         services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
         services.AddSingleton<NovelAIClient>();
+        
+        services.Configure<OpenAIOptions>(_configuration.GetSection("ChatMate.Services:OpenAI"));
+        services.AddSingleton<OpenAIClient>();
 
-        services.AddSingleton<ITextGenService>(sp => sp.GetRequiredService<NovelAIClient>());
-        services.AddSingleton<ITextToSpeechService>(sp => sp.GetRequiredService<NovelAIClient>());
+        services.AddSingleton<ITextGenService>(sp =>
+        {
+            var textGen = _configuration.GetSection("ChatMate.Server")["TextGen"];
+            return textGen switch
+            {
+                "OpenAI" => sp.GetRequiredService<OpenAIClient>(),
+                "NovelAI" => sp.GetRequiredService<NovelAIClient>(),
+                _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
+            };
+        });
+        
+        services.AddSingleton<ITextToSpeechService>(sp =>
+        {
+            var textGen = _configuration.GetSection("ChatMate.Server")["SpeechGen"];
+            return textGen switch
+            {
+                "NovelAI" => sp.GetRequiredService<NovelAIClient>(),
+                _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
+            };
+        });
     }
 
     public void Configure(IApplicationBuilder  app, IWebHostEnvironment env)
@@ -31,14 +52,11 @@ public class Startup
         if (!env.IsDevelopment())
         {
             app.UseExceptionHandler("/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            // app.UseHsts();
         }
 
         app.UseStaticFiles();
         app.UseRouting();
         app.UseWebSockets();
         app.UseEndpoints(endpoints => endpoints.MapControllers());
-        // app.UseAuthorization();
     }
 }
