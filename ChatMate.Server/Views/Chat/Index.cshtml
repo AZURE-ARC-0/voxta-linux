@@ -45,7 +45,7 @@
         .bot-msg {
             background-color: #5a5151;
         }
-        .speech-msg {
+        .speech-msg, .animation-msg {
             background-color: #443e43;
         }
     </style>
@@ -72,6 +72,9 @@
                                 <//>
                                 <${Match} when=${msg.type === 'Speech'}>
                                     <div class="chat-msg speech-msg text-secondary">Speech: http://127.0.0.1:5384${msg.content}<//>
+                                <//>
+                                <${Match} when=${msg.type === 'Animation'}>
+                                    <div class="chat-msg speech-msg text-secondary">Animation: <code>${msg.content}</code><//>
                                 <//>
                             <//>
                         `}
@@ -121,9 +124,7 @@
         
                 socket.onmessage = function(event) {
                     const data = JSON.parse(event.data);
-                    if (data.Type === 'Reply' || data.Type === 'Send' || data.Type === 'Speech') {
-                        setMessages(oldMessages => [...oldMessages, { type: data.Type, content: data.Content }]);
-                    }
+                    setMessages(oldMessages => [...oldMessages, { type: data.Type, content: data.Content }]);
                     if (data.Type === 'Speech') {
                         const audio = new Audio(data.Content);
                         audio.play();

@@ -5,7 +5,6 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Text.RegularExpressions;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
 
@@ -18,9 +17,6 @@ public class NovelAIOptions
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService
 {
-    // Regex that filters anything that is not a letter a number or punctuation
-    private static readonly Regex SanitizeMessage = new(@"[^a-zA-Z0-9 \.\!\?\,\;]", RegexOptions.Compiled);
-    
     // TODO: Clean up old speech requests after some time
     private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
 
@@ -89,15 +85,10 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
     }
 
-    public async ValueTask<string> GenerateTextAsync(ChatData chatData, string text)
+    public async ValueTask<string> GenerateReplyAsync(ChatData chatData)
     {
         // TODO: Keep a history and count tokens: https://novelai.net/tokenizer
         // TODO: Move the context and settings to appsettings
-        chatData.Messages.Add(new ChatMessageData
-        {
-            User = chatData.UserName,
-            Text = text,
-        });
         var input = $"""
         {chatData.Preamble}
         {string.Join("\n", chatData.Messages.Select(x => $"{x.User}: \"{x.Text}\""))}
@@ -117,7 +108,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         using var response = await _httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception(await response.Content.ReadAsStringAsync());
+            throw new NovelAIException(await response.Content.ReadAsStringAsync());
 
         using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
         var sb = new StringBuilder();
@@ -137,22 +128,14 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         }
         reader.Close();
         
-        var message = sb.ToString();
-        var sanitized = SanitizeMessage.Replace(message, "");
-        chatData.Messages.Add(new ChatMessageData
-        {
-            User = chatData.BotName,
-            Text = sanitized
-        });
-        
-        return sanitized;
+        return sb.ToString();
     }
 
     public ValueTask<string> GenerateSpeechUrlAsync(string text)
     {
         var id = Crypto.CreateCryptographicallySecureGuid();
         if (!_pendingSpeechRequests.TryAdd(id, text))
-            throw new Exception("Unable to save the speech to the pending requests.");
+            throw new NovelAIException("Unable to save the speech to the pending requests.");
         // TODO: Instead return a relative URL and let the client join so we can add tunnel proxies
         return ValueTask.FromResult($"/speech/{id}.wav");
     }
@@ -242,5 +225,12 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         public bool final { get; init; }
         public int ptr { get; init; }
         public string? error { get; init; }
+    }
+}
+
+public class NovelAIException : Exception
+{
+    public NovelAIException(string message) : base(message)
+    {
     }
 }

@@ -2,5 +2,5 @@
 
 public interface ITextGenService
 {
-    ValueTask<string> GenerateTextAsync(ChatData chatData, string text);
+    ValueTask<string> GenerateReplyAsync(ChatData chatData);
 }

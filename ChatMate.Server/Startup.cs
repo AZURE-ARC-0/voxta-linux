@@ -17,7 +17,7 @@ public class Startup
         services.AddWebSockets(options => { });
         
         services.AddHttpClient();
-        services.AddSingleton<HttpProxyHandlerFactory>();
+        services.AddScoped<ChatSessionFactory>();
         
         services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
         services.AddSingleton<NovelAIClient>();
@@ -42,6 +42,16 @@ public class Startup
             return textGen switch
             {
                 "NovelAI" => sp.GetRequiredService<NovelAIClient>(),
+                _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
+            };
+        });
+        
+        services.AddSingleton<IAnimationSelectionService>(sp =>
+        {
+            var textGen = _configuration.GetSection("ChatMate.Server")["AnimSelect"];
+            return textGen switch
+            {
+                "OpenAI" => sp.GetRequiredService<OpenAIClient>(),
                 _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
             };
         });
