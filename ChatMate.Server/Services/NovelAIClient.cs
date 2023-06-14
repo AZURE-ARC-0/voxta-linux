@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace ChatMate.Server.Services;
 
@@ -139,13 +140,14 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         reader.Close();
         
         var message = sb.ToString();
+        var sanitized = SanitizeMessage.Replace(message, "");
         chatData.Messages.Add(new ChatMessageData
         {
-            User = SanitizeMessage.Replace(chatData.BotName, ""),
-            Text = message
+            User = chatData.BotName,
+            Text = sanitized
         });
         
-        return message;
+        return sanitized;
     }
 
     public ValueTask<string> GenerateSpeechUrlAsync(string text)
@@ -154,10 +156,10 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         if (!_pendingSpeechRequests.TryAdd(id, text))
             throw new Exception("Unable to save the speech to the pending requests.");
         // TODO: Instead return a relative URL and let the client join so we can add tunnel proxies
-        return ValueTask.FromResult($"/speech/{id}.mp3");
+        return ValueTask.FromResult($"/speech/{id}.wav");
     }
 
-    public async Task HandleSpeechProxyRequestAsync(HttpResponse response, Guid id)
+    public async Task HandleSpeechProxyRequestAsync(HttpResponse response, Guid id, string extension)
     {
         #warning Should be TryRemove
         if(!_pendingSpeechRequests.TryGetValue(id, out var text))
@@ -196,46 +198,30 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         }
 
         // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
+        string contentType;
         var tmp = Path.GetTempFileName();
         var bytes = await response2.Content.ReadAsByteArrayAsync();
         await File.WriteAllBytesAsync(tmp, bytes);
         try
         {
-            /* Option 1
-            await using var webmStream = new MediaFoundationReader(tmp);
-            using var outputStream = new MemoryStream();
-            var targetWaveFormat = new WaveFormat(44100, 1);
-            await using var waveWriter = new WaveFileWriter(outputStream, targetWaveFormat);
-            var buffer = new byte[targetWaveFormat.AverageBytesPerSecond];
-            int bytesRead;
-            while ((bytesRead = webmStream.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                waveWriter.Write(buffer, 0, bytesRead);
-            }
-            waveWriter.Flush();
-            outputStream.Seek(0, SeekOrigin.Begin);
-            bytes = outputStream.ToArray();
-            */
-            /* Option 2
-            using (var reader = new MediaFoundationReader(tmp))
-            {
-                var outFormat = new WaveFormat(44100, reader.WaveFormat.Channels);
-                var ms = new MemoryStream();
-                using (var resampler = new MediaFoundationResampler(reader, outFormat))
-                {
-                    // resampler.ResamplerQuality = 60;
-                    WaveFileWriter.WriteWavFileToStream(ms, resampler);
-                }
-                bytes = ms.ToArray();
-            }
-            */
-            /* Option 3 */
             await using var reader = new MediaFoundationReader(tmp);
-            // var mediaType = MediaFoundationEncoder.SelectMediaType(AudioSubtypes.MFAudioFormat_MP3, new WaveFormat(44100, 1), 0);
-            // using var writer = new MediaFoundationEncoder(mediaType);
             var ms = new MemoryStream();
-            MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
-            // writer.Encode(ms, reader, Guid.Empty);
+            switch (extension)
+            {
+                case "mp3":
+                    contentType = "audio/mpeg";
+                    MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
+                    break;
+                case "wav":
+                    contentType = "audio/x-wav";
+                    // var resampler = new MediaFoundationResampler(reader, 44100);
+                    // var stereo = new MonoToStereoSampleProvider(resampler.ToSampleProvider());
+                    // WaveFileWriter.WriteWavFileToStream(ms, stereo.ToWaveProvider16());
+                    WaveFileWriter.WriteWavFileToStream(ms, reader);
+                    break;
+                default:
+                    throw new InvalidOperationException("Unexpected extension {extension}");
+            }
             bytes = ms.ToArray();
         }
         finally
@@ -244,7 +230,9 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         }
 
         response.StatusCode = (int)HttpStatusCode.OK;
-        response.ContentType = "audio/mpeg";
+        response.ContentType = contentType;
+        response.Headers.ContentDisposition = "attachment";
+        response.ContentLength = bytes.Length;
         await response.BodyWriter.WriteAsync(bytes);
     }
 

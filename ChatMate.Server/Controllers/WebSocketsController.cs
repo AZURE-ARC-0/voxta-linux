@@ -65,9 +65,9 @@ public class WebSocketsController : ControllerBase
             }
             if (clientMessage.Type == "Send")
             {
-                _logger.LogDebug("Received chat message: {Text}", clientMessage.Content);
+                _logger.LogInformation("Received chat message: {Text}", clientMessage.Content);
                 var gen = await _textGen.GenerateTextAsync(chatData, clientMessage.Content);
-                _logger.LogDebug("Generated chat reply: {Text}", gen);
+                _logger.LogInformation("Generated chat reply: {Text}", gen);
                 await webSocket.SendAsync(
                     JsonSerializer.SerializeToUtf8Bytes(new Message { Type = "Reply", Content = gen }),
                     WebSocketMessageType.Text,
@@ -76,7 +76,7 @@ public class WebSocketsController : ControllerBase
                     );
                     
                 var speechUrl = await _speechGen.GenerateSpeechUrlAsync(gen);
-                _logger.LogDebug("Generated speech URL: {SpeechUrl}", speechUrl);
+                _logger.LogInformation("Generated speech URL: {SpeechUrl}", speechUrl);
                 await webSocket.SendAsync(
                     JsonSerializer.SerializeToUtf8Bytes(new Message { Type = "Speech", Content = speechUrl }),
                     WebSocketMessageType.Text,
