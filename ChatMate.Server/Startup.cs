@@ -13,7 +13,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllersWithViews();
         services.AddWebSockets(options => { });
         
         services.AddHttpClient();
@@ -57,6 +57,9 @@ public class Startup
         app.UseStaticFiles();
         app.UseRouting();
         app.UseWebSockets();
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

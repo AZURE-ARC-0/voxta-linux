@@ -22,6 +22,27 @@ To get the key, login to Novel AI, open the developer console and type:
 console.log(JSON.parse(localStorage.getItem('session')).auth_token)
 ```
 
+## Starting the server
+
+You'll need .NET SDK 7. You can go to `ChatMate.Server` and run `dotnet run`.
+
+## Testing the server
+
+There is a test chat page at http://127.0.0.1:5384/chat
+
+## Using in Virt-A-Mate
+
+Add the ChatMate.cslist to a Person atom.
+
+You can open the plugin custom UI to see if the server is connected.
+
+## Known issues
+
+- Speech recognition sometimes stops working out of nowhere
+- The chat memory is only valid for the current connection
+- There is no correct token counting, so after some time you will get errors
+- We download the NovelAI audio to the disk, which adds a small delay. This is required because NAudio doesn't support loading a webm from a stream
+
 ## License
 
 [GNU GPLv3](LICENSE.md)
