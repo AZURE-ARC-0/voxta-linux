@@ -34,7 +34,7 @@
             flex: 1;
             padding: 10px;
         }
-        .user-msg, .bot-msg {
+        .chat-msg {
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
@@ -45,13 +45,16 @@
         .bot-msg {
             background-color: #5a5151;
         }
+        .speech-msg {
+            background-color: #443e43;
+        }
     </style>
 </head>
 <body class="bg-dark text-white d-flex flex-column">
     <div id="app" class="flex-grow-1"></div>
 
     <script type="module">
-        import { createSignal, onMount, For } from "https://cdn.skypack.dev/solid-js";
+        import { createSignal, onMount, For, Switch, Match } from "https://cdn.skypack.dev/solid-js";
         import { render } from "https://cdn.skypack.dev/solid-js/web";
         import html from "https://cdn.skypack.dev/solid-js/html";
         
@@ -60,9 +63,17 @@
                 <div class="chat-container">
                     <${For} each=${messages} fallback=${html`<p class="text-center text-secondary">Welcome to ChatMate!</p>`}>
                         ${msg => html`
-                            <div class="${msg.type === 'Reply' ? 'bot-msg' : 'user-msg text-end'}">
-                                ${msg.content}
-                            </div>
+                            <${Switch}>
+                                <${Match} when=${msg.type === 'Send'}>
+                                    <div class="chat-msg user-msg text-end">${msg.content}<//>
+                                <//>
+                                <${Match} when=${msg.type === 'Reply'}>
+                                    <div class="chat-msg bot-msg">${msg.content}<//>
+                                <//>
+                                <${Match} when=${msg.type === 'Speech'}>
+                                    <div class="chat-msg speech-msg text-secondary">Speech: http://127.0.0.1:5384${msg.content}<//>
+                                <//>
+                            <//>
                         `}
                     <//>
                 </div>
@@ -110,9 +121,10 @@
         
                 socket.onmessage = function(event) {
                     const data = JSON.parse(event.data);
-                    if (data.Type === 'Reply' || data.Type === 'Send') {
+                    if (data.Type === 'Reply' || data.Type === 'Send' || data.Type === 'Speech') {
                         setMessages(oldMessages => [...oldMessages, { type: data.Type, content: data.Content }]);
-                    } else if (data.Type === 'Speech') {
+                    }
+                    if (data.Type === 'Speech') {
                         const audio = new Audio(data.Content);
                         audio.play();
                     }
