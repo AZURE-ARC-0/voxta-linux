@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.DeepDev;
 using Microsoft.Extensions.Options;
 
 namespace ChatMate.Server.Services;
@@ -12,34 +13,73 @@ public class OpenAIOptions
     public required string Model { get; init; }
 }
 
+public static class OpenAISpecialTokens
+{
+    // ReSharper disable InconsistentNaming
+    private const string IM_START = "<|im_start|>";
+    private const string IM_END = "<|im_end|>";
+    // ReSharper restore InconsistentNaming
+
+    public static readonly Dictionary<string, int> SpecialTokens = new Dictionary<string, int>{
+        { IM_START, 100264},
+        { IM_END, 100265},
+    };
+    public static readonly HashSet<string> Keys = new HashSet<string>(SpecialTokens.Keys);
+}
+
 public class OpenAIClient : ITextGenService, IAnimationSelectionService
 {
     private readonly HttpClient _httpClient;
+    private readonly ITokenizer _tokenizer;
+    private readonly Sanitizer _sanitizer;
     private readonly OpenAIOptions _options;
 
-    public OpenAIClient(HttpClient httpClient, IOptions<OpenAIOptions> options)
+    public OpenAIClient(HttpClient httpClient, IOptions<OpenAIOptions> options, ITokenizer tokenizer, Sanitizer sanitizer)
     {
         _httpClient = httpClient;
+        _tokenizer = tokenizer;
+        _sanitizer = sanitizer;
         _options = options.Value;
 
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
     }
 
-    public async ValueTask<string> GenerateReplyAsync(ChatData chatData)
+    public int GetTokenCount(ChatMessageData message)
     {
+        return message.Tokens > 0 ? message.Tokens : _tokenizer.Encode(message.Text, OpenAISpecialTokens.Keys).Count;
+    }
+
+    public async ValueTask<ChatMessageData> GenerateReplyAsync(IReadOnlyChatData chatData)
+    {
+        var totalTokens = chatData.Preamble.Tokens;
+        
         var messages = new List<object> { new { role = "system", content = chatData.Preamble } };
-        foreach (var message in chatData.Messages)
+        var chatMessages = chatData.GetMessages();
+        for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
+            var message = chatMessages[i];
+            totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
+            if (totalTokens >= 4096) break;
             var role = message.User == chatData.BotName ? "assistant" : "user";
-            messages.Add(new { role, content = message.Text });
+            messages.Insert(1, new { role, content = message.Text });
         }
-        return await SendChatRequestAsync(messages);
+
+        var reply = await SendChatRequestAsync(messages);
+        
+        var sanitized = _sanitizer.Sanitize(reply);
+        var tokens = _tokenizer.Encode(sanitized, OpenAISpecialTokens.Keys);
+        return new ChatMessageData
+        {
+            User = chatData.BotName,
+            Text = sanitized,
+            Tokens = tokens.Count
+        };
     }
 
     public async ValueTask<string> SelectAnimationAsync(ChatData chatData)
     {
-        var sb = new StringBuilder(chatData.Preamble);
+        var sb = new StringBuilder(chatData.Preamble.Text);
         sb.AppendLine();
         foreach (var message in chatData.Messages.TakeLast(4))
         {

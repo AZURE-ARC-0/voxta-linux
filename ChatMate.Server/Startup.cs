@@ -1,6 +1,8 @@
 ﻿using ChatMate.Server;
 using ChatMate.Server.Services;
 using Microsoft.AspNetCore.WebSockets;
+using Microsoft.DeepDev;
+using Microsoft.Extensions.Options;
 
 public class Startup
 {
@@ -18,6 +20,7 @@ public class Startup
         
         services.AddHttpClient();
         services.AddScoped<ChatSessionFactory>();
+        services.AddSingleton<Sanitizer>();
         
         services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
         services.AddSingleton<NovelAIClient>();
@@ -25,6 +28,8 @@ public class Startup
         services.Configure<OpenAIOptions>(_configuration.GetSection("ChatMate.Services:OpenAI"));
         services.AddSingleton<OpenAIClient>();
 
+        // Service selection should be dynamic rather than fixed, i.e. multiple users
+        
         services.AddSingleton<ITextGenService>(sp =>
         {
             var textGen = _configuration.GetSection("ChatMate.Server")["TextGen"];
@@ -55,6 +60,8 @@ public class Startup
                 _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
             };
         });
+        
+        services.AddSingleton<ITokenizer>(sp => TokenizerBuilder.CreateByModelName(sp.GetRequiredService<IOptions<OpenAIOptions>>().Value.Model, OpenAISpecialTokens.SpecialTokens));
     }
 
     public void Configure(IApplicationBuilder  app, IWebHostEnvironment env)

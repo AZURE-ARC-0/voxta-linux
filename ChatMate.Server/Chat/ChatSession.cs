@@ -27,8 +27,6 @@ public class ChatSessionFactory
 
 public class ChatSession
 {
-    private static readonly Regex SanitizeMessage = new(@"[^a-zA-Z0-9 '""\-\.\!\?\,\;]", RegexOptions.Compiled);
-    
     private readonly WebSocket _webSocket;
     private readonly ITextGenService _textGen;
     private readonly ITextToSpeechService _speechGen;
@@ -36,8 +34,7 @@ public class ChatSession
     private readonly ILogger<ChatSession> _logger;
     private readonly SemaphoreSlim _sendLock = new(1);
     
-    // TODO: Use a real chat data store, reload using auth
-    private readonly ChatData _chatData = new ChatData();
+    private ChatData? _chatData;
 
     public ChatSession(WebSocket webSocket, ITextGenService textGen, ITextToSpeechService speechGen, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
     {
@@ -50,7 +47,13 @@ public class ChatSession
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {
+        // TODO: Use a real chat data store, reload using auth
+        _chatData = new ChatData();
+        _chatData.PreambleTokens = _textGen.GetTokenCount(_chatData.Preamble);
+        
         var buffer = new byte[1024 * 4];
+        
+        // TODO: Send available bots list
 
         while (!_webSocket.CloseStatus.HasValue)
         {
@@ -62,46 +65,35 @@ public class ChatSession
             {
                 continue;
             }
+            
+            // TODO: Select a bot from the provided bots list and a conversation ID to load the  chat
 
             if (clientMessage.Type == "Send")
             {
                 _logger.LogInformation("Received chat message: {Text}", clientMessage.Content);
+                // TODO: Save into some storage
                 _chatData.Messages.Add(new ChatMessageData
                 {
                     User = _chatData.UserName,
                     Text = clientMessage.Content,
                 });
 
-                var gen = await _textGen.GenerateReplyAsync(_chatData);
-                _logger.LogInformation("Reply: {Text}", gen);
-                gen = SanitizeMessage.Replace(gen, "");
-                _chatData.Messages.Add(new ChatMessageData
-                {
-                    User = _chatData.BotName,
-                    Text = clientMessage.Content,
-                });
-                await SendAsync(new Message { Type = "Reply", Content = gen }, cancellationToken);
+                var reply = await _textGen.GenerateReplyAsync(_chatData);
+                _logger.LogInformation("Reply ({Tokens} tokens): {Text}", reply.Tokens, reply.Text);
+                // TODO: Save into some storage
+                _chatData.Messages.Add(reply);
+                await SendAsync(new Message { Type = "Reply", Content = reply.Text }, cancellationToken);
 
-                await Task.WhenAll(
-                    GenerateSpeechAsync(cancellationToken, gen),
-                    SelectAnimationAsync(cancellationToken)
-                );
+                // TODO: Return this directly in the Reply instead
+                var speechUrl = await _speechGen.GenerateSpeechUrlAsync(reply.Text);
+                _logger.LogInformation("Generated speech URL: {SpeechUrl}", speechUrl);
+                await SendAsync(new Message { Type = "Speech", Content = speechUrl }, cancellationToken);
+
+                var animation = await _animSelect.SelectAnimationAsync(_chatData);
+                _logger.LogInformation("Selected animation: {Animation}", animation);
+                await SendAsync(new Message { Type = "Animation", Content = animation }, cancellationToken);
             }
         }
-    }
-
-    private async Task GenerateSpeechAsync(CancellationToken cancellationToken, string gen)
-    {
-        var speechUrl = await _speechGen.GenerateSpeechUrlAsync(gen);
-        _logger.LogInformation("Generated speech URL: {SpeechUrl}", speechUrl);
-        await SendAsync(new Message { Type = "Speech", Content = speechUrl }, cancellationToken);
-    }
-    
-    private async Task SelectAnimationAsync(CancellationToken cancellationToken)
-    {
-        var animation = await _animSelect.SelectAnimationAsync(_chatData);
-        _logger.LogInformation("Selected animation: {Animation}", animation);
-        await SendAsync(new Message { Type = "Animation", Content = animation }, cancellationToken);
     }
 
     private async Task SendAsync(Message message, CancellationToken cancellationToken)

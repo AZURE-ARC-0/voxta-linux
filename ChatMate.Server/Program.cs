@@ -1,3 +1,5 @@
+using Microsoft.DeepDev;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true);

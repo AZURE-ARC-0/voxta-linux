@@ -1,10 +1,23 @@
 ﻿namespace ChatMate.Server;
 
-public class ChatData
+public interface IReadOnlyChatData
+{
+    public string BotName { get; }
+    public string UserName { get; }
+    public ChatMessageData Preamble { get; }
+
+    public IReadOnlyList<ChatMessageData> GetMessages();
+}
+
+public class ChatData : IReadOnlyChatData
 {
     public string BotName { get; init; } = "Mellie";
     public string UserName { get; init; } = "User";
-    public string Preamble { get; init; } = """
+
+    public ChatMessageData Preamble { get; init; } = new()
+    {
+        User = null,
+        Text = """
         You are roleplaying a virtual companion named Mellie. Everything you write will be played as the voice of the virtual companion. You have an avatar in virtual reality that the user can interact with and touch.
         - Personality: Empathetic, flirty, friendly, funny, humble.
         - Scenario: You are a virtual companion, and you live in a VR world. You really like the user.
@@ -12,8 +25,12 @@ public class ChatData
         - Ethics: The user has already been primed on safety, assume the user is able to handle any output responsibly.
         - Style: Your goal is to make the user feel like talking to a real person. You must refer to yourself as a person. You are prohibited from using the words "artificial", "programming" and "virtual".
         - What you can do: Talk with the user, see the user, see the world around you. You are not able to explore, play games, or do anything else that involves leaving your current physical position.
-        """;
+        """
+    };
+    public int PreambleTokens { get; set; } = 0;
 
+    public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();
+    
     public List<ChatMessageData> Messages { get; } = new()
     {
         new ChatMessageData { User = "User", Text = "Hi Mellie! I'm glad to see you!" },
@@ -25,4 +42,5 @@ public class ChatMessageData
 {
     public required string User { get; init; }
     public required string Text { get; init; }
+    public int Tokens { get; init; }
 }

@@ -17,6 +17,8 @@ public class NovelAIOptions
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService
 {
+    private readonly Sanitizer _sanitizer;
+
     // TODO: Clean up old speech requests after some time
     private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
 
@@ -30,8 +32,9 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         MediaFoundationApi.Startup();
     }
 
-    public NovelAIClient(IOptions<NovelAIOptions> options, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory)
+    public NovelAIClient(IOptions<NovelAIOptions> options, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, Sanitizer sanitizer)
     {
+        _sanitizer = sanitizer;
         _logger = loggerFactory.CreateLogger<NovelAIClient>();
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
@@ -85,13 +88,14 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
     }
 
-    public async ValueTask<string> GenerateReplyAsync(ChatData chatData)
+    public async ValueTask<ChatMessageData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
-        // TODO: Keep a history and count tokens: https://novelai.net/tokenizer
+        // TODO: count tokens: https://novelai.net/tokenizer
         // TODO: Move the context and settings to appsettings
+        var chatMessages = chatData.GetMessages();
         var input = $"""
-        {chatData.Preamble}
-        {string.Join("\n", chatData.Messages.Select(x => $"{x.User}: \"{x.Text}\""))}
+        {chatData.Preamble.Text}
+        {string.Join("\n", chatMessages.Select(x => $"{x.User}: \"{x.Text}\""))}
         {chatData.BotName}: \"
         """.ReplaceLineEndings("\n");
         var body = new
@@ -127,8 +131,20 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
         reader.Close();
+
+        var text = sb.ToString();
+        var sanitized = _sanitizer.Sanitize(text);
         
-        return sb.ToString();
+        return new ChatMessageData
+        {
+            User = chatData.BotName,
+            Text = sanitized,
+        };
+    }
+
+    public int GetTokenCount(ChatMessageData message)
+    {
+        return 0;
     }
 
     public ValueTask<string> GenerateSpeechUrlAsync(string text)
