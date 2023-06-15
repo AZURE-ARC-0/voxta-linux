@@ -1,6 +1,7 @@
-﻿using System.Net.WebSockets;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Net.WebSockets;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace ChatMate.Server;
 
@@ -11,6 +12,7 @@ public class ChatSessionFactory
     private readonly IAnimationSelectionService _animSelect;
     private readonly ILogger<ChatSession> _logger;
 
+    [SuppressMessage("ReSharper", "ContextualLoggerProblem")]
     public ChatSessionFactory(ITextGenService textGen, ITextToSpeechService speechGen, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
     {
         _textGen = textGen;
@@ -44,12 +46,21 @@ public class ChatSession
         _animSelect = animSelect;
         _logger = logger;
     }
+
+    private static string Replace(IReadOnlyChatData chatData, string text) => text
+        .Replace("{{Now}}", DateTime.Now.ToString("f", CultureInfo.InvariantCulture))
+        .Replace("{{Bot}}", chatData.BotName);
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {
         // TODO: Use a real chat data store, reload using auth
         _chatData = new ChatData();
-        _chatData.PreambleTokens = _textGen.GetTokenCount(_chatData.Preamble);
+        _chatData.Preamble.Text = Replace(_chatData, _chatData.Preamble.Text);
+        foreach (var message in _chatData.Messages)
+        {
+            message.Text = Replace(_chatData, message.Text);
+            message.User = Replace(_chatData, message.User);
+        }
         
         var buffer = new byte[1024 * 4];
         

@@ -20,11 +20,12 @@ public static class OpenAISpecialTokens
     private const string IM_END = "<|im_end|>";
     // ReSharper restore InconsistentNaming
 
-    public static readonly Dictionary<string, int> SpecialTokens = new Dictionary<string, int>{
+    public static readonly Dictionary<string, int> SpecialTokens = new()
+    {
         { IM_START, 100264},
         { IM_END, 100265},
     };
-    public static readonly HashSet<string> Keys = new HashSet<string>(SpecialTokens.Keys);
+    public static readonly HashSet<string> Keys = new(SpecialTokens.Keys);
 }
 
 public class OpenAIClient : ITextGenService, IAnimationSelectionService
@@ -45,7 +46,7 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
     }
 
-    public int GetTokenCount(ChatMessageData message)
+    public int GetTokenCount(TextData message)
     {
         return message.Tokens > 0 ? message.Tokens : _tokenizer.Encode(message.Text, OpenAISpecialTokens.Keys).Count;
     }
@@ -54,7 +55,7 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
     {
         var totalTokens = chatData.Preamble.Tokens;
         
-        var messages = new List<object> { new { role = "system", content = chatData.Preamble } };
+        var messages = new List<object> { new { role = "system", content = chatData.Preamble.Text } };
         var chatMessages = chatData.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {

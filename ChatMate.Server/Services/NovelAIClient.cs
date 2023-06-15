@@ -142,7 +142,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
     }
 
-    public int GetTokenCount(ChatMessageData message)
+    public int GetTokenCount(TextData message)
     {
         return 0;
     }
