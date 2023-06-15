@@ -64,14 +64,11 @@
                     <${For} each=${messages} fallback=${html`<p class="text-center text-secondary">Welcome to ChatMate!</p>`}>
                         ${msg => html`
                             <${Switch}>
-                                <${Match} when=${msg.type === 'Send'}>
-                                    <div class="chat-msg user-msg text-end">${msg.content}<//>
+                                <${Match} when=${msg.user === 'user'}>
+                                    <div class="chat-msg user-msg text-end">${msg.text}<//>
                                 <//>
-                                <${Match} when=${msg.type === 'Reply'}>
-                                    <div class="chat-msg bot-msg">${msg.content}<//>
-                                <//>
-                                <${Match} when=${msg.type === 'Speech'}>
-                                    <div class="chat-msg speech-msg text-secondary">Speech: http://127.0.0.1:5384${msg.content}<//>
+                                <${Match} when=${msg.user === 'bot'}>
+                                    <div class="chat-msg bot-msg">${msg.text}<//>
                                 <//>
                             <//>
                         `}
@@ -163,21 +160,27 @@
                 socket.onmessage = function(event) {
                     console.log('ws', event.data)
                     const data = JSON.parse(event.data);
-                    if (data.Type === 'Send' || data.Type === 'Reply') {
-                        setMessages(oldMessages => [...oldMessages, { type: data.Type, content: data.Content }]);
-                    } else if (data.Type === 'Animation') {
-                        setAnimation(data.Content);
-                    } else if (data.Type === 'Speech') {
-                        const audio = new Audio(data.Content);
-                        audio.play();
+                    switch(data.$type){
+                        case 'reply':
+                            setMessages(oldMessages => [...oldMessages, { user: 'bot', text: data.text }]);
+                            break;
+                        case 'animation':
+                            setAnimation(data.value);
+                            break;
+                        case 'speech':
+                            const audio = new Audio(data.url);
+                            audio.play();
+                            break;
+                        default:
+                            console.error('unknown message type', data)
                     }
                 };
             });
         
             function onSend(content) {
-                const msg = JSON.stringify({ "Type": "Send", "Content": content });
+                const msg = JSON.stringify({ $type: "send", text: content });
                 socket.send(msg);
-                setMessages(oldMessages => [...oldMessages, { type: "Send", content: content }]);
+                setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
             }
             
             return () => html`

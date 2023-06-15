@@ -1,22 +1,24 @@
 using System.Net;
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using ChatMate.Server;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
 namespace WebSocketTests
 {
     [TestFixture]
     public class WebSocketTest
     {
+        private JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        
         private WebSocketClient _wsClient = null!;
-        private WebSocket _wsConnection;
-        private TestServer _server;
-        private HttpClient _httpClient;
+        private WebSocket _wsConnection = null!;
+        private TestServer _server = null!;
+        private HttpClient _httpClient = null!;
 
         [SetUp]
         public async Task SetUp()
@@ -25,7 +27,7 @@ namespace WebSocketTests
             var builder = WebHost.CreateDefaultBuilder()
                 .UseStartup<Startup>()
                 .UseContentRoot(webDir);
-            builder.ConfigureAppConfiguration((context, config) =>
+            builder.ConfigureAppConfiguration((_, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
                 config.AddJsonFile("appsettings.Local.json", optional: false, reloadOnChange: true);
@@ -58,8 +60,15 @@ namespace WebSocketTests
         [Test]
         public async Task SendMessageAndGetReply()
         {
+            
+            var requestBytes = JsonSerializer.SerializeToUtf8Bytes<ClientMessage>(
+                new ClientSendMessage { Text = "Hello, world!" },
+                _serializerOptions
+            );
+            string tmp2 = Encoding.UTF8.GetString(requestBytes);
+            Console.WriteLine(tmp2);
             await _wsConnection.SendAsync(
-                JsonSerializer.SerializeToUtf8Bytes(new Message {Type = "Send", Content = "Hello, world!"}),
+                requestBytes,
                 WebSocketMessageType.Text,
                 true,
                 CancellationToken.None
@@ -68,32 +77,44 @@ namespace WebSocketTests
             var buffer = new byte[1024];
             var result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
-            var reply = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, result.Count).Span);
+            var reply = (ServerReplyMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
             Assert.Multiple(() =>
             {
-                Assert.That(reply.Type, Is.EqualTo("Reply"));
-                Assert.That(reply.Content, Is.Not.Null.Or.Empty);
+                Assert.That(reply, Is.Not.Null);
+                Assert.That(reply?.Text, Is.Not.Null.Or.Empty);
             });
 
             result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
-            var speech = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, result.Count).Span);
+            var speech = (ServerSpeechMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
             Assert.Multiple(() =>
             {
-                Assert.That(speech.Type, Is.EqualTo("Speech"));
-                Assert.That(speech.Content, Does.StartWith("/speech"));
+                Assert.That(speech, Is.Not.Null);
+                Assert.That(speech?.Url, Does.StartWith("/speech"));
             });
 
-            var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, speech.Content));
-            if (!response.IsSuccessStatusCode)
-                Assert.Fail($"GET {speech.Content}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
-        
+            result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
+            var animation = (ServerAnimationMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
             Assert.Multiple(() =>
             {
-                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Content);
-                Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/mpeg"), speech.Content);
-                Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Content);
+                Assert.That(animation, Is.Not.Null);            
+                Assert.That(animation?.Value, Is.Not.Null.Or.Empty);
             });
+
+            if (speech?.Url != null)
+            {
+                var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, speech.Url));
+                if (!response.IsSuccessStatusCode)
+                    Assert.Fail($"GET {speech.Url}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Url);
+                    Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), speech.Url);
+                    Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Url);
+                });
+            }
         }
     }
 }

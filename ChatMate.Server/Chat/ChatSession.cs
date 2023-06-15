@@ -29,6 +29,12 @@ public class ChatSessionFactory
 
 public class ChatSession
 {
+    private readonly JsonSerializerOptions _serializeOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
+    
     private readonly WebSocket _webSocket;
     private readonly ITextGenService _textGen;
     private readonly ITextToSpeechService _speechGen;
@@ -71,49 +77,55 @@ public class ChatSession
             var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             if (result.CloseStatus.HasValue) return;
 
-            var clientMessage = JsonSerializer.Deserialize<Message>(buffer.AsMemory(0, result.Count).Span);
-            if (clientMessage == null)
-            {
-                continue;
-            }
-            
+            var clientMessage = JsonSerializer.Deserialize<ClientMessage>(buffer.AsMemory(0, result.Count).Span, _serializeOptions);
+
             // TODO: Select a bot from the provided bots list and a conversation ID to load the  chat
 
-            if (clientMessage.Type == "Send")
+            switch (clientMessage)
             {
-                _logger.LogInformation("Received chat message: {Text}", clientMessage.Content);
-                // TODO: Save into some storage
-                _chatData.Messages.Add(new ChatMessageData
-                {
-                    User = _chatData.UserName,
-                    Text = clientMessage.Content,
-                });
-
-                var reply = await _textGen.GenerateReplyAsync(_chatData);
-                _logger.LogInformation("Reply ({Tokens} tokens): {Text}", reply.Tokens, reply.Text);
-                // TODO: Save into some storage
-                _chatData.Messages.Add(reply);
-                await SendAsync(new Message { Type = "Reply", Content = reply.Text }, cancellationToken);
-
-                // TODO: Return this directly in the Reply instead
-                var speechUrl = await _speechGen.GenerateSpeechUrlAsync(reply.Text);
-                _logger.LogInformation("Generated speech URL: {SpeechUrl}", speechUrl);
-                await SendAsync(new Message { Type = "Speech", Content = speechUrl }, cancellationToken);
-
-                var animation = await _animSelect.SelectAnimationAsync(_chatData);
-                _logger.LogInformation("Selected animation: {Animation}", animation);
-                await SendAsync(new Message { Type = "Animation", Content = animation }, cancellationToken);
+                case ClientSendMessage sendMessage:
+                    await HandleClientMessage(sendMessage, cancellationToken);
+                    break;
+                default:
+                    _logger.LogError("Unknown message type {ClientMessage}", clientMessage?.GetType().Name ?? "null");
+                    break;
             }
         }
     }
 
-    private async Task SendAsync(Message message, CancellationToken cancellationToken)
+    private async Task HandleClientMessage(ClientSendMessage sendMessage, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
+        // TODO: Save into some storage
+        _chatData.Messages.Add(new ChatMessageData
+        {
+            User = _chatData.UserName,
+            Text = sendMessage.Text,
+        });
+
+        var reply = await _textGen.GenerateReplyAsync(_chatData);
+        _logger.LogInformation("Reply ({Tokens} tokens): {Text}", reply.Tokens, reply.Text);
+        // TODO: Save into some storage
+        _chatData.Messages.Add(reply);
+        await SendAsync(new ServerReplyMessage { Text = reply.Text }, cancellationToken);
+
+        // TODO: Return this directly in the Reply instead
+        var speechUrl = await _speechGen.GenerateSpeechUrlAsync(reply.Text);
+        _logger.LogInformation("Generated speech URL: {SpeechUrl}", speechUrl);
+        await SendAsync(new ServerSpeechMessage { Url = speechUrl }, cancellationToken);
+
+        var animation = await _animSelect.SelectAnimationAsync(_chatData);
+        _logger.LogInformation("Selected animation: {Animation}", animation);
+        await SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
+    }
+
+    private async Task SendAsync<T>(T message, CancellationToken cancellationToken) where T : ServerMessage
     {
         await _sendLock.WaitAsync(cancellationToken);
         try
         {
             await _webSocket.SendAsync(
-                JsonSerializer.SerializeToUtf8Bytes(message),
+                JsonSerializer.SerializeToUtf8Bytes<ServerMessage>(message, _serializeOptions),
                 WebSocketMessageType.Text,
                 true,
                 cancellationToken
