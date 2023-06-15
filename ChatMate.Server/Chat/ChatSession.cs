@@ -58,23 +58,20 @@ public class ChatSession
         .Replace("{{Bot}}", chatData.BotName);
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
-    {
-        // TODO: Use a real chat data store, reload using auth
-        _chatData = new ChatData
-        {
-            Id = Crypto.CreateCryptographicallySecureGuid()
-        };
-        _chatData.Preamble.Text = Replace(_chatData, _chatData.Preamble.Text);
-        _chatData.Preamble.Tokens = _textGen.GetTokenCount(_chatData.Preamble);
-        foreach (var message in _chatData.Messages)
-        {
-            message.Text = Replace(_chatData, message.Text);
-            message.User = Replace(_chatData, message.User);
-        }
-        
+    {   
         var buffer = new byte[1024 * 4];
-        
-        // TODO: Send available bots list
+
+        await SendAsync(new ServerBotsListMessage
+        {
+            Bots = new[]
+            {
+                new ServerBotsListMessage.Bot
+                {
+                    Id = "Melly",
+                    Name = "Melly"
+                }
+            }
+        }, cancellationToken);
 
         while (!_webSocket.CloseStatus.HasValue)
         {
@@ -87,6 +84,9 @@ public class ChatSession
 
             switch (clientMessage)
             {
+                case ClientSelectBotMessage selectBotMessage:
+                    await HandleSelectBotMessage(selectBotMessage, cancellationToken);
+                    break;
                 case ClientSendMessage sendMessage:
                     await HandleClientMessage(sendMessage, cancellationToken);
                     break;
@@ -94,6 +94,23 @@ public class ChatSession
                     _logger.LogError("Unknown message type {ClientMessage}", clientMessage?.GetType().Name ?? "null");
                     break;
             }
+        }
+    }
+
+    private async Task HandleSelectBotMessage(ClientSelectBotMessage selectBotMessage, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Received bot selection: {BotId}", selectBotMessage.BotId);
+        // TODO: Use a real chat data store, reload using auth
+        _chatData = new ChatData
+        {
+            Id = Crypto.CreateCryptographicallySecureGuid()
+        };
+        _chatData.Preamble.Text = Replace(_chatData, _chatData.Preamble.Text);
+        _chatData.Preamble.Tokens = _textGen.GetTokenCount(_chatData.Preamble);
+        foreach (var message in _chatData.Messages)
+        {
+            message.Text = Replace(_chatData, message.Text);
+            message.User = Replace(_chatData, message.User);
         }
     }
 

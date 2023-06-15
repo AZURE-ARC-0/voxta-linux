@@ -50,12 +50,27 @@
         import { render } from "https://cdn.skypack.dev/solid-js/web";
         import html from "https://cdn.skypack.dev/solid-js/html";
         
-        const Chat = ({ messages, animation }) => {
+        const Header = ({ animation, botsList, onBotSelect }) => {
             return () => html`
                 <div class="d-flex justify-content-between align-items-center mb-3 p-2">
-                    <div>ChatMate</div>
+                    <div class="d-flex align-items-center">
+                        <b>ChatMate</b>
+                        <select class="ms-2 form-select" onChange=${e => onBotSelect(e.target.value)}>
+                            <option value="">Select Bot</option>
+                            <${For} each=${botsList}>
+                                ${bot => html`
+                                    <option value=${bot.id}>${bot.name}</option>
+                                `}
+                            <//>
+                        </select>
+                    </div>
                     <div>Animation: <code>${animation}</code></div>
                 </div>
+            `;
+        };
+        
+        const Chat = ({ messages }) => {
+            return () => html`
                 <div class="chat-container p-2">
                     <${For} each=${messages} fallback=${html`<p class="text-center text-secondary">Welcome to ChatMate!</p>`}>
                         ${msg => html`
@@ -145,6 +160,7 @@
         const App = () => {
             const [messages, setMessages] = createSignal([]);
             const [animation, setAnimation] = createSignal('idle');
+            const [botsList, setBotsList] = createSignal([]);
         
             let socket;
         
@@ -165,11 +181,19 @@
                         case 'animation':
                             setAnimation(data.value);
                             break;
+                        case 'bots':
+                            setBotsList(data.bots);
+                            break;
                         default:
                             console.error('unknown message type', data)
                     }
                 };
             });
+            
+            function onBotSelect(botId) {
+                const msg = JSON.stringify({ $type: "selectBot", botId });
+                socket.send(msg);
+            }
         
             function onSend(content) {
                 const msg = JSON.stringify({ $type: "send", text: content });
@@ -179,7 +203,8 @@
             
             return () => html`
                 <div class="container p-0">
-                    <${Chat} messages=${messages()} animation=${animation()} />
+                    <${Header} animation=${animation()} botsList=${botsList()} onBotSelect=${onBotSelect} />
+                    <${Chat} messages=${messages()} />
                     <${MessageInput} onSend=${onSend} />
                 </div>
             `;
