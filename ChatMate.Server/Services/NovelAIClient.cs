@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -17,15 +16,11 @@ public class NovelAIOptions
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService
 {
-    private readonly Sanitizer _sanitizer;
-
-    // TODO: Clean up old speech requests after some time
-    private readonly ConcurrentDictionary<Guid, string> _pendingSpeechRequests = new();
-
     private readonly HttpClient _httpClient;
     private readonly string _model;
     private readonly object _parameters;
     private readonly ILogger<NovelAIClient> _logger;
+    private readonly Sanitizer _sanitizer;
 
     static NovelAIClient()
     {
@@ -88,7 +83,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
     }
 
-    public async ValueTask<ChatMessageData> GenerateReplyAsync(IReadOnlyChatData chatData)
+    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
         // TODO: count tokens: https://novelai.net/tokenizer
         // TODO: Move the context and settings to appsettings
@@ -135,10 +130,10 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         var text = sb.ToString();
         var sanitized = _sanitizer.Sanitize(text);
         
-        return new ChatMessageData
+        return new TextData
         {
-            User = chatData.BotName,
             Text = sanitized,
+            Tokens = 0,
         };
     }
 
@@ -147,29 +142,11 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         return 0;
     }
 
-    public ValueTask<string> GenerateSpeechUrlAsync(string text)
+    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, HttpResponse response, string extension)
     {
-        var id = Crypto.CreateCryptographicallySecureGuid();
-        if (!_pendingSpeechRequests.TryAdd(id, text))
-            throw new NovelAIException("Unable to save the speech to the pending requests.");
-        // TODO: Instead return a relative URL and let the client join so we can add tunnel proxies
-        return ValueTask.FromResult($"/speech/{id}.wav");
-    }
-
-    public async Task HandleSpeechProxyRequestAsync(HttpResponse response, Guid id, string extension)
-    {
-        #warning Should be TryRemove
-        if(!_pendingSpeechRequests.TryGetValue(id, out var text))
-        {
-            response.StatusCode = (int)HttpStatusCode.BadRequest;
-            response.ContentType = "text/plain";
-            await response.WriteAsync($"No pending speech with id {id}");
-            return;
-        }
-
         var querystring = new Dictionary<string, string>
         {
-            ["text"] = text,
+            ["text"] = speechRequest.Text,
             ["voice"] = "-1",
             ["seed"] = "Naia",
             ["opus"] = "true",

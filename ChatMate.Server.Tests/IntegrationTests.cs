@@ -82,15 +82,7 @@ namespace WebSocketTests
             {
                 Assert.That(reply, Is.Not.Null);
                 Assert.That(reply?.Text, Is.Not.Null.Or.Empty);
-            });
-
-            result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
-            var speech = (ServerSpeechMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
-            Assert.Multiple(() =>
-            {
-                Assert.That(speech, Is.Not.Null);
-                Assert.That(speech?.Url, Does.StartWith("/speech"));
+                Assert.That(reply?.SpeechUrl, Does.Match(@"/chats/.+/messages/.+/speech/.+\.wav"));
             });
 
             result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -102,17 +94,17 @@ namespace WebSocketTests
                 Assert.That(animation?.Value, Is.Not.Null.Or.Empty);
             });
 
-            if (speech?.Url != null)
+            if (reply?.SpeechUrl != null)
             {
-                var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, speech.Url));
+                var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, reply.SpeechUrl));
                 if (!response.IsSuccessStatusCode)
-                    Assert.Fail($"GET {speech.Url}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+                    Assert.Fail($"GET {reply.SpeechUrl}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
 
                 Assert.Multiple(() =>
                 {
-                    Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Url);
-                    Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), speech.Url);
-                    Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Url);
+                    Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), reply.SpeechUrl);
+                    Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), reply.SpeechUrl);
+                    Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), reply.SpeechUrl);
                 });
             }
         }

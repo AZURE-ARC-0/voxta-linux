@@ -8,22 +8,22 @@ namespace ChatMate.Server;
 public class ChatSessionFactory
 {
     private readonly ITextGenService _textGen;
-    private readonly ITextToSpeechService _speechGen;
+    private readonly PendingSpeechManager _pendingSpeech;
     private readonly IAnimationSelectionService _animSelect;
     private readonly ILogger<ChatSession> _logger;
 
     [SuppressMessage("ReSharper", "ContextualLoggerProblem")]
-    public ChatSessionFactory(ITextGenService textGen, ITextToSpeechService speechGen, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
+    public ChatSessionFactory(ITextGenService textGen, PendingSpeechManager pendingSpeech, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
     {
         _textGen = textGen;
-        _speechGen = speechGen;
+        _pendingSpeech = pendingSpeech;
         _animSelect = animSelect;
         _logger = logger;
     }
     
     public ChatSession Create(WebSocket webSocket)
     {
-        return new ChatSession(webSocket, _textGen, _speechGen, _animSelect, _logger);
+        return new ChatSession(webSocket, _textGen, _pendingSpeech, _animSelect, _logger);
     }
 }
 
@@ -37,18 +37,18 @@ public class ChatSession
     
     private readonly WebSocket _webSocket;
     private readonly ITextGenService _textGen;
-    private readonly ITextToSpeechService _speechGen;
+    private readonly PendingSpeechManager _pendingSpeech;
     private readonly IAnimationSelectionService _animSelect;
     private readonly ILogger<ChatSession> _logger;
     private readonly SemaphoreSlim _sendLock = new(1);
     
     private ChatData? _chatData;
 
-    public ChatSession(WebSocket webSocket, ITextGenService textGen, ITextToSpeechService speechGen, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
+    public ChatSession(WebSocket webSocket, ITextGenService textGen, PendingSpeechManager pendingSpeech, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
     {
         _webSocket = webSocket;
         _textGen = textGen;
-        _speechGen = speechGen;
+        _pendingSpeech = pendingSpeech;
         _animSelect = animSelect;
         _logger = logger;
     }
@@ -60,8 +60,12 @@ public class ChatSession
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {
         // TODO: Use a real chat data store, reload using auth
-        _chatData = new ChatData();
+        _chatData = new ChatData
+        {
+            Id = Crypto.CreateCryptographicallySecureGuid()
+        };
         _chatData.Preamble.Text = Replace(_chatData, _chatData.Preamble.Text);
+        _chatData.Preamble.Tokens = _textGen.GetTokenCount(_chatData.Preamble);
         foreach (var message in _chatData.Messages)
         {
             message.Text = Replace(_chatData, message.Text);
@@ -95,24 +99,40 @@ public class ChatSession
 
     private async Task HandleClientMessage(ClientSendMessage sendMessage, CancellationToken cancellationToken)
     {
+        if (_chatData is null) throw new InvalidOperationException("Chat data is null");
+        
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
         // TODO: Save into some storage
         _chatData.Messages.Add(new ChatMessageData
         {
+            Id = Guid.NewGuid(),
             User = _chatData.UserName,
+            Timestamp = DateTimeOffset.UtcNow,
             Text = sendMessage.Text,
         });
 
-        var reply = await _textGen.GenerateReplyAsync(_chatData);
+        var gen = await _textGen.GenerateReplyAsync(_chatData);
+        var reply = new ChatMessageData
+        {
+            Id = Guid.NewGuid(),
+            User = _chatData.BotName,
+            Timestamp = DateTimeOffset.UtcNow,
+            Text = gen.Text,
+            Tokens = gen.Tokens,
+        };
         _logger.LogInformation("Reply ({Tokens} tokens): {Text}", reply.Tokens, reply.Text);
         // TODO: Save into some storage
         _chatData.Messages.Add(reply);
-        await SendAsync(new ServerReplyMessage { Text = reply.Text }, cancellationToken);
-
-        // TODO: Return this directly in the Reply instead
-        var speechUrl = await _speechGen.GenerateSpeechUrlAsync(reply.Text);
-        _logger.LogInformation("Generated speech URL: {SpeechUrl}", speechUrl);
-        await SendAsync(new ServerSpeechMessage { Url = speechUrl }, cancellationToken);
+        _pendingSpeech.Push(_chatData.Id, reply.Id, new SpeechRequest
+        {
+            Text = gen.Text
+        });
+        await SendAsync(new ServerReplyMessage
+        {
+            Text = reply.Text,
+            SpeechUrl = $"/chats/{_chatData.Id}/messages/{reply.Id}/speech/{_chatData.Id}_{reply.Id}.wav"
+            
+        }, cancellationToken);
 
         var animation = await _animSelect.SelectAnimationAsync(_chatData);
         _logger.LogInformation("Selected animation: {Animation}", animation);

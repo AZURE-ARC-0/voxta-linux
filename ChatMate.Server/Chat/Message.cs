@@ -26,6 +26,7 @@ public abstract class ServerMessage
 public class ServerReplyMessage : ServerMessage
 {
     public required string Text { get; set; }
+    public required string SpeechUrl { get; set; }
 }
 
 [Serializable]

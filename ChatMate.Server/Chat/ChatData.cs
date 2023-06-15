@@ -11,6 +11,8 @@ public interface IReadOnlyChatData
 
 public class ChatData : IReadOnlyChatData
 {
+    public Guid Id { get; init; }
+    
     public string BotName { get; init; } = "Mellie";
     public string UserName { get; init; } = "User";
 
@@ -43,10 +45,12 @@ public class ChatData : IReadOnlyChatData
 public class TextData
 {
     public required string Text { get; set; }
-    public int Tokens { get; init; }
+    public int Tokens { get; set; }
 }
 
 public class ChatMessageData : TextData
 {
+    public Guid Id { get; set; }
     public required string User { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
 }

@@ -21,6 +21,7 @@ public class Startup
         services.AddHttpClient();
         services.AddScoped<ChatSessionFactory>();
         services.AddSingleton<Sanitizer>();
+        services.AddSingleton<PendingSpeechManager>();
         
         services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
         services.AddSingleton<NovelAIClient>();

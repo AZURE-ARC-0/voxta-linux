@@ -51,7 +51,7 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         return message.Tokens > 0 ? message.Tokens : _tokenizer.Encode(message.Text, OpenAISpecialTokens.Keys).Count;
     }
 
-    public async ValueTask<ChatMessageData> GenerateReplyAsync(IReadOnlyChatData chatData)
+    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
         var totalTokens = chatData.Preamble.Tokens;
         
@@ -70,9 +70,8 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         
         var sanitized = _sanitizer.Sanitize(reply);
         var tokens = _tokenizer.Encode(sanitized, OpenAISpecialTokens.Keys);
-        return new ChatMessageData
+        return new TextData
         {
-            User = chatData.BotName,
             Text = sanitized,
             Tokens = tokens.Count
         };
