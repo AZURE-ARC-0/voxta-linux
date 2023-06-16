@@ -23,9 +23,11 @@ public class ClientSelectBotMessage : ClientMessage
 
 [Serializable]
 [JsonDerivedType(typeof(ServerBotsListMessage), typeDiscriminator: "bots")]
+[JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
 [JsonDerivedType(typeof(ServerSpeechMessage), typeDiscriminator: "speech")]
 [JsonDerivedType(typeof(ServerAnimationMessage), typeDiscriminator: "animation")]
+[JsonDerivedType(typeof(ServerErrorMessage), typeDiscriminator: "error")]
 public abstract class ServerMessage
 {
 }
@@ -35,11 +37,17 @@ public class ServerBotsListMessage : ServerMessage
 {
     public required Bot[] Bots { get; set; }
     
+    [Serializable]
     public class Bot
     {
         public required string Id { get; init; }
         public required string Name { get; init; }
     }
+}
+
+[Serializable]
+public class ServerReadyMessage : ServerMessage
+{
 }
 
 [Serializable]
@@ -59,4 +67,10 @@ public class ServerSpeechMessage : ServerMessage
 public class ServerAnimationMessage : ServerMessage
 {
     public required string Value { get; set; }
+}
+
+[Serializable]
+public class ServerErrorMessage : ServerMessage
+{
+    public required string Message { get; set; }
 }

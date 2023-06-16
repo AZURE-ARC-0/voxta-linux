@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 
 namespace ChatMate.Server;
@@ -78,40 +79,70 @@ public class ChatSession
             var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             if (result.CloseStatus.HasValue) return;
 
-            var clientMessage = JsonSerializer.Deserialize<ClientMessage>(buffer.AsMemory(0, result.Count).Span, _serializeOptions);
-
-            // TODO: Select a bot from the provided bots list and a conversation ID to load the  chat
-
-            switch (clientMessage)
+            try
             {
-                case ClientSelectBotMessage selectBotMessage:
-                    await HandleSelectBotMessage(selectBotMessage, cancellationToken);
-                    break;
-                case ClientSendMessage sendMessage:
-                    await HandleClientMessage(sendMessage, cancellationToken);
-                    break;
-                default:
-                    _logger.LogError("Unknown message type {ClientMessage}", clientMessage?.GetType().Name ?? "null");
-                    break;
+                var clientMessage = JsonSerializer.Deserialize<ClientMessage>(buffer.AsMemory(0, result.Count).Span, _serializeOptions);
+
+                // TODO: Select a bot from the provided bots list and a conversation ID to load the  chat
+
+                switch (clientMessage)
+                {
+                    case ClientSelectBotMessage selectBotMessage:
+                        await HandleSelectBotMessage(selectBotMessage, cancellationToken);
+                        break;
+                    case ClientSendMessage sendMessage:
+                        await HandleClientMessage(sendMessage, cancellationToken);
+                        break;
+                    default:
+                        _logger.LogError("Unknown message type {ClientMessage}", clientMessage?.GetType().Name ?? "null");
+                        break;
+                }
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, "Error processing socket message: {RawMessage}", Encoding.UTF8.GetString(buffer.AsMemory(0, result.Count).Span));
+                await SendAsync(new ServerErrorMessage
+                {
+                    Message = exc.Message,
+                }, cancellationToken);
             }
         }
     }
 
     private async Task HandleSelectBotMessage(ClientSelectBotMessage selectBotMessage, CancellationToken cancellationToken)
     {
+        _chatData = null;
+        
+        if (string.IsNullOrEmpty(selectBotMessage.BotId))
+        {
+            return;
+        }
+        
         _logger.LogInformation("Received bot selection: {BotId}", selectBotMessage.BotId);
+
+        if (selectBotMessage.BotId != "Melly")
+        {
+            await SendAsync(new ServerErrorMessage
+            {
+                Message = $"Unknown bot {selectBotMessage.BotId}"
+            }, cancellationToken);
+            return;
+        }
+        
         // TODO: Use a real chat data store, reload using auth
-        _chatData = new ChatData
+        var chatData = new ChatData
         {
             Id = Crypto.CreateCryptographicallySecureGuid()
         };
-        _chatData.Preamble.Text = Replace(_chatData, _chatData.Preamble.Text);
-        _chatData.Preamble.Tokens = _textGen.GetTokenCount(_chatData.Preamble);
-        foreach (var message in _chatData.Messages)
+        chatData.Preamble.Text = Replace(chatData, chatData.Preamble.Text);
+        chatData.Preamble.Tokens = _textGen.GetTokenCount(chatData.Preamble);
+        foreach (var message in chatData.Messages)
         {
-            message.Text = Replace(_chatData, message.Text);
-            message.User = Replace(_chatData, message.User);
+            message.Text = Replace(chatData, message.Text);
+            message.User = Replace(chatData, message.User);
         }
+        _chatData = chatData;
+        await SendAsync(new ServerReadyMessage(), cancellationToken);
     }
 
     private async Task HandleClientMessage(ClientSendMessage sendMessage, CancellationToken cancellationToken)
