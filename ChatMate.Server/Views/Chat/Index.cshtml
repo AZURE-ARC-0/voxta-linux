@@ -173,43 +173,69 @@
             const [messages, setMessages] = createSignal([]);
             const [animation, setAnimation] = createSignal('idle');
             const [botsList, setBotsList] = createSignal([]);
+            
+            const addMessage = (message) => {
+                setMessages(oldMessages => [...oldMessages, message]);
+            };
+            
+            const onEvent = (event) => {
+                console.log('ws', event.data)
+                const data = JSON.parse(event.data);
+                switch(data.$type){
+                    case 'reply':
+                        addMessage({ user: 'bot', text: data.text });
+                        if (data.speechUrl) {
+                            const audio = new Audio(data.speechUrl);
+                            audio.play();
+                        }
+                        break;
+                    case 'error':
+                        addMessage({ user: 'error', text: data.message });
+                        break;
+                    case 'animation':
+                        setAnimation(data.value);
+                        break;
+                    case 'ready':
+                        setReady(true);
+                        break;
+                    case 'bots':
+                        setBotsList(data.bots);
+                        break;
+                    default:
+                        console.error('unknown message type', data)
+                }
+            };
         
+            const wsUrl = 'ws://127.0.0.1:5384/ws';
             let socket;
+            
+            const connect = () => {
+                socket = new WebSocket(wsUrl);
+        
+                socket.onmessage = onEvent;
+                
+                socket.onopen = function(event) {
+                    setMessages([]);
+                };
+                
+                socket.onclose = function(event) {
+                    addMessage({ user: 'error', text: 'Connection lost. Reconnecting...' });
+                    setTimeout(function() {
+                        connect();
+                    }, 5000);
+                };
+            
+                socket.onerror = function(error) {
+                    addMessage({ user: 'error', text: 'A socket error occured: ' + error.message });
+                };
+            };
         
             onMount(() => {
                 if (!recognition) {
                     setMessages(oldMessages => [...oldMessages, { user: 'error', text: 'Speech recognition is not supported in your browser.' }]);
                 }
                 
-                socket = new WebSocket('ws://127.0.0.1:5384/ws');
-        
-                socket.onmessage = function(event) {
-                    console.log('ws', event.data)
-                    const data = JSON.parse(event.data);
-                    switch(data.$type){
-                        case 'reply':
-                            setMessages(oldMessages => [...oldMessages, { user: 'bot', text: data.text }]);
-                            if (data.speechUrl) {
-                                const audio = new Audio(data.speechUrl);
-                                audio.play();
-                            }
-                            break;
-                        case 'error':
-                            setMessages(oldMessages => [...oldMessages, { user: 'error', text: data.message }]);
-                            break;
-                        case 'animation':
-                            setAnimation(data.value);
-                            break;
-                        case 'ready':
-                            setReady(true);
-                            break;
-                        case 'bots':
-                            setBotsList(data.bots);
-                            break;
-                        default:
-                            console.error('unknown message type', data)
-                    }
-                };
+                connect();
             });
             
             function onBotSelect(botId) {

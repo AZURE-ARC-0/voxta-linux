@@ -6,8 +6,9 @@ public class BotDefinition
     public required string Name { get; init; }
     public string? Description { get; init; }
     public required string Preamble { get; init; }
-    public required string Postamble { get; init; }
-    public required Message[] Messages { get; init; }
+    public string? Postamble { get; init; }
+    public string? Greeting { get; init; }
+    public required Message[] SampleMessages { get; init; }
     public required ServicesMap Services { get; init; }
 
     [Serializable]

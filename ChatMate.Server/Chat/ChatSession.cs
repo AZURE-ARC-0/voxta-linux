@@ -156,25 +156,38 @@ public class ChatSession
             Postamble = new TextData
             {
                 Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Postamble))
+            },
+            Greeting = new TextData
+            {
+                Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Greeting))
             }
         };
-        chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble);
-        foreach (var message in bot.Messages)
+        chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble.Text);
+        chatData.Postamble.Tokens = textGen.GetTokenCount(chatData.Postamble.Text);
+        chatData.Greeting.Tokens = textGen.GetTokenCount(chatData.Greeting.Text);
+        foreach (var message in bot.SampleMessages)
         {
-            chatData.Messages.Add(
-                new ChatMessageData
+            var m = new ChatMessageData
+            {
+                User = message.User switch
                 {
-                    User = message.User switch
-                    {
-                        "{{User}}" => _profile.Value.Name,
-                        "{{Bot}}" => bot.Name,
-                        _ => bot.Name
-                    },
-                    Text = ProcessText(bot, _profile.Value, message.Text)
-                });
+                    "{{User}}" => _profile.Value.Name,
+                    "{{Bot}}" => bot.Name,
+                    _ => bot.Name
+                },
+                Text = ProcessText(bot, _profile.Value, message.Text)
+            };
+            m.Tokens = textGen.GetTokenCount(m.Text);
+            chatData.SampleMessages.Add(m);
         }
         _chatData = chatData;
+        
         await SendAsync(new ServerReadyMessage(), cancellationToken);
+
+        if (chatData.Greeting.HasValue)
+        {
+            await SendReply(chatData.BotName, chatData.Greeting, cancellationToken);
+        }
     }
 
     private async Task HandleClientMessage(ClientSendMessage sendMessage, CancellationToken cancellationToken)
@@ -197,10 +210,15 @@ public class ChatSession
 
         var textGen = _textGenFactory.Create(_bot.Services.TextGen.Service);
         var gen = await textGen.GenerateReplyAsync(_chatData);
+        await SendReply(_chatData.BotName, gen, cancellationToken);
+    }
+
+    private async Task SendReply(string botName, TextData gen, CancellationToken cancellationToken)
+    {
         var reply = new ChatMessageData
         {
             Id = Guid.NewGuid(),
-            User = _chatData.BotName,
+            User = botName,
             Timestamp = DateTimeOffset.UtcNow,
             Text = gen.Text,
             Tokens = gen.Tokens,
@@ -218,7 +236,6 @@ public class ChatSession
         {
             Text = reply.Text,
             SpeechUrl = $"/chats/{_chatData.Id}/messages/{reply.Id}/speech/{_chatData.Id}_{reply.Id}.wav"
-            
         }, cancellationToken);
 
         if (_animSelectFactory.TryCreate(_bot.Services.AnimSelect.Service, out var animSelect))

@@ -3,5 +3,5 @@
 public interface ITextGenService
 {
     ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData);
-    int GetTokenCount(TextData message);
+    int GetTokenCount(string message);
 }

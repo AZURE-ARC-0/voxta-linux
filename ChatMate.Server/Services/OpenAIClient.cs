@@ -49,9 +49,10 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
     }
 
-    public int GetTokenCount(TextData message)
+    public int GetTokenCount(string message)
     {
-        return message.Tokens > 0 ? message.Tokens : _tokenizer.Encode(message.Text, OpenAISpecialTokens.Keys).Count;
+        if (string.IsNullOrEmpty(message)) return 0;
+        return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
