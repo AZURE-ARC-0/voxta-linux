@@ -23,45 +23,30 @@ public class Startup
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
         
-        services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
-        services.AddSingleton<NovelAIClient>();
-        
-        services.Configure<OpenAIOptions>(_configuration.GetSection("ChatMate.Services:OpenAI"));
-        services.AddSingleton<OpenAIClient>();
+        services.Configure<ProfileOptions>(_configuration.GetSection("ChatMate.Profile"));
+        services.AddSingleton<IBotRepository, BotYamlFileRepository>();
 
-        // Service selection should be dynamic rather than fixed, i.e. multiple users
-        
-        services.AddSingleton<ITextGenService>(sp =>
+        var textGenRegistry = new SelectorRegistry<ITextGenService>();
+        services.AddSingleton<SelectorFactory<ITextGenService>>(sp => new SelectorFactory<ITextGenService>(textGenRegistry, sp));
+        var textToSpeechRegistry = new SelectorRegistry<ITextToSpeechService>();
+        services.AddSingleton<SelectorFactory<ITextToSpeechService>>(sp => new SelectorFactory<ITextToSpeechService>(textToSpeechRegistry, sp));
+        var animationSelectionRegistry = new SelectorRegistry<IAnimationSelectionService>();
+        services.AddSingleton<SelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(animationSelectionRegistry, sp));
+
         {
-            var textGen = _configuration.GetSection("ChatMate.Server")["TextGen"];
-            return textGen switch
-            {
-                "OpenAI" => sp.GetRequiredService<OpenAIClient>(),
-                "NovelAI" => sp.GetRequiredService<NovelAIClient>(),
-                _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
-            };
-        });
+            services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
+            services.AddSingleton<NovelAIClient>();
+            textGenRegistry.Add<NovelAIClient>("NovelAI");
+            textToSpeechRegistry.Add<NovelAIClient>("NovelAI");
+        }
         
-        services.AddSingleton<ITextToSpeechService>(sp =>
         {
-            var textGen = _configuration.GetSection("ChatMate.Server")["SpeechGen"];
-            return textGen switch
-            {
-                "NovelAI" => sp.GetRequiredService<NovelAIClient>(),
-                _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
-            };
-        });
-        
-        services.AddSingleton<IAnimationSelectionService>(sp =>
-        {
-            var textGen = _configuration.GetSection("ChatMate.Server")["AnimSelect"];
-            return textGen switch
-            {
-                "OpenAI" => sp.GetRequiredService<OpenAIClient>(),
-                _ => throw new NotSupportedException($"TextGen not supported: {textGen}")
-            };
-        });
-        
+            services.Configure<OpenAIOptions>(_configuration.GetSection("ChatMate.Services:OpenAI"));
+            services.AddSingleton<OpenAIClient>();
+            textGenRegistry.Add<OpenAIClient>("OpenAI");
+            animationSelectionRegistry.Add<OpenAIClient>("OpenAI");
+        }
+
         services.AddSingleton<ITokenizer>(sp => TokenizerBuilder.CreateByModelName(sp.GetRequiredService<IOptions<OpenAIOptions>>().Value.Model, OpenAISpecialTokens.SpecialTokens));
     }
 

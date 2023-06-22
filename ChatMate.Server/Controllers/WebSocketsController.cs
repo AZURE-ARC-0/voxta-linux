@@ -27,20 +27,30 @@ public class WebSocketsController : ControllerBase
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
         var chatSession = _chatInstanceFactory.Create(webSocket);
-        _logger.Log(LogLevel.Information, "WebSocket connection established");
+        _logger.LogInformation("WebSocket connection established");
         try
         {
             await chatSession.HandleWebSocketConnectionAsync(cancellationToken);
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-            _logger.Log(LogLevel.Information, "WebSocket connection closed");
+            _logger.LogInformation("WebSocket connection closed");
         }
         catch (SocketException exc)
         {
             _logger.LogWarning(exc, "Unexpected socket exception");
         }
+        catch (WebSocketException exc)
+        {
+            if (webSocket.State == WebSocketState.Aborted)
+            {
+                _logger.LogInformation("WebSocket connection aborted");
+                return;
+            }
+            
+            _logger.LogWarning(exc, "Unexpected websocket exception");
+        }
         catch (Exception exc)
         {
-            _logger.LogError(exc, "Unexpected chat session error");
+            _logger.LogError(exc, "Unexpected chat session error: {Message}", exc.Message);
         }
     }
 }

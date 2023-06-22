@@ -1,6 +1,6 @@
-using Microsoft.DeepDev;
-
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls("http://127.0.0.1:5384");
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true);
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true);

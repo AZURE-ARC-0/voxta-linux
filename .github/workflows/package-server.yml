@@ -1,0 +1,37 @@
+name: PackageServer
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: Restore
+      run: dotnet restore ChatMate.Server/ChatMate.Server.csproj
+    - name: Build
+      run: dotnet build -c Release --no-restore ChatMate.Server/ChatMate.Server.csproj
+    - name: Publish
+      run: dotnet publish -c Release --no-build --no-restore --output ./publish/server ChatMate.Server/ChatMate.Server.csproj
+    - name: Zip
+      run: |
+        cd publish/server
+        zip -r "AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip" *
+    # - name: Test
+    #   run: dotnet test --no-build --verbosity normal ChatMate.Server/ChatMate.Server.csproj
+    - name: GitHub release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        draft: true
+        files: publish/server/AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

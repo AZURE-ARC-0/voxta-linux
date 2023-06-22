@@ -77,7 +77,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             stop_sequences = new[]
             {
                 // TODO: This is User: and " (this may not be the most efficient way to go)
-                new[]{ 21978, 49287 },
+                new[]{ 49287 },
                 new[]{ 49264 }
             }
         };
@@ -86,10 +86,10 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
         // TODO: count tokens: https://novelai.net/tokenizer
-        // TODO: Move the context and settings to appsettings
+        // TODO: Move the settings to appsettings
         var chatMessages = chatData.GetMessages();
         var input = $"""
-        {chatData.Preamble.Text}
+        Scenario: {chatData.Preamble.Text}
         {string.Join("\n", chatMessages.Select(x => $"{x.User}: \"{x.Text}\""))}
         {chatData.BotName}: \"
         """.ReplaceLineEndings("\n");
@@ -148,7 +148,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         {
             ["text"] = speechRequest.Text,
             ["voice"] = "-1",
-            ["seed"] = "Naia",
+            ["seed"] = speechRequest.Voice,
             ["opus"] = "true",
             ["version"] = "v2"
         };

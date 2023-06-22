@@ -1,8 +1,4 @@
 ﻿{
-  "ChatMate.Server": {
-    "TextGen": "OpenAI",
-    "SpeechGen": "NovelAI"
-  },
   "ChatMate.Services": {
     "NovelAI": {
       "Token": ""
@@ -12,5 +8,9 @@
       "ApiKey": "",
       "Model": "gpt-3.5-turbo"
     }
+  },
+  "ChatMate.Profile": {
+    "Name": "Anon",
+    "Description": "genderless, anonymous"
   }
 }

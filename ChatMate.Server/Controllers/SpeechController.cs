@@ -12,7 +12,7 @@ public class SpeechController : ControllerBase
         [FromRoute] Guid messageId,
         [FromRoute] string filename,
         [FromRoute] string extension,
-        [FromServices] ITextToSpeechService speechGen,
+        [FromServices] SelectorFactory<ITextToSpeechService> speechGenFactory,
         [FromServices] PendingSpeechManager pendingSpeech
     )
     {
@@ -24,6 +24,6 @@ public class SpeechController : ControllerBase
             return;
         }
 
-        await speechGen.GenerateSpeechAsync(speechRequest, Response, extension);
+        await speechGenFactory.Create(speechRequest.Service).GenerateSpeechAsync(speechRequest, Response, extension);
     }
 }

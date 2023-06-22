@@ -3,28 +3,33 @@ using System.Globalization;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace ChatMate.Server;
 
 public class ChatSessionFactory
 {
-    private readonly ITextGenService _textGen;
+    private readonly SelectorFactory<ITextGenService> _textGenFactory;
     private readonly PendingSpeechManager _pendingSpeech;
-    private readonly IAnimationSelectionService _animSelect;
+    private readonly SelectorFactory<IAnimationSelectionService> _animSelectFactory;
     private readonly ILogger<ChatSession> _logger;
+    private readonly IBotRepository _bots;
+    private readonly IOptions<ProfileOptions> _profile;
 
     [SuppressMessage("ReSharper", "ContextualLoggerProblem")]
-    public ChatSessionFactory(ITextGenService textGen, PendingSpeechManager pendingSpeech, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
+    public ChatSessionFactory(SelectorFactory<ITextGenService> textGenFactory, PendingSpeechManager pendingSpeech, SelectorFactory<IAnimationSelectionService> animSelectFactory, ILogger<ChatSession> logger, IBotRepository bots, IOptions<ProfileOptions> profile)
     {
-        _textGen = textGen;
+        _textGenFactory = textGenFactory;
         _pendingSpeech = pendingSpeech;
-        _animSelect = animSelect;
+        _animSelectFactory = animSelectFactory;
         _logger = logger;
+        _bots = bots;
+        _profile = profile;
     }
     
     public ChatSession Create(WebSocket webSocket)
     {
-        return new ChatSession(webSocket, _textGen, _pendingSpeech, _animSelect, _logger);
+        return new ChatSession(webSocket, _textGenFactory, _pendingSpeech, _animSelectFactory, _logger, _bots, _profile);
     }
 }
 
@@ -37,41 +42,43 @@ public class ChatSession
     };
     
     private readonly WebSocket _webSocket;
-    private readonly ITextGenService _textGen;
+    private readonly SelectorFactory<ITextGenService> _textGenFactory;
     private readonly PendingSpeechManager _pendingSpeech;
-    private readonly IAnimationSelectionService _animSelect;
+    private readonly SelectorFactory<IAnimationSelectionService> _animSelectFactory;
     private readonly ILogger<ChatSession> _logger;
+    private readonly IBotRepository _bots;
+    private readonly IOptions<ProfileOptions> _profile;
     private readonly SemaphoreSlim _sendLock = new(1);
-    
+
+    private BotDefinition? _bot;
     private ChatData? _chatData;
 
-    public ChatSession(WebSocket webSocket, ITextGenService textGen, PendingSpeechManager pendingSpeech, IAnimationSelectionService animSelect, ILogger<ChatSession> logger)
+    public ChatSession(WebSocket webSocket, SelectorFactory<ITextGenService> textGenFactory, PendingSpeechManager pendingSpeech, SelectorFactory<IAnimationSelectionService> animSelectFactory, ILogger<ChatSession> logger, IBotRepository bots, IOptions<ProfileOptions> profile)
     {
         _webSocket = webSocket;
-        _textGen = textGen;
+        _textGenFactory = textGenFactory;
         _pendingSpeech = pendingSpeech;
-        _animSelect = animSelect;
+        _animSelectFactory = animSelectFactory;
         _logger = logger;
+        _bots = bots;
+        _profile = profile;
     }
 
-    private static string Replace(IReadOnlyChatData chatData, string text) => text
+    private static string ProcessText(BotDefinition bot, ProfileOptions profile, string text) => text
         .Replace("{{Now}}", DateTime.Now.ToString("f", CultureInfo.InvariantCulture))
-        .Replace("{{Bot}}", chatData.BotName);
+        .Replace("{{Bot}}", bot.Name)
+        .Replace("{{User}}", profile.Name)
+        .Replace("{{UserDescription}}", profile.Description.Trim(' ', '\r', '\n'))
+        .Trim(' ', '\r', '\n');
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
         var buffer = new byte[1024 * 4];
 
+        var bots = await _bots.GetBotsListAsync(cancellationToken);
         await SendAsync(new ServerBotsListMessage
         {
-            Bots = new[]
-            {
-                new ServerBotsListMessage.Bot
-                {
-                    Id = "Melly",
-                    Name = "Melly"
-                }
-            }
+            Bots = bots
         }, cancellationToken);
 
         while (!_webSocket.CloseStatus.HasValue)
@@ -115,31 +122,56 @@ public class ChatSession
         
         if (string.IsNullOrEmpty(selectBotMessage.BotId))
         {
+            _logger.LogInformation("Cleared bot selection: {BotId}", selectBotMessage.BotId);
             return;
         }
-        
-        _logger.LogInformation("Received bot selection: {BotId}", selectBotMessage.BotId);
 
-        if (selectBotMessage.BotId != "Melly")
+        var bot = await _bots.GetBotAsync(selectBotMessage.BotId, cancellationToken);
+        
+        if (bot == null)
         {
+            _logger.LogWarning("Received invalid bot selection: {BotId}", selectBotMessage.BotId);
             await SendAsync(new ServerErrorMessage
             {
                 Message = $"Unknown bot {selectBotMessage.BotId}"
             }, cancellationToken);
             return;
         }
+
+        _bot = bot;
+        _logger.LogInformation("Selected bot: {BotId}", selectBotMessage.BotId);
+
+        var textGen = _textGenFactory.Create(bot.Services.TextGen.Service);
         
         // TODO: Use a real chat data store, reload using auth
         var chatData = new ChatData
         {
-            Id = Crypto.CreateCryptographicallySecureGuid()
+            Id = Crypto.CreateCryptographicallySecureGuid(),
+            UserName = _profile.Value.Name,
+            BotName = bot.Name,
+            Preamble = new TextData
+            {
+                Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Preamble))
+            },
+            Postamble = new TextData
+            {
+                Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Postamble))
+            }
         };
-        chatData.Preamble.Text = Replace(chatData, chatData.Preamble.Text);
-        chatData.Preamble.Tokens = _textGen.GetTokenCount(chatData.Preamble);
-        foreach (var message in chatData.Messages)
+        chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble);
+        foreach (var message in bot.Messages)
         {
-            message.Text = Replace(chatData, message.Text);
-            message.User = Replace(chatData, message.User);
+            chatData.Messages.Add(
+                new ChatMessageData
+                {
+                    User = message.User switch
+                    {
+                        "{{User}}" => _profile.Value.Name,
+                        "{{Bot}}" => bot.Name,
+                        _ => bot.Name
+                    },
+                    Text = ProcessText(bot, _profile.Value, message.Text)
+                });
         }
         _chatData = chatData;
         await SendAsync(new ServerReadyMessage(), cancellationToken);
@@ -148,6 +180,7 @@ public class ChatSession
     private async Task HandleClientMessage(ClientSendMessage sendMessage, CancellationToken cancellationToken)
     {
         if (_chatData is null) throw new InvalidOperationException("Chat data is null");
+        if (_bot is null) throw new InvalidOperationException("Chat data is null");
         
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
         // TODO: Save into some storage
@@ -159,7 +192,8 @@ public class ChatSession
             Text = sendMessage.Text,
         });
 
-        var gen = await _textGen.GenerateReplyAsync(_chatData);
+        var textGen = _textGenFactory.Create(_bot.Services.TextGen.Service);
+        var gen = await textGen.GenerateReplyAsync(_chatData);
         var reply = new ChatMessageData
         {
             Id = Guid.NewGuid(),
@@ -173,7 +207,9 @@ public class ChatSession
         _chatData.Messages.Add(reply);
         _pendingSpeech.Push(_chatData.Id, reply.Id, new SpeechRequest
         {
-            Text = gen.Text
+            Service = _bot.Services.SpeechGen.Service,
+            Text = gen.Text,
+            Voice = _bot.Services.SpeechGen.Settings.TryGetValue("Voice", out var voice) ? voice : "Default"
         });
         await SendAsync(new ServerReplyMessage
         {
@@ -182,9 +218,12 @@ public class ChatSession
             
         }, cancellationToken);
 
-        var animation = await _animSelect.SelectAnimationAsync(_chatData);
-        _logger.LogInformation("Selected animation: {Animation}", animation);
-        await SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
+        if (_animSelectFactory.TryCreate(_bot.Services.AnimSelect.Service, out var animSelect))
+        {
+            var animation = await animSelect.SelectAnimationAsync(_chatData);
+            _logger.LogInformation("Selected animation: {Animation}", animation);
+            await SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
+        }
     }
 
     private async Task SendAsync<T>(T message, CancellationToken cancellationToken) where T : ServerMessage

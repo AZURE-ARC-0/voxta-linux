@@ -59,7 +59,7 @@
                             <option value="">Select Bot</option>
                             <${For} each=${botsList}>
                                 ${bot => html`
-                                    <option value=${bot.id}>${bot.name}</option>
+                                    <option value=${bot.id}>${bot.name} - ${bot.description}</option>
                                 `}
                             <//>
                         </select>

@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{F4B78CA0-7
 		.gitignore = .gitignore
 		LICENSE.md = LICENSE.md
 		README.md = README.md
+		.github\workflows\package-server.yml = .github\workflows\package-server.yml
+		.github\workflows\package-var.yml = .github\workflows\package-var.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.VirtAMatePlugin", "ChatMate.VirtAMatePlugin\ChatMate.VirtAMatePlugin.csproj", "{7982F708-5B40-4572-911D-C1C565622D82}"
