@@ -40,15 +40,21 @@
         .bot-msg {
             background-color: #5a5151;
         }
+        .error-msg {
+            background-color: #5c2f2f;
+        }
     </style>
 </head>
 <body class="bg-dark text-white d-flex flex-column">
     <div id="app" class="flex-grow-1"></div>
 
     <script type="module">
-        import { createSignal, onMount, onCleanup, For, Switch, Match } from "https://cdn.skypack.dev/solid-js";
+        import { createSignal, onMount, onCleanup, For, Switch, Match, Show } from "https://cdn.skypack.dev/solid-js";
         import { render } from "https://cdn.skypack.dev/solid-js/web";
         import html from "https://cdn.skypack.dev/solid-js/html";
+        
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = window.SpeechRecognition ? new SpeechRecognition() : null;
         
         const Header = ({ animation, botsList, onBotSelect }) => {
             return () => html`
@@ -81,6 +87,9 @@
                                 <${Match} when=${msg.user === 'bot'}>
                                     <div class="chat-msg bot-msg">${msg.text}<//>
                                 <//>
+                                <${Match} when=${msg.user === 'error'}>
+                                    <div class="chat-msg error-msg">${msg.text}<//>
+                                <//>
                             <//>
                         `}
                     <//>
@@ -88,16 +97,8 @@
             `;
         }
         
-        const MessageInput = ({ onSend }) => {
+        const MessageInput = ({ onSend, enabled }) => {
             let inputRef;
-        
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!window.SpeechRecognition)
-                alert('Speech Recognition is not supported in your browser');
-            let recognition = new SpeechRecognition();
-        
-            recognition.interimResults = true;  // Allow interim results
-            recognition.lang = 'en-US';
         
             function sendMsg() {
                 if (inputRef.value) {
@@ -109,12 +110,15 @@
             function onKeyPress(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
+                    if (!enabled) return;
                     sendMsg();
                 }
             }
         
             function startSpeechRecognition() {
-                recognition.start();
+                if (recognition) {
+                    recognition.start();
+                }
             }
             
             const onRecognitionResult = (e) => {
@@ -129,13 +133,20 @@
             }
               
             onMount(() => {
-                recognition.addEventListener('result', onRecognitionResult);
-                recognition.addEventListener('end', onRecognitionEnd);
+                if (recognition) {
+                    recognition.interimResults = true;  // Allow interim results
+                    recognition.lang = 'en-US';
+                    
+                    recognition.addEventListener('result', onRecognitionResult);
+                    recognition.addEventListener('end', onRecognitionEnd);
+                }
             })
         
             onCleanup(() => {
-                recognition.removeEventListener('result', onRecognitionResult);
-                recognition.removeEventListener('end', onRecognitionEnd);
+                if (recognition) {
+                    recognition.removeEventListener('result', onRecognitionResult);
+                    recognition.removeEventListener('end', onRecognitionEnd);
+                }
             });
         
             return () => html`
@@ -152,12 +163,13 @@
                         ref=${el => {
                             inputRef = el;
                         }}/>
-                    <button class="btn btn-primary" onClick=${sendMsg}>Send</button>
+                    <button class="btn btn-primary" onClick=${sendMsg} disabled=${!enabled}>Send</button>
                 </div>
             `;
         }
         
         const App = () => {
+            const [ready, setReady] = createSignal(false);
             const [messages, setMessages] = createSignal([]);
             const [animation, setAnimation] = createSignal('idle');
             const [botsList, setBotsList] = createSignal([]);
@@ -165,6 +177,10 @@
             let socket;
         
             onMount(() => {
+                if (!recognition) {
+                    setMessages(oldMessages => [...oldMessages, { user: 'error', text: 'Speech recognition is not supported in your browser.' }]);
+                }
+                
                 socket = new WebSocket('ws://127.0.0.1:5384/ws');
         
                 socket.onmessage = function(event) {
@@ -178,8 +194,14 @@
                                 audio.play();
                             }
                             break;
+                        case 'error':
+                            setMessages(oldMessages => [...oldMessages, { user: 'error', text: data.message }]);
+                            break;
                         case 'animation':
                             setAnimation(data.value);
+                            break;
+                        case 'ready':
+                            setReady(true);
                             break;
                         case 'bots':
                             setBotsList(data.bots);
@@ -191,6 +213,7 @@
             });
             
             function onBotSelect(botId) {
+                setMessages([]);
                 const msg = JSON.stringify({ $type: "selectBot", botId });
                 socket.send(msg);
             }
@@ -205,7 +228,7 @@
                 <div class="container p-0">
                     <${Header} animation=${animation()} botsList=${botsList()} onBotSelect=${onBotSelect} />
                     <${Chat} messages=${messages()} />
-                    <${MessageInput} onSend=${onSend} />
+                    <${MessageInput} onSend=${onSend} enabled=${ready()} />
                 </div>
             `;
         }

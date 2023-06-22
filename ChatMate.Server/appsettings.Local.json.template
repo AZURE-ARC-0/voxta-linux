@@ -4,7 +4,6 @@
       "Token": ""
     },
     "OpenAI": {
-      "OrganizationId": "",
       "ApiKey": "",
       "Model": "gpt-3.5-turbo"
     }

@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,8 @@ namespace ChatMate.Server.Services;
 
 public class NovelAIOptions
 {
-    public required string Token { get; set; }
+    [Required, MinLength(100)]
+    public required string Token { get; init; }
 }
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService

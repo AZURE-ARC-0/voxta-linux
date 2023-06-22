@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.DeepDev;
@@ -8,8 +9,10 @@ namespace ChatMate.Server.Services;
 
 public class OpenAIOptions
 {
-    public required string OrganizationId { get; init; }
+    [Required, MinLength(40)]
     public required string ApiKey { get; init; }
+    
+    [Required, MinLength(5)]
     public required string Model { get; init; }
 }
 

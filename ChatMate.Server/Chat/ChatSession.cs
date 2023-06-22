@@ -179,8 +179,11 @@ public class ChatSession
 
     private async Task HandleClientMessage(ClientSendMessage sendMessage, CancellationToken cancellationToken)
     {
-        if (_chatData is null) throw new InvalidOperationException("Chat data is null");
-        if (_bot is null) throw new InvalidOperationException("Chat data is null");
+        if (_chatData is null || _bot == null)
+        {
+            await SendAsync(new ServerErrorMessage { Message = "Please select a bot first." }, cancellationToken);
+            return;
+        }
         
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
         // TODO: Save into some storage

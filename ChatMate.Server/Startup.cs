@@ -23,7 +23,9 @@ public class Startup
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
         
-        services.Configure<ProfileOptions>(_configuration.GetSection("ChatMate.Profile"));
+        services.AddOptions<ProfileOptions>()
+            .Bind(_configuration.GetSection("ChatMate.Profile"))
+            .ValidateDataAnnotations();
         services.AddSingleton<IBotRepository, BotYamlFileRepository>();
 
         var textGenRegistry = new SelectorRegistry<ITextGenService>();
@@ -34,14 +36,18 @@ public class Startup
         services.AddSingleton<SelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(animationSelectionRegistry, sp));
 
         {
-            services.Configure<NovelAIOptions>(_configuration.GetSection("ChatMate.Services:NovelAI"));
+            services.AddOptions<NovelAIOptions>()
+                .Bind(_configuration.GetSection("ChatMate.Services:NovelAI"))
+                .ValidateDataAnnotations();
             services.AddSingleton<NovelAIClient>();
             textGenRegistry.Add<NovelAIClient>("NovelAI");
             textToSpeechRegistry.Add<NovelAIClient>("NovelAI");
         }
         
         {
-            services.Configure<OpenAIOptions>(_configuration.GetSection("ChatMate.Services:OpenAI"));
+            services.AddOptions<OpenAIOptions>()
+                .Bind(_configuration.GetSection("ChatMate.Services:OpenAI"))
+                .ValidateDataAnnotations();
             services.AddSingleton<OpenAIClient>();
             textGenRegistry.Add<OpenAIClient>("OpenAI");
             animationSelectionRegistry.Add<OpenAIClient>("OpenAI");
