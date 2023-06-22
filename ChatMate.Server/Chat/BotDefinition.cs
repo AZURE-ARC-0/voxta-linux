@@ -8,6 +8,7 @@ public class BotDefinition
     public required string Preamble { get; init; }
     public string? Postamble { get; init; }
     public string? Greeting { get; init; }
+    public string[]? ThinkingSpeech { get; init; }
     public required Message[] SampleMessages { get; init; }
     public required ServicesMap Services { get; init; }
 

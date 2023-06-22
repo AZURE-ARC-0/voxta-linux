@@ -181,8 +181,15 @@ public class ChatSession
             chatData.SampleMessages.Add(m);
         }
         _chatData = chatData;
-        
-        await SendAsync(new ServerReadyMessage(), cancellationToken);
+
+        await SendAsync(new ServerReadyMessage
+        {
+            BotId = bot.Name,
+            ThinkingSpeechUrls =
+                bot.ThinkingSpeech?.Select(x =>
+                    CreateSpeechUrl(chatData.Id, bot, Guid.NewGuid(), x)
+                ).ToArray() ?? Array.Empty<string>()
+        }, cancellationToken);
 
         if (chatData.Greeting.HasValue)
         {
@@ -215,6 +222,10 @@ public class ChatSession
 
     private async Task SendReply(string botName, TextData gen, CancellationToken cancellationToken)
     {
+        var chatData = _chatData;
+        var bot = _bot;
+        if (chatData == null || bot == null) throw new NullReferenceException("No active chat");
+        
         var reply = new ChatMessageData
         {
             Id = Guid.NewGuid(),
@@ -225,25 +236,32 @@ public class ChatSession
         };
         _logger.LogInformation("Reply ({Tokens} tokens): {Text}", reply.Tokens, reply.Text);
         // TODO: Save into some storage
-        _chatData.Messages.Add(reply);
-        _pendingSpeech.Push(_chatData.Id, reply.Id, new SpeechRequest
-        {
-            Service = _bot.Services.SpeechGen.Service,
-            Text = gen.Text,
-            Voice = _bot.Services.SpeechGen.Settings.TryGetValue("Voice", out var voice) ? voice : "Default"
-        });
+        chatData.Messages.Add(reply);
+        var speechUrl = CreateSpeechUrl(chatData.Id, bot, reply.Id, gen.Text);
         await SendAsync(new ServerReplyMessage
         {
             Text = reply.Text,
-            SpeechUrl = $"/chats/{_chatData.Id}/messages/{reply.Id}/speech/{_chatData.Id}_{reply.Id}.wav"
+            SpeechUrl = speechUrl,
         }, cancellationToken);
 
-        if (_animSelectFactory.TryCreate(_bot.Services.AnimSelect.Service, out var animSelect))
+        if (_animSelectFactory.TryCreate(bot.Services.AnimSelect.Service, out var animSelect))
         {
-            var animation = await animSelect.SelectAnimationAsync(_chatData);
+            var animation = await animSelect.SelectAnimationAsync(chatData);
             _logger.LogInformation("Selected animation: {Animation}", animation);
             await SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }
+    }
+
+    private string CreateSpeechUrl(Guid chatId, BotDefinition bot, Guid messageId, string text)
+    {
+        _pendingSpeech.Push(chatId, messageId, new SpeechRequest
+        {
+            Service = bot.Services.SpeechGen.Service,
+            Text = text,
+            Voice = bot.Services.SpeechGen.Settings.TryGetValue("Voice", out var voice) ? voice : "Default"
+        });
+        var speechUrl = $"/chats/{chatId}/messages/{messageId}/speech/{chatId}_{messageId}.wav";
+        return speechUrl;
     }
 
     private async Task SendAsync<T>(T message, CancellationToken cancellationToken) where T : ServerMessage

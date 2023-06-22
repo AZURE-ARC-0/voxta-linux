@@ -174,6 +174,8 @@
             const [animation, setAnimation] = createSignal('idle');
             const [botsList, setBotsList] = createSignal([]);
             
+            let thinkingSpeechUrls = [];
+            
             const addMessage = (message) => {
                 setMessages(oldMessages => [...oldMessages, message]);
             };
@@ -196,6 +198,7 @@
                         setAnimation(data.value);
                         break;
                     case 'ready':
+                        thinkingSpeechUrls = data.thinkingSpeechUrls || [];
                         setReady(true);
                         break;
                     case 'bots':
@@ -248,6 +251,11 @@
                 const msg = JSON.stringify({ $type: "send", text: content });
                 socket.send(msg);
                 setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
+                if (thinkingSpeechUrls.length) {
+                    const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
+                    console.log('Playing ' + audioUrl)
+                    new Audio(audioUrl).play();
+                }
             }
             
             return () => html`

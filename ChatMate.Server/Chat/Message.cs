@@ -49,6 +49,8 @@ public class ServerBotsListMessage : ServerMessage
 [Serializable]
 public class ServerReadyMessage : ServerMessage
 {
+    public required string BotId { get; init; }
+    public required string[] ThinkingSpeechUrls { get; init; }
 }
 
 [Serializable]
