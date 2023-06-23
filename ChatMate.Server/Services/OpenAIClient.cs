@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace ChatMate.Server.Services;
 
+[Serializable]
 public class OpenAIOptions
 {
     [Required, MinLength(40)]
@@ -57,7 +58,9 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
-        var totalTokens = chatData.Preamble.Tokens;
+        var totalTokens = chatData.Preamble.Tokens + 4;
+        if (!string.IsNullOrEmpty(chatData.Postamble.Text))
+            totalTokens += chatData.Postamble.Tokens + 4;
         
         var messages = new List<object> { new { role = "system", content = chatData.Preamble.Text } };
         var chatMessages = chatData.GetMessages();
@@ -69,6 +72,9 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
             var role = message.User == chatData.BotName ? "assistant" : "user";
             messages.Insert(1, new { role, content = message.Text });
         }
+
+        if (!string.IsNullOrEmpty(chatData.Postamble.Text))
+            messages.Add(new { role = "system", content = chatData.Postamble.Text });
 
         var reply = await SendChatRequestAsync(messages);
         

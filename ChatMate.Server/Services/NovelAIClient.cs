@@ -10,6 +10,7 @@ using NAudio.Wave;
 
 namespace ChatMate.Server.Services;
 
+[Serializable]
 public class NovelAIOptions
 {
     [Required, MinLength(100)]
