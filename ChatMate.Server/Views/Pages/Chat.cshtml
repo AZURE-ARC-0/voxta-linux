@@ -1,0 +1,260 @@
+﻿@page
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Chat";
+}
+
+@section styles {
+    <style>
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .parent-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-container {
+            overflow-y: auto;
+            flex: 1;
+        }
+        .chat-msg {
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+        }
+        .user-msg {
+            background-color: #384750;
+        }
+        .bot-msg {
+            background-color: #5a5151;
+        }
+        .error-msg {
+            background-color: #5c2f2f;
+        }
+    </style>
+}
+
+<div id="app" class="flex-grow-1"></div>
+
+<script type="module">
+    import { createSignal, onMount, onCleanup, For, Switch, Match, Show } from "https://cdn.skypack.dev/solid-js";
+    import { render } from "https://cdn.skypack.dev/solid-js/web";
+    import html from "https://cdn.skypack.dev/solid-js/html";
+    
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = window.SpeechRecognition ? new SpeechRecognition() : null;
+    
+    const Header = ({ animation, botsList, onBotSelect }) => {
+        return () => html`
+            <div class="d-flex justify-content-between align-items-center mb-3 p-2">
+                <div class="d-flex align-items-center">
+                    <b>Bot:</b>
+                    <select class="ms-2 form-select" onChange=${e => onBotSelect(e.target.value)}>
+                        <option value="">Select Bot</option>
+                        <${For} each=${botsList}>
+                            ${bot => html`
+                                <option value=${bot.id}>${bot.name} - ${bot.description}</option>
+                            `}
+                        <//>
+                    </select>
+                </div>
+                <div>Animation: <code>${animation}</code></div>
+            </div>
+        `;
+    };
+    
+    const Chat = ({ messages }) => {
+        return () => html`
+            <div class="chat-container p-2">
+                <${For} each=${messages} fallback=${html`<p class="text-center text-secondary">Select a bot and start chatting</p>`}>
+                    ${msg => html`
+                        <${Switch}>
+                            <${Match} when=${msg.user === 'user'}>
+                                <div class="chat-msg user-msg text-end">${msg.text}<//>
+                            <//>
+                            <${Match} when=${msg.user === 'bot'}>
+                                <div class="chat-msg bot-msg">${msg.text}<//>
+                            <//>
+                            <${Match} when=${msg.user === 'error'}>
+                                <div class="chat-msg error-msg">${msg.text}<//>
+                            <//>
+                        <//>
+                    `}
+                <//>
+            </div>
+        `;
+    }
+    
+    const MessageInput = ({ onSend, enabled }) => {
+        let inputRef;
+    
+        function sendMsg() {
+            if (inputRef.value) {
+                onSend(inputRef.value);
+                inputRef.value = '';
+            }
+        }
+    
+        function onKeyPress(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!enabled) return;
+                sendMsg();
+            }
+        }
+    
+        function startSpeechRecognition() {
+            if (recognition) {
+                recognition.start();
+            } else {
+                alert('Speech Recognition is not supported in your browser!');
+            }
+        }
+        
+        const onRecognitionResult = (e) => {
+            inputRef.value = Array.from(e.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('');
+        }
+        
+        const onRecognitionEnd = () => {
+            setTimeout(sendMsg, 1);
+        }
+          
+        onMount(() => {
+            if (recognition) {
+                recognition.interimResults = true;  // Allow interim results
+                recognition.lang = 'en-US';
+                
+                recognition.addEventListener('result', onRecognitionResult);
+                recognition.addEventListener('end', onRecognitionEnd);
+            }
+        })
+    
+        onCleanup(() => {
+            if (recognition) {
+                recognition.removeEventListener('result', onRecognitionResult);
+                recognition.removeEventListener('end', onRecognitionEnd);
+            }
+        });
+    
+        return () => html`
+            <div class="input-group mt-3">
+                <div class="input-group-text">
+                    <button class="btn btn-secondary" onClick=${startSpeechRecognition}>
+                        <i class="bi bi-mic"></i>
+                    </button>
+                </div>
+                <input type="text"
+                    class="form-control"
+                    placeholder="Type your message here"
+                    onKeyPress=${onKeyPress}
+                    ref=${el => {
+                        inputRef = el;
+                    }}/>
+                <button class="btn btn-primary" onClick=${sendMsg} disabled=${!enabled}>Send</button>
+            </div>
+        `;
+    }
+    
+    const App = () => {
+        const [ready, setReady] = createSignal(false);
+        const [messages, setMessages] = createSignal([]);
+        const [animation, setAnimation] = createSignal('idle');
+        const [botsList, setBotsList] = createSignal([]);
+        
+        let thinkingSpeechUrls = [];
+        
+        const addMessage = (message) => {
+            setMessages(oldMessages => [...oldMessages, message]);
+        };
+        
+        const onEvent = (event) => {
+            console.log('ws', event.data)
+            const data = JSON.parse(event.data);
+            switch(data.$type){
+                case 'reply':
+                    addMessage({ user: 'bot', text: data.text });
+                    if (data.speechUrl) {
+                        const audio = new Audio(data.speechUrl);
+                        audio.play();
+                    }
+                    break;
+                case 'error':
+                    addMessage({ user: 'error', text: data.message });
+                    break;
+                case 'animation':
+                    setAnimation(data.value);
+                    break;
+                case 'ready':
+                    thinkingSpeechUrls = data.thinkingSpeechUrls || [];
+                    setReady(true);
+                    break;
+                case 'bots':
+                    setBotsList(data.bots);
+                    break;
+                default:
+                    console.error('unknown message type', data)
+            }
+        };
+    
+        const wsUrl = 'ws://127.0.0.1:5384/ws';
+        let socket;
+        
+        const connect = () => {
+            socket = new WebSocket(wsUrl);
+    
+            socket.onmessage = onEvent;
+            
+            socket.onopen = function(event) {
+                setMessages([]);
+            };
+            
+            socket.onclose = function(event) {
+                addMessage({ user: 'error', text: 'Connection lost. Reconnecting...' });
+                setTimeout(function() {
+                    connect();
+                }, 5000);
+            };
+        
+            socket.onerror = function(error) {
+                addMessage({ user: 'error', text: 'A socket error occured: ' + error.message });
+            };
+        };
+    
+        onMount(() => {
+            connect();
+        });
+        
+        function onBotSelect(botId) {
+            setMessages([]);
+            const msg = JSON.stringify({ $type: "selectBot", botId });
+            socket.send(msg);
+        }
+    
+        function onSend(content) {
+            const msg = JSON.stringify({ $type: "send", text: content });
+            socket.send(msg);
+            setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
+            if (thinkingSpeechUrls.length) {
+                const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
+                console.log('Playing ' + audioUrl)
+                new Audio(audioUrl).play();
+            }
+        }
+        
+        return () => html`
+            <div class="container parent-container p-2">
+                <${Header} animation=${animation()} botsList=${botsList()} onBotSelect=${onBotSelect} />
+                <${Chat} messages=${messages()} />
+                <${MessageInput} onSend=${onSend} enabled=${ready()} />
+            </div>
+        `;
+    }
+
+    render(() => html`<${App} />`, document.getElementById("app"));
+</script>
