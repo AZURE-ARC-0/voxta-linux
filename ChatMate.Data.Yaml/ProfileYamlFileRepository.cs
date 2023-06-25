@@ -5,7 +5,7 @@ namespace ChatMate.Data.Yaml;
 
 public class ProfileYamlFileRepository : YamlFileRepositoryBase, IProfileRepository
 {
-    public Task<ProfileSettings> GetProfileAsync()
+    public Task<ProfileSettings?> GetProfileAsync()
     {
         return DeserializeFileAsync<ProfileSettings>("Data/Profile.yaml");
     }

@@ -1,4 +1,5 @@
-﻿using ChatMate.Abstractions.Repositories;
+﻿using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Repositories;
 using ChatMate.Server.ViewModels;
 using ChatMate.Services.NovelAI;
 using ChatMate.Services.OpenAI;
@@ -24,9 +25,9 @@ public class PagesController : Controller
     [HttpGet("/settings")]
     public async Task<IActionResult> Settings([FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository)
     {
-        var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI");
-        var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI");
-        var profile = await profileRepository.GetProfileAsync();
+        var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI") ?? new OpenAISettings { Model = "gpt-3.5-turbo", ApiKey = "" };
+        var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI") ?? new NovelAISettings { Token = "" };
+        var profile = await profileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
         
         var vm = new SettingsViewModel
         {

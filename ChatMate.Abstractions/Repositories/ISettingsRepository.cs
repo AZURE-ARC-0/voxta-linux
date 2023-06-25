@@ -2,6 +2,6 @@
 
 public interface ISettingsRepository
 {
-    Task<T> GetAsync<T>(string key);
-    Task SaveAsync<T>(string key, T value);
+    Task<T?> GetAsync<T>(string key) where T : class;
+    Task SaveAsync<T>(string key, T value) where T : class;
 }

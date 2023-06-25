@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
+using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using ChatMate.Abstractions.Model;
@@ -111,6 +112,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         request.Content = bodyContent;
 
         var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{settings.Token}");
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
         Console.WriteLine(request.ToString());
@@ -170,6 +172,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
         var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{settings.Token}");
         using var response2 = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         

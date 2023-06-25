@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Text.Json;
 using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
@@ -39,12 +38,6 @@ public class ChatSessionFactory
 
 public class ChatSession
 {
-    private readonly JsonSerializerOptions _serializeOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
-    };
-    
     private readonly IChatSessionTunnel _tunnel;
     private readonly ISelectorFactory<ITextGenService> _textGenFactory;
     private readonly PendingSpeechManager _pendingSpeech;
@@ -99,7 +92,7 @@ public class ChatSession
                         await HandleClientMessage(sendMessage, cancellationToken);
                         break;
                     default:
-                        _logger.LogError("Unknown message type {ClientMessage}", clientMessage?.GetType().Name ?? "null");
+                        _logger.LogError("Unknown message type {ClientMessage}", clientMessage.GetType().Name);
                         break;
                 }
             }
@@ -142,7 +135,7 @@ public class ChatSession
         var textGen = _textGenFactory.Create(bot.Services.TextGen.Service);
         
         // TODO: Use a real chat data store, reload using auth
-        var profile = await _profileRepository.GetProfileAsync();
+        var profile = await _profileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
         var chatData = new ChatData
         {
             Id = Crypto.CreateCryptographicallySecureGuid(),

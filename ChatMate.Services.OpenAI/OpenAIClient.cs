@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
 using ChatMate.Abstractions.Model;
@@ -13,7 +14,7 @@ namespace ChatMate.Services.OpenAI;
 public class OpenAISettings
 {
     public required string ApiKey { get; init; }
-    public required string Model { get; init; }
+    public string? Model { get; init; }
 }
 
 public static class OpenAISpecialTokens
@@ -113,9 +114,10 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
     private async Task<string> SendChatRequestAsync(List<object> messages)
     {
         var settings = await _settingsRepository.GetAsync<OpenAISettings>("OpenAI");
+        if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         var body = new
         {
-            model = settings.Model,
+            model = settings.Model ?? "gpt-3.5-turbo",
             messages
         };
 
