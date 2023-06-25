@@ -1,7 +1,11 @@
 ﻿using System.Net;
+using ChatMate.Abstractions.DependencyInjection;
+using ChatMate.Abstractions.Services;
+using ChatMate.Core;
+using ChatMate.Server.Chat;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server;
+namespace ChatMate.Server.Controllers;
 
 [ApiController]
 public class SpeechController : ControllerBase
@@ -12,7 +16,7 @@ public class SpeechController : ControllerBase
         [FromRoute] Guid messageId,
         [FromRoute] string filename,
         [FromRoute] string extension,
-        [FromServices] SelectorFactory<ITextToSpeechService> speechGenFactory,
+        [FromServices] ISelectorFactory<ITextToSpeechService> speechGenFactory,
         [FromServices] PendingSpeechManager pendingSpeech
     )
     {
@@ -24,6 +28,6 @@ public class SpeechController : ControllerBase
             return;
         }
 
-        await speechGenFactory.Create(speechRequest.Service).GenerateSpeechAsync(speechRequest, Response, extension);
+        await speechGenFactory.Create(speechRequest.Service).GenerateSpeechAsync(speechRequest, new HttpResponseSpeechTunnel(Response), extension);
     }
 }

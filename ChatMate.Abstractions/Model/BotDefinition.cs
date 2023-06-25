@@ -1,4 +1,4 @@
-namespace ChatMate.Server;
+namespace ChatMate.Abstractions.Model;
 
 [Serializable]
 public class BotDefinition

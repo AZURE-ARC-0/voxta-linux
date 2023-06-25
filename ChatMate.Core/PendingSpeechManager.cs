@@ -1,7 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using ChatMate.Abstractions.Model;
 
-namespace ChatMate.Server;
+namespace ChatMate.Core;
 
 public class PendingSpeechManager
 {
@@ -18,11 +19,4 @@ public class PendingSpeechManager
     {
         return _pendingSpeechRequests.TryRemove($"{chatId}/{messageId}", out request);
     }
-}
-
-public class SpeechRequest
-{
-    public required string Service { get; init; }
-    public required string Text { get; init; }
-    public required string Voice { get; set; }
 }

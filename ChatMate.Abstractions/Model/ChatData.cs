@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Server;
+﻿namespace ChatMate.Abstractions.Model;
 
 public interface IReadOnlyChatData
 {

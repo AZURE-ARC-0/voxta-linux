@@ -1,8 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Server;
+namespace ChatMate.Abstractions.DependencyInjection;
 
-public class SelectorRegistry<TInterface> where TInterface : class
+public interface ISelectorRegistry<TInterface> where TInterface : class
+{
+    void Add<TConcrete>(string key) where TConcrete : class, TInterface;
+}
+
+public class SelectorRegistry<TInterface> : ISelectorRegistry<TInterface> where TInterface : class
 {
     public readonly Dictionary<string, Type> Types = new();
 
@@ -13,7 +19,13 @@ public class SelectorRegistry<TInterface> where TInterface : class
     }
 }
 
-public class SelectorFactory<TInterface> where TInterface : class
+public interface ISelectorFactory<TInterface> where TInterface : class
+{
+    TInterface Create(string key);
+    bool TryCreate(string? key, [NotNullWhen(true)] out TInterface? value);
+}
+
+public class SelectorFactory<TInterface> : ISelectorFactory<TInterface> where TInterface : class
 {
     private readonly SelectorRegistry<TInterface> _registry;
     private readonly IServiceProvider _sp;

@@ -1,4 +1,6 @@
 bin/
 obj/
-appsettings.Local.json
 publish/
+ChatMate.Server/Data
+!ChateMate.Server/Data/Bots/Kate.yaml
+!ChateMate.Server/Data/Bots/Melly.yaml

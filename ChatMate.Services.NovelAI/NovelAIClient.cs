@@ -1,19 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
-using System.Diagnostics.CodeAnalysis;
-using System.Net;
+using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Network;
+using ChatMate.Abstractions.Repositories;
+using ChatMate.Abstractions.Services;
+using ChatMate.Common;
+using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
 
-namespace ChatMate.Server.Services;
+namespace ChatMate.Services.NovelAI;
 
 [Serializable]
-public class NovelAIOptions
+public class NovelAISettings
 {
-    [Required, MinLength(100)]
     public required string Token { get; init; }
 }
 
@@ -23,6 +25,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
     private readonly string _model;
     private readonly object _parameters;
     private readonly ILogger<NovelAIClient> _logger;
+    private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
 
     static NovelAIClient()
@@ -30,14 +33,14 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         MediaFoundationApi.Startup();
     }
 
-    public NovelAIClient(IOptions<NovelAIOptions> options, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, Sanitizer sanitizer)
+    public NovelAIClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, Sanitizer sanitizer)
     {
+        _settingsRepository = settingsRepository;
         _sanitizer = sanitizer;
         _logger = loggerFactory.CreateLogger<NovelAIClient>();
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
-        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.Value.Token}");
         _model = "clio-v1";
         _parameters = new
         {
@@ -106,7 +109,11 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;
+
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{settings.Token}");
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+        Console.WriteLine(request.ToString());
         using var response = await _httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
@@ -145,7 +152,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         return 0;
     }
 
-    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, HttpResponse response, string extension)
+    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension)
     {
         var querystring = new Dictionary<string, string>
         {
@@ -162,15 +169,15 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{settings.Token}");
         using var response2 = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         
         if (!response2.IsSuccessStatusCode)
         {
             var reason = await response2.Content.ReadAsStringAsync();
             _logger.LogError("Failed to generate speech: {Reason}", reason);
-            response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            response.ContentType = "text/plain";
-            await response.WriteAsync($"Unable to generate speech: {reason}");
+            await tunnel.ErrorAsync($"Unable to generate speech: {reason}");
             return;
         }
 
@@ -206,11 +213,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             File.Delete(tmp);
         }
 
-        response.StatusCode = (int)HttpStatusCode.OK;
-        response.ContentType = contentType;
-        response.Headers.ContentDisposition = "attachment";
-        response.ContentLength = bytes.Length;
-        await response.BodyWriter.WriteAsync(bytes);
+        await tunnel.SendAsync(bytes, contentType);
     }
 
     [Serializable]

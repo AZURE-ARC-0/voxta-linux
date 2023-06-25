@@ -1,4 +1,6 @@
-﻿namespace ChatMate.Server;
+﻿using ChatMate.Abstractions.Model;
+
+namespace ChatMate.Abstractions.Services;
 
 public interface IAnimationSelectionService
 {

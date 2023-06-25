@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ChatMate.Server;
+namespace ChatMate.Abstractions.Model;
 
 [Serializable]
-public class ProfileOptions
+public class ProfileSettings
 {
     [MinLength(1)]
     public required string Name { get; init; }

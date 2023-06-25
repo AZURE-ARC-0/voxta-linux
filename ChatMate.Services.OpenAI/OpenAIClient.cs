@@ -1,19 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Repositories;
+using ChatMate.Abstractions.Services;
+using ChatMate.Common;
 using Microsoft.DeepDev;
-using Microsoft.Extensions.Options;
 
-namespace ChatMate.Server.Services;
+namespace ChatMate.Services.OpenAI;
 
 [Serializable]
-public class OpenAIOptions
+public class OpenAISettings
 {
-    [Required, MinLength(40)]
     public required string ApiKey { get; init; }
-    
-    [Required, MinLength(5)]
     public required string Model { get; init; }
 }
 
@@ -35,19 +34,18 @@ public static class OpenAISpecialTokens
 public class OpenAIClient : ITextGenService, IAnimationSelectionService
 {
     private readonly HttpClient _httpClient;
+    private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
-    private readonly OpenAIOptions _options;
 
-    public OpenAIClient(HttpClient httpClient, IOptions<OpenAIOptions> options, ITokenizer tokenizer, Sanitizer sanitizer)
+    public OpenAIClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer)
     {
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient("OpenAI");
+        _settingsRepository = settingsRepository;
         _tokenizer = tokenizer;
         _sanitizer = sanitizer;
-        _options = options.Value;
 
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
     }
 
     public int GetTokenCount(string message)
@@ -114,13 +112,16 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
 
     private async Task<string> SendChatRequestAsync(List<object> messages)
     {
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>("OpenAI");
         var body = new
         {
-            model = _options.Model,
+            model = settings.Model,
             messages
         };
 
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        // TODO: Make a request instead
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
         var response = await _httpClient.PostAsync("/v1/chat/completions", content);
 
         if (!response.IsSuccessStatusCode)

@@ -1,35 +1,39 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
+using ChatMate.Abstractions.DependencyInjection;
+using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Network;
+using ChatMate.Abstractions.Repositories;
+using ChatMate.Abstractions.Services;
+using ChatMate.Common;
+using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Server;
+namespace ChatMate.Core;
 
 public class ChatSessionFactory
 {
-    private readonly SelectorFactory<ITextGenService> _textGenFactory;
+    private readonly ISelectorFactory<ITextGenService> _textGenFactory;
     private readonly PendingSpeechManager _pendingSpeech;
-    private readonly SelectorFactory<IAnimationSelectionService> _animSelectFactory;
+    private readonly ISelectorFactory<IAnimationSelectionService> _animSelectFactory;
     private readonly ILogger<ChatSession> _logger;
     private readonly IBotRepository _bots;
-    private readonly IOptions<ProfileOptions> _profile;
+    private readonly IProfileRepository _profileRepository;
 
     [SuppressMessage("ReSharper", "ContextualLoggerProblem")]
-    public ChatSessionFactory(SelectorFactory<ITextGenService> textGenFactory, PendingSpeechManager pendingSpeech, SelectorFactory<IAnimationSelectionService> animSelectFactory, ILogger<ChatSession> logger, IBotRepository bots, IOptions<ProfileOptions> profile)
+    public ChatSessionFactory(ISelectorFactory<ITextGenService> textGenFactory, PendingSpeechManager pendingSpeech, ISelectorFactory<IAnimationSelectionService> animSelectFactory, ILogger<ChatSession> logger, IBotRepository bots, IProfileRepository profileRepository)
     {
         _textGenFactory = textGenFactory;
         _pendingSpeech = pendingSpeech;
         _animSelectFactory = animSelectFactory;
         _logger = logger;
         _bots = bots;
-        _profile = profile;
+        _profileRepository = profileRepository;
     }
     
-    public ChatSession Create(WebSocket webSocket)
+    public ChatSession Create(IChatSessionTunnel tunnel)
     {
-        return new ChatSession(webSocket, _textGenFactory, _pendingSpeech, _animSelectFactory, _logger, _bots, _profile);
+        return new ChatSession(tunnel, _textGenFactory, _pendingSpeech, _animSelectFactory, _logger, _bots, _profileRepository);
     }
 }
 
@@ -41,30 +45,29 @@ public class ChatSession
         WriteIndented = false
     };
     
-    private readonly WebSocket _webSocket;
-    private readonly SelectorFactory<ITextGenService> _textGenFactory;
+    private readonly IChatSessionTunnel _tunnel;
+    private readonly ISelectorFactory<ITextGenService> _textGenFactory;
     private readonly PendingSpeechManager _pendingSpeech;
-    private readonly SelectorFactory<IAnimationSelectionService> _animSelectFactory;
+    private readonly ISelectorFactory<IAnimationSelectionService> _animSelectFactory;
     private readonly ILogger<ChatSession> _logger;
     private readonly IBotRepository _bots;
-    private readonly IOptions<ProfileOptions> _profile;
-    private readonly SemaphoreSlim _sendLock = new(1);
+    private readonly IProfileRepository _profileRepository;
 
     private BotDefinition? _bot;
     private ChatData? _chatData;
 
-    public ChatSession(WebSocket webSocket, SelectorFactory<ITextGenService> textGenFactory, PendingSpeechManager pendingSpeech, SelectorFactory<IAnimationSelectionService> animSelectFactory, ILogger<ChatSession> logger, IBotRepository bots, IOptions<ProfileOptions> profile)
+    public ChatSession(IChatSessionTunnel tunnel, ISelectorFactory<ITextGenService> textGenFactory, PendingSpeechManager pendingSpeech, ISelectorFactory<IAnimationSelectionService> animSelectFactory, ILogger<ChatSession> logger, IBotRepository bots, IProfileRepository profileRepository)
     {
-        _webSocket = webSocket;
+        _tunnel = tunnel;
         _textGenFactory = textGenFactory;
         _pendingSpeech = pendingSpeech;
         _animSelectFactory = animSelectFactory;
         _logger = logger;
         _bots = bots;
-        _profile = profile;
+        _profileRepository = profileRepository;
     }
 
-    private static string ProcessText(BotDefinition bot, ProfileOptions profile, string text) => text
+    private static string ProcessText(BotDefinition bot, ProfileSettings profile, string text) => text
         .Replace("{{Now}}", DateTime.Now.ToString("f", CultureInfo.InvariantCulture))
         .Replace("{{Bot}}", bot.Name)
         .Replace("{{User}}", profile.Name)
@@ -73,24 +76,19 @@ public class ChatSession
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
-        var buffer = new byte[1024 * 4];
-
         var bots = await _bots.GetBotsListAsync(cancellationToken);
-        await SendAsync(new ServerBotsListMessage
+        await _tunnel.SendAsync(new ServerBotsListMessage
         {
             Bots = bots
         }, cancellationToken);
 
-        while (!_webSocket.CloseStatus.HasValue)
+        while (!_tunnel.Closed)
         {
-            var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            if (result.CloseStatus.HasValue) return;
 
             try
             {
-                var clientMessage = JsonSerializer.Deserialize<ClientMessage>(buffer.AsMemory(0, result.Count).Span, _serializeOptions);
-
-                // TODO: Select a bot from the provided bots list and a conversation ID to load the  chat
+                var clientMessage = await _tunnel.ReceiveAsync<ClientMessage>(cancellationToken);
+                if (clientMessage == null) return;
 
                 switch (clientMessage)
                 {
@@ -107,8 +105,8 @@ public class ChatSession
             }
             catch (Exception exc)
             {
-                _logger.LogError(exc, "Error processing socket message: {RawMessage}", Encoding.UTF8.GetString(buffer.AsMemory(0, result.Count).Span));
-                await SendAsync(new ServerErrorMessage
+                _logger.LogError(exc, "Error processing socket message");
+                await _tunnel.SendAsync(new ServerErrorMessage
                 {
                     Message = exc.Message,
                 }, cancellationToken);
@@ -131,7 +129,7 @@ public class ChatSession
         if (bot == null)
         {
             _logger.LogWarning("Received invalid bot selection: {BotId}", selectBotMessage.BotId);
-            await SendAsync(new ServerErrorMessage
+            await _tunnel.SendAsync(new ServerErrorMessage
             {
                 Message = $"Unknown bot {selectBotMessage.BotId}"
             }, cancellationToken);
@@ -144,22 +142,23 @@ public class ChatSession
         var textGen = _textGenFactory.Create(bot.Services.TextGen.Service);
         
         // TODO: Use a real chat data store, reload using auth
+        var profile = await _profileRepository.GetProfileAsync();
         var chatData = new ChatData
         {
             Id = Crypto.CreateCryptographicallySecureGuid(),
-            UserName = _profile.Value.Name,
+            UserName = profile.Name,
             BotName = bot.Name,
             Preamble = new TextData
             {
-                Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Preamble))
+                Text = ProcessText(bot, profile, string.Join('\n', bot.Preamble))
             },
             Postamble = new TextData
             {
-                Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Postamble))
+                Text = ProcessText(bot, profile, string.Join('\n', bot.Postamble))
             },
             Greeting = new TextData
             {
-                Text = ProcessText(bot, _profile.Value, string.Join('\n', bot.Greeting))
+                Text = ProcessText(bot, profile, string.Join('\n', bot.Greeting))
             }
         };
         chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble.Text);
@@ -171,18 +170,18 @@ public class ChatSession
             {
                 User = message.User switch
                 {
-                    "{{User}}" => _profile.Value.Name,
+                    "{{User}}" => profile.Name,
                     "{{Bot}}" => bot.Name,
                     _ => bot.Name
                 },
-                Text = ProcessText(bot, _profile.Value, message.Text)
+                Text = ProcessText(bot, profile, message.Text)
             };
             m.Tokens = textGen.GetTokenCount(m.Text);
             chatData.SampleMessages.Add(m);
         }
         _chatData = chatData;
 
-        await SendAsync(new ServerReadyMessage
+        await _tunnel.SendAsync(new ServerReadyMessage
         {
             BotId = bot.Name,
             ThinkingSpeechUrls =
@@ -201,7 +200,7 @@ public class ChatSession
     {
         if (_chatData is null || _bot == null)
         {
-            await SendAsync(new ServerErrorMessage { Message = "Please select a bot first." }, cancellationToken);
+            await _tunnel.SendAsync(new ServerErrorMessage { Message = "Please select a bot first." }, cancellationToken);
             return;
         }
         
@@ -238,7 +237,7 @@ public class ChatSession
         // TODO: Save into some storage
         chatData.Messages.Add(reply);
         var speechUrl = CreateSpeechUrl(chatData.Id, bot, reply.Id, gen.Text);
-        await SendAsync(new ServerReplyMessage
+        await _tunnel.SendAsync(new ServerReplyMessage
         {
             Text = reply.Text,
             SpeechUrl = speechUrl,
@@ -248,7 +247,7 @@ public class ChatSession
         {
             var animation = await animSelect.SelectAnimationAsync(chatData);
             _logger.LogInformation("Selected animation: {Animation}", animation);
-            await SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
+            await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }
     }
 
@@ -262,23 +261,5 @@ public class ChatSession
         });
         var speechUrl = $"/chats/{chatId}/messages/{messageId}/speech/{chatId}_{messageId}.wav";
         return speechUrl;
-    }
-
-    private async Task SendAsync<T>(T message, CancellationToken cancellationToken) where T : ServerMessage
-    {
-        await _sendLock.WaitAsync(cancellationToken);
-        try
-        {
-            await _webSocket.SendAsync(
-                JsonSerializer.SerializeToUtf8Bytes<ServerMessage>(message, _serializeOptions),
-                WebSocketMessageType.Text,
-                true,
-                cancellationToken
-            );
-        }
-        finally
-        {
-            _sendLock.Release();
-        }
     }
 }

@@ -1,8 +1,12 @@
-﻿using ChatMate.Server;
-using ChatMate.Server.Services;
+﻿using ChatMate.Abstractions.DependencyInjection;
+using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Services;
+using ChatMate.Common;
+using ChatMate.Core;
+using ChatMate.Data.Yaml;
 using Microsoft.AspNetCore.WebSockets;
-using Microsoft.DeepDev;
-using Microsoft.Extensions.Options;
+
+namespace ChatMate.Server;
 
 public class Startup
 {
@@ -23,37 +27,25 @@ public class Startup
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
         
-        services.AddOptions<ProfileOptions>()
+        services.AddOptions<ProfileSettings>()
             .Bind(_configuration.GetSection("ChatMate.Profile"))
             .ValidateDataAnnotations();
-        services.AddSingleton<IBotRepository, BotYamlFileRepository>();
+        services.AddYamlRepositories();
 
         var textGenRegistry = new SelectorRegistry<ITextGenService>();
-        services.AddSingleton<SelectorFactory<ITextGenService>>(sp => new SelectorFactory<ITextGenService>(textGenRegistry, sp));
+        services.AddSingleton<ISelectorFactory<ITextGenService>>(sp => new SelectorFactory<ITextGenService>(textGenRegistry, sp));
         var textToSpeechRegistry = new SelectorRegistry<ITextToSpeechService>();
-        services.AddSingleton<SelectorFactory<ITextToSpeechService>>(sp => new SelectorFactory<ITextToSpeechService>(textToSpeechRegistry, sp));
+        services.AddSingleton<ISelectorFactory<ITextToSpeechService>>(sp => new SelectorFactory<ITextToSpeechService>(textToSpeechRegistry, sp));
         var animationSelectionRegistry = new SelectorRegistry<IAnimationSelectionService>();
-        services.AddSingleton<SelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(animationSelectionRegistry, sp));
+        services.AddSingleton<ISelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(animationSelectionRegistry, sp));
 
-        {
-            services.AddOptions<NovelAIOptions>()
-                .Bind(_configuration.GetSection("ChatMate.Services:NovelAI"))
-                .ValidateDataAnnotations();
-            services.AddSingleton<NovelAIClient>();
-            textGenRegistry.Add<NovelAIClient>("NovelAI");
-            textToSpeechRegistry.Add<NovelAIClient>("NovelAI");
-        }
-        
-        {
-            services.AddOptions<OpenAIOptions>()
-                .Bind(_configuration.GetSection("ChatMate.Services:OpenAI"))
-                .ValidateDataAnnotations();
-            services.AddSingleton<OpenAIClient>();
-            textGenRegistry.Add<OpenAIClient>("OpenAI");
-            animationSelectionRegistry.Add<OpenAIClient>("OpenAI");
-        }
+        services.AddNovelAI();
+        textGenRegistry.RegisterNovelAI();
+        textToSpeechRegistry.RegisterNovelAI();
 
-        services.AddSingleton<ITokenizer>(sp => TokenizerBuilder.CreateByModelName(sp.GetRequiredService<IOptions<OpenAIOptions>>().Value.Model, OpenAISpecialTokens.SpecialTokens));
+        services.AddOpenAI();
+        textGenRegistry.RegisterOpenAI();
+        animationSelectionRegistry.RegisterOpenAI();
     }
 
     public void Configure(IApplicationBuilder  app, IWebHostEnvironment env)

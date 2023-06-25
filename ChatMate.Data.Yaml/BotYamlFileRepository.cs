@@ -1,18 +1,10 @@
-﻿using YamlDotNet.Serialization;
+﻿using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Repositories;
 
-namespace ChatMate.Server;
+namespace ChatMate.Data.Yaml;
 
-public interface IBotRepository
+public class BotYamlFileRepository : YamlFileRepositoryBase, IBotRepository
 {
-    Task<ServerBotsListMessage.Bot[]> GetBotsListAsync(CancellationToken cancellationToken);
-    Task<BotDefinition?> GetBotAsync(string id, CancellationToken cancellationToken);
-}
-
-public class BotYamlFileRepository : IBotRepository
-{
-    private static readonly IDeserializer YamlDeserializer = new DeserializerBuilder()
-        .Build();
-    
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private List<BotDefinition>? _bots;
     
@@ -57,11 +49,9 @@ public class BotYamlFileRepository : IBotRepository
     private static async ValueTask<List<BotDefinition>> LoadBotsAsync()
     {
         var bots = new List<BotDefinition>();
-        foreach(var file in Directory.EnumerateFiles("Bots", "*.yaml"))
+        foreach(var file in Directory.EnumerateFiles("Data/Bots", "*.yaml"))
         {
-            await using var stream = File.OpenRead(file);
-            using var reader = new StreamReader(stream);
-            var bot = YamlDeserializer.Deserialize<BotDefinition>(reader);
+            var bot = await DeserializeFileAsync<BotDefinition>(file);
             bots.Add(bot);
         }
         return bots;

@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace ChatMate.Server;
+namespace ChatMate.Common;
 
 public static class Crypto
 {

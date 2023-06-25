@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ChatMate.Server;
+namespace ChatMate.Abstractions.Model;
 
 [Serializable]
 [JsonDerivedType(typeof(ClientSelectBotMessage), typeDiscriminator: "selectBot")]

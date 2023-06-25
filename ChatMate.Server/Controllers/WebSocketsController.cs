@@ -1,8 +1,10 @@
 ﻿using System.Net.Sockets;
 using System.Net.WebSockets;
+using ChatMate.Core;
+using ChatMate.Server.Chat;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server;
+namespace ChatMate.Server.Controllers;
 
 [ApiController]
 public class WebSocketsController : ControllerBase
@@ -26,7 +28,8 @@ public class WebSocketsController : ControllerBase
         }
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        var chatSession = _chatInstanceFactory.Create(webSocket);
+        var tunnel = new WebsocketChatSessionTunnel(webSocket);
+        var chatSession = _chatInstanceFactory.Create(tunnel);
         _logger.LogInformation("WebSocket connection established");
         try
         {
