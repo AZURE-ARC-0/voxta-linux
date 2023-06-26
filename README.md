@@ -15,7 +15,7 @@ Download the latest `AcidBubbles.ChatMate.Server.VERSION.zip` release from the [
 
 ### Entering your API keys
 
-Open the `appsettings.Local.json.template` and copy it to `appsettings.Local.json`.
+Open <http://127.0.0.1:5384/settings>
 
 #### OpenAI
 
@@ -38,11 +38,11 @@ Open the `appsettings.Local.json.template` and copy it to `appsettings.Local.jso
 
 3. Use copy the resulting string and paste it into `appsettings.Local.json` under `ChatMate.Services:NovelAI:Token`.
 
-### Starting the server
+#### Profile
 
-Normally you can simply double-click on the executable, and it should work. If it doesn't, you can see the error message by running it from a terminal.
+Choose a name you'd like to be called, and describe how the AI should see you, and what hey know about you.
 
-## Using the browser chat interface
+### Testing the chat
 
 This UI is mostly for testing, but it's great way to make sure things work.
 
@@ -76,7 +76,7 @@ You can now launch Virt-A-Mate, open the main menu and go to User Preferences. F
 - Enable Package Downloader (optional, if you want to use the demo scene dependencies)
 - Enable Hub (optional, if you want to auto-download demo scene dependencies)
 
-### Using the demo scenes
+### Using a demo scenes
 
 If you download a scene that uses ChatMate, and the previous steps are done correctly, you can simply open the scene and it should work. You can validate that the plugin is running by opening the plugin's custom UI (go in Edit mode, select the Person atom, go to Plugins, find ChatMate, click on Open Custom UI), and you should see "Connected". If you have a Bot selected, the State should be idle.
 
@@ -112,7 +112,7 @@ You'll need [.NET SDK 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 - Chat
   - The chat memory is only valid for the current connection. Once you exit or reconnect, the memory is lost.
 - NovelAI
-  - I did not implement token counting, so past a certain point you will get errors.
+  - I did not implement token counting for NovelAI, so past a certain point you will get errors.
 - There is a small freeze when loading audio, and a preloader. I didn't find a way to get rid of it.
 
 ## Improvements
