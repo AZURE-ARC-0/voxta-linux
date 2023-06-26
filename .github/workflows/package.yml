@@ -14,7 +14,10 @@ jobs:
     - uses: actions/checkout@v3
     - name: Get the version
       id: get_version 
-      run: echo ::set-output name=VERSION::$(echo ${GITHUB_REF/refs\/tags\//} | cut -c 2-)
+      run: |
+        $version = $env:GITHUB_REF -replace "refs/tags/", ""
+        $version = $version.Substring(1)
+        Add-Content -Path $env:GITHUB_OUTPUT -Value "VERSION=$version"
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -28,7 +31,7 @@ jobs:
     - name: Zip
       run: |
         cd publish/server
-        Compress-Archive -Path .\* -DestinationPath -DestinationPath ".\AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip"
+        Compress-Archive -Path .\* -DestinationPath ".\AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip"
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
@@ -48,7 +51,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::$(echo ${GITHUB_REF/refs\/tags\//} | cut -c 2-)
+        run: echo VERSION=$(echo ${GITHUB_REF/refs\/tags\//} | cut -c 2-) >> $GITHUB_OUTPUT
       - name: Zip the release package
         id: zip
         run: |
