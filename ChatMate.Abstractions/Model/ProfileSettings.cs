@@ -7,5 +7,5 @@ public class ProfileSettings
 {
     [MinLength(1)]
     public required string Name { get; init; }
-    public string Description { get; init; } = "No description available";
+    public string? Description { get; init; }
 }

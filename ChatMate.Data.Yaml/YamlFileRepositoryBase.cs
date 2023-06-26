@@ -28,6 +28,7 @@ public abstract class YamlFileRepositoryBase
     
     protected static async Task SerializeFileAsync<T>(string file, T value)
     {
+        Directory.CreateDirectory(Path.GetDirectoryName(file) ?? throw new InvalidOperationException("Invalid file path"));
         await using var stream = File.Create(file);
         await using var reader = new StreamWriter(stream);
         YamlSerializer.Serialize(reader, value);

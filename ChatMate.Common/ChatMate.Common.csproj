@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
+    </ItemGroup>
+
 </Project>

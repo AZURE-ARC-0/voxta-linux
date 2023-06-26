@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
+using System.Runtime.Versioning;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
@@ -17,13 +18,13 @@ namespace ChatMate.Services.NovelAI;
 [Serializable]
 public class NovelAISettings
 {
-    public required string Token { get; init; }
+    public required string Token { get; set; }
+    public string Model { get; set; } = "clio-v1";
 }
 
 public class NovelAIClient : ITextGenService, ITextToSpeechService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _model;
     private readonly object _parameters;
     private readonly ILogger<NovelAIClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
@@ -42,7 +43,6 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
-        _model = "clio-v1";
         _parameters = new
         {
             temperature = 1.05,
@@ -90,8 +90,12 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
     }
 
+    [SupportedOSPlatform("windows")]
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
+
         // TODO: count tokens: https://novelai.net/tokenizer
         // TODO: Move the settings to appsettings
         var chatMessages = chatData.GetMessages();
@@ -102,7 +106,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         """.ReplaceLineEndings("\n");
         var body = new
         {
-            model = _model,
+            model = settings.Model,
             input,
             parameters = _parameters
         };
@@ -111,9 +115,7 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;
 
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{settings.Token}");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
         Console.WriteLine(request.ToString());
         using var response = await _httpClient.SendAsync(request);
@@ -156,6 +158,9 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension)
     {
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
+        
         var querystring = new Dictionary<string, string>
         {
             ["text"] = speechRequest.Text,
@@ -171,9 +176,8 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", $"{settings.Token}");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.Token));
         using var response2 = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         
         if (!response2.IsSuccessStatusCode)

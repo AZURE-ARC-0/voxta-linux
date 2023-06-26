@@ -27,16 +27,16 @@
         <div class="container d-flex justify-content-between">
             <a class="navbar-brand" href="@Url.Action("Index", "Pages")">ChatMate</a>
             <ul class="navbar-nav">
-                <li class="nav-item @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Index", "Pages")">Home</a>
                 </li>
-                <li class="nav-item @(ViewContext.RouteData.Values["Action"].ToString() == "Chat" ? "active" : "")">
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Chat" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Chat", "Pages")">Chat</a>
                 </li>
-                <li class="nav-item @(ViewContext.RouteData.Values["Action"].ToString() == "Settings" ? "active" : "")">
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Settings", "Pages")">Settings</a>
                 </li>
-                <li class="nav-item @(ViewContext.RouteData.Values["Action"].ToString() == "Bots" ? "active" : "")">
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Bots" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Bots", "Pages")">Bots</a>
                 </li>
             </ul>

@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Runtime.Versioning;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
@@ -13,8 +14,8 @@ namespace ChatMate.Services.OpenAI;
 [Serializable]
 public class OpenAISettings
 {
-    public required string ApiKey { get; init; }
-    public string? Model { get; init; }
+    public required string ApiKey { get; set; }
+    public string Model { get; set; } = "gpt-3.5-turbo";
 }
 
 public static class OpenAISpecialTokens
@@ -55,6 +56,7 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
+    [SupportedOSPlatform("windows")]
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
         var totalTokens = chatData.Preamble.Tokens + 4;
@@ -86,6 +88,7 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         };
     }
 
+    [SupportedOSPlatform("windows")]
     public async ValueTask<string> SelectAnimationAsync(ChatData chatData)
     {
         var sb = new StringBuilder(chatData.Preamble.Text);
@@ -111,19 +114,20 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         return animation.Trim('\'', '"', '.', '[', ']').ToLowerInvariant();
     }
 
+    [SupportedOSPlatform("windows")]
     private async Task<string> SendChatRequestAsync(List<object> messages)
     {
         var settings = await _settingsRepository.GetAsync<OpenAISettings>("OpenAI");
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         var body = new
         {
-            model = settings.Model ?? "gpt-3.5-turbo",
+            model = settings.Model,
             messages
         };
 
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
         // TODO: Make a request instead
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.ApiKey);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
         var response = await _httpClient.PostAsync("/v1/chat/completions", content);
 
         if (!response.IsSuccessStatusCode)

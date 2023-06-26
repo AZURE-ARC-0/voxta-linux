@@ -9,23 +9,34 @@
         <div class="form-group">
             <label asp-for="OpenAI.ApiKey">OpenAI Key:</label>
             <input asp-for="OpenAI.ApiKey" class="form-control" />
+            @Html.ValidationMessageFor(m => m.OpenAI.ApiKey)
         </div>
         <div class="form-group">
             <label asp-for="OpenAI.Model">OpenAI Model:</label>
             <input asp-for="OpenAI.Model" class="form-control" />
+            @Html.ValidationMessageFor(m => m.OpenAI.Model)
         </div>
         <div class="form-group">
-            <label asp-for="NovelAI.Token">NovelAI Key:</label>
+            <label asp-for="NovelAI.Token">NovelAI Token:</label>
             <input asp-for="NovelAI.Token" class="form-control" />
+            @Html.ValidationMessageFor(m => m.NovelAI.Token)
+        </div>
+        <div class="form-group">
+            <label asp-for="NovelAI.Model">NovelAI Model:</label>
+            <input asp-for="NovelAI.Model" class="form-control" />
+            @Html.ValidationMessageFor(m => m.NovelAI.Model)
         </div>
         <div class="form-group">
             <label asp-for="Profile.Name">Profile Name:</label>
             <input asp-for="Profile.Name" class="form-control" />
+            @Html.ValidationMessageFor(m => m.Profile.Name)
         </div>
         <div class="form-group">
-            <label asp-for="Profile.Description">Profile Name:</label>
+            <label asp-for="Profile.Description">Profile Description:</label>
             <input asp-for="Profile.Description" class="form-control" />
+            @Html.ValidationMessageFor(m => m.Profile.Description)
         </div>
         <button type="submit" class="btn btn-primary">Save</button>
+        @Html.ValidationSummary(true)
     </form>
 </div>
