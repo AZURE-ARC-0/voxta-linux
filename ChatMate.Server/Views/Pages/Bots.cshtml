@@ -1,7 +1,15 @@
-﻿@page
+﻿@model ChatMate.Abstractions.Model.ServerBotsListMessage.Bot[]
 @{
     Layout = "_Layout";
     ViewBag.Title = "Bots";
 }
 
-<p class="text-center">Bots List</p>
+<div class="container">
+    <p>Registered bots: </p>
+    <ul>
+        @foreach (var bot in Model)
+        {
+            <li><b>@bot.Name</b>: @bot.Description</li>
+        }
+    </ul>
+</div>

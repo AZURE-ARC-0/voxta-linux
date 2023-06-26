@@ -60,9 +60,10 @@ public class PagesController : Controller
     }
     
     [HttpGet("/bots")]
-    public IActionResult Bots()
+    public async Task<IActionResult> Bots([FromServices] IBotRepository botRepository, CancellationToken cancellationToken)
     {
-        return View();
+        var model = await botRepository.GetBotsListAsync(cancellationToken);
+        return View(model);
     }
     
     [HttpGet("/bots/{botId}")]
