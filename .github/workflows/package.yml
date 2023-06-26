@@ -6,13 +6,14 @@ on:
       - v*
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  server:
+    name: Package Server
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
     - name: Get the version
-      id: get_version
+      id: get_version 
       run: echo ::set-output name=VERSION::$(echo ${GITHUB_REF/refs\/tags\//} | cut -c 2-)
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -27,18 +28,7 @@ jobs:
     - name: Zip
       run: |
         cd publish/server
-        zip -r "AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip" *
-    - name: Zip the release package
-      id: zip
-      run: |
-        mkdir -p publish/Custom/Scripts/AcidBubbles/ChatMate
-        cd ChatMate.VirtAMatePlugin
-        cp -r src ../publish/Custom/Scripts/AcidBubbles/ChatMate/
-        cp *.cslist ../publish/Custom/Scripts/AcidBubbles/ChatMate/
-        cp meta.json ../publish/
-        cd ../publish
-        sed -i 's/v0.0.0/v${{ steps.get_version.outputs.VERSION }}/' meta.json
-        zip -r "AcidBubbles.ChatMate.${{ github.run_number }}.var" *
+        Compress-Archive -Path .\* -DestinationPath -DestinationPath ".\AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip"
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
@@ -46,6 +36,36 @@ jobs:
         draft: true
         files: |
           publish/server/AcidBubbles.ChatMate.Server.${{ github.run_number }}.zip
-          publish/AcidBubbles.ChatMate.${{ github.run_number }}.var
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+
+  var:
+    name: Package Virt-A-Mate Plugin
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo ${GITHUB_REF/refs\/tags\//} | cut -c 2-)
+      - name: Zip the release package
+        id: zip
+        run: |
+          mkdir -p publish/Custom/Scripts/AcidBubbles/ChatMate
+          cd ChatMate.VirtAMatePlugin
+          cp -r src ../publish/Custom/Scripts/AcidBubbles/ChatMate/
+          cp *.cslist ../publish/Custom/Scripts/AcidBubbles/ChatMate/
+          cp meta.json ../publish/
+          cd ../publish
+          sed -i 's/v0.0.0/v${{ steps.get_version.outputs.VERSION }}/' meta.json
+          zip -r "AcidBubbles.ChatMate.${{ github.run_number }}.var" *
+      - name: GitHub release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          files: |
+            publish/AcidBubbles.ChatMate.${{ github.run_number }}.var
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
