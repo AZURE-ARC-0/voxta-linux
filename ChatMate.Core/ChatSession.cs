@@ -64,7 +64,7 @@ public class ChatSession
         .Replace("{{Now}}", DateTime.Now.ToString("f", CultureInfo.InvariantCulture))
         .Replace("{{Bot}}", bot.Name)
         .Replace("{{User}}", profile.Name)
-        .Replace("{{UserDescription}}", profile.Description.Trim(' ', '\r', '\n'))
+        .Replace("{{UserDescription}}", profile.Description?.Trim(' ', '\r', '\n') ?? "Not specified")
         .Trim(' ', '\r', '\n');
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
