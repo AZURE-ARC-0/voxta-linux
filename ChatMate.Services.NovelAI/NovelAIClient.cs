@@ -90,7 +90,6 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         };
     }
 
-    [SupportedOSPlatform("windows")]
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");

@@ -1,4 +1,4 @@
-﻿using System.Runtime.Versioning;
+﻿#pragma warning disable CA1416
 using System.Security.Cryptography;
 
 namespace ChatMate.Common;
@@ -11,7 +11,6 @@ public static class Crypto
         return new Guid(bytes);
     }
     
-    [SupportedOSPlatform("windows")]
     public static string EncryptString(string plaintext)
     {
         byte[] plaintextBytes = System.Text.Encoding.UTF8.GetBytes(plaintext);
@@ -19,7 +18,6 @@ public static class Crypto
         return Convert.ToBase64String(encryptedBytes);
     }
     
-    [SupportedOSPlatform("windows")]
     public static string DecryptString(string encrypted)
     {
         byte[] encryptedBytes = Convert.FromBase64String(encrypted);

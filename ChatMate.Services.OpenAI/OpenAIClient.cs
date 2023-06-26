@@ -56,7 +56,6 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
-    [SupportedOSPlatform("windows")]
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
         var totalTokens = chatData.Preamble.Tokens + 4;
@@ -88,7 +87,6 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         };
     }
 
-    [SupportedOSPlatform("windows")]
     public async ValueTask<string> SelectAnimationAsync(ChatData chatData)
     {
         var sb = new StringBuilder(chatData.Preamble.Text);
@@ -114,7 +112,6 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         return animation.Trim('\'', '"', '.', '[', ']').ToLowerInvariant();
     }
 
-    [SupportedOSPlatform("windows")]
     private async Task<string> SendChatRequestAsync(List<object> messages)
     {
         var settings = await _settingsRepository.GetAsync<OpenAISettings>("OpenAI");
