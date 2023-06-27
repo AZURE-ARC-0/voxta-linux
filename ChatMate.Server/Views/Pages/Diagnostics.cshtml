@@ -1,0 +1,28 @@
+﻿@using ChatMate.Abstractions.Diagnostics
+@inject IPerformanceMetrics PerformanceMetrics
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Bots";
+}
+
+<div class="container">
+    <p>Performance Metrics: </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Metric</th>
+                <th scope="col">Average Elapsed Time</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var key in PerformanceMetrics.GetKeys())
+        {
+            <tr>
+                <td>@key</td>
+                <td>@PerformanceMetrics.GetAverage(key).ToString("g")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+</div>

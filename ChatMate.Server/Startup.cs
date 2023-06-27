@@ -1,9 +1,11 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
+using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using ChatMate.Core;
 using ChatMate.Data.Yaml;
+using ChatMate.Server.Chat;
 using Microsoft.AspNetCore.WebSockets;
 
 namespace ChatMate.Server;
@@ -26,6 +28,7 @@ public class Startup
         services.AddScoped<ChatSessionFactory>();
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
+        services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         
         services.AddOptions<ProfileSettings>()
             .Bind(_configuration.GetSection("ChatMate.Profile"))

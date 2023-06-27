@@ -71,4 +71,10 @@ public class PagesController : Controller
     {
         return View();
     }
+    
+    [HttpGet("/diagnostics")]
+    public IActionResult Diagnostics()
+    {
+        return View();
+    }
 }

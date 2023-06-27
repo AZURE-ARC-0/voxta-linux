@@ -39,6 +39,9 @@
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Bots" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Bots", "Pages")">Bots</a>
                 </li>
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Diagnostics" ? "active" : "")">
+                    <a class="nav-link" href="@Url.Action("Diagnostics", "Pages")">Diagnostics</a>
+                </li>
             </ul>
         </div>
     </nav>

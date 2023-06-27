@@ -1,45 +1,35 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
-using System.Runtime.Versioning;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
+using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
-using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
-using NAudio.Wave;
 
 namespace ChatMate.Services.NovelAI;
 
-[Serializable]
-public class NovelAISettings
-{
-    public required string Token { get; set; }
-    public string Model { get; set; } = "clio-v1";
-}
-
-public class NovelAIClient : ITextGenService, ITextToSpeechService
+public class NovelAITextGenClient : ITextGenService
 {
     private readonly HttpClient _httpClient;
     private readonly object _parameters;
-    private readonly ILogger<NovelAIClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
+    private readonly IPerformanceMetrics _performanceMetrics;
 
-    static NovelAIClient()
+    static NovelAITextGenClient()
     {
         MediaFoundationApi.Startup();
     }
 
-    public NovelAIClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, Sanitizer sanitizer)
+    public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
         _settingsRepository = settingsRepository;
         _sanitizer = sanitizer;
-        _logger = loggerFactory.CreateLogger<NovelAIClient>();
+        _performanceMetrics = performanceMetrics;
         _httpClient = httpClientFactory.CreateClient("NovelAI");
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
@@ -116,7 +106,8 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        Console.WriteLine(request.ToString());
+
+        var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
         using var response = await _httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
@@ -139,6 +130,8 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
             // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
         reader.Close();
+        
+        textGenPerf.Done();
 
         var text = sb.ToString();
         var sanitized = _sanitizer.Sanitize(text);
@@ -155,73 +148,6 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         return 0;
     }
 
-    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension)
-    {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        
-        var querystring = new Dictionary<string, string>
-        {
-            ["text"] = speechRequest.Text,
-            ["voice"] = "-1",
-            ["seed"] = speechRequest.Voice,
-            ["opus"] = "true",
-            ["version"] = "v2"
-        };
-        var uriBuilder = new UriBuilder(new Uri(_httpClient.BaseAddress!, "/ai/generate-voice"))
-        {
-            Query = await new FormUrlEncodedContent(querystring).ReadAsStringAsync()
-        };
-
-        using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.Token));
-        using var response2 = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
-        
-        if (!response2.IsSuccessStatusCode)
-        {
-            var reason = await response2.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to generate speech: {Reason}", reason);
-            await tunnel.ErrorAsync($"Unable to generate speech: {reason}");
-            return;
-        }
-
-        // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
-        string contentType;
-        var tmp = Path.GetTempFileName();
-        var bytes = await response2.Content.ReadAsByteArrayAsync();
-        await File.WriteAllBytesAsync(tmp, bytes);
-        try
-        {
-            await using var reader = new MediaFoundationReader(tmp);
-            var ms = new MemoryStream();
-            switch (extension)
-            {
-                case "mp3":
-                    contentType = "audio/mpeg";
-                    MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
-                    break;
-                case "wav":
-                    contentType = "audio/x-wav";
-                    // var resampler = new MediaFoundationResampler(reader, 44100);
-                    // var stereo = new MonoToStereoSampleProvider(resampler.ToSampleProvider());
-                    // WaveFileWriter.WriteWavFileToStream(ms, stereo.ToWaveProvider16());
-                    WaveFileWriter.WriteWavFileToStream(ms, reader);
-                    break;
-                default:
-                    throw new InvalidOperationException("Unexpected extension {extension}");
-            }
-            bytes = ms.ToArray();
-        }
-        finally
-        {
-            File.Delete(tmp);
-        }
-
-        await tunnel.SendAsync(bytes, contentType);
-    }
-
     [Serializable]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private class NovelAIEventData
@@ -230,12 +156,5 @@ public class NovelAIClient : ITextGenService, ITextToSpeechService
         public bool final { get; init; }
         public int ptr { get; init; }
         public string? error { get; init; }
-    }
-}
-
-public class NovelAIException : Exception
-{
-    public NovelAIException(string message) : base(message)
-    {
     }
 }

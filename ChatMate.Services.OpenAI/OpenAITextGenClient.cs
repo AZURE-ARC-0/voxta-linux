@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Headers;
-using System.Runtime.Versioning;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
+using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
@@ -10,13 +10,6 @@ using ChatMate.Common;
 using Microsoft.DeepDev;
 
 namespace ChatMate.Services.OpenAI;
-
-[Serializable]
-public class OpenAISettings
-{
-    public required string ApiKey { get; set; }
-    public string Model { get; set; } = "gpt-3.5-turbo";
-}
 
 public static class OpenAISpecialTokens
 {
@@ -33,19 +26,21 @@ public static class OpenAISpecialTokens
     public static readonly HashSet<string> Keys = new(SpecialTokens.Keys);
 }
 
-public class OpenAIClient : ITextGenService, IAnimationSelectionService
+public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 {
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
+    private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OpenAIClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer)
+    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
         _httpClient = httpClientFactory.CreateClient("OpenAI");
         _settingsRepository = settingsRepository;
         _tokenizer = tokenizer;
         _sanitizer = sanitizer;
+        _performanceMetrics = performanceMetrics;
 
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
     }
@@ -58,6 +53,8 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
     {
+        var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
+        
         var totalTokens = chatData.Preamble.Tokens + 4;
         if (!string.IsNullOrEmpty(chatData.Postamble.Text))
             totalTokens += chatData.Postamble.Tokens + 4;
@@ -76,10 +73,18 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         if (!string.IsNullOrEmpty(chatData.Postamble.Text))
             messages.Add(new { role = "system", content = chatData.Postamble.Text });
 
+        tokenizePerf.Pause();
+
+        var textGenPerf = _performanceMetrics.Start("OpenAI.TextGen");
         var reply = await SendChatRequestAsync(messages);
+        textGenPerf.Done();
         
         var sanitized = _sanitizer.Sanitize(reply);
+        
+        tokenizePerf.Resume();
         var tokens = _tokenizer.Encode(sanitized, OpenAISpecialTokens.Keys);
+        tokenizePerf.Done();
+        
         return new TextData
         {
             Text = sanitized,
@@ -135,12 +140,5 @@ public class OpenAIClient : ITextGenService, IAnimationSelectionService
         if (apiResponse == null) throw new NullReferenceException("OpenAI API response was null");
 
         return apiResponse.Value.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
-    }
-}
-
-public class OpenAIException : Exception
-{
-    public OpenAIException(string message) : base(message)
-    {
     }
 }
