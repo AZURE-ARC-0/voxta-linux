@@ -29,6 +29,7 @@ public class Startup
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
+        services.AddScoped<ChatServicesFactory>();
         
         services.AddOptions<ProfileSettings>()
             .Bind(_configuration.GetSection("ChatMate.Profile"))

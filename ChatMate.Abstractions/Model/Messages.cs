@@ -3,7 +3,7 @@
 namespace ChatMate.Abstractions.Model;
 
 [Serializable]
-[JsonDerivedType(typeof(ClientSelectBotMessage), typeDiscriminator: "selectBot")]
+[JsonDerivedType(typeof(ClientCreateChatMessage), typeDiscriminator: "createChat")]
 [JsonDerivedType(typeof(ClientSendMessage), typeDiscriminator: "send")]
 public abstract class ClientMessage
 {
@@ -16,13 +16,14 @@ public class ClientSendMessage : ClientMessage
 }
 
 [Serializable]
-public class ClientSelectBotMessage : ClientMessage
+public class ClientCreateChatMessage : ClientMessage
 {
     public required string BotId { get; init; }
+    public string? AudioPath { get; init; }
 }
 
 [Serializable]
-[JsonDerivedType(typeof(ServerBotsListMessage), typeDiscriminator: "bots")]
+[JsonDerivedType(typeof(ServerWelcomeMessage), typeDiscriminator: "welcome")]
 [JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
 [JsonDerivedType(typeof(ServerSpeechMessage), typeDiscriminator: "speech")]
@@ -33,7 +34,7 @@ public abstract class ServerMessage
 }
 
 [Serializable]
-public class ServerBotsListMessage : ServerMessage
+public class ServerWelcomeMessage : ServerMessage
 {
     public required Bot[] Bots { get; set; }
     
@@ -49,6 +50,7 @@ public class ServerBotsListMessage : ServerMessage
 [Serializable]
 public class ServerReadyMessage : ServerMessage
 {
+    public required Guid ChatId { get; init; }
     public required string BotId { get; init; }
     public required string[] ThinkingSpeechUrls { get; init; }
 }
@@ -57,7 +59,6 @@ public class ServerReadyMessage : ServerMessage
 public class ServerReplyMessage : ServerMessage
 {
     public required string Text { get; set; }
-    public required string SpeechUrl { get; set; }
 }
 
 [Serializable]

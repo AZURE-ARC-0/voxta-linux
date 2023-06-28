@@ -13,7 +13,7 @@ namespace ChatMate.Server.Tests
     [TestFixture]
     public class WebSocketTest
     {
-        private JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         
         private WebSocketClient _wsClient = null!;
         private WebSocket _wsConnection = null!;
@@ -75,6 +75,7 @@ namespace ChatMate.Server.Tests
             );
 
             var buffer = new byte[1024];
+            
             var result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
             var reply = (ServerReplyMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
@@ -82,7 +83,15 @@ namespace ChatMate.Server.Tests
             {
                 Assert.That(reply, Is.Not.Null);
                 Assert.That(reply?.Text, Is.Not.Null.Or.Empty);
-                Assert.That(reply?.SpeechUrl, Does.Match(@"/chats/.+/messages/.+/speech/.+\.wav"));
+            });
+            
+            result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
+            var speech = (ServerSpeechMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
+            Assert.Multiple(() =>
+            {
+                Assert.That(speech, Is.Not.Null);
+                Assert.That(speech?.Url, Does.Match(@"/chats/.+/messages/.+/speech/.+\.wav"));
             });
 
             result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -94,17 +103,17 @@ namespace ChatMate.Server.Tests
                 Assert.That(animation?.Value, Is.Not.Null.Or.Empty);
             });
 
-            if (reply?.SpeechUrl != null)
+            if (speech?.Url != null)
             {
-                var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, reply.SpeechUrl));
+                var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, speech.Url));
                 if (!response.IsSuccessStatusCode)
-                    Assert.Fail($"GET {reply.SpeechUrl}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+                    Assert.Fail($"GET {speech.Url}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
 
                 Assert.Multiple(() =>
                 {
-                    Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), reply.SpeechUrl);
-                    Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), reply.SpeechUrl);
-                    Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), reply.SpeechUrl);
+                    Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Url);
+                    Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), speech.Url);
+                    Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1000), speech.Url);
                 });
             }
         }

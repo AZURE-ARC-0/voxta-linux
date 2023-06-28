@@ -10,13 +10,13 @@ public class PendingSpeechManager
     // TODO: Instead of using a a pending technique, just load the chat?
     private readonly ConcurrentDictionary<string, SpeechRequest> _pendingSpeechRequests = new();
 
-    public void Push(Guid chatId, Guid messageId, SpeechRequest request)
+    public void Push(string id, SpeechRequest request)
     {
-        _pendingSpeechRequests.TryAdd($"{chatId}/{messageId}", request);
+        _pendingSpeechRequests.TryAdd(id, request);
     }
 
-    public bool TryGetValue(Guid chatId, Guid messageId, [NotNullWhen(true)] out SpeechRequest? request)
+    public bool TryGetValue(string id, [NotNullWhen(true)] out SpeechRequest? request)
     {
-        return _pendingSpeechRequests.TryRemove($"{chatId}/{messageId}", out request);
+        return _pendingSpeechRequests.TryRemove(id, out request);
     }
 }

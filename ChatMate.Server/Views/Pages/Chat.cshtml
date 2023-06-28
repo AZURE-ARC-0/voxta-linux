@@ -179,10 +179,10 @@
             switch(data.$type){
                 case 'reply':
                     addMessage({ user: 'bot', text: data.text });
-                    if (data.speechUrl) {
-                        const audio = new Audio(data.speechUrl);
-                        audio.play();
-                    }
+                    break;
+                case 'speech':
+                    const audio = new Audio(data.url);
+                    audio.play();
                     break;
                 case 'error':
                     addMessage({ user: 'error', text: data.message });
@@ -194,7 +194,7 @@
                     thinkingSpeechUrls = data.thinkingSpeechUrls || [];
                     setReady(true);
                     break;
-                case 'bots':
+                case 'welcome':
                     setBotsList(data.bots);
                     break;
                 default:
@@ -232,7 +232,7 @@
         
         function onBotSelect(botId) {
             setMessages([]);
-            const msg = JSON.stringify({ $type: "selectBot", botId });
+            const msg = JSON.stringify({ $type: "createChat", botId });
             socket.send(msg);
         }
     

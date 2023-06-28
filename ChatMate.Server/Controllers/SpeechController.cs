@@ -10,21 +10,19 @@ namespace ChatMate.Server.Controllers;
 [ApiController]
 public class SpeechController : ControllerBase
 {
-    [HttpGet("/chats/{chatId}/messages/{messageId}/speech/{filename}.{extension}")]
+    [HttpGet("/tts/{id}.{extension}")]
     public async Task GetSpeech(
-        [FromRoute] Guid chatId,
-        [FromRoute] Guid messageId,
-        [FromRoute] string filename,
+        [FromRoute] string id,
         [FromRoute] string extension,
         [FromServices] ISelectorFactory<ITextToSpeechService> speechGenFactory,
         [FromServices] PendingSpeechManager pendingSpeech
     )
     {
-        if (!pendingSpeech.TryGetValue(chatId, messageId, out var speechRequest))
+        if (!pendingSpeech.TryGetValue(id, out var speechRequest))
         {
             Response.StatusCode = (int)HttpStatusCode.BadRequest;
             Response.ContentType = "text/plain";
-            await Response.WriteAsync($"No pending speech for chat {chatId} and message {messageId}");
+            await Response.WriteAsync($"No pending speech for {id}");
             return;
         }
 
