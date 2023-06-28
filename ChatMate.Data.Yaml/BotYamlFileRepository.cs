@@ -13,7 +13,7 @@ public class BotYamlFileRepository : YamlFileRepositoryBase, IBotRepository
         var bots = await LoadBotsCheckAsync(cancellationToken);
         return bots.Select(b => new ServerWelcomeMessage.Bot
         {
-            Id = b.Name,
+            Id = b.Id,
             Name = b.Name,
             Description = b.Description,
         }).ToArray();
@@ -22,7 +22,8 @@ public class BotYamlFileRepository : YamlFileRepositoryBase, IBotRepository
     public async Task<BotDefinition?> GetBotAsync(string id, CancellationToken cancellationToken)
     {
         var bots = await LoadBotsCheckAsync(cancellationToken);
-        return bots.FirstOrDefault(b => b.Name == id);
+        if(!Guid.TryParse(id, out var guid)) return null;
+        return bots.FirstOrDefault(b => b.Id == guid);
     }
 
     private async ValueTask<List<BotDefinition>> LoadBotsCheckAsync(CancellationToken cancellationToken)

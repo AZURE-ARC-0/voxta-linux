@@ -67,9 +67,49 @@ public class PagesController : Controller
     }
     
     [HttpGet("/bots/{botId}")]
-    public IActionResult Bot()
+    public async Task<IActionResult> Bot([FromRoute] string botId, [FromServices] IBotRepository botRepository, CancellationToken cancellationToken)
     {
-        return View();
+        BotDefinition? bot;
+        if (botId == "new")
+        {
+            bot = new BotDefinition
+            {
+                Name = "New bot",
+                Preamble = "{{Bot}} is a virtual companion for {{User}}.",
+                SampleMessages = Array.Empty<BotDefinition.Message>(),
+                Services = new BotDefinition.ServicesMap
+                {
+                    TextGen = new BotDefinition.ServiceMap
+                    {
+                        Service = "OpenAI",
+                        Settings = new Dictionary<string, string>
+                        {
+                            { "Model", "gpt-3.5-turbo" }
+                        }
+                    },
+                    SpeechGen = new BotDefinition.ServiceMap
+                    {
+                        Service = "NovelAI",
+                        Settings = new Dictionary<string, string>
+                        {
+                            { "Voice", "Naia" }
+                        }
+                    },
+                    AnimSelect = new BotDefinition.ServiceMap
+                    {
+                        Service = "None",
+                    }
+                }
+            };
+        }
+        else
+        {
+            bot = await botRepository.GetBotAsync(botId, cancellationToken);
+            if (bot == null)
+                return NotFound("Bot not found");
+        }
+            
+        return View(bot);
     }
     
     [HttpGet("/diagnostics")]

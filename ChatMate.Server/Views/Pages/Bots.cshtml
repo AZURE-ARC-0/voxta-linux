@@ -6,10 +6,24 @@
 
 <div class="container">
     <p>Registered bots: </p>
-    <ul>
+    <table class="table">
+        <thead>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Edit</th>
+        </thead>
+
         @foreach (var bot in Model)
         {
-            <li><b>@bot.Name</b>: @bot.Description</li>
+            <tr>
+                <td>@bot.Name</td>
+                <td>@bot.Description</td>
+                <td><a class="btn btn-primary" href="/bots/@bot.Id">Edit</a></td>
+            </tr>
         }
-    </ul>
+        <tr>
+            <td colspan="2"></td>
+            <td><a class="btn btn-primary" href="/bots/new">Add new bot</a></td>
+        </tr>
+    </table>
 </div>

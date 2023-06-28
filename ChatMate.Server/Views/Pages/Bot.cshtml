@@ -1,7 +1,15 @@
-﻿@page
+﻿@model ChatMate.Abstractions.Model.BotDefinition
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Chat";
+    ViewBag.Title = "Bots";
 }
 
-<p class="text-center">Bot</p>
+<div class="container">
+    <form method="post" asp-action="settings">
+        <div class="form-group">
+            <label asp-for="Name">Name:</label>
+            <input asp-for="Name" class="form-control" />
+            @Html.ValidationMessageFor(m => m.Name)
+        </div>
+    </form>
+</div>
