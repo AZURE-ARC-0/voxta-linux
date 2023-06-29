@@ -6,6 +6,7 @@ namespace ChatMate.Abstractions.Model;
 [JsonDerivedType(typeof(ClientStartChatMessage), typeDiscriminator: "startChat")]
 [JsonDerivedType(typeof(ClientStopChatMessage), typeDiscriminator: "stopChat")]
 [JsonDerivedType(typeof(ClientSendMessage), typeDiscriminator: "send")]
+[JsonDerivedType(typeof(ClientListenMessage), typeDiscriminator: "listen")]
 public abstract class ClientMessage
 {
 }
@@ -26,14 +27,19 @@ public class ClientStartChatMessage : ClientMessage
 [Serializable]
 public class ClientStopChatMessage : ClientMessage
 {
-    public required string BotId { get; init; }
-    public string? AudioPath { get; init; }
+}
+
+[Serializable]
+public class ClientListenMessage : ClientMessage
+{
 }
 
 [Serializable]
 [JsonDerivedType(typeof(ServerWelcomeMessage), typeDiscriminator: "welcome")]
 [JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
+[JsonDerivedType(typeof(ServerSpeechRecognitionStartMessage), typeDiscriminator: "speechRecognitionStart")]
+[JsonDerivedType(typeof(ServerSpeechRecognitionEndMessage), typeDiscriminator: "speechRecognitionEnd")]
 [JsonDerivedType(typeof(ServerSpeechMessage), typeDiscriminator: "speech")]
 [JsonDerivedType(typeof(ServerAnimationMessage), typeDiscriminator: "animation")]
 [JsonDerivedType(typeof(ServerErrorMessage), typeDiscriminator: "error")]
@@ -65,6 +71,17 @@ public class ServerReadyMessage : ServerMessage
 
 [Serializable]
 public class ServerReplyMessage : ServerMessage
+{
+    public required string Text { get; set; }
+}
+
+[Serializable]
+public class ServerSpeechRecognitionStartMessage : ServerMessage
+{
+}
+
+[Serializable]
+public class ServerSpeechRecognitionEndMessage : ServerMessage
 {
     public required string Text { get; set; }
 }

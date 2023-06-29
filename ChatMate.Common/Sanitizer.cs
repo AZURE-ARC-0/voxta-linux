@@ -8,6 +8,6 @@ public class Sanitizer
 
     public string Sanitize(string message)
     {
-        return SanitizeMessage.Replace(message, "").Trim('\"', ' ');
+        return SanitizeMessage.Replace(message, "").Trim('\"', '\'', ' ');
     }
 }

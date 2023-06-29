@@ -22,14 +22,15 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllersWithViews();
-        services.AddWebSockets(options => { });
+        services.AddWebSockets(_ => { });
         
         services.AddHttpClient();
         services.AddScoped<ChatSessionFactory>();
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
-        services.AddScoped<ChatServicesFactory>();
+        services.AddScoped<ChatServicesLocator>();
+        services.AddSingleton<LocalInputEventDispatcher>();
         
         services.AddOptions<ProfileSettings>()
             .Bind(_configuration.GetSection("ChatMate.Profile"))
@@ -50,6 +51,9 @@ public class Startup
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
         animationSelectionRegistry.RegisterOpenAI();
+
+        services.AddVosk(_configuration.GetSection("Vosk"));
+        services.AddHostedService<SpeechRecognitionBackgroundTask>();
     }
 
     public void Configure(IApplicationBuilder  app, IWebHostEnvironment env)

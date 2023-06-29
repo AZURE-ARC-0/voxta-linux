@@ -182,7 +182,15 @@
                     break;
                 case 'speech':
                     const audio = new Audio(data.url);
+                    audio.addEventListener('ended', () => {
+                        const msg = JSON.stringify({ $type: "listen" });
+                        socket.send(msg);
+                    });
                     audio.play();
+                    break;
+                case 'speechRecognitionStart':
+                    break;
+                case 'speechRecognitionEnd':
                     break;
                 case 'error':
                     addMessage({ user: 'error', text: data.message });

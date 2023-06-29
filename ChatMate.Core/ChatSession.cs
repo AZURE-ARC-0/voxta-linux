@@ -8,23 +8,23 @@ namespace ChatMate.Core;
 public class ChatSession
 {
     private readonly IChatSessionTunnel _tunnel;
-    private readonly ChatServicesFactory _servicesFactory;
+    private readonly ChatServicesLocator _servicesLocator;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<ChatSession> _logger;
 
     private ChatInstance? _chat;
 
-    public ChatSession(IChatSessionTunnel tunnel, ILoggerFactory loggerFactory, ChatServicesFactory servicesFactory)
+    public ChatSession(IChatSessionTunnel tunnel, ILoggerFactory loggerFactory, ChatServicesLocator servicesLocator)
     {
         _tunnel = tunnel;
-        _servicesFactory = servicesFactory;
+        _servicesLocator = servicesLocator;
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ChatSession>();
     }
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
-        var bots = await _servicesFactory._bots.GetBotsListAsync(cancellationToken);
+        var bots = await _servicesLocator.BotsRepository.GetBotsListAsync(cancellationToken);
         await _tunnel.SendAsync(new ServerWelcomeMessage
         {
             Bots = bots
@@ -54,6 +54,14 @@ public class ChatSession
                         }
                         await _chat.HandleMessageAsync(sendMessage, cancellationToken);
                         break;
+                    case ClientListenMessage:
+                        if (_chat == null)
+                        {
+                            await _tunnel.SendAsync(new ServerErrorMessage { Message = "Please select a bot first." }, cancellationToken);
+                            return;
+                        }
+                        _chat.HandleListenAsync();
+                        break;
                     default:
                         _logger.LogError("Unknown message type {ClientMessage}", clientMessage.GetType().Name);
                         break;
@@ -82,7 +90,7 @@ public class ChatSession
             return;
         }
 
-        var bot = await _servicesFactory._bots.GetBotAsync(startChatMessage.BotId, cancellationToken);
+        var bot = await _servicesLocator.BotsRepository.GetBotAsync(startChatMessage.BotId, cancellationToken);
         
         if (bot == null)
         {
@@ -96,10 +104,10 @@ public class ChatSession
 
         _logger.LogInformation("Selected bot: {BotId}", startChatMessage.BotId);
 
-        var profile = await _servicesFactory._profileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
+        var profile = await _servicesLocator.ProfileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
         var textProcessor = new ChatTextProcessor(bot, profile);
 
-        var textGen = _servicesFactory._textGenFactory.Create(bot.Services.TextGen.Service);
+        var textGen = _servicesLocator.TextGenFactory.Create(bot.Services.TextGen.Service);
         
         // TODO: Use a real chat data store, reload using auth
         var chatData = new ChatData
@@ -139,7 +147,7 @@ public class ChatSession
             chatData.SampleMessages.Add(m);
         }
 
-        _chat = new ChatInstance(_tunnel, _loggerFactory, _servicesFactory, chatData, bot, textProcessor, startChatMessage.AudioPath);
+        _chat = new ChatInstance(_tunnel, _loggerFactory, _servicesLocator, chatData, bot, textProcessor, startChatMessage.AudioPath);
 
         await _chat.SendReadyAsync(cancellationToken);
     }

@@ -5,17 +5,17 @@ namespace ChatMate.Core;
 
 public class ChatSessionFactory
 {
-    private readonly ChatServicesFactory _servicesFactory;
+    private readonly ChatServicesLocator _servicesLocator;
     private readonly ILoggerFactory _loggerFactory;
 
-    public ChatSessionFactory(ChatServicesFactory servicesFactory, ILoggerFactory loggerFactory)
+    public ChatSessionFactory(ChatServicesLocator servicesLocator, ILoggerFactory loggerFactory)
     {
-        _servicesFactory = servicesFactory;
+        _servicesLocator = servicesLocator;
         _loggerFactory = loggerFactory;
     }
     
     public ChatSession Create(IChatSessionTunnel tunnel)
     {
-        return new ChatSession(tunnel, _loggerFactory, _servicesFactory);
+        return new ChatSession(tunnel, _loggerFactory, _servicesLocator);
     }
 }

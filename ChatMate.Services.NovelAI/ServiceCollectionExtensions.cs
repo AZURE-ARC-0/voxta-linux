@@ -1,9 +1,8 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Services;
 using ChatMate.Services.NovelAI;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Data.Yaml;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class ChatInstance
+public class ChatInstance : IDisposable
 {
     private readonly IChatSessionTunnel _tunnel;
-    private readonly ChatServicesFactory _servicesFactory;
+    private readonly ChatServicesLocator _servicesLocator;
     private readonly ChatData _chatData;
     private readonly BotDefinition _bot;
     private readonly ChatTextProcessor _chatTextProcessor;
@@ -18,19 +18,22 @@ public class ChatInstance
     public ChatInstance(
         IChatSessionTunnel tunnel,
         ILoggerFactory loggerFactory,
-        ChatServicesFactory servicesFactory,
+        ChatServicesLocator servicesLocator,
         ChatData chatData,
         BotDefinition bot,
         ChatTextProcessor chatTextProcessor,
         string? audioPath)
     {
         _tunnel = tunnel;
-        _servicesFactory = servicesFactory;
+        _servicesLocator = servicesLocator;
         _chatData = chatData;
         _bot = bot;
         _chatTextProcessor = chatTextProcessor;
         _audioPath = audioPath;
         _logger = loggerFactory.CreateLogger<ChatSession>();
+        
+        servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart += OnSpeechRecognitionStart;
+        servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd += OnSpeechRecognitionEnd;
     }
 
     public async Task HandleMessageAsync(ClientSendMessage sendMessage, CancellationToken cancellationToken)
@@ -45,9 +48,14 @@ public class ChatInstance
             Text = _chatTextProcessor.ProcessText(sendMessage.Text),
         });
 
-        var textGen = _servicesFactory._textGenFactory.Create(_bot.Services.TextGen.Service);
+        var textGen = _servicesLocator.TextGenFactory.Create(_bot.Services.TextGen.Service);
         var gen = await textGen.GenerateReplyAsync(_chatData);
         await SendReply(_chatData.BotName, gen, cancellationToken);
+    }
+    
+    public void HandleListenAsync()
+    {
+        _servicesLocator.LocalInputEventDispatcher.OnReadyForSpeechRecognition();
     }
 
     private async Task SendReply(string botName, TextData gen, CancellationToken cancellationToken, string? id = null)
@@ -81,7 +89,7 @@ public class ChatInstance
             Url = speechUrl,
         }, cancellationToken);
 
-        if (_servicesFactory._animSelectFactory.TryCreate(bot.Services.AnimSelect.Service, out var animSelect))
+        if (_servicesLocator.AnimSelectFactory.TryCreate(bot.Services.AnimSelect.Service, out var animSelect))
         {
             var animation = await animSelect.SelectAnimationAsync(chatData);
             _logger.LogInformation("Selected animation: {Animation}", animation);
@@ -94,7 +102,7 @@ public class ChatInstance
         Task speechTask;
         if (_audioPath != null)
         {
-            var speechGen = _servicesFactory._textToSpeechFactory.Create(_bot.Services.SpeechGen.Service);
+            var speechGen = _servicesLocator.TextToSpeechFactory.Create(_bot.Services.SpeechGen.Service);
             speechUrl = Path.Combine(_audioPath, $"{id}.wav");
             if (!File.Exists(speechUrl))
             {
@@ -121,7 +129,7 @@ public class ChatInstance
 
     private string CreateSpeechUrl(string id, string text)
     {
-        _servicesFactory._pendingSpeech.Push(id, new SpeechRequest
+        _servicesLocator.PendingSpeech.Push(id, new SpeechRequest
         {
             Service = _bot.Services.SpeechGen.Service,
             Text = text,
@@ -162,5 +170,23 @@ public class ChatInstance
         {
             await SendReply(_chatData.BotName, _chatData.Greeting, cancellationToken);
         }
+    }
+
+    private void OnSpeechRecognitionStart(object? sender, EventArgs e)
+    {
+        _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), CancellationToken.None);
+    }
+
+    private void OnSpeechRecognitionEnd(object? sender, string e)
+    {
+        _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage { Text = e }, CancellationToken.None);
+        #warning Ensure synchronous handling, using a queue or a lock
+        HandleMessageAsync(new ClientSendMessage { Text = e }, CancellationToken.None);
+    }
+
+    public void Dispose()
+    {
+        _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart -= OnSpeechRecognitionStart;
+        _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd -= OnSpeechRecognitionEnd;
     }
 }

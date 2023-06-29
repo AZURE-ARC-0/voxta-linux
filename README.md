@@ -22,8 +22,9 @@ Open <http://127.0.0.1:5384/settings>
 [OpenAI](https://openai.com/) has excellent reasoning abilities, and can be used to drive emotion and state animations. It does not allow for nsfw content however, and may refer to itself as an AI.
 
 1. Go to [https://platform.openai.com/account/api-keys]
-2. Create a new API key, and copy it to `appsettings.Local.json` in `ChatMate.Services:OpenAI:ApiKey`
-3. Go to Settings to find your `Organization ID`, and add it in  in `ChatMate.Services:OpenAI:OrganizationId`
+2. Create a new API key, and copy it to `OpenAI Key`
+
+You can technically user another model, but only `gpt-3.5-turbo` is supported at the moment.
 
 #### NovelAI
 
@@ -36,7 +37,19 @@ Open <http://127.0.0.1:5384/settings>
    console.log(JSON.parse(localStorage.getItem('session')).auth_token)
    ```
 
-3. Use copy the resulting string and paste it into `appsettings.Local.json` under `ChatMate.Services:NovelAI:Token`.
+3. Use copy the resulting string and paste it into `NovelAI Token`.
+
+You can technically user another model, but only `clio-v1` is supported at the moment.
+
+#### Vosk
+
+Vosk is used to do speech to text outside of Virt-A-Mate (because it's better, faster and uncensored).
+
+When launching for the first time, a model will be downloaded. You can change it in `appsettings.json`; the list can be found here: <https://alphacephei.com/vosk/models>.
+
+| Model                        | Hash                                                             |
+| vosk-model-small-en-us-0.15  | 30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498 |
+| vosk-model-en-us-0.22-lgraph | d9838b4aaa82a75c4a17f5aca300eaca129aaab2a7cbf951bafbb500eb9c4334 |
 
 #### Profile
 

@@ -2,9 +2,8 @@
 using ChatMate.Abstractions.Services;
 using ChatMate.Services.OpenAI;
 using Microsoft.DeepDev;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Data.Yaml;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
