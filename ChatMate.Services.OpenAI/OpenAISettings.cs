@@ -3,6 +3,8 @@
 [Serializable]
 public class OpenAISettings
 {
+    public const string DefaultModel = "gpt-3.5-turbo";
+    
     public required string ApiKey { get; set; }
-    public string Model { get; set; } = "gpt-3.5-turbo";
+    public string Model { get; set; } = DefaultModel;
 }

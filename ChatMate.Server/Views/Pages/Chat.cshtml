@@ -88,7 +88,7 @@
         `;
     }
     
-    const MessageInput = ({ onSend, enabled }) => {
+    const MessageInput = ({ onSend, enabled, useServerSpeechRecognition }) => {
         let inputRef;
     
         function sendMsg() {
@@ -144,11 +144,13 @@
     
         return () => html`
             <div class="input-group mt-3">
-                <div class="input-group-text">
-                    <button class="btn btn-secondary" onClick=${startSpeechRecognition}>
-                        <i class="bi bi-mic"></i>
-                    </button>
-                </div>
+                <Show when=${useServerSpeechRecognition}>
+                    <div class="input-group-text">
+                        <button class="btn btn-secondary" onClick=${startSpeechRecognition}>
+                            <i class="bi bi-mic"></i>
+                        </button>
+                    </div>
+                </Show>
                 <input type="text"
                     class="form-control"
                     placeholder="Type your message here"
@@ -166,6 +168,7 @@
         const [messages, setMessages] = createSignal([]);
         const [animation, setAnimation] = createSignal('idle');
         const [botsList, setBotsList] = createSignal([]);
+        const [useServerSpeechRecognition, setUseServerSpeechRecognition] = createSignal(true);
         
         let thinkingSpeechUrls = [];
         
@@ -240,7 +243,7 @@
         
         function onBotSelect(botId) {
             setMessages([]);
-            const msg = JSON.stringify({ $type: "startChat", botId });
+            const msg = JSON.stringify({ $type: "startChat", botId, useServerSpeechRecognition: useServerSpeechRecognition() });
             socket.send(msg);
         }
     
@@ -259,7 +262,7 @@
             <div class="container parent-container p-2">
                 <${Header} animation=${animation()} botsList=${botsList()} onBotSelect=${onBotSelect} />
                 <${Chat} messages=${messages()} />
-                <${MessageInput} onSend=${onSend} enabled=${ready()} />
+                <${MessageInput} onSend=${onSend} enabled=${ready()}, useServerSpeechRecognition=${useServerSpeechRecognition()} />
             </div>
         `;
     }

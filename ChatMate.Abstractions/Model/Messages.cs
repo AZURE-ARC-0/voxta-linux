@@ -22,6 +22,7 @@ public class ClientStartChatMessage : ClientMessage
 {
     public required string BotId { get; init; }
     public string? AudioPath { get; init; }
+    public bool UseServerSpeechRecognition { get; init; }
 }
 
 [Serializable]

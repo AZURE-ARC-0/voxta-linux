@@ -53,7 +53,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
+        if (string.IsNullOrEmpty(settings.Token)) throw new AuthenticationException("NovelAI token is missing.");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.Token));
         var ttsPerf = _performanceMetrics.Start("NovelAI.TextToSpeech");
         using var audioResponse = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);

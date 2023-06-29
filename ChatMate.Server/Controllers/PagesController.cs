@@ -26,17 +26,27 @@ public class PagesController : Controller
     [HttpGet("/settings")]
     public async Task<IActionResult> Settings([FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository)
     {
-        var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI") ?? new OpenAISettings { ApiKey = "" };
-        openai.ApiKey = string.IsNullOrEmpty(openai.ApiKey) ? "" : Crypto.DecryptString(openai.ApiKey);
-        var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI") ?? new NovelAISettings { Token = "" };
-        novelai.Token = string.IsNullOrEmpty(novelai.Token) ? "" : Crypto.DecryptString(novelai.Token);
-        var profile = await profileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
-        
+        var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI");
+        var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        var profile = await profileRepository.GetProfileAsync();
+
         var vm = new SettingsViewModel
         {
-            OpenAI = openai,
-            NovelAI = novelai,
-            Profile = profile
+            OpenAI = new OpenAISettings
+            {
+                ApiKey = string.IsNullOrEmpty(openai?.ApiKey) ? "" : Crypto.DecryptString(openai.ApiKey),
+                Model = openai?.Model ?? OpenAISettings.DefaultModel,
+            },
+            NovelAI = new NovelAISettings
+            {
+                Token = string.IsNullOrEmpty(novelai?.Token) ? "" : Crypto.DecryptString(novelai.Token),
+                Model = novelai?.Model ?? NovelAISettings.DefaultModel,
+            },
+            Profile = new ProfileSettings
+            {
+                Name = profile?.Name ?? "User",
+                Description = profile?.Description ?? ""
+            }
         };
         
         return View(vm);
@@ -50,11 +60,21 @@ public class PagesController : Controller
             return View("Settings", model);
         }
         
-        model.OpenAI.ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey);
-        await settingsRepository.SaveAsync("OpenAI", model.OpenAI);
-        model.NovelAI.Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token);
-        await settingsRepository.SaveAsync("NovelAI", model.NovelAI);
-        await profileRepository.SaveProfileAsync(model.Profile);
+        await settingsRepository.SaveAsync("OpenAI", new OpenAISettings
+        {
+            ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey),
+            Model = model.OpenAI.Model,
+        });
+        await settingsRepository.SaveAsync("NovelAI", new NovelAISettings
+        {
+            Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token),
+            Model = model.NovelAI.Model,
+        });
+        await profileRepository.SaveProfileAsync(new ProfileSettings
+        {
+            Name = model.Profile.Name,
+            Description = model.Profile.Description,
+        });
         
         return RedirectToAction("Chat");
     }

@@ -174,11 +174,13 @@ public class ChatInstance : IDisposable
 
     private void OnSpeechRecognitionStart(object? sender, EventArgs e)
     {
+        _logger.LogInformation("Speech recognition started");
         _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), CancellationToken.None);
     }
 
     private void OnSpeechRecognitionEnd(object? sender, string e)
     {
+        _logger.LogInformation("Speech recognition ended: {Text}", e);
         _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage { Text = e }, CancellationToken.None);
         #warning Ensure synchronous handling, using a queue or a lock
         HandleMessageAsync(new ClientSendMessage { Text = e }, CancellationToken.None);

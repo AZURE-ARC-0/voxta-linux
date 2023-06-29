@@ -52,6 +52,7 @@ public class ChatSession
                             await _tunnel.SendAsync(new ServerErrorMessage { Message = "Please select a bot first." }, cancellationToken);
                             return;
                         }
+
                         await _chat.HandleMessageAsync(sendMessage, cancellationToken);
                         break;
                     case ClientListenMessage:
@@ -60,12 +61,17 @@ public class ChatSession
                             await _tunnel.SendAsync(new ServerErrorMessage { Message = "Please select a bot first." }, cancellationToken);
                             return;
                         }
+
                         _chat.HandleListenAsync();
                         break;
                     default:
                         _logger.LogError("Unknown message type {ClientMessage}", clientMessage.GetType().Name);
                         break;
                 }
+            }
+            catch (TaskCanceledException exc)
+            {
+                _logger.LogWarning(exc, "Disconnect by cancellation");
             }
             catch (Exception exc)
             {
