@@ -1,5 +1,6 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Diagnostics;
+using ChatMate.Abstractions.Management;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
@@ -31,6 +32,9 @@ public class Startup
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddScoped<ChatServicesLocator>();
         services.AddSingleton<LocalInputEventDispatcher>();
+        services.AddSingleton<TemporaryFileCleanupService>();
+        services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
+        services.AddHostedService(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
         
         services.AddOptions<ProfileSettings>()
             .Bind(_configuration.GetSection("ChatMate.Profile"))

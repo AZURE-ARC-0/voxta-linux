@@ -107,6 +107,7 @@ public class ChatInstance : IDisposable
             speechUrl = Path.Combine(_audioPath, $"{id}.wav");
             if (!File.Exists(speechUrl))
             {
+                _servicesLocator.TemporaryFileCleanup.MarkForDeletion(speechUrl);
                 speechTask = speechGen.GenerateSpeechAsync(new SpeechRequest
                 {
                     Service = _bot.Services.SpeechGen.Service,
