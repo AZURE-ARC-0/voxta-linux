@@ -1,7 +1,8 @@
 bin/
 obj/
 publish/
-ChatMate.Server/Data
-!ChateMate.Server/Data/Bots/Kate.yaml
-!ChateMate.Server/Data/Bots/Melly.yaml
+ChatMate.Server/Data/*
+!ChatMate.Server/Data/Bots/
+ChatMate.Server/Data/Bots/*
+!ChatMate.Server/Data/Bots/Sample*
 ChatMate.Server/Models
