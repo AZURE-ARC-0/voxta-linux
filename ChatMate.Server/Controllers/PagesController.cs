@@ -62,18 +62,18 @@ public class PagesController : Controller
         
         await settingsRepository.SaveAsync("OpenAI", new OpenAISettings
         {
-            ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey),
-            Model = model.OpenAI.Model,
+            ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey.Trim('"', ' ')),
+            Model = model.OpenAI.Model.Trim(),
         });
         await settingsRepository.SaveAsync("NovelAI", new NovelAISettings
         {
-            Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token),
-            Model = model.NovelAI.Model,
+            Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
+            Model = model.NovelAI.Model.Trim(),
         });
         await profileRepository.SaveProfileAsync(new ProfileSettings
         {
-            Name = model.Profile.Name,
-            Description = model.Profile.Description,
+            Name = model.Profile.Name.Trim(),
+            Description = model.Profile.Description?.Trim(),
         });
         
         return RedirectToAction("Chat");
