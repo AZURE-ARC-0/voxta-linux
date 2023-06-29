@@ -39,6 +39,7 @@ public class ChatInstance : IDisposable
     public async Task HandleMessageAsync(ClientSendMessage sendMessage, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
+        _servicesLocator.LocalInputEventDispatcher.OnPauseSpeechRecognition();
         // TODO: Save into some storage
         _chatData.Messages.Add(new ChatMessageData
         {

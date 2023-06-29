@@ -12,6 +12,7 @@ public class SpeechRecognitionBackgroundTask : BackgroundService
         _speechRecognitionService = speechRecognitionService;
         speechRecognitionService.SpeechStart += (_, _) => localInputEventDispatcher.OnSpeechRecognitionStart();
         speechRecognitionService.SpeechEnd += (_, text) => localInputEventDispatcher.OnSpeechRecognitionEnd(text);
+        localInputEventDispatcher.PauseSpeechRecognition += (_, _) => speechRecognitionService.StopMicrophoneTranscription();
         localInputEventDispatcher.ReadyForSpeechRecognition += (_, _) => speechRecognitionService.StartMicrophoneTranscription();
     }
 

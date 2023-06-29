@@ -20,6 +20,7 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
     
     private VoskRecognizer? _recognizer;
     private WaveInEvent? _waveIn;
+    private bool _recording;
     private bool _speaking;
     
     public event EventHandler? SpeechStart;
@@ -68,16 +69,21 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
     
     public void StartMicrophoneTranscription()
     {
+        if (_recording) return;
         _waveIn?.StartRecording();
+        _recording = true;
     }
     
     public void StopMicrophoneTranscription()
     {
+        if (!_recording) return;
+        _recording = false;
         _waveIn?.StopRecording();
     }
     
     public void Dispose()
     {
+        StopMicrophoneTranscription();
         _waveIn?.Dispose();
         _recognizer?.Dispose();
     }
