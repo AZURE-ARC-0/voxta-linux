@@ -50,6 +50,7 @@ public class BotYamlFileRepository : YamlFileRepositoryBase, IBotRepository
     private static async ValueTask<List<BotDefinition>> LoadBotsAsync()
     {
         var bots = new List<BotDefinition>();
+        if (!Directory.Exists("Data/Bots")) return bots;
         foreach(var file in Directory.EnumerateFiles("Data/Bots", "*.yaml"))
         {
             var bot = await DeserializeFileAsync<BotDefinition>(file);
