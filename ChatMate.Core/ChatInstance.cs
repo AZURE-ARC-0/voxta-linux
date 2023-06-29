@@ -175,16 +175,25 @@ public class ChatInstance : IDisposable
 
     private void OnSpeechRecognitionStart(object? sender, EventArgs e)
     {
+        Task.Run(OnSpeechRecognitionStartAsync);
+    }
+
+    private async Task OnSpeechRecognitionStartAsync()
+    {
         _logger.LogInformation("Speech recognition started");
-        _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), CancellationToken.None);
+        await _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), CancellationToken.None);
     }
 
     private void OnSpeechRecognitionEnd(object? sender, string e)
     {
+        Task.Run(() => OnSpeechRecognitionEndAsync(e));
+    }
+
+    private async Task OnSpeechRecognitionEndAsync(string e)
+    {
         _logger.LogInformation("Speech recognition ended: {Text}", e);
-        _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage { Text = e }, CancellationToken.None);
-        #warning Ensure synchronous handling, using a queue or a lock
-        HandleMessageAsync(new ClientSendMessage { Text = e }, CancellationToken.None);
+        await _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage { Text = e }, CancellationToken.None);
+        await HandleMessageAsync(new ClientSendMessage { Text = e }, CancellationToken.None);
     }
 
     public void Dispose()
