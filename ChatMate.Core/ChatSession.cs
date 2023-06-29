@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using ChatMate.Abstractions.Model;
+﻿using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Common;
 using Microsoft.Extensions.Logging;
@@ -22,13 +21,6 @@ public class ChatSession
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<ChatSession>();
     }
-
-    private static string ProcessText(BotDefinition bot, ProfileSettings profile, string text) => text
-        .Replace("{{Now}}", DateTime.Now.ToString("f", CultureInfo.InvariantCulture))
-        .Replace("{{Bot}}", bot.Name)
-        .Replace("{{User}}", profile.Name)
-        .Replace("{{UserDescription}}", profile.Description?.Trim(' ', '\r', '\n') ?? "Not specified")
-        .Trim(' ', '\r', '\n');
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
@@ -48,8 +40,11 @@ public class ChatSession
 
                 switch (clientMessage)
                 {
-                    case ClientCreateChatMessage selectBotMessage:
-                        await CreateChatAsync(selectBotMessage, cancellationToken);
+                    case ClientStartChatMessage startChatMessage:
+                        await StartChatAsync(startChatMessage, cancellationToken);
+                        break;
+                    case ClientStopChatMessage:
+                        _chat = null;
                         break;
                     case ClientSendMessage sendMessage:
                         if (_chat == null)
@@ -75,32 +70,38 @@ public class ChatSession
         }
     }
 
-    private async Task CreateChatAsync(ClientCreateChatMessage createChatMessage, CancellationToken cancellationToken)
+    private async Task StartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(createChatMessage.BotId))
+        if (string.IsNullOrEmpty(startChatMessage.BotId))
         {
-            _logger.LogInformation("Cleared bot selection: {BotId}", createChatMessage.BotId);
-            return;
-        }
-
-        var bot = await _servicesFactory._bots.GetBotAsync(createChatMessage.BotId, cancellationToken);
-        
-        if (bot == null)
-        {
-            _logger.LogWarning("Received invalid bot selection: {BotId}", createChatMessage.BotId);
+            _logger.LogWarning("Received empty bot selection");
             await _tunnel.SendAsync(new ServerErrorMessage
             {
-                Message = $"Unknown bot {createChatMessage.BotId}"
+                Message = $"Unknown bot {startChatMessage.BotId}"
             }, cancellationToken);
             return;
         }
 
-        _logger.LogInformation("Selected bot: {BotId}", createChatMessage.BotId);
+        var bot = await _servicesFactory._bots.GetBotAsync(startChatMessage.BotId, cancellationToken);
+        
+        if (bot == null)
+        {
+            _logger.LogWarning("Received invalid bot selection: {BotId}", startChatMessage.BotId);
+            await _tunnel.SendAsync(new ServerErrorMessage
+            {
+                Message = $"Unknown bot {startChatMessage.BotId}"
+            }, cancellationToken);
+            return;
+        }
+
+        _logger.LogInformation("Selected bot: {BotId}", startChatMessage.BotId);
+
+        var profile = await _servicesFactory._profileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
+        var textProcessor = new ChatTextProcessor(bot, profile);
 
         var textGen = _servicesFactory._textGenFactory.Create(bot.Services.TextGen.Service);
         
         // TODO: Use a real chat data store, reload using auth
-        var profile = await _servicesFactory._profileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
         var chatData = new ChatData
         {
             Id = Crypto.CreateCryptographicallySecureGuid(),
@@ -108,15 +109,15 @@ public class ChatSession
             BotName = bot.Name,
             Preamble = new TextData
             {
-                Text = ProcessText(bot, profile, string.Join('\n', bot.Preamble))
+                Text = textProcessor.ProcessText(bot.Preamble)
             },
             Postamble = new TextData
             {
-                Text = ProcessText(bot, profile, string.Join('\n', bot.Postamble))
+                Text = textProcessor.ProcessText(bot.Postamble)
             },
             Greeting = new TextData
             {
-                Text = ProcessText(bot, profile, string.Join('\n', bot.Greeting))
+                Text = textProcessor.ProcessText(bot.Greeting)
             }
         };
         chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble.Text);
@@ -132,13 +133,13 @@ public class ChatSession
                     "{{Bot}}" => bot.Name,
                     _ => bot.Name
                 },
-                Text = ProcessText(bot, profile, message.Text)
+                Text = textProcessor.ProcessText(message.Text)
             };
             m.Tokens = textGen.GetTokenCount(m.Text);
             chatData.SampleMessages.Add(m);
         }
 
-        _chat = new ChatInstance(_tunnel, _loggerFactory, _servicesFactory, chatData, bot, createChatMessage.AudioPath);
+        _chat = new ChatInstance(_tunnel, _loggerFactory, _servicesFactory, chatData, bot, textProcessor, startChatMessage.AudioPath);
 
         await _chat.SendReadyAsync(cancellationToken);
     }

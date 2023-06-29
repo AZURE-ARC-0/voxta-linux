@@ -232,7 +232,7 @@
         
         function onBotSelect(botId) {
             setMessages([]);
-            const msg = JSON.stringify({ $type: "createChat", botId });
+            const msg = JSON.stringify({ $type: "startChat", botId });
             socket.send(msg);
         }
     

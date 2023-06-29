@@ -11,15 +11,24 @@ public class ChatInstance
     private readonly ChatServicesFactory _servicesFactory;
     private readonly ChatData _chatData;
     private readonly BotDefinition _bot;
+    private readonly ChatTextProcessor _chatTextProcessor;
     private readonly string? _audioPath;
     private readonly ILogger<ChatSession> _logger;
 
-    public ChatInstance(IChatSessionTunnel tunnel, ILoggerFactory loggerFactory, ChatServicesFactory servicesFactory, ChatData chatData, BotDefinition bot, string? audioPath)
+    public ChatInstance(
+        IChatSessionTunnel tunnel,
+        ILoggerFactory loggerFactory,
+        ChatServicesFactory servicesFactory,
+        ChatData chatData,
+        BotDefinition bot,
+        ChatTextProcessor chatTextProcessor,
+        string? audioPath)
     {
         _tunnel = tunnel;
         _servicesFactory = servicesFactory;
         _chatData = chatData;
         _bot = bot;
+        _chatTextProcessor = chatTextProcessor;
         _audioPath = audioPath;
         _logger = loggerFactory.CreateLogger<ChatSession>();
     }
@@ -33,7 +42,7 @@ public class ChatInstance
             Id = Guid.NewGuid(),
             User = _chatData.UserName,
             Timestamp = DateTimeOffset.UtcNow,
-            Text = sendMessage.Text,
+            Text = _chatTextProcessor.ProcessText(sendMessage.Text),
         });
 
         var textGen = _servicesFactory._textGenFactory.Create(_bot.Services.TextGen.Service);

@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
@@ -29,8 +30,14 @@ public class WebsocketChatSessionTunnel : IChatSessionTunnel
     {
         var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(_buffer), cancellationToken);
         if (result.CloseStatus.HasValue) return null;
-        var clientMessage = JsonSerializer.Deserialize<T>(_buffer.AsMemory(0, result.Count).Span, SerializeOptions);
-        return clientMessage;
+        try
+        {
+            return JsonSerializer.Deserialize<T>(_buffer.AsMemory(0, result.Count).Span, SerializeOptions);
+        }
+        catch (JsonException exc)
+        {
+            throw new JsonException($"Failed to deserialize: {Encoding.UTF8.GetString(_buffer.AsMemory(0, result.Count).Span)}", exc);
+        }
     }
 
     public async Task SendAsync<T>(T message, CancellationToken cancellationToken) where T : ServerMessage

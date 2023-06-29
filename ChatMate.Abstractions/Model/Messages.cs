@@ -3,7 +3,8 @@
 namespace ChatMate.Abstractions.Model;
 
 [Serializable]
-[JsonDerivedType(typeof(ClientCreateChatMessage), typeDiscriminator: "createChat")]
+[JsonDerivedType(typeof(ClientStartChatMessage), typeDiscriminator: "startChat")]
+[JsonDerivedType(typeof(ClientStopChatMessage), typeDiscriminator: "stopChat")]
 [JsonDerivedType(typeof(ClientSendMessage), typeDiscriminator: "send")]
 public abstract class ClientMessage
 {
@@ -16,7 +17,14 @@ public class ClientSendMessage : ClientMessage
 }
 
 [Serializable]
-public class ClientCreateChatMessage : ClientMessage
+public class ClientStartChatMessage : ClientMessage
+{
+    public required string BotId { get; init; }
+    public string? AudioPath { get; init; }
+}
+
+[Serializable]
+public class ClientStopChatMessage : ClientMessage
 {
     public required string BotId { get; init; }
     public string? AudioPath { get; init; }
