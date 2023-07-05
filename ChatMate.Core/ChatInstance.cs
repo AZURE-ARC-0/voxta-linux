@@ -13,6 +13,7 @@ public class ChatInstance : IDisposable
     private readonly BotDefinition _bot;
     private readonly ChatTextProcessor _chatTextProcessor;
     private readonly string? _audioPath;
+    private readonly bool _useServerSpeechRecognition;
     private readonly ILogger<ChatSession> _logger;
 
     public ChatInstance(
@@ -22,7 +23,8 @@ public class ChatInstance : IDisposable
         ChatData chatData,
         BotDefinition bot,
         ChatTextProcessor chatTextProcessor,
-        string? audioPath)
+        string? audioPath,
+        bool useServerSpeechRecognition)
     {
         _tunnel = tunnel;
         _servicesLocator = servicesLocator;
@@ -30,16 +32,20 @@ public class ChatInstance : IDisposable
         _bot = bot;
         _chatTextProcessor = chatTextProcessor;
         _audioPath = audioPath;
+        _useServerSpeechRecognition = useServerSpeechRecognition;
         _logger = loggerFactory.CreateLogger<ChatSession>();
-        
-        servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart += OnSpeechRecognitionStart;
-        servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd += OnSpeechRecognitionEnd;
+
+        if (useServerSpeechRecognition)
+        {
+            servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart += OnSpeechRecognitionStart;
+            servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd += OnSpeechRecognitionEnd;
+        }
     }
 
     public async Task HandleMessageAsync(ClientSendMessage sendMessage, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
-        _servicesLocator.LocalInputEventDispatcher.OnPauseSpeechRecognition();
+        if (_useServerSpeechRecognition) _servicesLocator.LocalInputEventDispatcher.OnPauseSpeechRecognition();
         // TODO: Save into some storage
         _chatData.Messages.Add(new ChatMessageData
         {
@@ -54,9 +60,11 @@ public class ChatInstance : IDisposable
         await SendReply(_chatData.BotName, gen, cancellationToken);
     }
     
-    public void HandleListenAsync()
+    public Task HandleListenAsync()
     {
+        if (!_useServerSpeechRecognition) return Task.CompletedTask;
         _servicesLocator.LocalInputEventDispatcher.OnReadyForSpeechRecognition();
+        return Task.CompletedTask;
     }
 
     private async Task SendReply(string botName, TextData gen, CancellationToken cancellationToken, string? id = null)
@@ -199,7 +207,10 @@ public class ChatInstance : IDisposable
 
     public void Dispose()
     {
-        _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart -= OnSpeechRecognitionStart;
-        _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd -= OnSpeechRecognitionEnd;
+        if (_useServerSpeechRecognition)
+        {
+            _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart -= OnSpeechRecognitionStart;
+            _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd -= OnSpeechRecognitionEnd;
+        }
     }
 }
