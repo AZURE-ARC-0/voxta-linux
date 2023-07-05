@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 
@@ -11,8 +12,38 @@ public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
     private static readonly JsonSerializerOptions SerializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
+        WriteIndented = false,
+        Converters = { new BooleanStringJsonConverter(), new NullableGuidJsonConverter() }
     };
+
+    private class BooleanStringJsonConverter : JsonConverter<bool>
+    {
+        public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var stringValue = reader.GetString();
+            return bool.TryParse(stringValue, out var value) && value;
+        }
+
+        public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
+        }
+    }
+
+    private class NullableGuidJsonConverter : JsonConverter<Guid?>
+    {
+        public override Guid? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            var stringValue = reader.GetString();
+            if (string.IsNullOrEmpty(stringValue)) return null;
+            return Guid.Parse(stringValue);
+        }
+
+        public override void Write(Utf8JsonWriter writer, Guid? value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
+        }
+    }
     
     private readonly byte[] _buffer = new byte[1024 * 4];
     

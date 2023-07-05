@@ -35,13 +35,13 @@ public class BotTemplateLoadedMessage : ServerMessage
 {
     public required string BotName { get; init; }
     public required string Preamble { get; init; }
-    public string? Postamble { get; init; }
-    public string? Greeting { get; init; }
-    public string? SampleMessages { get; init; }
+    public required string Postamble { get; init; }
+    public required string Greeting { get; init; }
+    public required string SampleMessages { get; init; }
     
     public required string TextGenService { get; init; }
-    public string? TtsService { get; init; }
-    public string? TtsVoice { get; init; }
+    public required string TtsService { get; init; }
+    public required string TtsVoice { get; init; }
 }
 
 [Serializable]

@@ -78,6 +78,8 @@ public class UserConnection
 
     private async Task LoadBotTemplateAsync(string botTemplateId, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Loading bot template {BotTemplateId}", botTemplateId);
+        
         var bot = await _servicesLocator.BotsRepository.GetBotAsync(botTemplateId, cancellationToken);
         if (bot == null)
         {
@@ -89,8 +91,8 @@ public class UserConnection
         {
             BotName = bot.Name,
             Preamble = bot.Preamble,
-            Postamble = bot.Postamble,
-            Greeting = bot.Greeting,
+            Postamble = bot.Postamble ?? "",
+            Greeting = bot.Greeting ?? "",
             SampleMessages = string.Join("\n", bot.SampleMessages.Select(x => $"{x.User}: {x.Text}")),
             TextGenService = bot.Services.TextGen.Service,
             TtsService = bot.Services.SpeechGen.Service,
