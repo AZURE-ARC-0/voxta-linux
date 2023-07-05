@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class UserConnection
+public class UserConnection : IDisposable
 {
     private readonly IUserConnectionTunnel _tunnel;
     private readonly ChatServicesLocator _servicesLocator;
@@ -41,9 +41,12 @@ public class UserConnection
                 switch (clientMessage)
                 {
                     case ClientStartChatMessage startChatMessage:
+                        _chat?.Dispose();
+                        _chat = null;
                         await StartChatAsync(startChatMessage, cancellationToken);
                         break;
                     case ClientStopChatMessage:
+                        _chat?.Dispose();
                         _chat = null;
                         break;
                     case ClientSendMessage sendMessage:
@@ -167,5 +170,10 @@ public class UserConnection
         );
 
         await _chat.SendReadyAsync(cancellationToken);
+    }
+
+    public void Dispose()
+    {
+        _chat?.Dispose();
     }
 }

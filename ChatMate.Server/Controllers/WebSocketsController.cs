@@ -29,7 +29,7 @@ public class WebSocketsController : ControllerBase
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
         var tunnel = new WebsocketUserConnectionTunnel(webSocket);
-        var chatSession = _chatInstanceFactory.Create(tunnel);
+        using var chatSession = _chatInstanceFactory.Create(tunnel);
         _logger.LogInformation("WebSocket connection established");
         try
         {
@@ -48,7 +48,7 @@ public class WebSocketsController : ControllerBase
                 _logger.LogInformation("WebSocket connection aborted");
                 return;
             }
-            
+
             _logger.LogWarning(exc, "Unexpected websocket exception");
         }
         catch (Exception exc)
