@@ -47,14 +47,14 @@
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = window.SpeechRecognition ? new SpeechRecognition() : null;
     
-    const Header = ({ animation, botsList, onBotSelect }) => {
+    const Header = ({ animation, botTemplatesList, onBotTemplateSelect }) => {
         return () => html`
             <div class="d-flex justify-content-between align-items-center mb-3 p-2">
                 <div class="d-flex align-items-center">
                     <b>Bot:</b>
-                    <select class="ms-2 form-select" onChange=${e => onBotSelect(e.target.value)}>
+                    <select class="ms-2 form-select" onChange=${e => onBotTemplateSelect(e.target.value)}>
                         <option value="">Select Bot</option>
-                        <${For} each=${botsList}>
+                        <${For} each=${botTemplatesList}>
                             ${bot => html`
                                 <option value=${bot.id}>${bot.name} - ${bot.description}</option>
                             `}
@@ -167,8 +167,8 @@
         const [ready, setReady] = createSignal(false);
         const [messages, setMessages] = createSignal([]);
         const [animation, setAnimation] = createSignal('idle');
-        const [botsList, setBotsList] = createSignal([]);
-        const [useServerSpeechRecognition, setUseServerSpeechRecognition] = createSignal(true);
+        const [botTemplatesList, setBotTemplatesList] = createSignal([]);
+        const [useServerSpeechRecognition, _] = createSignal(true);
         
         let thinkingSpeechUrls = [];
         
@@ -206,7 +206,10 @@
                     setReady(true);
                     break;
                 case 'welcome':
-                    setBotsList(data.bots);
+                    setBotTemplatesList(data.botTemplates);
+                    break;
+                case 'botTemplateLoaded':
+                    onBotTemplateLoaded(data);
                     break;
                 default:
                     console.error('unknown message type', data)
@@ -241,9 +244,22 @@
             connect();
         });
         
-        function onBotSelect(botId) {
+        function onBotTemplateSelect(botTemplateId) {
             setMessages([]);
-            const msg = JSON.stringify({ $type: "startChat", botId, useServerSpeechRecognition: useServerSpeechRecognition() });
+            const msg = JSON.stringify({
+                $type: "loadBotTemplate",
+                botTemplateId
+            });
+            socket.send(msg);
+        }
+        
+        function onBotTemplateLoaded(template) {
+            setMessages([]);
+            const msg = JSON.stringify({
+                ...template, 
+                $type: "startChat",
+                useServerSpeechRecognition: useServerSpeechRecognition()
+            });
             socket.send(msg);
         }
     
@@ -260,7 +276,7 @@
         
         return () => html`
             <div class="container parent-container p-2">
-                <${Header} animation=${animation()} botsList=${botsList()} onBotSelect=${onBotSelect} />
+                <${Header} animation=${animation()} botTemplatesList=${botTemplatesList()} onBotTemplateSelect=${onBotTemplateSelect} />
                 <${Chat} messages=${messages()} />
                 <${MessageInput} onSend=${onSend} enabled=${ready()}, useServerSpeechRecognition=${useServerSpeechRecognition()} />
             </div>

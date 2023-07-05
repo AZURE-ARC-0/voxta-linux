@@ -24,14 +24,18 @@ public class BotDefinition
     public class ServicesMap
     {
         public required ServiceMap TextGen { get; init; }
-        public required ServiceMap SpeechGen { get; init; }
-        public required ServiceMap AnimSelect { get; init; }
+        public required VoiceServiceMap SpeechGen { get; init; }
     }
 
     [Serializable]
     public class ServiceMap
     {
         public required string Service { get; init; }
-        public Dictionary<string, string> Settings { get; init; } = new Dictionary<string, string>();
+    }
+    
+    [Serializable]
+    public class VoiceServiceMap : ServiceMap
+    {
+        public required string Voice { get; init; }
     }
 }

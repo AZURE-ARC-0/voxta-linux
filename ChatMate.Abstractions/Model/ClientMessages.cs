@@ -3,6 +3,7 @@
 namespace ChatMate.Abstractions.Model;
 
 [Serializable]
+[JsonDerivedType(typeof(ClientLoadBotTemplateMessage), typeDiscriminator: "loadBotTemplate")]
 [JsonDerivedType(typeof(ClientStartChatMessage), typeDiscriminator: "startChat")]
 [JsonDerivedType(typeof(ClientStopChatMessage), typeDiscriminator: "stopChat")]
 [JsonDerivedType(typeof(ClientSendMessage), typeDiscriminator: "send")]
@@ -18,11 +19,27 @@ public class ClientSendMessage : ClientMessage
 }
 
 [Serializable]
+public class ClientLoadBotTemplateMessage : ClientMessage
+{
+    public required string BotTemplateId { get; init; }
+}
+
+[Serializable]
 public class ClientStartChatMessage : ClientMessage
 {
-    public required string BotId { get; init; }
+    public Guid? ChatId { get; init; }
     public string? AudioPath { get; init; }
     public bool UseServerSpeechRecognition { get; init; }
+    
+    public required string BotName { get; init; }
+    public required string Preamble { get; init; }
+    public string? Postamble { get; init; }
+    public string? Greeting { get; init; }
+    public string? SampleMessages { get; init; }
+    
+    public required string TextGenService { get; init; }
+    public string? TtsService { get; init; }
+    public string? TtsVoice { get; init; }
 }
 
 [Serializable]

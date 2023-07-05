@@ -14,8 +14,8 @@ public class ChatSessionFactory
         _loggerFactory = loggerFactory;
     }
     
-    public ChatSession Create(IChatSessionTunnel tunnel)
+    public UserConnection Create(IUserConnectionTunnel tunnel)
     {
-        return new ChatSession(tunnel, _loggerFactory, _servicesLocator);
+        return new UserConnection(tunnel, _loggerFactory, _servicesLocator);
     }
 }

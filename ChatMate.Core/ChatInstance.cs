@@ -7,33 +7,33 @@ namespace ChatMate.Core;
 
 public class ChatInstance : IDisposable
 {
-    private readonly IChatSessionTunnel _tunnel;
+    private readonly IUserConnectionTunnel _tunnel;
     private readonly ChatServicesLocator _servicesLocator;
-    private readonly ChatData _chatData;
-    private readonly BotDefinition _bot;
+    private readonly ChatSessionData _chatSessionData;
+    private readonly ClientStartChatMessage _startChatMessage;
     private readonly ChatTextProcessor _chatTextProcessor;
     private readonly string? _audioPath;
     private readonly bool _useServerSpeechRecognition;
-    private readonly ILogger<ChatSession> _logger;
+    private readonly ILogger<UserConnection> _logger;
 
     public ChatInstance(
-        IChatSessionTunnel tunnel,
+        IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
         ChatServicesLocator servicesLocator,
-        ChatData chatData,
-        BotDefinition bot,
+        ChatSessionData chatSessionData,
+        ClientStartChatMessage startChatMessage,
         ChatTextProcessor chatTextProcessor,
         string? audioPath,
         bool useServerSpeechRecognition)
     {
         _tunnel = tunnel;
         _servicesLocator = servicesLocator;
-        _chatData = chatData;
-        _bot = bot;
+        _chatSessionData = chatSessionData;
+        _startChatMessage = startChatMessage;
         _chatTextProcessor = chatTextProcessor;
         _audioPath = audioPath;
         _useServerSpeechRecognition = useServerSpeechRecognition;
-        _logger = loggerFactory.CreateLogger<ChatSession>();
+        _logger = loggerFactory.CreateLogger<UserConnection>();
 
         if (useServerSpeechRecognition)
         {
@@ -47,17 +47,17 @@ public class ChatInstance : IDisposable
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
         if (_useServerSpeechRecognition) _servicesLocator.LocalInputEventDispatcher.OnPauseSpeechRecognition();
         // TODO: Save into some storage
-        _chatData.Messages.Add(new ChatMessageData
+        _chatSessionData.Messages.Add(new ChatMessageData
         {
             Id = Guid.NewGuid(),
-            User = _chatData.UserName,
+            User = _chatSessionData.UserName,
             Timestamp = DateTimeOffset.UtcNow,
             Text = _chatTextProcessor.ProcessText(sendMessage.Text),
         });
 
-        var textGen = _servicesLocator.TextGenFactory.Create(_bot.Services.TextGen.Service);
-        var gen = await textGen.GenerateReplyAsync(_chatData);
-        await SendReply(_chatData.BotName, gen, cancellationToken);
+        var textGen = _servicesLocator.TextGenFactory.Create(_startChatMessage.TextGenService);
+        var gen = await textGen.GenerateReplyAsync(_chatSessionData);
+        await SendReply(_chatSessionData.BotName, gen, cancellationToken);
     }
     
     public Task HandleListenAsync()
@@ -69,9 +69,8 @@ public class ChatInstance : IDisposable
 
     private async Task SendReply(string botName, TextData gen, CancellationToken cancellationToken, string? id = null)
     {
-        var chatData = _chatData;
-        var bot = _bot;
-        if (chatData == null || bot == null) throw new NullReferenceException("No active chat");
+        var chatData = _chatSessionData;
+        if (chatData == null) throw new NullReferenceException("No active chat");
         
         var reply = new ChatMessageData
         {
@@ -85,7 +84,7 @@ public class ChatInstance : IDisposable
         // TODO: Save into some storage
         chatData.Messages.Add(reply);
 
-        var speechTask = CreateSpeech(gen.Text, $"msg_{_bot.Id}_{id ?? _chatData.Id.ToString()}_{reply.Id}", out var speechUrl);
+        var speechTask = CreateSpeech(gen.Text, $"msg_{_chatSessionData.ChatId.ToString()}_{reply.Id}", out var speechUrl);
 
         await _tunnel.SendAsync(new ServerReplyMessage
         {
@@ -98,29 +97,40 @@ public class ChatInstance : IDisposable
             Url = speechUrl,
         }, cancellationToken);
 
+        #warning Re-enable this but not as a bot option
+        /*
         if (_servicesLocator.AnimSelectFactory.TryCreate(bot.Services.AnimSelect.Service, out var animSelect))
         {
             var animation = await animSelect.SelectAnimationAsync(chatData);
             _logger.LogInformation("Selected animation: {Animation}", animation);
             await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }
+        */
     }
 
     private Task CreateSpeech(string text, string id, out string speechUrl)
     {
+        var ttsService = _startChatMessage.TtsService;
+        var ttsVoice = _startChatMessage.TtsVoice;
+        if (string.IsNullOrEmpty(ttsService) || string.IsNullOrEmpty(ttsVoice))
+        {
+            speechUrl = "";
+            return Task.CompletedTask;
+        }
+
         Task speechTask;
         if (_audioPath != null)
         {
-            var speechGen = _servicesLocator.TextToSpeechFactory.Create(_bot.Services.SpeechGen.Service);
+            var speechGen = _servicesLocator.TextToSpeechFactory.Create(ttsService);
             speechUrl = Path.Combine(_audioPath, $"{id}.wav");
             if (!File.Exists(speechUrl))
             {
                 _servicesLocator.TemporaryFileCleanup.MarkForDeletion(speechUrl);
                 speechTask = speechGen.GenerateSpeechAsync(new SpeechRequest
                 {
-                    Service = _bot.Services.SpeechGen.Service,
+                    Service = ttsService,
                     Text = text,
-                    Voice = _bot.Services.SpeechGen.Settings["Voice"]
+                    Voice = ttsVoice,
                 }, new FileSpeechTunnel(speechUrl), "wav");
             }
             else
@@ -130,20 +140,20 @@ public class ChatInstance : IDisposable
         }
         else
         {
-            speechUrl = CreateSpeechUrl(Crypto.CreateCryptographicallySecureGuid().ToString(), text);
+            speechUrl = CreateSpeechUrl(Crypto.CreateCryptographicallySecureGuid().ToString(), text, ttsService, ttsVoice);
             speechTask = Task.CompletedTask;
         }
 
         return speechTask;
     }
 
-    private string CreateSpeechUrl(string id, string text)
+    private string CreateSpeechUrl(string id, string text, string ttsService, string ttsVoice)
     {
         _servicesLocator.PendingSpeech.Push(id, new SpeechRequest
         {
-            Service = _bot.Services.SpeechGen.Service,
+            Service = ttsService,
             Text = text,
-            Voice = _bot.Services.SpeechGen.Settings.TryGetValue("Voice", out var voice) ? voice : "Default"
+            Voice = ttsVoice,
         });
         var speechUrl = $"/tts/{id}.wav";
         return speechUrl;
@@ -156,6 +166,8 @@ public class ChatInstance : IDisposable
             Directory.CreateDirectory(_audioPath);
         }
 
+        #warning Bring back thinking speech
+        /*
         var thinkingSpeechUrls = new string[_bot.ThinkingSpeech?.Length ?? 0];
         if (_bot.ThinkingSpeech != null)
         {
@@ -167,18 +179,18 @@ public class ChatInstance : IDisposable
                 i++;
             }
         }
+        */
 
         await _tunnel.SendAsync(new ServerReadyMessage
         {
-            ChatId = _chatData.Id,
-            BotId = _bot.Name,
-            ThinkingSpeechUrls = thinkingSpeechUrls,
+            ChatId = _chatSessionData.ChatId,
+            // ThinkingSpeechUrls = thinkingSpeechUrls,
                 
         }, cancellationToken);
 
-        if (_chatData.Greeting.HasValue)
+        if (_chatSessionData.Greeting != null)
         {
-            await SendReply(_chatData.BotName, _chatData.Greeting, cancellationToken);
+            await SendReply(_chatSessionData.BotName, _chatSessionData.Greeting, cancellationToken);
         }
     }
 

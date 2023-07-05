@@ -102,23 +102,12 @@ public class PagesController : Controller
                     TextGen = new BotDefinition.ServiceMap
                     {
                         Service = "OpenAI",
-                        Settings = new Dictionary<string, string>
-                        {
-                            { "Model", "gpt-3.5-turbo" }
-                        }
                     },
-                    SpeechGen = new BotDefinition.ServiceMap
+                    SpeechGen = new BotDefinition.VoiceServiceMap
                     {
                         Service = "NovelAI",
-                        Settings = new Dictionary<string, string>
-                        {
-                            { "Voice", "Naia" }
-                        }
+                        Voice = "Naia",
                     },
-                    AnimSelect = new BotDefinition.ServiceMap
-                    {
-                        Service = "None",
-                    }
                 }
             };
         }

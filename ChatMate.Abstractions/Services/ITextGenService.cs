@@ -4,6 +4,6 @@ namespace ChatMate.Abstractions.Services;
 
 public interface ITextGenService
 {
-    ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData);
+    ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData);
     int GetTokenCount(string message);
 }

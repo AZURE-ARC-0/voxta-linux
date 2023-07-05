@@ -80,18 +80,18 @@ public class NovelAITextGenClient : ITextGenService
         };
     }
 
-    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
+    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
 
         // TODO: count tokens: https://novelai.net/tokenizer
         // TODO: Move the settings to appsettings
-        var chatMessages = chatData.GetMessages();
+        var chatMessages = chatSessionData.GetMessages();
         var input = $"""
-        Scenario: {chatData.Preamble.Text}
+        Scenario: {chatSessionData.Preamble.Text}
         {string.Join("\n", chatMessages.Select(x => $"{x.User}: \"{x.Text}\""))}
-        {chatData.BotName}: \"
+        {chatSessionData.BotName}: \"
         """.ReplaceLineEndings("\n");
         var body = new
         {

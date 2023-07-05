@@ -6,10 +6,7 @@ Services:
     Service: NovelAI
   SpeechGen:
     Service: NovelAI
-    Settings:
-      Voice: Naia
-  AnimSelect:
-    Service: None
+    Voice: Naia
 Preamble: |
   [ Title: Conversation between {{User}} and {{Bot}}, Genre: Adult ]
   [ Current date and time: {{Now}} ]

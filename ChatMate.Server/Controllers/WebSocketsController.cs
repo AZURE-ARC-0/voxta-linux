@@ -28,7 +28,7 @@ public class WebSocketsController : ControllerBase
         }
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-        var tunnel = new WebsocketChatSessionTunnel(webSocket);
+        var tunnel = new WebsocketUserConnectionTunnel(webSocket);
         var chatSession = _chatInstanceFactory.Create(tunnel);
         _logger.LogInformation("WebSocket connection established");
         try

@@ -6,10 +6,7 @@ Services:
     Service: OpenAI
   SpeechGen:
     Service: NovelAI
-    Settings:
-      Voice: Naia
-  AnimSelect:
-    Service: OpenAI
+    Voice: Naia
 Preamble: |
   You are roleplaying as a virtual companion named {{Bot}} that exists in virtual reality. 
   {{User}} can virtually interact with you and touch you. You have a voice.

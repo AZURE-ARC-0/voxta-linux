@@ -2,7 +2,7 @@
 
 namespace ChatMate.Abstractions.Network;
 
-public interface IChatSessionTunnel
+public interface IUserConnectionTunnel
 {
     bool Closed { get; }
     Task<T?> ReceiveAsync<T>(CancellationToken cancellationToken) where T : ClientMessage;

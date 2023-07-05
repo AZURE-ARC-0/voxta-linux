@@ -51,27 +51,27 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
-    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatData chatData)
+    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData)
     {
         var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
         
-        var totalTokens = chatData.Preamble.Tokens + 4;
-        if (!string.IsNullOrEmpty(chatData.Postamble.Text))
-            totalTokens += chatData.Postamble.Tokens + 4;
+        var totalTokens = chatSessionData.Preamble.Tokens + 4;
+        if (!string.IsNullOrEmpty(chatSessionData.Postamble.Text))
+            totalTokens += chatSessionData.Postamble.Tokens + 4;
         
-        var messages = new List<object> { new { role = "system", content = chatData.Preamble.Text } };
-        var chatMessages = chatData.GetMessages();
+        var messages = new List<object> { new { role = "system", content = chatSessionData.Preamble.Text } };
+        var chatMessages = chatSessionData.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= 4096) break;
-            var role = message.User == chatData.BotName ? "assistant" : "user";
+            var role = message.User == chatSessionData.BotName ? "assistant" : "user";
             messages.Insert(1, new { role, content = message.Text });
         }
 
-        if (!string.IsNullOrEmpty(chatData.Postamble.Text))
-            messages.Add(new { role = "system", content = chatData.Postamble.Text });
+        if (!string.IsNullOrEmpty(chatSessionData.Postamble.Text))
+            messages.Add(new { role = "system", content = chatSessionData.Postamble.Text });
 
         tokenizePerf.Pause();
 
@@ -92,11 +92,11 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         };
     }
 
-    public async ValueTask<string> SelectAnimationAsync(ChatData chatData)
+    public async ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData)
     {
-        var sb = new StringBuilder(chatData.Preamble.Text);
+        var sb = new StringBuilder(chatSessionData.Preamble.Text);
         sb.AppendLine();
-        foreach (var message in chatData.Messages.TakeLast(4))
+        foreach (var message in chatSessionData.Messages.TakeLast(4))
         {
             sb.AppendLine($"{message.User}: {message.Text}");
         }
@@ -105,7 +105,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         ---
         Available animations: smile, frown, pensive, excited, sad, curious, afraid, angry, surprised, laugh, cry, idle
         ---
-        Write the animation {chatData.BotName} should play.
+        Write the animation {chatSessionData.BotName} should play.
         """);
         var messages = new List<object>
         {

@@ -1,28 +1,26 @@
 ﻿namespace ChatMate.Abstractions.Model;
 
-public interface IReadOnlyChatData
+public interface IReadOnlyChatSessionData
 {
-    public string BotName { get; }
     public string UserName { get; }
+    public string BotName { get; }
     public TextData Preamble { get; }
     public TextData Postamble { get; }
-    public TextData Greeting { get; }
+    public TextData? Greeting { get; }
 
     public IReadOnlyList<ChatMessageData> GetSampleMessages();
     public IReadOnlyList<ChatMessageData> GetMessages();
 }
 
 [Serializable]
-public class ChatData : IReadOnlyChatData
+public class ChatSessionData : IReadOnlyChatSessionData
 {
-    public Guid Id { get; init; }
-    
+    public Guid ChatId { get; init; }
+    public required string UserName { get; init; }
     public required string BotName { get; init; }
-    public string UserName { get; init; } = "User";
-
     public required TextData Preamble { get; init; }
     public required TextData Postamble { get; init; }
-    public required TextData Greeting { get; init; }
+    public TextData? Greeting { get; init; }
 
     public IReadOnlyList<ChatMessageData> GetSampleMessages() => Messages.AsReadOnly();
     public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();

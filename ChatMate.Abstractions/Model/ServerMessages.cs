@@ -4,6 +4,7 @@ namespace ChatMate.Abstractions.Model;
 
 [Serializable]
 [JsonDerivedType(typeof(ServerWelcomeMessage), typeDiscriminator: "welcome")]
+[JsonDerivedType(typeof(BotTemplateLoadedMessage), typeDiscriminator: "botTemplateLoaded")]
 [JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
 [JsonDerivedType(typeof(ServerSpeechRecognitionStartMessage), typeDiscriminator: "speechRecognitionStart")]
@@ -18,10 +19,10 @@ public abstract class ServerMessage
 [Serializable]
 public class ServerWelcomeMessage : ServerMessage
 {
-    public required Bot[] Bots { get; set; }
+    public required BotTemplate[] BotTemplates { get; set; }
     
     [Serializable]
-    public class Bot
+    public class BotTemplate
     {
         public required Guid Id { get; init; }
         public required string Name { get; init; }
@@ -30,11 +31,24 @@ public class ServerWelcomeMessage : ServerMessage
 }
 
 [Serializable]
+public class BotTemplateLoadedMessage : ServerMessage
+{
+    public required string BotName { get; init; }
+    public required string Preamble { get; init; }
+    public string? Postamble { get; init; }
+    public string? Greeting { get; init; }
+    public string? SampleMessages { get; init; }
+    
+    public required string TextGenService { get; init; }
+    public string? TtsService { get; init; }
+    public string? TtsVoice { get; init; }
+}
+
+[Serializable]
 public class ServerReadyMessage : ServerMessage
 {
     public required Guid ChatId { get; init; }
-    public required string BotId { get; init; }
-    public required string[] ThinkingSpeechUrls { get; init; }
+    // public required string[] ThinkingSpeechUrls { get; init; }
 }
 
 [Serializable]

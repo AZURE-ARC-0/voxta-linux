@@ -6,7 +6,7 @@ using ChatMate.Abstractions.Network;
 
 namespace ChatMate.Server.Chat;
 
-public class WebsocketChatSessionTunnel : IChatSessionTunnel
+public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
 {
     private static readonly JsonSerializerOptions SerializeOptions = new()
     {
@@ -21,7 +21,7 @@ public class WebsocketChatSessionTunnel : IChatSessionTunnel
 
     public bool Closed => _webSocket.CloseStatus.HasValue;
 
-    public WebsocketChatSessionTunnel(WebSocket webSocket)
+    public WebsocketUserConnectionTunnel(WebSocket webSocket)
     {
         _webSocket = webSocket;
     }

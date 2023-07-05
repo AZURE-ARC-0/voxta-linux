@@ -8,10 +8,10 @@ public class BotYamlFileRepository : YamlFileRepositoryBase, IBotRepository
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private List<BotDefinition>? _bots;
     
-    public async Task<ServerWelcomeMessage.Bot[]> GetBotsListAsync(CancellationToken cancellationToken)
+    public async Task<ServerWelcomeMessage.BotTemplate[]> GetBotsListAsync(CancellationToken cancellationToken)
     {
         var bots = await LoadBotsCheckAsync(cancellationToken);
-        return bots.Select(b => new ServerWelcomeMessage.Bot
+        return bots.Select(b => new ServerWelcomeMessage.BotTemplate
         {
             Id = b.Id,
             Name = b.Name,
