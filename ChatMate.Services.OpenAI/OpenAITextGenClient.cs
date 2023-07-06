@@ -124,7 +124,8 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         var body = new
         {
             model = settings.Model,
-            messages
+            messages,
+            max_tokens = 120,
         };
 
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");

@@ -64,9 +64,9 @@ public class UserConnection : IDisposable
                         break;
                 }
             }
-            catch (TaskCanceledException exc)
+            catch (TaskCanceledException)
             {
-                _logger.LogWarning(exc, "Disconnect by cancellation");
+                _logger.LogInformation("Disconnected by cancellation");
             }
             catch (Exception exc)
             {

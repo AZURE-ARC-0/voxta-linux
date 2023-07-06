@@ -37,6 +37,10 @@ public class WebSocketsController : ControllerBase
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             _logger.LogInformation("WebSocket connection closed");
         }
+        catch (TaskCanceledException)
+        {
+            _logger.LogInformation("Socket closed by cancellation");
+        }
         catch (SocketException exc)
         {
             _logger.LogWarning(exc, "Unexpected socket exception");
