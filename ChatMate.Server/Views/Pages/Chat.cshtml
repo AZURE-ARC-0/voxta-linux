@@ -198,7 +198,7 @@
                     break;
                 case 'speech':
                     playAudio(data.url, () => {
-                        const msg = JSON.stringify({ $type: "listen" });
+                        const msg = JSON.stringify({ $type: "speechPlaybackComplete" });
                         socket.send(msg);
                     });
                     break;

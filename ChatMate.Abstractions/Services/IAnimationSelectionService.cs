@@ -4,5 +4,5 @@ namespace ChatMate.Abstractions.Services;
 
 public interface IAnimationSelectionService
 {
-    ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData);
+    ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken);
 }

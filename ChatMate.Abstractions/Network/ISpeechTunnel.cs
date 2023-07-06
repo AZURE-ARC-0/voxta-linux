@@ -2,6 +2,6 @@
 
 public interface ISpeechTunnel
 {
-    Task ErrorAsync(string message);
-    Task SendAsync(byte[] bytes, string contentType);
+    Task ErrorAsync(string message, CancellationToken cancellationToken);
+    Task SendAsync(byte[] bytes, string contentType, CancellationToken cancellationToken);
 }

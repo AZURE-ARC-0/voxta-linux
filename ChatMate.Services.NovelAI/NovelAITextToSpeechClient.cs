@@ -33,7 +33,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
     }
 
-    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension)
+    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
@@ -48,7 +48,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         };
         var uriBuilder = new UriBuilder(new Uri(_httpClient.BaseAddress!, "/ai/generate-voice"))
         {
-            Query = await new FormUrlEncodedContent(querystring).ReadAsStringAsync()
+            Query = await new FormUrlEncodedContent(querystring).ReadAsStringAsync(cancellationToken)
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
@@ -56,23 +56,23 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         if (string.IsNullOrEmpty(settings.Token)) throw new AuthenticationException("NovelAI token is missing.");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.Token));
         var ttsPerf = _performanceMetrics.Start("NovelAI.TextToSpeech");
-        using var audioResponse = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+        using var audioResponse = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
         
         if (!audioResponse.IsSuccessStatusCode)
         {
-            var reason = await audioResponse.Content.ReadAsStringAsync();
+            var reason = await audioResponse.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogError("Failed to generate speech: {Reason}", reason);
-            await tunnel.ErrorAsync($"Unable to generate speech: {reason}");
+            await tunnel.ErrorAsync($"Unable to generate speech: {reason}", cancellationToken);
             return;
         }
 
         // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
         string contentType;
         var tmp = Path.GetTempFileName();
-        var bytes = await audioResponse.Content.ReadAsByteArrayAsync();
+        var bytes = await audioResponse.Content.ReadAsByteArrayAsync(cancellationToken);
         ttsPerf.Done();
         var audioConvPerf = _performanceMetrics.Start("NovelAI.AudioConversion");
-        await File.WriteAllBytesAsync(tmp, bytes);
+        await File.WriteAllBytesAsync(tmp, bytes, cancellationToken);
         try
         {
             await using var reader = new MediaFoundationReader(tmp);
@@ -101,6 +101,6 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         }
         audioConvPerf.Done();
 
-        await tunnel.SendAsync(bytes, contentType);
+        await tunnel.SendAsync(bytes, contentType, cancellationToken);
     }
 }

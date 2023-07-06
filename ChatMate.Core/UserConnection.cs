@@ -52,9 +52,8 @@ public class UserConnection : IDisposable
                     case ClientSendMessage sendMessage:
                         await (_chat?.HandleMessageAsync(sendMessage, cancellationToken) ?? SendError("Please select a bot first.", cancellationToken));
                         break;
-                    #warning Better name
-                    case ClientListenMessage:
-                        await (_chat?.HandleListenAsync() ?? SendError("Please select a bot first.", cancellationToken));
+                    case ClientSpeechPlaybackCompleteMessage:
+                        await (_chat?.HandleSpeechPlaybackCompleteAsync() ?? SendError("Please select a bot first.", cancellationToken));
                         break;
                     case ClientLoadBotTemplateMessage loadBotTemplateMessage:
                         await LoadBotTemplateAsync(loadBotTemplateMessage.BotTemplateId, cancellationToken);

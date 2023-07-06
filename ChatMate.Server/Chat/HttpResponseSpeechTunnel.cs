@@ -12,19 +12,19 @@ public class HttpResponseSpeechTunnel : ISpeechTunnel
         _response = response;
     }
     
-    public async Task ErrorAsync(string message)
+    public async Task ErrorAsync(string message, CancellationToken cancellationToken)
     {
         _response.StatusCode = (int)HttpStatusCode.InternalServerError;
         _response.ContentType = "text/plain";
-        await _response.WriteAsync(message);
+        await _response.WriteAsync(message, cancellationToken: cancellationToken);
     }
 
-    public async Task SendAsync(byte[] bytes, string contentType)
+    public async Task SendAsync(byte[] bytes, string contentType, CancellationToken cancellationToken)
     {
         _response.StatusCode = (int)HttpStatusCode.OK;
         _response.ContentType = contentType;
         _response.Headers.ContentDisposition = "attachment";
         _response.ContentLength = bytes.Length;
-        await _response.BodyWriter.WriteAsync(bytes);
+        await _response.BodyWriter.WriteAsync(bytes, cancellationToken);
     }
 }

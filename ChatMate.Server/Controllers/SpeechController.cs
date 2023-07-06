@@ -15,17 +15,18 @@ public class SpeechController : ControllerBase
         [FromRoute] string id,
         [FromRoute] string extension,
         [FromServices] ISelectorFactory<ITextToSpeechService> speechGenFactory,
-        [FromServices] PendingSpeechManager pendingSpeech
+        [FromServices] PendingSpeechManager pendingSpeech,
+        CancellationToken cancellationToken
     )
     {
         if (!pendingSpeech.TryGetValue(id, out var speechRequest))
         {
             Response.StatusCode = (int)HttpStatusCode.BadRequest;
             Response.ContentType = "text/plain";
-            await Response.WriteAsync($"No pending speech for {id}");
+            await Response.WriteAsync($"No pending speech for {id}", cancellationToken: cancellationToken);
             return;
         }
 
-        await speechGenFactory.Create(speechRequest.Service).GenerateSpeechAsync(speechRequest, new HttpResponseSpeechTunnel(Response), extension);
+        await speechGenFactory.Create(speechRequest.Service).GenerateSpeechAsync(speechRequest, new HttpResponseSpeechTunnel(Response), extension, cancellationToken);
     }
 }

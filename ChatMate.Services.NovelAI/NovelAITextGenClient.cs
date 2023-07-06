@@ -80,7 +80,7 @@ public class NovelAITextGenClient : ITextGenService
         };
     }
 
-    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData)
+    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");

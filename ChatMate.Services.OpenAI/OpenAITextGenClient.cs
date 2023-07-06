@@ -51,7 +51,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
-    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData)
+    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
         
@@ -76,7 +76,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         tokenizePerf.Pause();
 
         var textGenPerf = _performanceMetrics.Start("OpenAI.TextGen");
-        var reply = await SendChatRequestAsync(messages);
+        var reply = await SendChatRequestAsync(messages, cancellationToken);
         textGenPerf.Done();
         
         var sanitized = _sanitizer.Sanitize(reply);
@@ -92,7 +92,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         };
     }
 
-    public async ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData)
+    public async ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var sb = new StringBuilder(chatSessionData.Preamble.Text);
         sb.AppendLine();
@@ -113,11 +113,11 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
             new { role = "user", content = sb.ToString() }
         };
         
-        var animation = await SendChatRequestAsync(messages);
+        var animation = await SendChatRequestAsync(messages, cancellationToken);
         return animation.Trim('\'', '"', '.', '[', ']').ToLowerInvariant();
     }
 
-    private async Task<string> SendChatRequestAsync(List<object> messages)
+    private async Task<string> SendChatRequestAsync(List<object> messages, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<OpenAISettings>("OpenAI");
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
@@ -131,12 +131,13 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
         // TODO: Make a request instead
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
-        var response = await _httpClient.PostAsync("/v1/chat/completions", content);
+        var response = await _httpClient.PostAsync("/v1/chat/completions", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw new OpenAIException(await response.Content.ReadAsStringAsync());
+            throw new OpenAIException(await response.Content.ReadAsStringAsync(cancellationToken));
 
-        var apiResponse = (JsonElement?)await JsonSerializer.DeserializeAsync<dynamic>(await response.Content.ReadAsStreamAsync());
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var apiResponse = (JsonElement?)await JsonSerializer.DeserializeAsync<dynamic>(stream, cancellationToken: cancellationToken);
 
         if (apiResponse == null) throw new NullReferenceException("OpenAI API response was null");
 

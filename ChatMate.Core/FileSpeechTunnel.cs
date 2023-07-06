@@ -11,13 +11,13 @@ public class FileSpeechTunnel : ISpeechTunnel
         _path = path;
     }
     
-    public Task ErrorAsync(string message)
+    public Task ErrorAsync(string message, CancellationToken cancellationToken)
     {
         throw new Exception(message);
     }
 
-    public Task SendAsync(byte[] bytes, string contentType)
+    public Task SendAsync(byte[] bytes, string contentType, CancellationToken cancellationToken)
     {
-        return File.WriteAllBytesAsync(_path, bytes);
+        return File.WriteAllBytesAsync(_path, bytes, cancellationToken);
     }
 }

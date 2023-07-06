@@ -5,5 +5,5 @@ namespace ChatMate.Abstractions.Services;
 
 public interface ITextToSpeechService
 {
-    Task GenerateSpeechAsync(SpeechRequest request, ISpeechTunnel tunnel, string extension);
+    Task GenerateSpeechAsync(SpeechRequest request, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken);
 }
