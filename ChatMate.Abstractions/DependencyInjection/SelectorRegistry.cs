@@ -38,7 +38,9 @@ public class SelectorFactory<TInterface> : ISelectorFactory<TInterface> where TI
 
     public TInterface Create(string key)
     {
-        return (TInterface)_sp.GetRequiredService(_registry.Types[key]);
+        if (!_registry.Types.TryGetValue(key, out var type))
+            throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {key}");
+        return (TInterface)_sp.GetRequiredService(type);
     }
 
     public bool TryCreate(string? key, [NotNullWhen(true)] out TInterface? value)

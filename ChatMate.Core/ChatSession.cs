@@ -28,7 +28,7 @@ public class ChatSession : IDisposable
         ClientStartChatMessage startChatMessage,
         ChatTextProcessor chatTextProcessor,
         string? audioPath,
-        bool useServerSpeechRecognition,
+        bool useSpeechRecognition,
         bool pauseSpeechRecognitionDuringPlayback)
     {
         _tunnel = tunnel;
@@ -40,7 +40,7 @@ public class ChatSession : IDisposable
         _pauseSpeechRecognitionDuringPlayback = pauseSpeechRecognitionDuringPlayback;
         _logger = loggerFactory.CreateLogger<UserConnection>();
 
-        if (useServerSpeechRecognition)
+        if (useSpeechRecognition)
         {
             _inputHandle = _servicesLocator.ExclusiveLocalInputManager.Acquire();
             _inputHandle.SpeechRecognitionStarted += OnSpeechRecognitionStarted;
@@ -75,7 +75,7 @@ public class ChatSession : IDisposable
                 lastBotMessage.Tokens = textGen.GetTokenCount(lastBotMessage.Text);
                 _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);
             }
-            text = "*{{User}} interrupts {{Bot}} in the middle of a sentence* " + text;
+            text = "*interrupts {{Bot}}* " + text;
             _logger.LogInformation("Added interruption notice to the user message: {Text}", text);
         }
         
@@ -99,6 +99,7 @@ public class ChatSession : IDisposable
             try
             {
                 var gen = await textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
+                if (string.IsNullOrWhiteSpace(gen.Text)) throw new InvalidOperationException("AI service returned an empty string.");
                 reply = CreateMessageFromGen(gen);
             }
             catch (TaskCanceledException)

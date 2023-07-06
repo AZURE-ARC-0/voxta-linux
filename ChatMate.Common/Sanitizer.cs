@@ -10,6 +10,8 @@ public class Sanitizer
     public string Sanitize(string message)
     {
         var result = message;
+        if (result.StartsWith("1) ")) result = result[3..];
+        if (result.StartsWith("- ")) result = result[2..];
         result = RemoveNonChat.Replace(result, "");
         result = SanitizeMessage.Replace(result, "");
         return result.Trim('\"', '\'', ' ');

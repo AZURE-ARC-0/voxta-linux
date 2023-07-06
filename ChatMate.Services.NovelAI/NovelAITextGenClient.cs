@@ -108,16 +108,16 @@ public class NovelAITextGenClient : ITextGenService
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
-        using var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw new NovelAIException(await response.Content.ReadAsStringAsync());
+            throw new NovelAIException(await response.Content.ReadAsStringAsync(cancellationToken));
 
-        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
+        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
         var sb = new StringBuilder();
         while (true)
         {
-            var line = await reader.ReadLineAsync();
+            var line = await reader.ReadLineAsync(cancellationToken);
             if (line == null) break;
             if (!line.StartsWith("data:")) continue;
             var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);

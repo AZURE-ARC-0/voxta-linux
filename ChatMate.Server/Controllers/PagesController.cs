@@ -2,6 +2,7 @@
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Common;
 using ChatMate.Server.ViewModels;
+using ChatMate.Services.KoboldAI;
 using ChatMate.Services.NovelAI;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,8 @@ public class PagesController : Controller
     {
         var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI");
         var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        #warning Introduce constants and extension methods
+        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>("KoboldAI");
         var profile = await profileRepository.GetProfileAsync();
 
         var vm = new SettingsViewModel
@@ -42,10 +45,15 @@ public class PagesController : Controller
                 Token = string.IsNullOrEmpty(novelai?.Token) ? "" : Crypto.DecryptString(novelai.Token),
                 Model = novelai?.Model ?? NovelAISettings.DefaultModel,
             },
+            KoboldAI = new KoboldAISettings
+            {
+                Uri = koboldai?.Uri ?? "http://localhost:5001",
+            },
             Profile = new ProfileSettings
             {
                 Name = profile?.Name ?? "User",
                 Description = profile?.Description ?? "",
+                EnableSpeechRecognition = profile?.EnableSpeechRecognition ?? true,
                 PauseSpeechRecognitionDuringPlayback = profile?.PauseSpeechRecognitionDuringPlayback ?? true
             }
         };
@@ -71,10 +79,15 @@ public class PagesController : Controller
             Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
             Model = model.NovelAI.Model.Trim(),
         });
+        await settingsRepository.SaveAsync("KoboldAI", new KoboldAISettings
+        {
+            Uri = model.KoboldAI.Uri,
+        });
         await profileRepository.SaveProfileAsync(new ProfileSettings
         {
             Name = model.Profile.Name.Trim(),
             Description = model.Profile.Description?.Trim(),
+            EnableSpeechRecognition = model.Profile.EnableSpeechRecognition,
             PauseSpeechRecognitionDuringPlayback = model.Profile.PauseSpeechRecognitionDuringPlayback,
         });
         

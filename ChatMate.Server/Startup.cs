@@ -48,13 +48,16 @@ public class Startup
         var animationSelectionRegistry = new SelectorRegistry<IAnimationSelectionService>();
         services.AddSingleton<ISelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(animationSelectionRegistry, sp));
 
-        services.AddNovelAI();
-        textGenRegistry.RegisterNovelAI();
-        textToSpeechRegistry.RegisterNovelAI();
-
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
         animationSelectionRegistry.RegisterOpenAI();
+
+        services.AddNovelAI();
+        textGenRegistry.RegisterNovelAI();
+        textToSpeechRegistry.RegisterNovelAI();
+        
+        services.AddKoboldAI();
+        textGenRegistry.RegisterKoboldAI();
 
         services.AddVosk(_configuration.GetSection("Vosk"));
         services.AddHostedService<SpeechRecognitionBackgroundTask>();

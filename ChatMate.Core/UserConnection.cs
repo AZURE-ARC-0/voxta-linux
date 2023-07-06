@@ -95,7 +95,7 @@ public class UserConnection : IDisposable
             Preamble = bot.Preamble,
             Postamble = bot.Postamble ?? "",
             Greeting = bot.Greeting ?? "",
-            SampleMessages = string.Join("\n", bot.SampleMessages.Select(x => $"{x.User}: {x.Text}")),
+            SampleMessages = bot.SampleMessages != null ?string.Join("\n", bot.SampleMessages.Select(x => $"{x.User}: {x.Text}")) : "",
             TextGenService = bot.Services.TextGen.Service,
             TtsService = bot.Services.SpeechGen.Service,
             TtsVoice = bot.Services.SpeechGen.Voice,
@@ -165,7 +165,7 @@ public class UserConnection : IDisposable
             startChatMessage,
             textProcessor,
             startChatMessage.AudioPath,
-            startChatMessage.UseServerSpeechRecognition,
+            startChatMessage.UseServerSpeechRecognition && profile.EnableSpeechRecognition,
             profile.PauseSpeechRecognitionDuringPlayback
         );
 
