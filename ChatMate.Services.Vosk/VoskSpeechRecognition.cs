@@ -52,7 +52,6 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
                 var text = json?.Text;
                 if (string.IsNullOrEmpty(text)) return;
                 if (text == "huh") return;
-                StopMicrophoneTranscription();
                 SpeechEnd?.Invoke(this, text);
             }
             else

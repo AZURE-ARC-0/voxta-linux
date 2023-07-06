@@ -14,7 +14,7 @@ public class ChatServicesLocator
     public readonly ISelectorFactory<IAnimationSelectionService> AnimSelectFactory;
     public readonly IBotRepository BotsRepository;
     public readonly IProfileRepository ProfileRepository;
-    public readonly LocalInputEventDispatcher LocalInputEventDispatcher;
+    public readonly ExclusiveLocalInputManager ExclusiveLocalInputManager;
     public readonly ITemporaryFileCleanup TemporaryFileCleanup;
 
     [SuppressMessage("ReSharper", "ContextualLoggerProblem")]
@@ -25,7 +25,7 @@ public class ChatServicesLocator
         ISelectorFactory<IAnimationSelectionService> animSelectFactory,
         IBotRepository botsRepository,
         IProfileRepository profileRepository,
-        LocalInputEventDispatcher localInputEventDispatcher,
+        ExclusiveLocalInputManager exclusiveLocalInputManager,
         ITemporaryFileCleanup temporaryFileCleanup
     )
     {
@@ -35,7 +35,7 @@ public class ChatServicesLocator
         AnimSelectFactory = animSelectFactory;
         BotsRepository = botsRepository;
         ProfileRepository = profileRepository;
-        LocalInputEventDispatcher = localInputEventDispatcher;
+        ExclusiveLocalInputManager = exclusiveLocalInputManager;
         TemporaryFileCleanup = temporaryFileCleanup;
     }
 }

@@ -8,4 +8,5 @@ public class ProfileSettings
     [MinLength(1)]
     public required string Name { get; init; }
     public string? Description { get; init; }
+    public bool PauseSpeechRecognitionDuringPlayback { get; init; } = true;
 }

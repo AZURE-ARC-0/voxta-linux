@@ -10,9 +10,9 @@ namespace ChatMate.Server.Controllers;
 public class WebSocketsController : ControllerBase
 {
     private readonly ILogger<WebSocketsController> _logger;
-    private readonly ChatSessionFactory _chatInstanceFactory;
+    private readonly UserConnectionFactory _chatInstanceFactory;
 
-    public WebSocketsController(ILogger<WebSocketsController> logger, ChatSessionFactory chatInstanceFactory)
+    public WebSocketsController(ILogger<WebSocketsController> logger, UserConnectionFactory chatInstanceFactory)
     {
         _logger = logger;
         _chatInstanceFactory = chatInstanceFactory;

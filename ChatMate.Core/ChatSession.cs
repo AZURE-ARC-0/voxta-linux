@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class ChatInstance : IDisposable
+public class ChatSession : IDisposable
 {
     private readonly IUserConnectionTunnel _tunnel;
     private readonly ChatServicesLocator _servicesLocator;
@@ -13,10 +13,11 @@ public class ChatInstance : IDisposable
     private readonly ClientStartChatMessage _startChatMessage;
     private readonly ChatTextProcessor _chatTextProcessor;
     private readonly string? _audioPath;
-    private readonly bool _useServerSpeechRecognition;
+    private readonly bool _pauseSpeechRecognitionDuringPlayback;
     private readonly ILogger<UserConnection> _logger;
+    private readonly ExclusiveLocalInputHandle? _inputHandle;
 
-    public ChatInstance(
+    public ChatSession(
         IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
         ChatServicesLocator servicesLocator,
@@ -24,7 +25,8 @@ public class ChatInstance : IDisposable
         ClientStartChatMessage startChatMessage,
         ChatTextProcessor chatTextProcessor,
         string? audioPath,
-        bool useServerSpeechRecognition)
+        bool useServerSpeechRecognition,
+        bool pauseSpeechRecognitionDuringPlayback)
     {
         _tunnel = tunnel;
         _servicesLocator = servicesLocator;
@@ -32,20 +34,21 @@ public class ChatInstance : IDisposable
         _startChatMessage = startChatMessage;
         _chatTextProcessor = chatTextProcessor;
         _audioPath = audioPath;
-        _useServerSpeechRecognition = useServerSpeechRecognition;
+        _pauseSpeechRecognitionDuringPlayback = pauseSpeechRecognitionDuringPlayback;
         _logger = loggerFactory.CreateLogger<UserConnection>();
 
         if (useServerSpeechRecognition)
         {
-            servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart += OnSpeechRecognitionStart;
-            servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd += OnSpeechRecognitionEnd;
+            _inputHandle = _servicesLocator.ExclusiveLocalInputManager.Acquire();
+            _inputHandle.SpeechRecognitionStarted += OnSpeechRecognitionStarted;
+            _inputHandle.SpeechRecognitionFinished += OnSpeechRecognitionFinished;
         }
     }
 
     public async Task HandleMessageAsync(ClientSendMessage sendMessage, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Received chat message: {Text}", sendMessage.Text);
-        if (_useServerSpeechRecognition) _servicesLocator.LocalInputEventDispatcher.OnPauseSpeechRecognition();
+        if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
         // TODO: Save into some storage
         _chatSessionData.Messages.Add(new ChatMessageData
         {
@@ -62,8 +65,7 @@ public class ChatInstance : IDisposable
     
     public Task HandleListenAsync()
     {
-        if (!_useServerSpeechRecognition) return Task.CompletedTask;
-        _servicesLocator.LocalInputEventDispatcher.OnReadyForSpeechRecognition();
+        _inputHandle?.RequestResumeSpeechRecognition();
         return Task.CompletedTask;
     }
 
@@ -194,35 +196,37 @@ public class ChatInstance : IDisposable
         }
     }
 
-    private void OnSpeechRecognitionStart(object? sender, EventArgs e)
+    private void OnSpeechRecognitionStarted(object? sender, EventArgs e)
     {
-        Task.Run(OnSpeechRecognitionStartAsync);
+        Task.Run(OnSpeechRecognitionStartedAsync);
     }
 
-    private async Task OnSpeechRecognitionStartAsync()
+    private async Task OnSpeechRecognitionStartedAsync()
     {
         _logger.LogInformation("Speech recognition started");
         await _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), CancellationToken.None);
     }
 
-    private void OnSpeechRecognitionEnd(object? sender, string e)
+    private void OnSpeechRecognitionFinished(object? sender, string e)
     {
-        Task.Run(() => OnSpeechRecognitionEndAsync(e));
+        if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
+        Task.Run(() => OnSpeechRecognitionFinishedAsync(e));
     }
 
-    private async Task OnSpeechRecognitionEndAsync(string e)
+    private async Task OnSpeechRecognitionFinishedAsync(string e)
     {
-        _logger.LogInformation("Speech recognition ended: {Text}", e);
+        _logger.LogInformation("Speech recognition finished: {Text}", e);
         await _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage { Text = e }, CancellationToken.None);
         await HandleMessageAsync(new ClientSendMessage { Text = e }, CancellationToken.None);
     }
 
     public void Dispose()
     {
-        if (_useServerSpeechRecognition)
+        if (_inputHandle != null)
         {
-            _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionStart -= OnSpeechRecognitionStart;
-            _servicesLocator.LocalInputEventDispatcher.SpeechRecognitionEnd -= OnSpeechRecognitionEnd;
+            _inputHandle.SpeechRecognitionStarted -= OnSpeechRecognitionStarted;
+            _inputHandle.SpeechRecognitionFinished -= OnSpeechRecognitionFinished;
+            _inputHandle.Dispose();
         }
     }
 }

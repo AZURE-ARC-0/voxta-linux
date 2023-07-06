@@ -20,8 +20,18 @@ public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
     {
         public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var stringValue = reader.GetString();
-            return bool.TryParse(stringValue, out var value) && value;
+            switch (reader.TokenType)
+            {
+                case JsonTokenType.True:
+                    return true;
+                case JsonTokenType.False:
+                    return false;
+                case JsonTokenType.String:
+                    var stringValue = reader.GetString();
+                    return bool.TryParse(stringValue, out var value) && value;
+                default:
+                    throw new JsonException("Invalid boolean value");
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)

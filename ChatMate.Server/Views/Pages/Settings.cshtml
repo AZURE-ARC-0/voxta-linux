@@ -36,6 +36,11 @@
             <input asp-for="Profile.Description" class="form-control" />
             @Html.ValidationMessageFor(m => m.Profile.Description)
         </div>
+        <div class="form-group">
+            <label asp-for="Profile.PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback: <span class="text-muted">Turn off to allow interruptions, requires a headset</span></label>
+            <input asp-for="Profile.PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input" />
+            @Html.ValidationMessageFor(m => m.Profile.PauseSpeechRecognitionDuringPlayback)
+        </div>
         <button type="submit" class="btn btn-primary">Save</button>
         @Html.ValidationSummary(true)
     </form>

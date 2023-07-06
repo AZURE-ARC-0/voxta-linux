@@ -26,12 +26,12 @@ public class Startup
         services.AddWebSockets(_ => { });
         
         services.AddHttpClient();
-        services.AddScoped<ChatSessionFactory>();
+        services.AddScoped<UserConnectionFactory>();
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddScoped<ChatServicesLocator>();
-        services.AddSingleton<LocalInputEventDispatcher>();
+        services.AddSingleton<ExclusiveLocalInputManager>();
         services.AddSingleton<TemporaryFileCleanupService>();
         services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
         services.AddHostedService(sp => sp.GetRequiredService<TemporaryFileCleanupService>());

@@ -12,7 +12,7 @@ public class UserConnection : IDisposable
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<UserConnection> _logger;
 
-    private ChatInstance? _chat;
+    private ChatSession? _chat;
 
     public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ChatServicesLocator servicesLocator)
     {
@@ -158,7 +158,7 @@ public class UserConnection : IDisposable
             chatData.SampleMessages.Add(m);
         }
 
-        _chat = new ChatInstance(
+        _chat = new ChatSession(
             _tunnel,
             _loggerFactory,
             _servicesLocator,
@@ -166,7 +166,8 @@ public class UserConnection : IDisposable
             startChatMessage,
             textProcessor,
             startChatMessage.AudioPath,
-            startChatMessage.UseServerSpeechRecognition
+            startChatMessage.UseServerSpeechRecognition,
+            profile.PauseSpeechRecognitionDuringPlayback
         );
 
         await _chat.SendReadyAsync(cancellationToken);

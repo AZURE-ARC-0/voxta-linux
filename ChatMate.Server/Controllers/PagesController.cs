@@ -45,7 +45,8 @@ public class PagesController : Controller
             Profile = new ProfileSettings
             {
                 Name = profile?.Name ?? "User",
-                Description = profile?.Description ?? ""
+                Description = profile?.Description ?? "",
+                PauseSpeechRecognitionDuringPlayback = profile?.PauseSpeechRecognitionDuringPlayback ?? true
             }
         };
         
@@ -74,6 +75,7 @@ public class PagesController : Controller
         {
             Name = model.Profile.Name.Trim(),
             Description = model.Profile.Description?.Trim(),
+            PauseSpeechRecognitionDuringPlayback = model.Profile.PauseSpeechRecognitionDuringPlayback,
         });
         
         return RedirectToAction("Chat");

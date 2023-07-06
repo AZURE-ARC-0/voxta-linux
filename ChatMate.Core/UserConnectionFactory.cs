@@ -3,12 +3,12 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class ChatSessionFactory
+public class UserConnectionFactory
 {
     private readonly ChatServicesLocator _servicesLocator;
     private readonly ILoggerFactory _loggerFactory;
 
-    public ChatSessionFactory(ChatServicesLocator servicesLocator, ILoggerFactory loggerFactory)
+    public UserConnectionFactory(ChatServicesLocator servicesLocator, ILoggerFactory loggerFactory)
     {
         _servicesLocator = servicesLocator;
         _loggerFactory = loggerFactory;

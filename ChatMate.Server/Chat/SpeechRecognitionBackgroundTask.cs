@@ -7,13 +7,13 @@ public class SpeechRecognitionBackgroundTask : BackgroundService
 {
     private readonly ISpeechRecognitionService _speechRecognitionService;
 
-    public SpeechRecognitionBackgroundTask(ISpeechRecognitionService speechRecognitionService, LocalInputEventDispatcher localInputEventDispatcher)
+    public SpeechRecognitionBackgroundTask(ISpeechRecognitionService speechRecognitionService, ExclusiveLocalInputManager exclusiveLocalInputManager)
     {
         _speechRecognitionService = speechRecognitionService;
-        speechRecognitionService.SpeechStart += (_, _) => localInputEventDispatcher.OnSpeechRecognitionStart();
-        speechRecognitionService.SpeechEnd += (_, text) => localInputEventDispatcher.OnSpeechRecognitionEnd(text);
-        localInputEventDispatcher.PauseSpeechRecognition += (_, _) => speechRecognitionService.StopMicrophoneTranscription();
-        localInputEventDispatcher.ReadyForSpeechRecognition += (_, _) => speechRecognitionService.StartMicrophoneTranscription();
+        speechRecognitionService.SpeechStart += (_, _) => exclusiveLocalInputManager.OnSpeechRecognitionStarted();
+        speechRecognitionService.SpeechEnd += (_, text) => exclusiveLocalInputManager.OnSpeechRecognitionFinished(text);
+        exclusiveLocalInputManager.PauseSpeechRecognitionRequested += (_, _) => speechRecognitionService.StopMicrophoneTranscription();
+        exclusiveLocalInputManager.ResumeSpeechRecognitionRequested += (_, _) => speechRecognitionService.StartMicrophoneTranscription();
     }
 
     public override async Task StartAsync(CancellationToken cancellationToken)

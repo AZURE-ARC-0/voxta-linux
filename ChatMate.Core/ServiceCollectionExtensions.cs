@@ -7,7 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddChatMate(this IServiceCollection services)
     {
-        services.AddSingleton<ChatSessionFactory>();
+        services.AddSingleton<UserConnectionFactory>();
         return services;
     }
 }

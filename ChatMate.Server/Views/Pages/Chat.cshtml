@@ -44,6 +44,19 @@
     import { render } from "https://cdn.skypack.dev/solid-js/web";
     import html from "https://cdn.skypack.dev/solid-js/html";
     
+    let currentAudio;
+    
+    const playAudio = (url, cb) => {
+        if (currentAudio) {
+            currentAudio.pause();
+        }
+        currentAudio = new Audio(url);
+        if (cb) {
+            currentAudio.addEventListener('ended', cb);
+        }
+        currentAudio.play();
+    }
+    
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = window.SpeechRecognition ? new SpeechRecognition() : null;
     
@@ -184,16 +197,16 @@
                     addMessage({ user: 'bot', text: data.text });
                     break;
                 case 'speech':
-                    const audio = new Audio(data.url);
-                    audio.addEventListener('ended', () => {
+                    playAudio(data.url, () => {
                         const msg = JSON.stringify({ $type: "listen" });
                         socket.send(msg);
                     });
-                    audio.play();
                     break;
                 case 'speechRecognitionStart':
+                    if (currentAudio) currentAudio.pause();
                     break;
                 case 'speechRecognitionEnd':
+                    addMessage({ user: 'user', text: data.text });
                     break;
                 case 'error':
                     addMessage({ user: 'error', text: data.message });
@@ -270,7 +283,7 @@
             if (thinkingSpeechUrls.length) {
                 const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
                 console.log('Playing ' + audioUrl)
-                new Audio(audioUrl).play();
+                playAudio(audioUrl);
             }
         }
         
