@@ -3,7 +3,12 @@ using ChatMate.Abstractions.Model;
 
 namespace ChatMate.Core;
 
-public class ChatTextProcessor
+public interface IChatTextProcessor
+{
+    string ProcessText(string? text);
+}
+
+public class ChatTextProcessor : IChatTextProcessor
 {
     private readonly ProfileSettings _profile;
     private readonly string _botName;

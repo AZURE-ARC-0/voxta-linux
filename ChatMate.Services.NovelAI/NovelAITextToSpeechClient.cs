@@ -14,6 +14,8 @@ namespace ChatMate.Services.NovelAI;
 
 public class NovelAITextToSpeechClient : ITextToSpeechService
 {
+    public string ServiceName => NovelAIConstants.ServiceName;
+    
     private readonly HttpClient _httpClient;
     private readonly ILogger<NovelAITextToSpeechClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
@@ -29,13 +31,13 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _logger = loggerFactory.CreateLogger<NovelAITextToSpeechClient>();
-        _httpClient = httpClientFactory.CreateClient("NovelAI");
+        _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
     }
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
         
         var querystring = new Dictionary<string, string>

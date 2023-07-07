@@ -25,7 +25,7 @@ public class ChatSessionFactory
         _pendingSpeech = pendingSpeech;
     }
 
-    public async Task<ChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
+    public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
     {
         if (startChatMessage.AudioPath != null)
         {
@@ -54,7 +54,9 @@ public class ChatSessionFactory
             Greeting = !string.IsNullOrEmpty(startChatMessage.Greeting) ? new TextData
             {
                 Text = textProcessor.ProcessText(startChatMessage.Greeting)
-            } : null
+            } : null,
+            AudioPath = startChatMessage.AudioPath,
+            TtsVoice = startChatMessage.TtsVoice
         };
         chatData.Preamble.Tokens = services.TextGen.GetTokenCount(chatData.Preamble.Text);
         chatData.Postamble.Tokens = services.TextGen.GetTokenCount(chatData.Postamble.Text);
@@ -85,7 +87,6 @@ public class ChatSessionFactory
             _loggerFactory,
             services,
             chatData,
-            startChatMessage,
             textProcessor,
             profile,
             useSpeechRecognition ? _localInputManager.Acquire() : null,

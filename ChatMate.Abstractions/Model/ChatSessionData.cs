@@ -27,6 +27,9 @@ public class ChatSessionData : IReadOnlyChatSessionData
 
     public List<ChatMessageData> SampleMessages { get; } = new();
     public List<ChatMessageData> Messages { get; } = new();
+    
+    public string? AudioPath { get; init; }
+    public string? TtsVoice { get; set; }
 }
 
 [Serializable]

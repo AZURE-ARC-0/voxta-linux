@@ -14,6 +14,6 @@ public static class ServiceCollectionExtensions
     
     public static void RegisterKoboldAI(this ISelectorRegistry<ITextGenService> registry)
     {
-        registry.Add<KoboldAITextGenClient>("KoboldAI");
+        registry.Add<KoboldAITextGenClient>(KoboldAIConstants.ServiceName);
     }
 }

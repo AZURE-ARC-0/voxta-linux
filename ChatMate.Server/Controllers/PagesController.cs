@@ -27,10 +27,10 @@ public class PagesController : Controller
     [HttpGet("/settings")]
     public async Task<IActionResult> Settings([FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository, CancellationToken cancellationToken)
     {
-        var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI");
-        var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        var openai = await settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
+        var novelai = await settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
         #warning Introduce constants and extension methods
-        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>("KoboldAI");
+        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName);
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
 
         var vm = new SettingsViewModel
@@ -69,17 +69,17 @@ public class PagesController : Controller
             return View("Settings", model);
         }
         
-        await settingsRepository.SaveAsync("OpenAI", new OpenAISettings
+        await settingsRepository.SaveAsync(OpenAIConstants.ServiceName, new OpenAISettings
         {
             ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey.Trim('"', ' ')),
             Model = model.OpenAI.Model.Trim(),
         });
-        await settingsRepository.SaveAsync("NovelAI", new NovelAISettings
+        await settingsRepository.SaveAsync(NovelAIConstants.ServiceName, new NovelAISettings
         {
             Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
             Model = model.NovelAI.Model.Trim(),
         });
-        await settingsRepository.SaveAsync("KoboldAI", new KoboldAISettings
+        await settingsRepository.SaveAsync(KoboldAIConstants.ServiceName, new KoboldAISettings
         {
             Uri = model.KoboldAI.Uri,
         });
@@ -116,11 +116,11 @@ public class PagesController : Controller
                 {
                     TextGen = new BotDefinition.ServiceMap
                     {
-                        Service = "OpenAI",
+                        Service = OpenAIConstants.ServiceName,
                     },
                     SpeechGen = new BotDefinition.VoiceServiceMap
                     {
-                        Service = "NovelAI",
+                        Service = NovelAIConstants.ServiceName,
                         Voice = "Naia",
                     },
                 }

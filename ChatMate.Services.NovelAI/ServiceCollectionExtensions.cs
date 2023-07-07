@@ -15,11 +15,11 @@ public static class ServiceCollectionExtensions
     
     public static void RegisterNovelAI(this ISelectorRegistry<ITextGenService> registry)
     {
-        registry.Add<NovelAITextGenClient>("NovelAI");
+        registry.Add<NovelAITextGenClient>(NovelAIConstants.ServiceName);
     }
     
     public static void RegisterNovelAI(this ISelectorRegistry<ITextToSpeechService> registry)
     {
-        registry.Add<NovelAITextToSpeechClient>("NovelAI");
+        registry.Add<NovelAITextToSpeechClient>(NovelAIConstants.ServiceName);
     }
 }

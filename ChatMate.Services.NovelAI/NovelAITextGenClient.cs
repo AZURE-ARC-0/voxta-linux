@@ -30,7 +30,7 @@ public class NovelAITextGenClient : ITextGenService
         _settingsRepository = settingsRepository;
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
-        _httpClient = httpClientFactory.CreateClient("NovelAI");
+        _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
         _parameters = new
@@ -82,7 +82,7 @@ public class NovelAITextGenClient : ITextGenService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>("NovelAI");
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
 
         // TODO: count tokens: https://novelai.net/tokenizer

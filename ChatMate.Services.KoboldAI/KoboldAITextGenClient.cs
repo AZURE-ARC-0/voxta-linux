@@ -24,7 +24,7 @@ public class KoboldAITextGenClient : ITextGenService
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
         #warning Pass the config on creation, create once per session
-        var settings = settingsRepository.GetAsync<KoboldAISettings>("KoboldAI").GetAwaiter().GetResult();
+        var settings = settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName).GetAwaiter().GetResult();
         _httpClient.BaseAddress = new Uri(settings!.Uri);
     }
 
@@ -35,7 +35,7 @@ public class KoboldAITextGenClient : ITextGenService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<KoboldAISettings>("KoboldAI");
+        var settings = await _settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName);
 
         // TODO: count tokens?
         // TODO: Hardcoded Guanaco formatting

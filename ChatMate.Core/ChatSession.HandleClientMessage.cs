@@ -1,45 +1,24 @@
-﻿using ChatMate.Abstractions.Management;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
+﻿using ChatMate.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class HandleClientMessageProcessing : ReplyMessageProcessingBase, IMessageProcessing
+public partial class ChatSession
 {
-    private readonly ILogger<HandleClientMessageProcessing> _logger;
-    private readonly ExclusiveLocalInputHandle? _inputHandle;
-    private readonly bool _pauseSpeechRecognitionDuringPlayback;
-    private readonly ChatSessionData _chatSessionData;
-    private readonly ChatServices _services;
-    private readonly ClientSendMessage _clientSendMessage;
-    private readonly ChatSessionState _state;
-    private readonly ChatTextProcessor _chatTextProcessor;
-
-    public HandleClientMessageProcessing(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ExclusiveLocalInputHandle? inputHandle, bool pauseSpeechRecognitionDuringPlayback,
-        ChatSessionData chatSessionData, ChatServices services, ClientSendMessage clientSendMessage, ChatSessionState state, ChatTextProcessor chatTextProcessor,
-        ChatSessionState chatSessionState, ClientStartChatMessage startChatMessage, PendingSpeechManager pendingSpeech, ITemporaryFileCleanup temporaryFileCleanup)
-        : base(tunnel, chatSessionData, chatSessionState, startChatMessage, services, pendingSpeech, temporaryFileCleanup)
+    public void HandleClientMessage(ClientSendMessage clientSendMessage)
     {
-        _logger = loggerFactory.CreateLogger<HandleClientMessageProcessing>();
-        _inputHandle = inputHandle;
-        _pauseSpeechRecognitionDuringPlayback = pauseSpeechRecognitionDuringPlayback;
-        _chatSessionData = chatSessionData;
-        _services = services;
-        _clientSendMessage = clientSendMessage;
-        _state = state;
-        _chatTextProcessor = chatTextProcessor;
+        Enqueue(ct => HandleClientMessageAsync(clientSendMessage, ct));
     }
 
-    public async ValueTask HandleAsync(CancellationToken cancellationToken)
+    private async ValueTask HandleClientMessageAsync(ClientSendMessage clientSendMessage, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Received chat message: {Text}", _clientSendMessage.Text);
+        _logger.LogInformation("Received chat message: {Text}", clientSendMessage.Text);
 #warning This should actually happen once we have the text and sent the wav back
         if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
 
-        var text = _clientSendMessage.Text;
+        var text = clientSendMessage.Text;
 
-        if (await _state.AbortReplyAsync())
+        if (await _chatSessionState.AbortReplyAsync())
         {
 #warning Refactor this, find a cleaner way to do that (e.g. estimate the audio length cutoff?)
             var lastBotMessage = _chatSessionData.Messages.LastOrDefault(m => m.User == _chatSessionData.BotName);
@@ -62,7 +41,7 @@ public class HandleClientMessageProcessing : ReplyMessageProcessingBase, IMessag
             Text = _chatTextProcessor.ProcessText(text),
         });
 
-        var abortCancellationToken = await _state.BeginGeneratingReply();
+        var abortCancellationToken = await _chatSessionState.BeginGeneratingReply();
         try
         {
             using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, abortCancellationToken);
@@ -93,7 +72,7 @@ public class HandleClientMessageProcessing : ReplyMessageProcessingBase, IMessag
         }
         finally
         {
-            _state.SpeechGenerationComplete();
+            _chatSessionState.SpeechGenerationComplete();
         }
     }
 }

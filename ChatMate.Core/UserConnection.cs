@@ -11,7 +11,7 @@ public sealed class UserConnection : IAsyncDisposable
     private readonly ChatSessionFactory _chatSessionFactory;
     private readonly ILogger<UserConnection> _logger;
 
-    private ChatSession? _chat;
+    private IChatSession _chat;
 
     public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ChatRepositories repositories, ChatSessionFactory chatSessionFactory)
     {

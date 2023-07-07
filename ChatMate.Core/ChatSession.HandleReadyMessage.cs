@@ -1,27 +1,16 @@
-﻿using ChatMate.Abstractions.Management;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
+﻿using ChatMate.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class HandleReadyMessageProcessing : ReplyMessageProcessingBase, IMessageProcessing
+public partial class ChatSession
 {
-    private readonly ILogger<HandleClientMessageProcessing> _logger;
-    private readonly IUserConnectionTunnel _tunnel;
-    private readonly ChatSessionData _chatSessionData;
-
-    public HandleReadyMessageProcessing(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory,
-        ChatSessionData chatSessionData, ChatServices services,
-        ChatSessionState chatSessionState, ClientStartChatMessage startChatMessage, PendingSpeechManager pendingSpeech, ITemporaryFileCleanup temporaryFileCleanup)
-        : base(tunnel, chatSessionData, chatSessionState, startChatMessage, services, pendingSpeech, temporaryFileCleanup)
+    public void SendReady()
     {
-        _logger = loggerFactory.CreateLogger<HandleClientMessageProcessing>();
-        _tunnel = tunnel;
-        _chatSessionData = chatSessionData;
+        Enqueue(HandleAsync);
     }
 
-    public async ValueTask HandleAsync(CancellationToken cancellationToken)
+    private async ValueTask HandleAsync(CancellationToken cancellationToken)
     {
 #warning Bring back thinking speech
         /*

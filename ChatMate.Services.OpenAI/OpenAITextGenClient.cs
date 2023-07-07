@@ -36,7 +36,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
-        _httpClient = httpClientFactory.CreateClient("OpenAI");
+        _httpClient = httpClientFactory.CreateClient(OpenAIConstants.ServiceName);
         _settingsRepository = settingsRepository;
         _tokenizer = tokenizer;
         _sanitizer = sanitizer;
@@ -119,7 +119,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 
     private async Task<string> SendChatRequestAsync(List<object> messages, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>("OpenAI");
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         var body = new
         {

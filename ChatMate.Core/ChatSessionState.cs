@@ -15,6 +15,7 @@ public class ChatSessionState
 
     public ValueTask<bool> AbortReplyAsync()
     {
+        _speaking = false;
 #warning This is a mess. Clean up.
         if (_replyAbort == null)
         {

@@ -17,11 +17,11 @@ public static class ServiceCollectionExtensions
     
     public static void RegisterOpenAI(this ISelectorRegistry<ITextGenService> registry)
     {
-        registry.Add<OpenAITextGenClient>("OpenAI");
+        registry.Add<OpenAITextGenClient>(OpenAIConstants.ServiceName);
     }
     
     public static void RegisterOpenAI(this ISelectorRegistry<IAnimationSelectionService> registry)
     {
-        registry.Add<OpenAITextGenClient>("OpenAI");
+        registry.Add<OpenAITextGenClient>(OpenAIConstants.ServiceName);
     }
 }
