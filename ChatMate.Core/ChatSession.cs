@@ -11,6 +11,7 @@ public interface IChatSession : IAsyncDisposable
 {
     void SendReady();
     void HandleClientMessage(ClientSendMessage clientSendMessage);
+    void HandleSpeechPlaybackStart(double duration);
     void HandleSpeechPlaybackComplete();
 }
 
@@ -55,9 +56,15 @@ public sealed partial class ChatSession : IChatSession
 
         _messageQueueProcessTask = Task.Run(() => ProcessQueueAsync(_messageQueueCancellationTokenSource.Token), _messageQueueCancellationTokenSource.Token);
     }
+    
+    public void HandleSpeechPlaybackStart(double duration)
+    {
+        _chatSessionState.StartSpeechAudio(duration);
+    }
 
     public void HandleSpeechPlaybackComplete()
     {
+        _chatSessionState.StopSpeechAudio();
         _inputHandle?.RequestResumeSpeechRecognition();
     }
 

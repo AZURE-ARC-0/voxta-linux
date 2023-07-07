@@ -7,6 +7,7 @@ namespace ChatMate.Abstractions.Model;
 [JsonDerivedType(typeof(ClientStartChatMessage), typeDiscriminator: "startChat")]
 [JsonDerivedType(typeof(ClientStopChatMessage), typeDiscriminator: "stopChat")]
 [JsonDerivedType(typeof(ClientSendMessage), typeDiscriminator: "send")]
+[JsonDerivedType(typeof(ClientSpeechPlaybackStartMessage), typeDiscriminator: "speechPlaybackStart")]
 [JsonDerivedType(typeof(ClientSpeechPlaybackCompleteMessage), typeDiscriminator: "speechPlaybackComplete")]
 public abstract class ClientMessage
 {
@@ -16,7 +17,6 @@ public abstract class ClientMessage
 public class ClientSendMessage : ClientMessage
 {
     public required string Text { get; init; }
-    public double SpeechInterruptionRatio { get; init; }
 }
 
 [Serializable]
@@ -46,6 +46,12 @@ public class ClientStartChatMessage : ClientMessage
 [Serializable]
 public class ClientStopChatMessage : ClientMessage
 {
+}
+
+[Serializable]
+public class ClientSpeechPlaybackStartMessage : ClientMessage
+{
+    public double Duration { get; init; }
 }
 
 [Serializable]

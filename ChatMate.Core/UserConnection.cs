@@ -11,7 +11,7 @@ public sealed class UserConnection : IAsyncDisposable
     private readonly ChatSessionFactory _chatSessionFactory;
     private readonly ILogger<UserConnection> _logger;
 
-    private IChatSession _chat;
+    private IChatSession? _chat;
 
     public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ChatRepositories repositories, ChatSessionFactory chatSessionFactory)
     {
@@ -50,6 +50,9 @@ public sealed class UserConnection : IAsyncDisposable
                         break;
                     case ClientSendMessage sendMessage:
                         _chat?.HandleClientMessage(sendMessage);
+                        break;
+                    case ClientSpeechPlaybackStartMessage speechPlaybackStartMessage:
+                        _chat?.HandleSpeechPlaybackStart(speechPlaybackStartMessage.Duration);
                         break;
                     case ClientSpeechPlaybackCompleteMessage:
                         _chat?.HandleSpeechPlaybackComplete();
@@ -117,6 +120,6 @@ public sealed class UserConnection : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if(_chat != null) await _chat.DisposeAsync();
+        await _chat.DisposeAsync();
     }
 }

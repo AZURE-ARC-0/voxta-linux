@@ -1,9 +1,13 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 namespace ChatMate.Core;
 
 public class ChatSessionState
 {
+    public Stopwatch _audioPlaybackStopwatch = new();
+    public double _audioPlaybackDuration;
+    
     public readonly StringBuilder PendingUserMessage = new();
     
     private CancellationTokenSource? _generateReplyAbort;
@@ -44,5 +48,26 @@ public class ChatSessionState
             _generateReplyTaskCompletionSource = null;
             _generateReplyAbort = null;
         }
+    }
+
+    public void StartSpeechAudio(double duration)
+    {
+        _audioPlaybackStopwatch.Restart();
+        _audioPlaybackDuration = duration;
+    }
+    
+    public void StopSpeechAudio()
+    {
+        _audioPlaybackStopwatch.Stop();
+        _audioPlaybackDuration = 0;
+    }
+
+    public double InterruptSpeech()
+    {
+        if (!_audioPlaybackStopwatch.IsRunning || _audioPlaybackDuration == 0) return 0;
+        _audioPlaybackStopwatch.Stop();
+        var ratio = _audioPlaybackStopwatch.Elapsed.TotalSeconds / _audioPlaybackDuration;
+        _audioPlaybackDuration = 0;
+        return ratio;
     }
 }

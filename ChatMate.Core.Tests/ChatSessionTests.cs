@@ -120,7 +120,9 @@ public class ChatSessionTests
 
         _session.HandleClientMessage(new ClientSendMessage { Text = "Hello!" });
         await _session.WaitForPendingQueueItemsAsync();
-        _session.HandleClientMessage(new ClientSendMessage { Text = "Stop!", SpeechInterruptionRatio = 0.5d });
+        _session.HandleSpeechPlaybackStart(1);
+        await Task.Delay(500);
+        _session.HandleClientMessage(new ClientSendMessage { Text = "Stop!" });
 
         await AssertSession();
         Assert.Multiple(() =>

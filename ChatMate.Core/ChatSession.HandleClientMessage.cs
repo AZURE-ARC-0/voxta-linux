@@ -20,12 +20,13 @@ public partial class ChatSession
 
             var text = clientSendMessage.Text;
 
-            if (clientSendMessage.SpeechInterruptionRatio is > 0.05f and < 0.95f)
+            var speechInterruptionRatio = _chatSessionState.InterruptSpeech();
+            if (speechInterruptionRatio is > 0.05f and < 0.95f)
             {
                 var lastBotMessage = _chatSessionData.Messages.LastOrDefault();
                 if (lastBotMessage?.User == _chatSessionData.BotName)
                 {
-                    var cutoff = Math.Clamp((int)Math.Round(lastBotMessage.Text.Length * clientSendMessage.SpeechInterruptionRatio), 1, lastBotMessage.Text.Length - 2);
+                    var cutoff = Math.Clamp((int)Math.Round(lastBotMessage.Text.Length * speechInterruptionRatio), 1, lastBotMessage.Text.Length - 2);
                     lastBotMessage.Text = lastBotMessage.Text[..cutoff] + "...";
                     lastBotMessage.Tokens = _textGen.GetTokenCount(lastBotMessage.Text);
                     _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);

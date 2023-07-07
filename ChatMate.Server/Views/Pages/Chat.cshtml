@@ -46,14 +46,13 @@
     
     let currentAudio;
     
-    const playAudio = (url, cb) => {
+    const playAudio = (url, onStart, onComplete) => {
         if (currentAudio) {
             currentAudio.pause();
         }
         currentAudio = new Audio(url);
-        if (cb) {
-            currentAudio.addEventListener('ended', cb);
-        }
+        if (onStart) currentAudio.addEventListener('play', () => onStart(currentAudio.duration));
+        if (onComplete) currentAudio.addEventListener('ended', onComplete);
         currentAudio.play();
     }
     
@@ -197,10 +196,9 @@
                     addMessage({ user: 'bot', text: data.text });
                     break;
                 case 'speech':
-                    playAudio(data.url, () => {
-                        const msg = JSON.stringify({ $type: "speechPlaybackComplete" });
-                        socket.send(msg);
-                    });
+                    playAudio(data.url,
+                     (duration) => socket.send(JSON.stringify({ $type: "speechPlaybackStart", duration: duration })),
+                     () => socket.send(JSON.stringify({ $type: "speechPlaybackComplete" })));
                     break;
                 case 'speechRecognitionStart':
                     if (currentAudio) currentAudio.pause();
@@ -277,7 +275,8 @@
         }
     
         function onSend(content) {
-            const msg = JSON.stringify({ $type: "send", text: content });
+            const speechInterruptionRatio = currentAudio ? currentAudio.currentTime / currentAudio.duration : 0;
+            const msg = JSON.stringify({ $type: "send", text: content, speechInterruptionRatio: speechInterruptionRatio });
             socket.send(msg);
             setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
             if (thinkingSpeechUrls.length) {
