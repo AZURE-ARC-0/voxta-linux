@@ -20,7 +20,7 @@ public class ChatSessionData : IReadOnlyChatSessionData
     public required string BotName { get; init; }
     public required TextData Preamble { get; init; }
     public TextData? Postamble { get; init; }
-    public TextData? Greeting { get; init; }
+    public TextData? Greeting { get; set; }
 
     public IReadOnlyList<ChatMessageData> GetSampleMessages() => Messages.AsReadOnly();
     public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();

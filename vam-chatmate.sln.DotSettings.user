@@ -1,7 +1,7 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f7b114d9_002D4df8_002D4bf8_002Da6b0_002D7fff417bc7d8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;ChatMate.Server.Tests&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::6B5F01F8-F66D-4A86-B6DB-EB6D4BB245AB::net7.0::ChatMate.Core.Tests.ChatSessionTests.TestSendReady&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::6B5F01F8-F66D-4A86-B6DB-EB6D4BB245AB::net7.0::ChatMate.Core.Tests.ChatSessionTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	</wpf:ResourceDictionary>

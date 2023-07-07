@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using ChatMate.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
@@ -27,16 +28,16 @@ public partial class ChatSession
         await _messageQueueProcessTask;
     }
 
-    private async Task ProcessQueueAsync(CancellationToken token)
+    private async Task ProcessQueueAsync(CancellationToken cancellationToken)
     {
         try
         {
-            foreach (var message in _messageQueue.GetConsumingEnumerable(token))
+            foreach (var message in _messageQueue.GetConsumingEnumerable(cancellationToken))
             {
                 _processingSemaphore.Release();
                 try
                 {
-                    await message(token);
+                    await message(cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -44,10 +45,11 @@ public partial class ChatSession
                 catch (Exception exc)
                 {
                     _logger.LogError(exc, "Error processing message {MessageType}", message.GetType().Name);
+                    await _tunnel.SendAsync(new ServerErrorMessage { Message = exc.Message }, cancellationToken);
                 }
                 finally
                 {
-                    await _processingSemaphore.WaitAsync(token);
+                    await _processingSemaphore.WaitAsync(cancellationToken);
                 }
             }
         }
@@ -59,12 +61,18 @@ public partial class ChatSession
             _messageQueue.Dispose();
         }
     }
-    
+
     public async Task WaitForPendingQueueItemsAsync()
     {
-        while (_messageQueue.Count > 0 || _processingSemaphore.CurrentCount > 0)
+        try
         {
-            await Task.Delay(10);
+            while (_messageQueue.Count > 0 || _processingSemaphore.CurrentCount > 0)
+            {
+                await Task.Delay(10);
+            }
+        }
+        catch (ObjectDisposedException)
+        {
         }
     }
 }
