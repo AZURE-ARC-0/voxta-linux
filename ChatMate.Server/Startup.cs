@@ -26,12 +26,8 @@ public class Startup
         services.AddWebSockets(_ => { });
         
         services.AddHttpClient();
-        services.AddScoped<UserConnectionFactory>();
-        services.AddSingleton<Sanitizer>();
-        services.AddSingleton<PendingSpeechManager>();
+        services.AddChatMate();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
-        services.AddScoped<ChatServicesLocator>();
-        services.AddSingleton<ExclusiveLocalInputManager>();
         services.AddSingleton<TemporaryFileCleanupService>();
         services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
         services.AddHostedService(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
@@ -41,12 +37,9 @@ public class Startup
             .ValidateDataAnnotations();
         services.AddYamlRepositories();
 
-        var textGenRegistry = new SelectorRegistry<ITextGenService>();
-        services.AddSingleton<ISelectorFactory<ITextGenService>>(sp => new SelectorFactory<ITextGenService>(textGenRegistry, sp));
-        var textToSpeechRegistry = new SelectorRegistry<ITextToSpeechService>();
-        services.AddSingleton<ISelectorFactory<ITextToSpeechService>>(sp => new SelectorFactory<ITextToSpeechService>(textToSpeechRegistry, sp));
-        var animationSelectionRegistry = new SelectorRegistry<IAnimationSelectionService>();
-        services.AddSingleton<ISelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(animationSelectionRegistry, sp));
+        var textGenRegistry = services.AddTextGenRegistry();
+        var textToSpeechRegistry = services.AddTextToSpeechRegistry();
+        var animationSelectionRegistry = services.AddAnimationSelectorRegistry();
 
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();

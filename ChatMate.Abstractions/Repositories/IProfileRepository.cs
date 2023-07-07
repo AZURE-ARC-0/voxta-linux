@@ -4,6 +4,6 @@ namespace ChatMate.Abstractions.Repositories;
 
 public interface IProfileRepository
 {
-    Task<ProfileSettings?> GetProfileAsync();
+    Task<ProfileSettings?> GetProfileAsync(CancellationToken cancellationToken);
     Task SaveProfileAsync(ProfileSettings value);
 }

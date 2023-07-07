@@ -25,13 +25,13 @@ public class PagesController : Controller
     }
     
     [HttpGet("/settings")]
-    public async Task<IActionResult> Settings([FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository)
+    public async Task<IActionResult> Settings([FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository, CancellationToken cancellationToken)
     {
         var openai = await settingsRepository.GetAsync<OpenAISettings>("OpenAI");
         var novelai = await settingsRepository.GetAsync<NovelAISettings>("NovelAI");
         #warning Introduce constants and extension methods
         var koboldai = await settingsRepository.GetAsync<KoboldAISettings>("KoboldAI");
-        var profile = await profileRepository.GetProfileAsync();
+        var profile = await profileRepository.GetProfileAsync(cancellationToken);
 
         var vm = new SettingsViewModel
         {

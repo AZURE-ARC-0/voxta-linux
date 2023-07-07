@@ -1,30 +1,29 @@
 ﻿using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
-using ChatMate.Common;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
-public class UserConnection : IDisposable
+public sealed class UserConnection : IAsyncDisposable
 {
     private readonly IUserConnectionTunnel _tunnel;
-    private readonly ChatServicesLocator _servicesLocator;
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly ChatRepositories _repositories;
+    private readonly ChatSessionFactory _chatSessionFactory;
     private readonly ILogger<UserConnection> _logger;
 
     private ChatSession? _chat;
 
-    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ChatServicesLocator servicesLocator)
+    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ChatRepositories repositories, ChatSessionFactory chatSessionFactory)
     {
         _tunnel = tunnel;
-        _servicesLocator = servicesLocator;
-        _loggerFactory = loggerFactory;
+        _repositories = repositories;
+        _chatSessionFactory = chatSessionFactory;
         _logger = loggerFactory.CreateLogger<UserConnection>();
     }
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
-        var bots = await _servicesLocator.BotsRepository.GetBotsListAsync(cancellationToken);
+        var bots = await _repositories.Bots.GetBotsListAsync(cancellationToken);
         await _tunnel.SendAsync(new ServerWelcomeMessage
         {
             BotTemplates = bots
@@ -41,19 +40,19 @@ public class UserConnection : IDisposable
                 switch (clientMessage)
                 {
                     case ClientStartChatMessage startChatMessage:
-                        _chat?.Dispose();
+                        if(_chat != null) await _chat.DisposeAsync();
                         _chat = null;
                         await StartChatAsync(startChatMessage, cancellationToken);
                         break;
                     case ClientStopChatMessage:
-                        _chat?.Dispose();
+                        if(_chat != null) await _chat.DisposeAsync();
                         _chat = null;
                         break;
                     case ClientSendMessage sendMessage:
-                        await (_chat?.HandleMessageAsync(sendMessage, cancellationToken) ?? SendError("Please select a bot first.", cancellationToken));
+                        _chat?.HandleClientMessage(sendMessage);
                         break;
                     case ClientSpeechPlaybackCompleteMessage:
-                        await (_chat?.HandleSpeechPlaybackCompleteAsync() ?? SendError("Please select a bot first.", cancellationToken));
+                        _chat?.HandleSpeechPlaybackComplete();
                         break;
                     case ClientLoadBotTemplateMessage loadBotTemplateMessage:
                         await LoadBotTemplateAsync(loadBotTemplateMessage.BotTemplateId, cancellationToken);
@@ -82,7 +81,7 @@ public class UserConnection : IDisposable
     {
         _logger.LogInformation("Loading bot template {BotTemplateId}", botTemplateId);
         
-        var bot = await _servicesLocator.BotsRepository.GetBotAsync(botTemplateId, cancellationToken);
+        var bot = await _repositories.Bots.GetBotAsync(botTemplateId, cancellationToken);
         if (bot == null)
         {
             await SendError("This bot template does not exist", cancellationToken);
@@ -111,69 +110,13 @@ public class UserConnection : IDisposable
     {
         _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
 
-        var profile = await _servicesLocator.ProfileRepository.GetProfileAsync() ?? new ProfileSettings { Name = "User", Description = "" };
-        var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
+        _chat = await _chatSessionFactory.CreateAsync(_tunnel, startChatMessage, cancellationToken);
 
-        var textGen = _servicesLocator.TextGenFactory.Create(startChatMessage.TextGenService);
-        
-        // TODO: Use a real chat data store, reload using auth
-        var chatData = new ChatSessionData
-        {
-            ChatId = startChatMessage.ChatId ?? Crypto.CreateCryptographicallySecureGuid(),
-            UserName = profile.Name,
-            BotName = startChatMessage.BotName,
-            Preamble = new TextData
-            {
-                Text = textProcessor.ProcessText(startChatMessage.Preamble)
-            },
-            Postamble = new TextData
-            {
-                Text = textProcessor.ProcessText(startChatMessage.Postamble)
-            },
-            Greeting = !string.IsNullOrEmpty(startChatMessage.Greeting) ? new TextData
-            {
-                Text = textProcessor.ProcessText(startChatMessage.Greeting)
-            } : null
-        };
-        chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble.Text);
-        chatData.Postamble.Tokens = textGen.GetTokenCount(chatData.Postamble.Text);
-        if(chatData.Greeting != null) chatData.Greeting.Tokens = textGen.GetTokenCount(chatData.Greeting.Text);
-        var sampleMessages = startChatMessage.SampleMessages?.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
-        foreach (var message in sampleMessages)
-        {
-            var parts = message.Split(":");
-            if (parts.Length == 1) continue;
-            var m = new ChatMessageData
-            {
-                User = parts[0] switch
-                {
-                    "{{User}}" => profile.Name,
-                    "{{Bot}}" => startChatMessage.BotName,
-                    _ => startChatMessage.BotName
-                },
-                Text = textProcessor.ProcessText(parts[1].Trim())
-            };
-            m.Tokens = textGen.GetTokenCount(m.Text);
-            chatData.SampleMessages.Add(m);
-        }
-
-        _chat = new ChatSession(
-            _tunnel,
-            _loggerFactory,
-            _servicesLocator,
-            chatData,
-            startChatMessage,
-            textProcessor,
-            startChatMessage.AudioPath,
-            startChatMessage.UseServerSpeechRecognition && profile.EnableSpeechRecognition,
-            profile.PauseSpeechRecognitionDuringPlayback
-        );
-
-        await _chat.SendReadyAsync(cancellationToken);
+        _chat.SendReady();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _chat?.Dispose();
+        if(_chat != null) await _chat.DisposeAsync();
     }
 }

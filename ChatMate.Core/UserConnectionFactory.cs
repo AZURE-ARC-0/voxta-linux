@@ -1,21 +1,27 @@
 ﻿using ChatMate.Abstractions.Network;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
 public class UserConnectionFactory
 {
-    private readonly ChatServicesLocator _servicesLocator;
-    private readonly ILoggerFactory _loggerFactory;
+    private readonly IServiceProvider _sp;
 
-    public UserConnectionFactory(ChatServicesLocator servicesLocator, ILoggerFactory loggerFactory)
+    public UserConnectionFactory(
+        IServiceProvider sp
+        )
     {
-        _servicesLocator = servicesLocator;
-        _loggerFactory = loggerFactory;
+        _sp = sp;
     }
     
     public UserConnection Create(IUserConnectionTunnel tunnel)
     {
-        return new UserConnection(tunnel, _loggerFactory, _servicesLocator);
+        return new UserConnection(
+            tunnel,
+            _sp.GetRequiredService<ILoggerFactory>(),
+            _sp.GetRequiredService<ChatRepositories>(),
+            _sp.GetRequiredService<ChatSessionFactory>()
+        );
     }
 }
