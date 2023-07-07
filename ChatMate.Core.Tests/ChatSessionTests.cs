@@ -109,6 +109,32 @@ public class ChatSessionTests
             Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerSpeechMessage>().FirstOrDefault()?.Url, Is.EqualTo("/audio-path"));
         });
     }
+
+    [Test]
+    public async Task TestHandleClientMessage_InterruptSpeech()
+    {
+        var genIdx = 0;
+        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => new TextData { Text = genIdx++ == 0 ? "This speech will be interrupted." : "How rude!" });
+        _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
+        _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
+
+        _session.HandleClientMessage(new ClientSendMessage { Text = "Hello!" });
+        await _session.WaitForPendingQueueItemsAsync();
+        _session.HandleClientMessage(new ClientSendMessage { Text = "Stop!", SpeechInterruptionRatio = 0.5d });
+
+        await AssertSession();
+        Assert.Multiple(() =>
+        {
+            Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
+                User: Hello!
+                Bot: This speech will...
+                User: *interrupts {{Bot}}* Stop!
+                Bot: How rude!
+                """.ReplaceLineEndings("\n")));
+            Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("This speech will be interrupted."));
+            Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("How rude!"));
+        });
+    }
     
     [Test]
     public async Task TestHandleClientMessage_InterruptGeneration()
@@ -117,7 +143,7 @@ public class ChatSessionTests
         _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).Returns<IReadOnlyChatSessionData, CancellationToken>(async (data, ct) =>
         {
             if (genIdx++ == 0) await Task.Delay(10000, ct);
-            return new TextData { Text = $"Pong {genIdx}" };
+            return new TextData { Text = $"Pong {genIdx}!" };
         });
         _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
@@ -133,8 +159,7 @@ public class ChatSessionTests
                 Ping 2!
                 Bot: Pong 2!
                 """.ReplaceLineEndings("\n")));
-            Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong!"));
-            Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerSpeechMessage>().FirstOrDefault()?.Url, Is.EqualTo("/audio-path"));
+            Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong 2!"));
         });
     }
 
