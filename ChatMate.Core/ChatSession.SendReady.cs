@@ -38,8 +38,10 @@ public partial class ChatSession
 
         if (_chatSessionData.Greeting != null)
         {
-            var reply = CreateMessageFromGen(_chatSessionData.Greeting);
-            await SendReply(reply, cancellationToken);
+            var reply1 = ChatMessageData.FromGen(_chatSessionData.BotName, _chatSessionData.Greeting);
+            _chatSessionData.Messages.Add(reply1);
+            var reply = reply1;
+            await SendReplyWithSpeechAsync(reply, cancellationToken);
         }
     }
 }

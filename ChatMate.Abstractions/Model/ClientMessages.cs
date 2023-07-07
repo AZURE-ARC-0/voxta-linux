@@ -16,6 +16,7 @@ public abstract class ClientMessage
 public class ClientSendMessage : ClientMessage
 {
     public required string Text { get; init; }
+    public double SpeechInterruptionRatio { get; init; }
 }
 
 [Serializable]

@@ -35,6 +35,7 @@ public class ChatSessionTests
             TtsVoice = "voice",
         };
         var chatTextProcessor = new Mock<IChatTextProcessor>();
+        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>())).Returns<string?>(text => text ?? "");
         var profile = new ProfileSettings
         {
             Name = "User",
@@ -104,6 +105,34 @@ public class ChatSessionTests
         await AssertSession();
         Assert.Multiple(() =>
         {
+            Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong!"));
+            Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerSpeechMessage>().FirstOrDefault()?.Url, Is.EqualTo("/audio-path"));
+        });
+    }
+    
+    [Test]
+    public async Task TestHandleClientMessage_InterruptGeneration()
+    {
+        var genIdx = 0;
+        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).Returns<IReadOnlyChatSessionData, CancellationToken>(async (data, ct) =>
+        {
+            if (genIdx++ == 0) await Task.Delay(10000, ct);
+            return new TextData { Text = $"Pong {genIdx}" };
+        });
+        _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
+        _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
+
+        _session.HandleClientMessage(new ClientSendMessage { Text = "Ping 1!" });
+        _session.HandleClientMessage(new ClientSendMessage { Text = "Ping 2!" });
+
+        await AssertSession();
+        Assert.Multiple(() =>
+        {
+            Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
+                User: Ping 1!
+                Ping 2!
+                Bot: Pong 2!
+                """.ReplaceLineEndings("\n")));
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong!"));
             Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerSpeechMessage>().FirstOrDefault()?.Url, Is.EqualTo("/audio-path"));
         });

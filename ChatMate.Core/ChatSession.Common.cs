@@ -4,9 +4,9 @@ namespace ChatMate.Core;
 
 public partial class ChatSession
 {
-    private async Task SendReply(ChatMessageData reply, CancellationToken cancellationToken)
+    private async Task SendReplyWithSpeechAsync(ChatMessageData reply, CancellationToken cancellationToken)
     {
-        var speechTask = _speechGenerator.CreateSpeechAsync(reply.Text, $"msg_{_chatSessionData.ChatId.ToString()}_{reply.Id}", cancellationToken);
+        var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(reply.Text, $"msg_{_chatSessionData.ChatId.ToString()}_{reply.Id}", cancellationToken), cancellationToken);
 
         await _tunnel.SendAsync(new ServerReplyMessage
         {
@@ -16,14 +16,14 @@ public partial class ChatSession
         var speechUrl = await speechTask;
         if (speechUrl != null)
         {
+            if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
             await _tunnel.SendAsync(new ServerSpeechMessage
             {
                 Url = speechUrl,
             }, cancellationToken);
-            _chatSessionState.SpeechStart();
         }
 
-#warning Re-enable this but not as a bot option
+        #warning Re-enable this but not as a bot option
         /*
         if (_servicesLocator.AnimSelectFactory.TryCreate(bot.Services.AnimSelect.Service, out var animSelect))
         {
@@ -32,20 +32,5 @@ public partial class ChatSession
             await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }
         */
-    }
-
-    private ChatMessageData CreateMessageFromGen(TextData gen)
-    {
-        var reply = new ChatMessageData
-        {
-            Id = Guid.NewGuid(),
-            User = _chatSessionData.BotName,
-            Timestamp = DateTimeOffset.UtcNow,
-            Text = gen.Text,
-            Tokens = gen.Tokens,
-        };
-        // TODO: Save into some storage
-        _chatSessionData.Messages.Add(reply);
-        return reply;
     }
 }

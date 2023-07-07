@@ -58,7 +58,6 @@ public sealed partial class ChatSession : IChatSession
 
     public void HandleSpeechPlaybackComplete()
     {
-        _chatSessionState.SpeechComplete();
         _inputHandle?.RequestResumeSpeechRecognition();
     }
 
@@ -67,7 +66,7 @@ public sealed partial class ChatSession : IChatSession
         _logger.LogInformation("Speech recognition started");
         Enqueue(async ct =>
         {
-            await _chatSessionState.AbortReplyAsync();
+            await _chatSessionState.AbortGeneratingReplyAsync();
             await _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), ct);
         });
     }

@@ -7,72 +7,67 @@ public partial class ChatSession
 {
     public void HandleClientMessage(ClientSendMessage clientSendMessage)
     {
-        Enqueue(ct => HandleClientMessageAsync(clientSendMessage, ct));
+        _chatSessionState.AbortGeneratingReplyAsync().AsTask().GetAwaiter().GetResult();
+        var abortCancellationToken = _chatSessionState.GenerateReplyBegin();
+        Enqueue(ct => HandleClientMessageAsync(clientSendMessage, abortCancellationToken, ct));
     }
 
-    private async ValueTask HandleClientMessageAsync(ClientSendMessage clientSendMessage, CancellationToken cancellationToken)
+    private async ValueTask HandleClientMessageAsync(ClientSendMessage clientSendMessage, CancellationToken abortCancellationToken, CancellationToken queueCancellationToken)
     {
-        _logger.LogInformation("Received chat message: {Text}", clientSendMessage.Text);
-#warning This should actually happen once we have the text and sent the wav back
-        if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
-
-        var text = clientSendMessage.Text;
-
-        if (await _chatSessionState.AbortReplyAsync())
-        {
-#warning Refactor this, find a cleaner way to do that (e.g. estimate the audio length cutoff?)
-            var lastBotMessage = _chatSessionData.Messages.LastOrDefault(m => m.User == _chatSessionData.BotName);
-            if (lastBotMessage != null)
-            {
-                lastBotMessage.Text = lastBotMessage.Text[..(lastBotMessage.Text.Length / 2)] + "...";
-                lastBotMessage.Tokens = _textGen.GetTokenCount(lastBotMessage.Text);
-                _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);
-            }
-            text = "*interrupts {{Bot}}* " + text;
-            _logger.LogInformation("Added interruption notice to the user message: {Text}", text);
-        }
-        
-        // TODO: Save into some storage
-        _chatSessionData.Messages.Add(new ChatMessageData
-        {
-            Id = Guid.NewGuid(),
-            User = _chatSessionData.UserName,
-            Timestamp = DateTimeOffset.UtcNow,
-            Text = _chatTextProcessor.ProcessText(text),
-        });
-
-        var abortCancellationToken = await _chatSessionState.BeginGeneratingReply();
         try
         {
-            using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, abortCancellationToken);
-            var linkedCancellationToken = linkedCancellationSource.Token;
+            _logger.LogInformation("Received chat message: {Text}", clientSendMessage.Text);
+
+            var text = clientSendMessage.Text;
+
+            if (clientSendMessage.SpeechInterruptionRatio is > 0.05f and < 0.95f)
+            {
+                var lastBotMessage = _chatSessionData.Messages.LastOrDefault();
+                if (lastBotMessage?.User == _chatSessionData.BotName)
+                {
+                    var cutoff = Math.Clamp((int)Math.Round(lastBotMessage.Text.Length * clientSendMessage.SpeechInterruptionRatio), 1, lastBotMessage.Text.Length - 2);
+                    lastBotMessage.Text = lastBotMessage.Text[..cutoff] + "...";
+                    lastBotMessage.Tokens = _textGen.GetTokenCount(lastBotMessage.Text);
+                    _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);
+                }
+
+                text = "*interrupts {{Bot}}* " + text;
+                _logger.LogInformation("Added interruption notice to the user message: {Text}", text);
+            }
+
+            if (_chatSessionState.PendingUserMessage.Length > 0) _chatSessionState.PendingUserMessage.Append('\n');
+            _chatSessionState.PendingUserMessage.Append(text);
 
             ChatMessageData reply;
             try
             {
+                using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(queueCancellationToken, abortCancellationToken);
+                var linkedCancellationToken = linkedCancellationSource.Token;
                 var gen = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
                 if (string.IsNullOrWhiteSpace(gen.Text)) throw new InvalidOperationException("AI service returned an empty string.");
-                reply = CreateMessageFromGen(gen);
+                reply = ChatMessageData.FromGen(_chatSessionData.BotName, gen);
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
+                // Reply will simply be dropped
                 return;
             }
 
-            try
+            // TODO: Save into some storage
+            _chatSessionData.Messages.Add(new ChatMessageData
             {
-                await SendReply(reply, linkedCancellationToken);
-            }
-            catch (TaskCanceledException)
-            {
-                if (cancellationToken.IsCancellationRequested) return;
-#warning This is tricky because we cancel the bot message but we can't say for sure if the response was sent. Requires refactoring.
-                _chatSessionData.Messages.Remove(reply);
-            }
+                Id = Guid.NewGuid(),
+                User = _chatSessionData.UserName,
+                Timestamp = DateTimeOffset.UtcNow,
+                Text = _chatTextProcessor.ProcessText(_chatSessionState.PendingUserMessage.ToString()),
+            });
+            _chatSessionData.Messages.Add(reply);
+            _chatSessionState.PendingUserMessage.Clear();
+            await SendReplyWithSpeechAsync(reply, queueCancellationToken);
         }
         finally
         {
-            _chatSessionState.SpeechGenerationComplete();
+            _chatSessionState.GenerateReplyEnd();
         }
     }
 }

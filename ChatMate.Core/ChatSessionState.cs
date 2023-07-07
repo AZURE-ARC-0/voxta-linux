@@ -1,59 +1,48 @@
-﻿namespace ChatMate.Core;
+﻿using System.Text;
+
+namespace ChatMate.Core;
 
 public class ChatSessionState
 {
-    private bool _speaking;
-    private CancellationTokenSource? _replyAbort;
+    public readonly StringBuilder PendingUserMessage = new();
+    
+    private CancellationTokenSource? _generateReplyAbort;
+    private TaskCompletionSource<bool>? _generateReplyTaskCompletionSource;
 
-    public async Task<CancellationToken> BeginGeneratingReply()
+    public CancellationToken GenerateReplyBegin()
     {
-        await AbortReplyAsync();
+        _generateReplyTaskCompletionSource = new TaskCompletionSource<bool>();
         var cts = new CancellationTokenSource();
-        _replyAbort = cts;
+        _generateReplyAbort = cts;
         return cts.Token;
     }
 
-    public ValueTask<bool> AbortReplyAsync()
+    public void GenerateReplyEnd()
     {
-        _speaking = false;
-#warning This is a mess. Clean up.
-        if (_replyAbort == null)
-        {
-            if (_speaking)
-            {
-                _speaking = false;
-                return ValueTask.FromResult(true);
-            }
-            return ValueTask.FromResult(false);
-        }
-        
+        _generateReplyTaskCompletionSource?.SetResult(true);
+        _generateReplyAbort?.Dispose();
+        _generateReplyAbort = null;
+    }
+
+    public async ValueTask AbortGeneratingReplyAsync()
+    {
         try
         {
-            _replyAbort?.Cancel();
+            try
+            {
+                _generateReplyAbort?.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            
+            if (_generateReplyTaskCompletionSource != null)
+                await _generateReplyTaskCompletionSource.Task;
         }
-        catch (ObjectDisposedException)
+        finally
         {
+            _generateReplyTaskCompletionSource = null;
+            _generateReplyAbort = null;
         }
-        
-#warning Wait for the abort task
-        _replyAbort = null;
-        _speaking = false;
-        return ValueTask.FromResult(false);
-    }
-    
-    public void SpeechStart()
-    {
-        _speaking = true;
-    }
-
-    public void SpeechComplete()
-    {
-        _speaking = false;
-    }
-
-    public void SpeechGenerationComplete()
-    {
-        _replyAbort?.Dispose();
-        _replyAbort = null;
     }
 }
