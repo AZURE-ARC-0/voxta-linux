@@ -25,7 +25,7 @@ public partial class ChatSession
             if (lastBotMessage != null)
             {
                 lastBotMessage.Text = lastBotMessage.Text[..(lastBotMessage.Text.Length / 2)] + "...";
-                lastBotMessage.Tokens = _services.TextGen.GetTokenCount(lastBotMessage.Text);
+                lastBotMessage.Tokens = _textGen.GetTokenCount(lastBotMessage.Text);
                 _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);
             }
             text = "*interrupts {{Bot}}* " + text;
@@ -50,7 +50,7 @@ public partial class ChatSession
             ChatMessageData reply;
             try
             {
-                var gen = await _services.TextGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
+                var gen = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
                 if (string.IsNullOrWhiteSpace(gen.Text)) throw new InvalidOperationException("AI service returned an empty string.");
                 reply = CreateMessageFromGen(gen);
             }

@@ -1,6 +1,8 @@
-﻿using ChatMate.Abstractions.Management;
+﻿using ChatMate.Abstractions.DependencyInjection;
+using ChatMate.Abstractions.Management;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
+using ChatMate.Abstractions.Services;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
@@ -15,37 +17,35 @@ public interface IChatSession : IAsyncDisposable
 public sealed partial class ChatSession : IChatSession
 {
     private readonly IUserConnectionTunnel _tunnel;
-    private readonly ChatServices _services;
+    private readonly ITextGenService _textGen;
     private readonly ChatSessionData _chatSessionData;
     private readonly IChatTextProcessor _chatTextProcessor;
     private readonly bool _pauseSpeechRecognitionDuringPlayback;
     private readonly ILogger<UserConnection> _logger;
     private readonly ExclusiveLocalInputHandle? _inputHandle;
-    private readonly ITemporaryFileCleanup _temporaryFileCleanup;
     private readonly ChatSessionState _chatSessionState;
-    private readonly PendingSpeechManager _pendingSpeech;
+    private readonly ISpeechGenerator _speechGenerator;
 
     public ChatSession(IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
-        ChatServices services,
+        ITextGenService textGen,
         ChatSessionData chatSessionData,
         IChatTextProcessor chatTextProcessor,
         ProfileSettings profile,
         ExclusiveLocalInputHandle? inputHandle,
-        ITemporaryFileCleanup temporaryFileCleanup,
-        PendingSpeechManager pendingSpeech,
-        ChatSessionState chatSessionState)
+        ChatSessionState chatSessionState,
+        ISpeechGenerator speechGenerator
+        )
     {
         _tunnel = tunnel;
-        _services = services;
+        _textGen = textGen;
         _chatSessionData = chatSessionData;
         _chatTextProcessor = chatTextProcessor;
         _pauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback;
         _logger = loggerFactory.CreateLogger<UserConnection>();
         _inputHandle = inputHandle;
-        _temporaryFileCleanup = temporaryFileCleanup;
-        _pendingSpeech = pendingSpeech;
         _chatSessionState = chatSessionState;
+        _speechGenerator = speechGenerator;
 
         if (_inputHandle != null)
         {

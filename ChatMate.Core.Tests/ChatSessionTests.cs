@@ -1,4 +1,3 @@
-using ChatMate.Abstractions.Management;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
@@ -13,8 +12,8 @@ public class ChatSessionTests
     private Mock<IUserConnectionTunnel> _tunnelMock = null!;
     private ChatSessionData _chatSessionData = null!;
     private Mock<ITextGenService> _textGen = null!;
-    private Mock<ITextToSpeechService> _textToSpeech = null!;
     private List<string> _serverErrors = null!;
+    private Mock<ISpeechGenerator> _speechGenerator = null!;
 
     [SetUp]
     public void Setup()
@@ -23,7 +22,6 @@ public class ChatSessionTests
         
         _tunnelMock = new Mock<IUserConnectionTunnel>();
         _textGen = new Mock<ITextGenService>();
-        _textToSpeech = new Mock<ITextToSpeechService>();
         _chatSessionData = new ChatSessionData
         {
             UserName = "User",
@@ -46,25 +44,19 @@ public class ChatSessionTests
         };
         var inputManager = new ExclusiveLocalInputManager();
         var inputHandle = new ExclusiveLocalInputHandle(inputManager);
-        var temporaryFileCleanup = new Mock<ITemporaryFileCleanup>();
-        var pendingSpeech = new PendingSpeechManager();
         var chatSessionState = new ChatSessionState();
+        _speechGenerator = new Mock<ISpeechGenerator>();
 
         _session = new ChatSession(
             _tunnelMock.Object,
             new NullLoggerFactory(),
-            new ChatServices
-            {
-                TextGen = _textGen.Object,
-                TextToSpeech = _textToSpeech.Object,
-            },
+            _textGen.Object,
             _chatSessionData,
             chatTextProcessor.Object,
             profile,
             inputHandle,
-            temporaryFileCleanup.Object,
-            pendingSpeech,
-            chatSessionState
+            chatSessionState,
+            _speechGenerator.Object
         );
 
         _tunnelMock
@@ -103,7 +95,7 @@ public class ChatSessionTests
     public async Task TestHandleClientMessage()
     {
         _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).ReturnsAsync(new TextData { Text = "Pong!" });
-        _textToSpeech.Setup(m => m.GenerateSpeechAsync(It.IsAny<SpeechRequest>(), It.IsAny<ISpeechTunnel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        _speechGenerator.Setup(m => m.CreateSpeechAsync("Pong!", It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync("/audio-path");
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerSpeechMessage>(), It.IsAny<CancellationToken>())).Verifiable();
 
@@ -113,7 +105,7 @@ public class ChatSessionTests
         Assert.Multiple(() =>
         {
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong!"));
-            Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerSpeechMessage>().FirstOrDefault()?.Url, Is.Not.Null.Or.Empty);
+            Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerSpeechMessage>().FirstOrDefault()?.Url, Is.EqualTo("/audio-path"));
         });
     }
 
