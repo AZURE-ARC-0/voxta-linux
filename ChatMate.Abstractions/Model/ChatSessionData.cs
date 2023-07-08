@@ -21,6 +21,7 @@ public class ChatSessionData : IReadOnlyChatSessionData
     public required TextData Preamble { get; init; }
     public TextData? Postamble { get; init; }
     public TextData? Greeting { get; set; }
+    public string[]? ThinkingSpeech { get; init; }
 
     public IReadOnlyList<ChatMessageData> GetSampleMessages() => Messages.AsReadOnly();
     public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();

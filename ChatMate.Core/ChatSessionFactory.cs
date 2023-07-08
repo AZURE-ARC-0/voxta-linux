@@ -10,6 +10,7 @@ namespace ChatMate.Core;
 public class ChatSessionFactory
 {
     private readonly ISelectorFactory<ITextGenService> _textGenFactory;
+    private readonly ISelectorFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ChatRepositories _repositories;
     private readonly ExclusiveLocalInputManager _localInputManager;
@@ -35,6 +36,14 @@ public class ChatSessionFactory
         var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
 
         var textGen = _textGenFactory.Create(startChatMessage.TextGenService);
+        string[]? thinkingSpeech = null;
+        if (startChatMessage is { TtsService: not null, TtsVoice: not null })
+        {
+            var textToSpeechGen = _textToSpeechFactory.Create(startChatMessage.TtsService);
+            thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
+        }
+
+        var speechGenerator = _speechGeneratorFactory.Create(startChatMessage.TtsService, startChatMessage.TtsVoice, startChatMessage.AudioPath);
         
         // TODO: Use a real chat data store, reload using auth
         var chatData = new ChatSessionData
@@ -54,6 +63,7 @@ public class ChatSessionFactory
             {
                 Text = textProcessor.ProcessText(startChatMessage.Greeting)
             } : null,
+            ThinkingSpeech = thinkingSpeech,
             AudioPath = startChatMessage.AudioPath,
             TtsVoice = startChatMessage.TtsVoice
         };
@@ -90,7 +100,7 @@ public class ChatSessionFactory
             profile,
             useSpeechRecognition ? _localInputManager.Acquire() : null,
             new ChatSessionState(),
-            _speechGeneratorFactory.Create(startChatMessage.TtsService, startChatMessage.TtsVoice, startChatMessage.AudioPath)
+            speechGenerator
         );
     }
 }

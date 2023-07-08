@@ -35,6 +35,18 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
     }
 
+    public string[] GetThinkingSpeech()
+    {
+        return new[]
+        {
+            "m",
+            "uh",
+            "..",
+            "mmh",
+            "hum",
+        };
+    }
+
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);

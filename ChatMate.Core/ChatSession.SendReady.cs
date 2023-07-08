@@ -1,4 +1,5 @@
 ﻿using ChatMate.Abstractions.Model;
+using ChatMate.Common;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
@@ -7,30 +8,26 @@ public partial class ChatSession
 {
     public void SendReady()
     {
-        Enqueue(HandleAsync);
+        Enqueue(SendReadyAsync);
     }
 
-    private async ValueTask HandleAsync(CancellationToken cancellationToken)
+    private async ValueTask SendReadyAsync(CancellationToken cancellationToken)
     {
-#warning Bring back thinking speech
-        /*
-        var thinkingSpeechUrls = new string[_bot.ThinkingSpeech?.Length ?? 0];
-        if (_bot.ThinkingSpeech != null)
+        var thinkingSpeechUrls = new List<string>(_chatSessionData.ThinkingSpeech?.Length ?? 0);
+        if (_chatSessionData.ThinkingSpeech != null)
         {
-            byte i = 0;
-            foreach (var thinkingSpeech in _bot.ThinkingSpeech)
+            foreach (var thinkingSpeech in _chatSessionData.ThinkingSpeech)
             {
-                await CreateSpeech(thinkingSpeech, Crypto.CreateCryptographicallySecureGuid().ToString(), out var speechUrl);
-                thinkingSpeechUrls[i] = speechUrl;
-                i++;
+                var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, Crypto.CreateCryptographicallySecureGuid().ToString(), cancellationToken);
+                if (thinkingSpeechUrl != null)
+                    thinkingSpeechUrls.Add(thinkingSpeechUrl);
             }
         }
-        */
 
         await _tunnel.SendAsync(new ServerReadyMessage
         {
             ChatId = _chatSessionData.ChatId,
-            // ThinkingSpeechUrls = thinkingSpeechUrls,
+            ThinkingSpeechUrls = thinkingSpeechUrls.ToArray(),
                 
         }, cancellationToken);
         
@@ -38,9 +35,8 @@ public partial class ChatSession
 
         if (_chatSessionData.Greeting != null)
         {
-            var reply1 = ChatMessageData.FromGen(_chatSessionData.BotName, _chatSessionData.Greeting);
-            _chatSessionData.Messages.Add(reply1);
-            var reply = reply1;
+            var reply = ChatMessageData.FromGen(_chatSessionData.BotName, _chatSessionData.Greeting);
+            _chatSessionData.Messages.Add(reply);
             await SendReplyWithSpeechAsync(reply, cancellationToken);
         }
     }
