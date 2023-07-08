@@ -1,6 +1,4 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Management;
-using ChatMate.Abstractions.Model;
+﻿using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -26,6 +24,7 @@ public sealed partial class ChatSession : IChatSession
     private readonly ExclusiveLocalInputHandle? _inputHandle;
     private readonly ChatSessionState _chatSessionState;
     private readonly ISpeechGenerator _speechGenerator;
+    private readonly IAnimationSelectionService? _animationSelection;
 
     public ChatSession(IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
@@ -35,8 +34,8 @@ public sealed partial class ChatSession : IChatSession
         ProfileSettings profile,
         ExclusiveLocalInputHandle? inputHandle,
         ChatSessionState chatSessionState,
-        ISpeechGenerator speechGenerator
-        )
+        ISpeechGenerator speechGenerator,
+        IAnimationSelectionService? animationSelection)
     {
         _tunnel = tunnel;
         _textGen = textGen;
@@ -47,6 +46,7 @@ public sealed partial class ChatSession : IChatSession
         _inputHandle = inputHandle;
         _chatSessionState = chatSessionState;
         _speechGenerator = speechGenerator;
+        _animationSelection = animationSelection;
 
         if (_inputHandle != null)
         {

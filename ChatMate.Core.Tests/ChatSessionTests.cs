@@ -57,7 +57,8 @@ public class ChatSessionTests
             profile,
             inputHandle,
             chatSessionState,
-            _speechGenerator.Object
+            _speechGenerator.Object,
+            null
         );
 
         _tunnelMock

@@ -8,45 +8,55 @@
     <form method="post" asp-action="settings">
         <h3>OpenAI</h3>
         <div class="form-group">
-            <label asp-for="OpenAI.ApiKey">OpenAI Key:</label>
+            <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
             <input asp-for="OpenAI.ApiKey" class="form-control"/>
             @Html.ValidationMessageFor(m => m.OpenAI.ApiKey)
         </div>
         <div class="form-group">
-            <label asp-for="OpenAI.Model">OpenAI Model:</label>
+            <label asp-for="OpenAI.Model">OpenAI model:</label>
             <input asp-for="OpenAI.Model" class="form-control"/>
             @Html.ValidationMessageFor(m => m.OpenAI.Model)
         </div>
         
         <h3>NovelAI</h3>
         <div class="form-group">
-            <label asp-for="NovelAI.Token">NovelAI Token:</label>
+            <label asp-for="NovelAI.Token">NovelAI token:</label>
             <input asp-for="NovelAI.Token" class="form-control"/>
             @Html.ValidationMessageFor(m => m.NovelAI.Token)
         </div>
         <div class="form-group">
-            <label asp-for="NovelAI.Model">NovelAI Model:</label>
+            <label asp-for="NovelAI.Model">NovelAI model:</label>
             <input asp-for="NovelAI.Model" class="form-control"/>
             @Html.ValidationMessageFor(m => m.NovelAI.Model)
         </div>
         
         <h3>KoboldAI</h3>
         <div class="form-group">
-            <label asp-for="KoboldAI.Uri">KoboldAI Uri:</label>
+            <label asp-for="KoboldAI.Uri">KoboldAI uri:</label>
             <input asp-for="KoboldAI.Uri" class="form-control"/>
             @Html.ValidationMessageFor(m => m.KoboldAI.Uri)
         </div>
         
         <h3>Profile</h3>
         <div class="form-group">
-            <label asp-for="Profile.Name">Profile Name:</label>
+            <label asp-for="Profile.Name">Profile name:</label>
             <input asp-for="Profile.Name" class="form-control"/>
             @Html.ValidationMessageFor(m => m.Profile.Name)
         </div>
         <div class="form-group">
-            <label asp-for="Profile.Description">Profile Description:</label>
+            <label asp-for="Profile.Description">Profile description:</label>
             <input asp-for="Profile.Description" class="form-control"/>
             @Html.ValidationMessageFor(m => m.Profile.Description)
+        </div>
+        
+        <h3>Services</h3>
+        <div class="form-group">
+            <label asp-for="Profile.AnimationSelectionService">Animation selection service</label>
+            <select asp-for="Profile.AnimationSelectionService" class="form-control">
+                <option value="">None</option>
+                <option value="OpenAI">OpenAI</option>
+            </select>
+            @Html.ValidationMessageFor(m => m.Profile.AnimationSelectionService)
         </div>
         
         <h3>Options</h3>

@@ -64,7 +64,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
         
         var totalTokens = chatSessionData.Preamble.Tokens + 4;
-        if (!string.IsNullOrEmpty(chatSessionData.Postamble.Text))
+        if (!string.IsNullOrEmpty(chatSessionData.Postamble?.Text))
             totalTokens += chatSessionData.Postamble.Tokens + 4;
         
         var messages = new List<object> { new { role = "system", content = chatSessionData.Preamble.Text } };
@@ -78,7 +78,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
             messages.Insert(1, new { role, content = message.Text });
         }
 
-        if (!string.IsNullOrEmpty(chatSessionData.Postamble.Text))
+        if (!string.IsNullOrEmpty(chatSessionData.Postamble?.Text))
             messages.Add(new { role = "system", content = chatSessionData.Postamble.Text });
 
         tokenizePerf.Pause();
@@ -103,7 +103,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
     public async ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var sb = new StringBuilder(chatSessionData.Preamble.Text);
-        sb.AppendLine();
+        sb.AppendLine("");
         foreach (var message in chatSessionData.Messages.TakeLast(4))
         {
             sb.AppendLine($"{message.User}: {message.Text}");
@@ -112,12 +112,11 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         sb.AppendLine($"""
         ---
         Available animations: smile, frown, pensive, excited, sad, curious, afraid, angry, surprised, laugh, cry, idle
-        ---
         Write the animation {chatSessionData.BotName} should play.
         """);
         var messages = new List<object>
         {
-            new { role = "system", content = "You are a tool that selects the character animation for a Virtual Reality game. You will be presented with a chat, and must provide the animation that should be used from the provided list. Only answer with a single animation name." },
+            new { role = "system", content = "You are a tool that selects the character animation for a Virtual Reality game. You will be presented with a chat, and must provide the animation to play from the provided list. Only answer with a single animation name. Example response: smile" },
             new { role = "user", content = sb.ToString() }
         };
         

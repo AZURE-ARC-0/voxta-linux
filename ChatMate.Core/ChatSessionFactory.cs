@@ -15,6 +15,7 @@ public class ChatSessionFactory
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
+    private readonly IServiceFactory<IAnimationSelectionService> _animationSelectionFactory;
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
@@ -22,8 +23,8 @@ public class ChatSessionFactory
         ExclusiveLocalInputManager localInputManager,
         SpeechGeneratorFactory speechGeneratorFactory,
         IServiceFactory<ITextGenService> textGenFactory,
-        IServiceFactory<ITextToSpeechService> textToSpeechFactory
-    )
+        IServiceFactory<ITextToSpeechService> textToSpeechFactory,
+        IServiceFactory<IAnimationSelectionService> animationSelectionFactory)
     {
         _loggerFactory = loggerFactory;
         _repositories = repositories;
@@ -31,6 +32,7 @@ public class ChatSessionFactory
         _speechGeneratorFactory = speechGeneratorFactory;
         _textGenFactory = textGenFactory;
         _textToSpeechFactory = textToSpeechFactory;
+        _animationSelectionFactory = animationSelectionFactory;
     }
 
     public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
@@ -44,6 +46,9 @@ public class ChatSessionFactory
         var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
 
         var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService);
+        var animationSelection = string.IsNullOrEmpty(profile.AnimationSelectionService)
+            ? null
+            : await _animationSelectionFactory.CreateAsync(profile.AnimationSelectionService);
         
         string[]? thinkingSpeech = null;
         if (startChatMessage is { TtsService: not null, TtsVoice: not null })
@@ -109,7 +114,8 @@ public class ChatSessionFactory
             profile,
             useSpeechRecognition ? _localInputManager.Acquire() : null,
             new ChatSessionState(),
-            speechGenerator
+            speechGenerator,
+            animationSelection
         );
     }
 }

@@ -27,9 +27,9 @@ public class PagesController : Controller
     [HttpGet("/settings")]
     public async Task<IActionResult> Settings([FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository, CancellationToken cancellationToken)
     {
-        var openai = await settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
-        var novelai = await settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
-        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName);
+        var openai = await settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName, cancellationToken);
+        var novelai = await settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName, cancellationToken);
+        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName, cancellationToken);
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
 
         var vm = new SettingsViewModel
@@ -53,7 +53,8 @@ public class PagesController : Controller
                 Name = profile?.Name ?? "User",
                 Description = profile?.Description ?? "",
                 EnableSpeechRecognition = profile?.EnableSpeechRecognition ?? true,
-                PauseSpeechRecognitionDuringPlayback = profile?.PauseSpeechRecognitionDuringPlayback ?? true
+                PauseSpeechRecognitionDuringPlayback = profile?.PauseSpeechRecognitionDuringPlayback ?? true,
+                AnimationSelectionService = profile != null ? profile.AnimationSelectionService : OpenAIConstants.ServiceName,
             }
         };
         
@@ -88,6 +89,7 @@ public class PagesController : Controller
             Description = model.Profile.Description?.Trim(),
             EnableSpeechRecognition = model.Profile.EnableSpeechRecognition,
             PauseSpeechRecognitionDuringPlayback = model.Profile.PauseSpeechRecognitionDuringPlayback,
+            AnimationSelectionService = model.Profile.AnimationSelectionService,
         });
         
         return RedirectToAction("Chat");
@@ -110,6 +112,8 @@ public class PagesController : Controller
             {
                 Name = "New bot",
                 Preamble = "{{Bot}} is a virtual companion for {{User}}.",
+                Postamble = "",
+                Greeting = "Hi!",
                 SampleMessages = Array.Empty<BotDefinition.Message>(),
                 Services = new BotDefinition.ServicesMap
                 {
@@ -122,6 +126,10 @@ public class PagesController : Controller
                         Service = NovelAIConstants.ServiceName,
                         Voice = "Naia",
                     },
+                },
+                Options = new BotDefinition.BotOptions
+                {
+                    EnableThinkingSpeech = true,
                 }
             };
         }

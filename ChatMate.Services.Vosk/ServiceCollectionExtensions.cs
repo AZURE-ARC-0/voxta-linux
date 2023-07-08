@@ -1,5 +1,4 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Services;
+﻿using ChatMate.Abstractions.Services;
 using ChatMate.Services.Vosk;
 using Microsoft.Extensions.Configuration;
 

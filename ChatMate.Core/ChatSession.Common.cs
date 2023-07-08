@@ -1,4 +1,5 @@
 ﻿using ChatMate.Abstractions.Model;
+using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
 
@@ -23,14 +24,11 @@ public partial class ChatSession
             }, cancellationToken);
         }
 
-        #warning Re-enable this but not as a bot option
-        /*
-        if (_servicesLocator.AnimSelectFactory.TryCreate(bot.Services.AnimSelect.Service, out var animSelect))
+        if (_animationSelection != null)
         {
-            var animation = await animSelect.SelectAnimationAsync(chatData);
+            var animation = await _animationSelection.SelectAnimationAsync(_chatSessionData, cancellationToken);
             _logger.LogInformation("Selected animation: {Animation}", animation);
             await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }
-        */
     }
 }
