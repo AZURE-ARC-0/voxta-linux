@@ -1,14 +1,14 @@
 ﻿using System.Diagnostics;
-using System.Text;
+using ChatMate.Abstractions.Model;
 
 namespace ChatMate.Core;
 
 public class ChatSessionState
 {
-    public Stopwatch _audioPlaybackStopwatch = new();
-    public double _audioPlaybackDuration;
+    public TextData? PendingUserMessage;
     
-    public readonly StringBuilder PendingUserMessage = new();
+    private readonly Stopwatch _audioPlaybackStopwatch = new();
+    private double _audioPlaybackDuration;
     
     private CancellationTokenSource? _generateReplyAbort;
     private TaskCompletionSource<bool>? _generateReplyTaskCompletionSource;

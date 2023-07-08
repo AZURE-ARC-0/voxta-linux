@@ -36,8 +36,24 @@ public partial class ChatSession
                 _logger.LogInformation("Added interruption notice to the user message: {Text}", text);
             }
 
-            if (_chatSessionState.PendingUserMessage.Length > 0) _chatSessionState.PendingUserMessage.Append('\n');
-            _chatSessionState.PendingUserMessage.Append(text);
+            if (_chatSessionState.PendingUserMessage == null)
+            {
+                var userText = _chatTextProcessor.ProcessText(text);
+                var userTextData = new TextData
+                {
+                    Text = userText,
+                    Tokens = _textGen.GetTokenCount(userText)
+                };
+                var userMessageData = ChatMessageData.FromGen(_chatSessionData.UserName, userTextData);
+                _chatSessionData.Messages.Add(userMessageData);
+                _chatSessionState.PendingUserMessage = userMessageData;
+            }
+            else
+            {
+                var append = '\n' + text;
+                _chatSessionState.PendingUserMessage.Text += append;
+                _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
+            }
 
             ChatMessageData reply;
             try
@@ -54,16 +70,11 @@ public partial class ChatSession
                 return;
             }
 
+            _chatSessionState.PendingUserMessage = null;
+            
             // TODO: Save into some storage
-            _chatSessionData.Messages.Add(new ChatMessageData
-            {
-                Id = Guid.NewGuid(),
-                User = _chatSessionData.UserName,
-                Timestamp = DateTimeOffset.UtcNow,
-                Text = _chatTextProcessor.ProcessText(_chatSessionState.PendingUserMessage.ToString()),
-            });
             _chatSessionData.Messages.Add(reply);
-            _chatSessionState.PendingUserMessage.Clear();
+            
             await SendReplyWithSpeechAsync(reply, queueCancellationToken);
         }
         finally

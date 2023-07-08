@@ -40,7 +40,7 @@
 <div id="app" class="flex-grow-1"></div>
 
 <script type="module">
-    import { createSignal, onMount, onCleanup, For, Switch, Match, Show } from "https://cdn.skypack.dev/solid-js";
+    import { createSignal, onMount, onCleanup, For, Switch, Match } from "https://cdn.skypack.dev/solid-js";
     import { render } from "https://cdn.skypack.dev/solid-js/web";
     import html from "https://cdn.skypack.dev/solid-js/html";
     
@@ -51,7 +51,7 @@
             currentAudio.pause();
         }
         currentAudio = new Audio(url);
-        if (onStart) currentAudio.addEventListener('play', () => onStart(currentAudio.duration));
+        if (onStart) currentAudio.addEventListener('playing', () => onStart(currentAudio.duration));
         if (onComplete) currentAudio.addEventListener('ended', onComplete);
         currentAudio.play();
     }
@@ -196,9 +196,11 @@
                     addMessage({ user: 'bot', text: data.text });
                     break;
                 case 'speech':
-                    playAudio(data.url,
-                     (duration) => socket.send(JSON.stringify({ $type: "speechPlaybackStart", duration: duration })),
-                     () => socket.send(JSON.stringify({ $type: "speechPlaybackComplete" })));
+                    playAudio(
+                        data.url,
+                         (duration) => socket.send(JSON.stringify({ $type: "speechPlaybackStart", duration: duration })),
+                         () => socket.send(JSON.stringify({ $type: "speechPlaybackComplete" }))
+                     );
                     break;
                 case 'speechRecognitionStart':
                     if (currentAudio) currentAudio.pause();

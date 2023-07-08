@@ -120,6 +120,6 @@ public sealed class UserConnection : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await _chat.DisposeAsync();
+        if (_chat != null) await _chat.DisposeAsync();
     }
 }
