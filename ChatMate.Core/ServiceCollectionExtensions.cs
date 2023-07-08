@@ -22,24 +22,24 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static SelectorRegistry<ITextGenService> AddTextGenRegistry(this IServiceCollection services)
+    public static ServiceRegistry<ITextGenService> AddTextGenRegistry(this IServiceCollection services)
     {
-        var registry = new SelectorRegistry<ITextGenService>();
-        services.AddSingleton<ISelectorFactory<ITextGenService>>(sp => new SelectorFactory<ITextGenService>(registry, sp));
+        var registry = new ServiceRegistry<ITextGenService>();
+        services.AddScoped<IServiceFactory<ITextGenService>>(sp => new ServiceFactory<ITextGenService>(registry, sp));
         return registry;
     }
     
-    public static SelectorRegistry<ITextToSpeechService> AddTextToSpeechRegistry(this IServiceCollection services)
+    public static ServiceRegistry<ITextToSpeechService> AddTextToSpeechRegistry(this IServiceCollection services)
     {
-        var registry = new SelectorRegistry<ITextToSpeechService>();
-        services.AddSingleton<ISelectorFactory<ITextToSpeechService>>(sp => new SelectorFactory<ITextToSpeechService>(registry, sp));
+        var registry = new ServiceRegistry<ITextToSpeechService>();
+        services.AddScoped<IServiceFactory<ITextToSpeechService>>(sp => new ServiceFactory<ITextToSpeechService>(registry, sp));
         return registry;
     }
     
-    public static SelectorRegistry<IAnimationSelectionService> AddAnimationSelectorRegistry(this IServiceCollection services)
+    public static ServiceRegistry<IAnimationSelectionService> AddAnimationServiceRegistry(this IServiceCollection services)
     {
-        var registry = new SelectorRegistry<IAnimationSelectionService>();
-        services.AddSingleton<ISelectorFactory<IAnimationSelectionService>>(sp => new SelectorFactory<IAnimationSelectionService>(registry, sp));
+        var registry = new ServiceRegistry<IAnimationSelectionService>();
+        services.AddScoped<IServiceFactory<IAnimationSelectionService>>(sp => new ServiceFactory<IAnimationSelectionService>(registry, sp));
         return registry;
     }
 }

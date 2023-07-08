@@ -21,14 +21,17 @@ public class SpeechGeneratorFactory
         _sp = sp;
     }
     
-    public ISpeechGenerator Create(string? ttsService, string? ttsVoice, string? audioPath)
+    public async Task<ISpeechGenerator> CreateAsync(string? ttsService, string? ttsVoice, string? audioPath)
     {
         if (string.IsNullOrEmpty(ttsService) || string.IsNullOrEmpty(ttsVoice))
             return new NoSpeechGenerator();
 
-        if(audioPath != null)
-            return new LocalSpeechGenerator(_sp.GetRequiredService<ISelectorFactory<ITextToSpeechService>>().Create(ttsService), ttsVoice, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath);
-        
+        if (audioPath != null)
+        {
+            var textToSpeech = await _sp.GetRequiredService<IServiceFactory<ITextToSpeechService>>().CreateAsync(ttsService);
+            return new LocalSpeechGenerator(textToSpeech, ttsVoice, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath);
+        }
+
         return new RemoteSpeechGenerator(ttsService, ttsVoice, _sp.GetRequiredService<PendingSpeechManager>());
     }
 }

@@ -1,14 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using ChatMate.Abstractions.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatMate.Abstractions.DependencyInjection;
 
-public interface ISelectorRegistry<TInterface> where TInterface : class
+public interface IServiceRegistry<in TInterface> where TInterface : class
 {
     void Add<TConcrete>(string key) where TConcrete : class, TInterface;
 }
 
-public class SelectorRegistry<TInterface> : ISelectorRegistry<TInterface> where TInterface : class
+public class ServiceRegistry<TInterface> : IServiceRegistry<TInterface> where TInterface : class
 {
     public readonly Dictionary<string, Type> Types = new();
 
@@ -19,38 +19,35 @@ public class SelectorRegistry<TInterface> : ISelectorRegistry<TInterface> where 
     }
 }
 
-public interface ISelectorFactory<TInterface> where TInterface : class
+public interface IServiceFactory<TInterface> where TInterface : class
 {
-    TInterface Create(string key);
-    bool TryCreate(string? key, [NotNullWhen(true)] out TInterface? value);
+    Task<TInterface> CreateAsync(string key);
 }
 
-public class SelectorFactory<TInterface> : ISelectorFactory<TInterface> where TInterface : class
+public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInterface : class, IService
 {
-    private readonly SelectorRegistry<TInterface> _registry;
+    private readonly Dictionary<string, TInterface> _instances = new();
+    private readonly ServiceRegistry<TInterface> _registry;
     private readonly IServiceProvider _sp;
 
-    public SelectorFactory(SelectorRegistry<TInterface> registry, IServiceProvider sp)
+    public ServiceFactory(ServiceRegistry<TInterface> registry, IServiceProvider sp)
     {
         _registry = registry;
         _sp = sp;
     }
 
-    public TInterface Create(string key)
+    public async Task<TInterface> CreateAsync(string key)
     {
+        if (_instances.TryGetValue(key, out var instance))
+            return instance;
+        
         if (!_registry.Types.TryGetValue(key, out var type))
             throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {key}");
-        return (TInterface)_sp.GetRequiredService(type);
-    }
-
-    public bool TryCreate(string? key, [NotNullWhen(true)] out TInterface? value)
-    {
-        if (string.IsNullOrEmpty(key) || key == "None" || !_registry.Types.TryGetValue(key, out var type))
-        {
-            value = null;
-            return false;
-        }
-        value = (TInterface)_sp.GetRequiredService(type);
-        return true;
+        
+        instance = (TInterface)_sp.GetRequiredService(type);
+        await instance.InitializeAsync();
+        _instances.Add(key, instance);
+        
+        return instance;
     }
 }

@@ -29,7 +29,6 @@ public class PagesController : Controller
     {
         var openai = await settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
         var novelai = await settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
-        #warning Introduce constants and extension methods
         var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName);
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
 

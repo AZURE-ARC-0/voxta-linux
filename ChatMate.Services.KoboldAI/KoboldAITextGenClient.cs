@@ -23,8 +23,11 @@ public class KoboldAITextGenClient : ITextGenService
         _settingsRepository = settingsRepository;
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
-        #warning Pass the config on creation, create once per session
-        var settings = settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName).GetAwaiter().GetResult();
+    }
+    
+    public async Task InitializeAsync()
+    {
+        var settings = await _settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri(settings!.Uri);
     }
 

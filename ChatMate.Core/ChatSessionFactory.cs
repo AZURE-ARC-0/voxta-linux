@@ -13,16 +13,16 @@ public class ChatSessionFactory
     private readonly ChatRepositories _repositories;
     private readonly ExclusiveLocalInputManager _localInputManager;
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
-    private readonly ISelectorFactory<ITextGenService> _textGenFactory;
-    private readonly ISelectorFactory<ITextToSpeechService> _textToSpeechFactory;
+    private readonly IServiceFactory<ITextGenService> _textGenFactory;
+    private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
         ChatRepositories repositories,
         ExclusiveLocalInputManager localInputManager,
         SpeechGeneratorFactory speechGeneratorFactory,
-        ISelectorFactory<ITextGenService> textGenFactory,
-        ISelectorFactory<ITextToSpeechService> textToSpeechFactory
+        IServiceFactory<ITextGenService> textGenFactory,
+        IServiceFactory<ITextToSpeechService> textToSpeechFactory
     )
     {
         _loggerFactory = loggerFactory;
@@ -43,15 +43,16 @@ public class ChatSessionFactory
         var profile = await _repositories.Profile.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
         var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
 
-        var textGen = _textGenFactory.Create(startChatMessage.TextGenService);
+        var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService);
+        
         string[]? thinkingSpeech = null;
         if (startChatMessage is { TtsService: not null, TtsVoice: not null })
         {
-            var textToSpeechGen = _textToSpeechFactory.Create(startChatMessage.TtsService);
+            var textToSpeechGen = await _textToSpeechFactory.CreateAsync(startChatMessage.TtsService);
             thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
         }
 
-        var speechGenerator = _speechGeneratorFactory.Create(startChatMessage.TtsService, startChatMessage.TtsVoice, startChatMessage.AudioPath);
+        var speechGenerator = await _speechGeneratorFactory.CreateAsync(startChatMessage.TtsService, startChatMessage.TtsVoice, startChatMessage.AudioPath);
         
         // TODO: Use a real chat data store, reload using auth
         var chatData = new ChatSessionData

@@ -14,7 +14,7 @@ public class SpeechController : ControllerBase
     public async Task GetSpeech(
         [FromRoute] string id,
         [FromRoute] string extension,
-        [FromServices] ISelectorFactory<ITextToSpeechService> speechGenFactory,
+        [FromServices] IServiceFactory<ITextToSpeechService> speechGenFactory,
         [FromServices] PendingSpeechManager pendingSpeech,
         CancellationToken cancellationToken
     )
@@ -27,6 +27,7 @@ public class SpeechController : ControllerBase
             return;
         }
 
-        await speechGenFactory.Create(speechRequest.Service).GenerateSpeechAsync(speechRequest, new HttpResponseSpeechTunnel(Response), extension, cancellationToken);
+        var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service);
+        await textToSpeech.GenerateSpeechAsync(speechRequest, new HttpResponseSpeechTunnel(Response), extension, cancellationToken);
     }
 }

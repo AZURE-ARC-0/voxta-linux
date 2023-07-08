@@ -8,11 +8,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddKoboldAI(this IServiceCollection services)
     {
-        services.AddSingleton<KoboldAITextGenClient>();
+        services.AddScoped<KoboldAITextGenClient>();
         return services;
     }
     
-    public static void RegisterKoboldAI(this ISelectorRegistry<ITextGenService> registry)
+    public static void RegisterKoboldAI(this IServiceRegistry<ITextGenService> registry)
     {
         registry.Add<KoboldAITextGenClient>(KoboldAIConstants.ServiceName);
     }

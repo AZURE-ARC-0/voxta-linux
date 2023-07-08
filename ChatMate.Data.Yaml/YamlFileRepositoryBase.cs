@@ -10,7 +10,7 @@ public abstract class YamlFileRepositoryBase
     private static readonly ISerializer YamlSerializer = new SerializerBuilder()
         .Build();
 
-    protected static async Task<T?> DeserializeFileAsync<T>(string file) where T : class
+    protected static async Task<T?> DeserializeFileAsync<T>(string file, CancellationToken cancellationToken) where T : class
     {
         if (!File.Exists(file)) return null;
         await using var stream = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read);

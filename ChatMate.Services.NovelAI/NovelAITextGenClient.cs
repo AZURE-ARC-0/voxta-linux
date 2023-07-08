@@ -19,6 +19,7 @@ public class NovelAITextGenClient : ITextGenService
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private string _model = "clio-v1";
 
     static NovelAITextGenClient()
     {
@@ -31,8 +32,6 @@ public class NovelAITextGenClient : ITextGenService
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
         _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
-        _httpClient.BaseAddress = new Uri("https://api.novelai.net");
-        _httpClient.DefaultRequestHeaders.Add("Accept", "text/event-stream");
         _parameters = new
         {
             temperature = 1.05,
@@ -79,12 +78,18 @@ public class NovelAITextGenClient : ITextGenService
             }
         };
     }
+    
+    public async Task InitializeAsync()
+    {
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
+        _httpClient.BaseAddress = new Uri("https://api.novelai.net");
+        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
+        _model = settings.Model;
+    }
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-
         // TODO: count tokens: https://novelai.net/tokenizer
         // TODO: Move the settings to appsettings
         var chatMessages = chatSessionData.GetMessages();
@@ -95,7 +100,7 @@ public class NovelAITextGenClient : ITextGenService
         """.ReplaceLineEndings("\n");
         var body = new
         {
-            model = settings.Model,
+            model = _model,
             input,
             parameters = _parameters
         };
@@ -103,8 +108,6 @@ public class NovelAITextGenClient : ITextGenService
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");

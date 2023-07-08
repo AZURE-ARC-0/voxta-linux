@@ -39,7 +39,7 @@ public class Startup
 
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
-        var animationSelectionRegistry = services.AddAnimationSelectorRegistry();
+        var animationSelectionRegistry = services.AddAnimationServiceRegistry();
 
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();

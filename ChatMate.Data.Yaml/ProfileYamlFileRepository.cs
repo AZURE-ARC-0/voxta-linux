@@ -5,17 +5,13 @@ namespace ChatMate.Data.Yaml;
 
 public class ProfileYamlFileRepository : YamlFileRepositoryBase, IProfileRepository
 {
-    private ProfileSettings? _cache;
-    
     public async Task<ProfileSettings?> GetProfileAsync(CancellationToken cancellationToken)
     {
-        if (_cache != null) return _cache;
-        return _cache = await DeserializeFileAsync<ProfileSettings>("Data/Profile.yaml");
+        return await DeserializeFileAsync<ProfileSettings>("Data/Profile.yaml", cancellationToken);
     }
 
     public Task SaveProfileAsync(ProfileSettings value)
     {
-        _cache = value;
         return SerializeFileAsync("Data/Profile.yaml", value);
     }
 }

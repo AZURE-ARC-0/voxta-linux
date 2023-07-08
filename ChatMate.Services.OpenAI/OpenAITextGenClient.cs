@@ -33,6 +33,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private string _model = "gpt-3.5-turbo";
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
@@ -41,8 +42,15 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         _tokenizer = tokenizer;
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
+    }
 
+    public async Task InitializeAsync()
+    {
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
+        if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
+        _model = settings.Model;
     }
 
     public int GetTokenCount(string message)
@@ -119,18 +127,14 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 
     private async Task<string> SendChatRequestAsync(List<object> messages, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
-        if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         var body = new
         {
-            model = settings.Model,
+            model = _model,
             messages,
             max_tokens = 120,
         };
 
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
-        // TODO: Make a request instead
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
         var response = await _httpClient.PostAsync("/v1/chat/completions", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

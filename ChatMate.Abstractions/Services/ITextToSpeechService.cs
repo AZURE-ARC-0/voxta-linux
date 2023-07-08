@@ -3,7 +3,7 @@ using ChatMate.Abstractions.Network;
 
 namespace ChatMate.Abstractions.Services;
 
-public interface ITextToSpeechService
+public interface ITextToSpeechService : IService
 {
     string ServiceName { get; }
     string[]? GetThinkingSpeech();

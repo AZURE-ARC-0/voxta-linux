@@ -8,17 +8,17 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddNovelAI(this IServiceCollection services)
     {
-        services.AddSingleton<NovelAITextGenClient>();
-        services.AddSingleton<NovelAITextToSpeechClient>();
+        services.AddScoped<NovelAITextGenClient>();
+        services.AddScoped<NovelAITextToSpeechClient>();
         return services;
     }
     
-    public static void RegisterNovelAI(this ISelectorRegistry<ITextGenService> registry)
+    public static void RegisterNovelAI(this IServiceRegistry<ITextGenService> registry)
     {
         registry.Add<NovelAITextGenClient>(NovelAIConstants.ServiceName);
     }
     
-    public static void RegisterNovelAI(this ISelectorRegistry<ITextToSpeechService> registry)
+    public static void RegisterNovelAI(this IServiceRegistry<ITextToSpeechService> registry)
     {
         registry.Add<NovelAITextToSpeechClient>(NovelAIConstants.ServiceName);
     }
