@@ -41,7 +41,7 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
         _waveIn = new WaveInEvent();
         _waveIn.WaveFormat = new WaveFormat(SampleRate, 1);
         #warning Add perf measure for this too... somehow
-        _waveIn.DataAvailable += (sender, e) =>
+        _waveIn.DataAvailable += (_, e) =>
         {
             if (e.BytesRecorded <= 0) return;
             if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))

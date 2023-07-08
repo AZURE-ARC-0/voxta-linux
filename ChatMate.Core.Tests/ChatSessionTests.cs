@@ -142,11 +142,13 @@ public class ChatSessionTests
     public async Task TestHandleClientMessage_InterruptGeneration()
     {
         var genIdx = 0;
-        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).Returns<IReadOnlyChatSessionData, CancellationToken>(async (data, ct) =>
-        {
-            if (genIdx++ == 0) await Task.Delay(10000, ct);
-            return new TextData { Text = $"Pong {genIdx}!" };
-        });
+        _textGen
+            .Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>()))
+            .Returns<IReadOnlyChatSessionData, CancellationToken>(async (_, ct) =>
+            {
+                if (genIdx++ == 0) await Task.Delay(10000, ct);
+                return new TextData { Text = $"Pong {genIdx}!" };
+            });
         _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
 

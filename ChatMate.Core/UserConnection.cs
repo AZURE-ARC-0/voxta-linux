@@ -101,6 +101,7 @@ public sealed class UserConnection : IAsyncDisposable
             TextGenService = bot.Services.TextGen.Service,
             TtsService = bot.Services.SpeechGen.Service,
             TtsVoice = bot.Services.SpeechGen.Voice,
+            EnableThinkingSpeech = bot.Options?.EnableThinkingSpeech ?? true,
         }, cancellationToken);
     }
 

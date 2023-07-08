@@ -15,3 +15,5 @@ Preamble: |
   Bubbles: And do you know which one is it?
   Kally: Oh yes, yes! Mmmh, let me think... Oh, yes! It's the second one! I'm smart!
 Greeting: "Hi! What can I do for you today, master?"
+Options:
+  EnableThinkingSpeech: true

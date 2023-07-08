@@ -42,6 +42,7 @@ public class BotTemplateLoadedMessage : ServerMessage
     public required string TextGenService { get; init; }
     public required string TtsService { get; init; }
     public required string TtsVoice { get; init; }
+    public bool EnableThinkingSpeech { get; init; }
 }
 
 [Serializable]

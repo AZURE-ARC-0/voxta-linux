@@ -84,7 +84,10 @@ public sealed partial class ChatSession : IChatSession
         if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
         Enqueue(async ct =>
         {
-            await _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage { Text = e }, ct);
+            await _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage
+            {
+                Text = e
+            }, ct);
         });
         HandleClientMessage(new ClientSendMessage { Text = e });
     }

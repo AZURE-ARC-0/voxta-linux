@@ -11,6 +11,7 @@ public class BotDefinition
     public string? Greeting { get; init; }
     public Message[]? SampleMessages { get; init; }
     public required ServicesMap Services { get; init; }
+    public BotOptions? Options { get; init; }
 
     [Serializable]
     public class Message
@@ -36,5 +37,11 @@ public class BotDefinition
     public class VoiceServiceMap : ServiceMap
     {
         public required string Voice { get; init; }
+    }
+    
+    [Serializable]
+    public class BotOptions
+    {
+        public bool EnableThinkingSpeech { get; init; }
     }
 }

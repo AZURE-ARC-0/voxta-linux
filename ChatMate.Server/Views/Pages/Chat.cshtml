@@ -183,6 +183,12 @@
         const [useServerSpeechRecognition, _] = createSignal(true);
         
         let thinkingSpeechUrls = [];
+        const playThinkingSpeech = () => {
+            if (thinkingSpeechUrls.length) {
+                const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
+                playAudio(audioUrl);
+            }
+        }
         
         const addMessage = (message) => {
             setMessages(oldMessages => [...oldMessages, message]);
@@ -207,6 +213,7 @@
                     break;
                 case 'speechRecognitionEnd':
                     addMessage({ user: 'user', text: data.text });
+                    playThinkingSpeech();
                     break;
                 case 'error':
                     addMessage({ user: 'error', text: data.message });
@@ -281,11 +288,7 @@
             const msg = JSON.stringify({ $type: "send", text: content, speechInterruptionRatio: speechInterruptionRatio });
             socket.send(msg);
             setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
-            if (thinkingSpeechUrls.length) {
-                const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
-                console.log('Playing ' + audioUrl)
-                playAudio(audioUrl);
-            }
+            playThinkingSpeech();
         }
         
         return () => html`

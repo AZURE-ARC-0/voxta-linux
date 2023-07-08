@@ -9,6 +9,6 @@ public class SettingsViewModel
 {
     public required OpenAISettings OpenAI { get; set; }
     public required NovelAISettings NovelAI { get; set; }
-    public required ProfileSettings Profile { get; set; }
     public required KoboldAISettings KoboldAI { get; set; }
+    public required ProfileSettings Profile { get; set; }
 }

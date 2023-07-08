@@ -9,20 +9,28 @@ namespace ChatMate.Core;
 
 public class ChatSessionFactory
 {
-    private readonly ISelectorFactory<ITextGenService> _textGenFactory;
-    private readonly ISelectorFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ChatRepositories _repositories;
     private readonly ExclusiveLocalInputManager _localInputManager;
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
+    private readonly ISelectorFactory<ITextGenService> _textGenFactory;
+    private readonly ISelectorFactory<ITextToSpeechService> _textToSpeechFactory;
 
-    public ChatSessionFactory(ILoggerFactory loggerFactory, ChatRepositories repositories, ExclusiveLocalInputManager localInputManager, SpeechGeneratorFactory speechGeneratorFactory, ISelectorFactory<ITextGenService> textGenFactory)
+    public ChatSessionFactory(
+        ILoggerFactory loggerFactory,
+        ChatRepositories repositories,
+        ExclusiveLocalInputManager localInputManager,
+        SpeechGeneratorFactory speechGeneratorFactory,
+        ISelectorFactory<ITextGenService> textGenFactory,
+        ISelectorFactory<ITextToSpeechService> textToSpeechFactory
+    )
     {
         _loggerFactory = loggerFactory;
         _repositories = repositories;
         _localInputManager = localInputManager;
         _speechGeneratorFactory = speechGeneratorFactory;
         _textGenFactory = textGenFactory;
+        _textToSpeechFactory = textToSpeechFactory;
     }
 
     public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)

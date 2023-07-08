@@ -51,7 +51,7 @@
         
         <h3>Options</h3>
         <div class="form-group">
-            <label asp-for="Profile.EnableSpeechRecognition">Pause Speech Recognition During Playback: <span class="text-muted">Enable speech recognition</span></label>
+            <label asp-for="Profile.EnableSpeechRecognition">Enable speech recognition</label>
             <input asp-for="Profile.EnableSpeechRecognition" type="checkbox" class="form-check-input"/>
             @Html.ValidationMessageFor(m => m.Profile.EnableSpeechRecognition)
         </div>
