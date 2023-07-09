@@ -44,7 +44,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         _performanceMetrics = performanceMetrics;
     }
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");

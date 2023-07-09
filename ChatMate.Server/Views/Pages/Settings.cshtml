@@ -37,6 +37,13 @@
             @Html.ValidationMessageFor(m => m.KoboldAI.Uri)
         </div>
         
+        <h3>ElevenLabs</h3>
+        <div class="form-group">
+            <label asp-for="ElevenLabs.ApiKey">ElevenLabs API key:</label>
+            <input asp-for="ElevenLabs.ApiKey" class="form-control"/>
+            @Html.ValidationMessageFor(m => m.ElevenLabs.ApiKey)
+        </div>
+        
         <h3>Profile</h3>
         <div class="form-group">
             <label asp-for="Profile.Name">Profile name:</label>

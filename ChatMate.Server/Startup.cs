@@ -47,6 +47,9 @@ public class Startup
         
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();
+        
+        services.AddElevenLabs();
+        textToSpeechRegistry.RegisterElevenLabs();
 
         services.AddVosk(_configuration.GetSection("Vosk"));
         services.AddHostedService<SpeechRecognitionBackgroundTask>();

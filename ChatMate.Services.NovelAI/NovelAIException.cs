@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.NovelAI;
+﻿namespace ChatMate.Services.ElevenLabs;
 
 public class NovelAIException : Exception
 {

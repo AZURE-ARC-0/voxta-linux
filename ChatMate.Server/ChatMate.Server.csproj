@@ -33,6 +33,7 @@
     <ProjectReference Include="..\ChatMate.Abstractions\ChatMate.Abstractions.csproj" />
     <ProjectReference Include="..\ChatMate.Core\ChatMate.Core.csproj" />
     <ProjectReference Include="..\ChatMate.Data.Yaml\ChatMate.Data.Yaml.csproj" />
+    <ProjectReference Include="..\ChatMate.Services.ElevenLabs\ChatMate.Services.ElevenLabs.csproj" />
     <ProjectReference Include="..\ChatMate.Services.KoboldAI\ChatMate.Services.KoboldAI.csproj" />
     <ProjectReference Include="..\ChatMate.Services.NovelAI\ChatMate.Services.NovelAI.csproj" />
     <ProjectReference Include="..\ChatMate.Services.OpenAI\ChatMate.Services.OpenAI.csproj" />

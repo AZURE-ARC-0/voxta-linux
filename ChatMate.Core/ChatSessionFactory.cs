@@ -45,19 +45,19 @@ public class ChatSessionFactory
         var profile = await _repositories.Profile.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
         var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
 
-        var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService);
+        var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService, cancellationToken);
         var animationSelection = string.IsNullOrEmpty(profile.AnimationSelectionService)
             ? null
-            : await _animationSelectionFactory.CreateAsync(profile.AnimationSelectionService);
+            : await _animationSelectionFactory.CreateAsync(profile.AnimationSelectionService, cancellationToken);
         
         string[]? thinkingSpeech = null;
         if (startChatMessage is { TtsService: not null, TtsVoice: not null })
         {
-            var textToSpeechGen = await _textToSpeechFactory.CreateAsync(startChatMessage.TtsService);
+            var textToSpeechGen = await _textToSpeechFactory.CreateAsync(startChatMessage.TtsService, cancellationToken);
             thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
         }
 
-        var speechGenerator = await _speechGeneratorFactory.CreateAsync(startChatMessage.TtsService, startChatMessage.TtsVoice, startChatMessage.AudioPath);
+        var speechGenerator = await _speechGeneratorFactory.CreateAsync(startChatMessage.TtsService, startChatMessage.TtsVoice, startChatMessage.AudioPath, cancellationToken);
         
         // TODO: Use a real chat data store, reload using auth
         var chatData = new ChatSessionData

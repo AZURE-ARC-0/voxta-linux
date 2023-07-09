@@ -32,7 +32,7 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
         _options = options;
     }
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var model = await _modelDownloader.AcquireModelAsync();
         global::Vosk.Vosk.SetLogLevel(_options.Value.LogLevel);

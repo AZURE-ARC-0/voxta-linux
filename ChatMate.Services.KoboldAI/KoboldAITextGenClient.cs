@@ -25,7 +25,7 @@ public class KoboldAITextGenClient : ITextGenService
         _performanceMetrics = performanceMetrics;
     }
     
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri(settings!.Uri);

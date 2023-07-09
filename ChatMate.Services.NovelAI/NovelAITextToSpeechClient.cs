@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using System.Security.Authentication;
 using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
 using NAudio.Wave;
 
-namespace ChatMate.Services.NovelAI;
+namespace ChatMate.Services.ElevenLabs;
 
 public class NovelAITextToSpeechClient : ITextToSpeechService
 {
@@ -35,7 +36,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
     }
     
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
@@ -55,11 +56,29 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         };
     }
 
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    public Task<VoiceInfo[]> GetVoicesAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new VoiceInfo[]
+        {
+            new() { Id = "Ligeia", Label = "Ligeia (Unisex)" },
+            new() { Id = "Aini", Label = "Aini (Female)" },
+            new() { Id = "Orea", Label = "Orea (Female)" },
+            new() { Id = "Claea", Label = "Claea (Female)" },
+            new() { Id = "Lim", Label = "Lim (Female)" },
+            new() { Id = "Orae", Label = "Orae (Female)" },
+            new() { Id = "Naia", Label = "Naia (Female)" },
+            new() { Id = "Olon", Label = "Olon (Male)" },
+            new() { Id = "Elei", Label = "Elei (Male)" },
+            new() { Id = "Ogma", Label = "Ogma (Male)" },
+            new() { Id = "Reid", Label = "Reid (Male)" },
+            new() { Id = "Pega", Label = "Pega (Male)" },
+            new() { Id = "Lam", Label = "Lam (Male)" },
+        });
+    }
+
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        
         var querystring = new Dictionary<string, string>
         {
             ["text"] = speechRequest.Text,
@@ -75,8 +94,6 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
-        if (string.IsNullOrEmpty(settings.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.Token));
         var ttsPerf = _performanceMetrics.Start("NovelAI.TextToSpeech");
         using var audioResponse = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
         

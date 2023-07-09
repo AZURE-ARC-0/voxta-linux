@@ -18,7 +18,7 @@ public class SpeechRecognitionBackgroundTask : BackgroundService
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _speechRecognitionService.InitializeAsync();
+        await _speechRecognitionService.InitializeAsync(cancellationToken);
         await base.StartAsync(cancellationToken);
     }
 

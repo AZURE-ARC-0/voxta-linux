@@ -27,4 +27,9 @@ public class HttpResponseSpeechTunnel : ISpeechTunnel
         _response.ContentLength = bytes.Length;
         await _response.BodyWriter.WriteAsync(bytes, cancellationToken);
     }
+
+    public string? GetPath()
+    {
+        return null;
+    }
 }

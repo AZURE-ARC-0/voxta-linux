@@ -2,5 +2,5 @@
 
 public interface IService
 {
-    Task InitializeAsync();
+    Task InitializeAsync(CancellationToken cancellationToken);
 }

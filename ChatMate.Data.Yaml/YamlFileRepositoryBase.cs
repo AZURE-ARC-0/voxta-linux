@@ -1,10 +1,23 @@
-﻿using YamlDotNet.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
 namespace ChatMate.Data.Yaml;
 
 public abstract class YamlFileRepositoryBase
 {
+    private static readonly HashSet<char> InvalidFileNameChars = new(Path.GetInvalidFileNameChars());
+
+    protected static void IsValidFileName([NotNull] string? filename)
+    {
+        if (filename == null) throw new ArgumentNullException(nameof(filename));
+        if (filename.Any(InvalidFileNameChars.Contains) || filename.Equals(".") || filename.Contains(".."))
+            throw new SecurityException($"Invalid filename: {filename}");
+        if (!filename.EndsWith(".yaml"))
+            throw new SecurityException($"File name '{filename}' must end with .yaml");
+    }
+
     private static readonly IDeserializer YamlDeserializer = new DeserializerBuilder()
         .Build();
     private static readonly ISerializer YamlSerializer = new SerializerBuilder()

@@ -10,7 +10,7 @@ using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using NAudio.MediaFoundation;
 
-namespace ChatMate.Services.NovelAI;
+namespace ChatMate.Services.ElevenLabs;
 
 public class NovelAITextGenClient : ITextGenService
 {
@@ -79,7 +79,7 @@ public class NovelAITextGenClient : ITextGenService
         };
     }
     
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName);
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
