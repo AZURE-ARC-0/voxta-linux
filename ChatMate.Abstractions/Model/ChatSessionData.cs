@@ -6,9 +6,7 @@ public interface IReadOnlyChatSessionData
     public string BotName { get; }
     public TextData Preamble { get; }
     public TextData? Postamble { get; }
-    public TextData? Greeting { get; }
 
-    public IReadOnlyList<ChatMessageData> GetSampleMessages();
     public IReadOnlyList<ChatMessageData> GetMessages();
 }
 

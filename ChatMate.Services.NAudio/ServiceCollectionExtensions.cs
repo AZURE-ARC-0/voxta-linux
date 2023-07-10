@@ -5,9 +5,8 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNAudio(this IServiceCollection services)
+    public static void AddNAudio(this IServiceCollection services)
     {
         services.AddScoped<IAudioConverter, NAudioAudioConverter>();
-        return services;
     }
 }

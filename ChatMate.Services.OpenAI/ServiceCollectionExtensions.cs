@@ -7,12 +7,11 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddOpenAI(this IServiceCollection services)
+    public static void AddOpenAI(this IServiceCollection services)
     {
         var tokenizer = TokenizerBuilder.CreateByModelName("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
         services.AddSingleton<ITokenizer>(_ => tokenizer);
         services.AddScoped<OpenAITextGenClient>();
-        return services;
     }
     
     public static void RegisterOpenAI(this IServiceRegistry<ITextGenService> registry)

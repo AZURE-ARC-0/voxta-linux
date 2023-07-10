@@ -6,11 +6,10 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddNovelAI(this IServiceCollection services)
+    public static void AddNovelAI(this IServiceCollection services)
     {
         services.AddScoped<NovelAITextGenClient>();
         services.AddScoped<NovelAITextToSpeechClient>();
-        return services;
     }
     
     public static void RegisterNovelAI(this IServiceRegistry<ITextGenService> registry)

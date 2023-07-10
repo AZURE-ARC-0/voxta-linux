@@ -1,4 +1,5 @@
 ﻿using ChatMate.Abstractions.Network;
+using ChatMate.Abstractions.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,7 @@ public class UserConnectionFactory
         return new UserConnection(
             tunnel,
             _sp.GetRequiredService<ILoggerFactory>(),
-            _sp.GetRequiredService<ChatRepositories>(),
+            _sp.GetRequiredService<IBotRepository>(),
             _sp.GetRequiredService<ChatSessionFactory>()
         );
     }

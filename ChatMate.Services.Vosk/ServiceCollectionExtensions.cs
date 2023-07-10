@@ -6,12 +6,11 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddVosk(this IServiceCollection services, IConfigurationSection configuration)
+    public static void AddVosk(this IServiceCollection services, IConfigurationSection configuration)
     {
         services.Configure<VoskOptions>(configuration);
         services.AddSingleton<IVoskModelDownloader, VoskModelDownloader>();
         services.AddSingleton<ISpeechRecognitionService, VoskSpeechRecognition>();
-        return services;
     }
 }
 

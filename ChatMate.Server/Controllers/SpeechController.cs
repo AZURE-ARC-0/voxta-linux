@@ -15,6 +15,7 @@ public class SpeechController : ControllerBase
     [HttpGet("/tts/gens/{id}.{extension}")]
     public async Task GetSpeech(
         [FromRoute] string id,
+        // ReSharper disable once UnusedParameter.Global
         [FromRoute] string extension,
         [FromServices] IServiceFactory<ITextToSpeechService> speechGenFactory,
         [FromServices] PendingSpeechManager pendingSpeech,

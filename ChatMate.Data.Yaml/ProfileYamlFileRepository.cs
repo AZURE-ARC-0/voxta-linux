@@ -7,7 +7,7 @@ public class ProfileYamlFileRepository : YamlFileRepositoryBase, IProfileReposit
 {
     public async Task<ProfileSettings?> GetProfileAsync(CancellationToken cancellationToken)
     {
-        return await DeserializeFileAsync<ProfileSettings>("Data/Profile.yaml", cancellationToken);
+        return await DeserializeFileAsync<ProfileSettings>("Data/Profile.yaml");
     }
 
     public Task SaveProfileAsync(ProfileSettings value)

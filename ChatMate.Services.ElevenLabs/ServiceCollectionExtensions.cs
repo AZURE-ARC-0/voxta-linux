@@ -6,10 +6,9 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddElevenLabs(this IServiceCollection services)
+    public static void AddElevenLabs(this IServiceCollection services)
     {
         services.AddScoped<ElevenLabsTextToSpeechClient>();
-        return services;
     }
     
     public static void RegisterElevenLabs(this IServiceRegistry<ITextToSpeechService> registry)

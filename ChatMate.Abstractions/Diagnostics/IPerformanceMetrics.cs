@@ -3,8 +3,7 @@
 public interface IPerformanceMetrics
 {
     IPerformanceMetricsTracker Start(string key);
-    void Track(string key, TimeSpan elapsed);
-    ICollection<string> GetKeys();
+    IEnumerable<string> GetKeys();
     TimeSpan GetAverage(string key);
 }
 

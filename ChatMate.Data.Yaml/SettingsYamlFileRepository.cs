@@ -6,7 +6,7 @@ public class SettingsYamlFileRepository : YamlFileRepositoryBase, ISettingsRepos
 {
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
     {
-        return await DeserializeFileAsync<T>($"Data/Services/{key}.yaml", cancellationToken);
+        return await DeserializeFileAsync<T>($"Data/Services/{key}.yaml");
     }
 
     public Task SaveAsync<T>(string key, T value) where T : class

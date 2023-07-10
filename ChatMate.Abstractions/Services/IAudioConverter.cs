@@ -6,5 +6,5 @@ public interface IAudioConverter
 {
     string ContentType { get; }
     Task<AudioData> ConvertAudioAsync(AudioData input, CancellationToken cancellationToken);
-    string SelectContentType(string[] acceptedContentTypes, string generatedContentType);
+    void SelectContentType(string[] acceptedContentTypes, string generatedContentType);
 }

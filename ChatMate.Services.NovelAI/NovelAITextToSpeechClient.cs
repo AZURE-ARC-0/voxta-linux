@@ -108,7 +108,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
 
         // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
         await using var stream = await audioResponse.Content.ReadAsStreamAsync(cancellationToken);
-        await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType), cancellationToken);
+        await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();
     }
 }

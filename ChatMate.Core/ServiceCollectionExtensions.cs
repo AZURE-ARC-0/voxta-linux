@@ -8,7 +8,7 @@ namespace ChatMate.Data.Yaml;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddChatMate(this IServiceCollection services)
+    public static void AddChatMate(this IServiceCollection services)
     {
         services.AddScoped<UserConnectionFactory>();
         services.AddScoped<ChatSessionFactory>();
@@ -18,8 +18,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<Sanitizer>();
         services.AddSingleton<ExclusiveLocalInputManager>();
-        
-        return services;
     }
 
     public static ServiceRegistry<ITextGenService> AddTextGenRegistry(this IServiceCollection services)

@@ -6,10 +6,9 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddKoboldAI(this IServiceCollection services)
+    public static void AddKoboldAI(this IServiceCollection services)
     {
         services.AddScoped<KoboldAITextGenClient>();
-        return services;
     }
     
     public static void RegisterKoboldAI(this IServiceRegistry<ITextGenService> registry)

@@ -1,5 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
+using ChatMate.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace ChatMate.Core;
@@ -7,23 +8,23 @@ namespace ChatMate.Core;
 public sealed class UserConnection : IAsyncDisposable
 {
     private readonly IUserConnectionTunnel _tunnel;
-    private readonly ChatRepositories _repositories;
+    private readonly IBotRepository _botRepository;
     private readonly ChatSessionFactory _chatSessionFactory;
     private readonly ILogger<UserConnection> _logger;
 
     private IChatSession? _chat;
 
-    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ChatRepositories repositories, ChatSessionFactory chatSessionFactory)
+    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, IBotRepository botRepository, ChatSessionFactory chatSessionFactory)
     {
         _tunnel = tunnel;
-        _repositories = repositories;
+        _botRepository = botRepository;
         _chatSessionFactory = chatSessionFactory;
         _logger = loggerFactory.CreateLogger<UserConnection>();
     }
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
-        var bots = await _repositories.Bots.GetBotsListAsync(cancellationToken);
+        var bots = await _botRepository.GetBotsListAsync(cancellationToken);
         await _tunnel.SendAsync(new ServerWelcomeMessage
         {
             BotTemplates = bots
@@ -84,7 +85,7 @@ public sealed class UserConnection : IAsyncDisposable
     {
         _logger.LogInformation("Loading bot template {BotTemplateId}", botTemplateId);
         
-        var bot = await _repositories.Bots.GetBotAsync(botTemplateId, cancellationToken);
+        var bot = await _botRepository.GetBotAsync(botTemplateId, cancellationToken);
         if (bot == null)
         {
             await SendError("This bot template does not exist", cancellationToken);

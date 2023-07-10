@@ -35,7 +35,7 @@ public class BotYamlFileRepository : YamlFileRepositoryBase, IBotRepository
         if (!Directory.Exists("Data/Bots")) return bots;
         foreach(var file in Directory.EnumerateFiles("Data/Bots", "*.yaml"))
         {
-            var bot = await DeserializeFileAsync<BotDefinition>(file, cancellationToken);
+            var bot = await DeserializeFileAsync<BotDefinition>(file);
             if (bot == null) continue;
             bot.Id = Path.GetFileName(file);
             bots.Add(bot);

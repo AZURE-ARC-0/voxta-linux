@@ -46,7 +46,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName);
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName, cancellationToken);
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
