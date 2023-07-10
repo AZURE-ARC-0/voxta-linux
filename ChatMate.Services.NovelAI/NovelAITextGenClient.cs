@@ -10,7 +10,7 @@ using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using NAudio.MediaFoundation;
 
-namespace ChatMate.Services.ElevenLabs;
+namespace ChatMate.Services.NovelAI;
 
 public class NovelAITextGenClient : ITextGenService
 {

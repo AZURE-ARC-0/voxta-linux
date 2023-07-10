@@ -1,8 +1,10 @@
 ﻿using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Management;
 using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Services;
 using ChatMate.Data.Yaml;
 using ChatMate.Server.Chat;
+using ChatMate.Services.NAudio;
 using Microsoft.AspNetCore.WebSockets;
 
 namespace ChatMate.Server;
@@ -50,6 +52,8 @@ public class Startup
         
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();
+        
+        services.AddNAudio();
 
         services.AddVosk(_configuration.GetSection("Vosk"));
         services.AddHostedService<SpeechRecognitionBackgroundTask>();

@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.ElevenLabs;
+﻿namespace ChatMate.Services.NovelAI;
 
 public static class NovelAIConstants
 {

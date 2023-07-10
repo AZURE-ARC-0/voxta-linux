@@ -37,6 +37,8 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         _httpClient.DefaultRequestHeaders.Add("xi-api-key", Crypto.DecryptString(settings.ApiKey));
     }
 
+    public string ContentType => "audio/mpeg";
+
     public string[] GetThinkingSpeech()
     {
         return new[]
@@ -48,7 +50,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         };
     }
 
-    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken)
+    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
     {
         var body = new
         {
@@ -65,8 +67,9 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         {
             Content = JsonContent.Create(body)
         };
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/mpeg"));
-
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/*"));
+        request.Headers.TransferEncodingChunked = false;
+        
         var response = await _httpClient.SendAsync(request, cancellationToken);
 
         
@@ -78,10 +81,9 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
             return;
         }
         
-        var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        await tunnel.SendAsync(new AudioData(stream, response.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();
-        
-        await tunnel.SendAsync(bytes, "audio/mpeg", cancellationToken);
     }
 
     public async Task<VoiceInfo[]> GetVoicesAsync(CancellationToken cancellationToken)

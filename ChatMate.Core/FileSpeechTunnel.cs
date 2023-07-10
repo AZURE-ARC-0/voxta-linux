@@ -1,4 +1,5 @@
-﻿using ChatMate.Abstractions.Network;
+﻿using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Network;
 
 namespace ChatMate.Core;
 
@@ -16,8 +17,9 @@ public class FileSpeechTunnel : ISpeechTunnel
         throw new Exception(message);
     }
 
-    public Task SendAsync(byte[] bytes, string contentType, CancellationToken cancellationToken)
+    public async Task SendAsync(AudioData audioData, CancellationToken cancellationToken)
     {
-        return File.WriteAllBytesAsync(_path, bytes, cancellationToken);
+        await using var f = File.Create(_path);
+        await audioData.Stream.CopyToAsync(f, cancellationToken);
     }
 }

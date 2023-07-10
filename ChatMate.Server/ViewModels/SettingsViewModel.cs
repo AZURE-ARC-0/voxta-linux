@@ -1,6 +1,7 @@
 ﻿using ChatMate.Abstractions.Model;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.ElevenLabs;
+using ChatMate.Services.NovelAI;
 using ChatMate.Services.OpenAI;
 
 namespace ChatMate.Server.ViewModels;

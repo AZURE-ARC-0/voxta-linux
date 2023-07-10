@@ -1,6 +1,7 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Management;
 using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,16 +22,20 @@ public class SpeechGeneratorFactory
         _sp = sp;
     }
     
-    public async Task<ISpeechGenerator> CreateAsync(string? ttsService, string? ttsVoice, string? audioPath, CancellationToken cancellationToken)
+    public async Task<ISpeechGenerator> CreateAsync(string? ttsService, string? ttsVoice, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(ttsService) || string.IsNullOrEmpty(ttsVoice))
             return new NoSpeechGenerator();
-
-        if (audioPath == null)
-            return new RemoteSpeechGenerator(ttsService, ttsVoice, _sp.GetRequiredService<PendingSpeechManager>());
         
         var textToSpeech = await _sp.GetRequiredService<IServiceFactory<ITextToSpeechService>>().CreateAsync(ttsService, cancellationToken);
-        return new LocalSpeechGenerator(textToSpeech, ttsVoice, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath);
+        
+        var audioConverter = _sp.GetRequiredService<IAudioConverter>();
+        audioConverter.SelectContentType(acceptContentTypes, textToSpeech.ContentType);
+
+        if (audioPath == null)
+            return new RemoteSpeechGenerator(ttsService, ttsVoice, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
+
+        return new LocalSpeechGenerator(textToSpeech, ttsVoice, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
     }
 }
 
@@ -48,31 +53,34 @@ public class LocalSpeechGenerator : ISpeechGenerator
     private readonly string _ttsVoice;
     private readonly ITemporaryFileCleanup _temporaryFileCleanup;
     private readonly string _audioPath;
+    private readonly IAudioConverter _audioConverter;
 
-    public LocalSpeechGenerator(ITextToSpeechService textToSpeechService, string ttsVoice, ITemporaryFileCleanup temporaryFileCleanup, string audioPath)
+    public LocalSpeechGenerator(ITextToSpeechService textToSpeechService, string ttsVoice, ITemporaryFileCleanup temporaryFileCleanup, string audioPath, IAudioConverter audioConverter)
     {
         _textToSpeechService = textToSpeechService;
         _ttsVoice = ttsVoice;
         _temporaryFileCleanup = temporaryFileCleanup;
         _audioPath = audioPath;
+        _audioConverter = audioConverter;
     }
     
     public async Task<string?> CreateSpeechAsync(string text, string id, CancellationToken cancellationToken)
     {
-            var speechUrl = Path.Combine(_audioPath, $"{id}.wav");
-            if (File.Exists(speechUrl)) return speechUrl;
-            _temporaryFileCleanup.MarkForDeletion(speechUrl);
-            await _textToSpeechService.GenerateSpeechAsync(new SpeechRequest
-                {
-                    Service = _textToSpeechService.ServiceName,
-                    Text = text,
-                    Voice = _ttsVoice,
-                },
-                new FileSpeechTunnel(speechUrl),
-                "wav",
-                cancellationToken
-            );
-            return speechUrl;
+        var speechUrl = Path.Combine(_audioPath, $"{id}.{AudioData.GetExtension(_audioConverter.ContentType)}");
+        var speechTunnel = new ConversionSpeechTunnel(new FileSpeechTunnel(speechUrl), _audioConverter);
+        if (File.Exists(speechUrl)) return speechUrl;
+        _temporaryFileCleanup.MarkForDeletion(speechUrl);
+        await _textToSpeechService.GenerateSpeechAsync(new SpeechRequest
+            {
+                Service = _textToSpeechService.ServiceName,
+                Text = text,
+                Voice = _ttsVoice,
+                ContentType = _audioConverter.ContentType,
+            },
+            speechTunnel,
+            cancellationToken
+        );
+        return speechUrl;
     }
 }
 
@@ -81,12 +89,14 @@ public class RemoteSpeechGenerator : ISpeechGenerator
     private readonly string _ttsService;
     private readonly string _ttsVoice;
     private readonly PendingSpeechManager _pendingSpeech;
+    private readonly string _contentType;
 
-    public RemoteSpeechGenerator(string ttsService, string ttsVoice, PendingSpeechManager pendingSpeech)
+    public RemoteSpeechGenerator(string ttsService, string ttsVoice, PendingSpeechManager pendingSpeech, string contentType)
     {
         _ttsService = ttsService;
         _ttsVoice = ttsVoice;
         _pendingSpeech = pendingSpeech;
+        _contentType = contentType;
     }
 
     public Task<string?> CreateSpeechAsync(string text, string id, CancellationToken cancellationToken)
@@ -101,8 +111,9 @@ public class RemoteSpeechGenerator : ISpeechGenerator
             Service = ttsService,
             Text = text,
             Voice = ttsVoice,
+            ContentType = _contentType,
         });
-        var speechUrl = $"/tts/{id}.wav";
+        var speechUrl = $"/tts/gens/{id}.{AudioData.GetExtension(_contentType)}";
         return speechUrl;
     }
 }

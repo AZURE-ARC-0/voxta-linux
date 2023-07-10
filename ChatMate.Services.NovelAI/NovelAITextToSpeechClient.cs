@@ -9,9 +9,8 @@ using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using Microsoft.Extensions.Logging;
 using NAudio.MediaFoundation;
-using NAudio.Wave;
 
-namespace ChatMate.Services.ElevenLabs;
+namespace ChatMate.Services.NovelAI;
 
 public class NovelAITextToSpeechClient : ITextToSpeechService
 {
@@ -42,6 +41,8 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
     }
+
+    public string ContentType => "audio/webm";
 
     public string[] GetThinkingSpeech()
     {
@@ -76,7 +77,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         });
     }
 
-    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, string extension, CancellationToken cancellationToken)
+    public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
     {
         var querystring = new Dictionary<string, string>
         {
@@ -92,7 +93,8 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.ToString());
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/webm"));
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("audio/*"));
+        request.Headers.TransferEncodingChunked = false;
         var ttsPerf = _performanceMetrics.Start("NovelAI.TextToSpeech");
         using var audioResponse = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
         
@@ -105,40 +107,8 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         }
 
         // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
-        string contentType;
-        var tmp = Path.GetTempFileName();
-        var bytes = await audioResponse.Content.ReadAsByteArrayAsync(cancellationToken);
+        await using var stream = await audioResponse.Content.ReadAsStreamAsync(cancellationToken);
+        await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType), cancellationToken);
         ttsPerf.Done();
-        var audioConvPerf = _performanceMetrics.Start("NovelAI.AudioConversion");
-        await File.WriteAllBytesAsync(tmp, bytes, cancellationToken);
-        try
-        {
-            await using var reader = new MediaFoundationReader(tmp);
-            var ms = new MemoryStream();
-            switch (extension)
-            {
-                case "mp3":
-                    contentType = "audio/mpeg";
-                    MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
-                    break;
-                case "wav":
-                    contentType = "audio/x-wav";
-                    // var resampler = new MediaFoundationResampler(reader, 44100);
-                    // var stereo = new MonoToStereoSampleProvider(resampler.ToSampleProvider());
-                    // WaveFileWriter.WriteWavFileToStream(ms, stereo.ToWaveProvider16());
-                    WaveFileWriter.WriteWavFileToStream(ms, reader);
-                    break;
-                default:
-                    throw new InvalidOperationException("Unexpected extension {extension}");
-            }
-            bytes = ms.ToArray();
-        }
-        finally
-        {
-            File.Delete(tmp);
-        }
-        audioConvPerf.Done();
-
-        await tunnel.SendAsync(bytes, contentType, cancellationToken);
     }
 }

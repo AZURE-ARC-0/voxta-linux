@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.ElevenLabs;
+﻿namespace ChatMate.Services.NovelAI;
 
 [Serializable]
 public class NovelAISettings

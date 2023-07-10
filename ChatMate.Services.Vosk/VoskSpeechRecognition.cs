@@ -51,6 +51,7 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
                 var json = JsonSerializer.Deserialize<Result>(result, SerializeOptions);
                 var text = json?.Text;
                 if (string.IsNullOrEmpty(text)) return;
+                #warning Instead, check for single-word, low-certainty results
                 if (text == "huh") return;
                 SpeechEnd?.Invoke(this, text);
             }

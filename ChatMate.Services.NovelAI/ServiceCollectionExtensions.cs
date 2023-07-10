@@ -1,6 +1,6 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Services;
-using ChatMate.Services.ElevenLabs;
+using ChatMate.Services.NovelAI;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

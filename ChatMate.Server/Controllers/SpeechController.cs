@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Model;
+using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
 using ChatMate.Core;
 using ChatMate.Server.Chat;
@@ -11,12 +12,13 @@ namespace ChatMate.Server.Controllers;
 [ApiController]
 public class SpeechController : ControllerBase
 {
-    [HttpGet("/tts/{id}.{extension}")]
+    [HttpGet("/tts/gens/{id}.{extension}")]
     public async Task GetSpeech(
         [FromRoute] string id,
         [FromRoute] string extension,
         [FromServices] IServiceFactory<ITextToSpeechService> speechGenFactory,
         [FromServices] PendingSpeechManager pendingSpeech,
+        [FromServices] IAudioConverter audioConverter,
         CancellationToken cancellationToken
     )
     {
@@ -29,7 +31,9 @@ public class SpeechController : ControllerBase
         }
 
         var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, cancellationToken);
-        await textToSpeech.GenerateSpeechAsync(speechRequest, new HttpResponseSpeechTunnel(Response), extension, cancellationToken);
+        audioConverter.SelectContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
+        var speechTunnel = new ConversionSpeechTunnel(new HttpResponseSpeechTunnel(Response), audioConverter);
+        await textToSpeech.GenerateSpeechAsync(speechRequest, speechTunnel, cancellationToken);
     }
     
 

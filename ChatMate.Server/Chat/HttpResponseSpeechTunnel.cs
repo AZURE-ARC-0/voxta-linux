@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 
 namespace ChatMate.Server.Chat;
@@ -19,17 +20,13 @@ public class HttpResponseSpeechTunnel : ISpeechTunnel
         await _response.WriteAsync(message, cancellationToken: cancellationToken);
     }
 
-    public async Task SendAsync(byte[] bytes, string contentType, CancellationToken cancellationToken)
+    public async Task SendAsync(AudioData audioData, CancellationToken cancellationToken)
     {
         _response.StatusCode = (int)HttpStatusCode.OK;
-        _response.ContentType = contentType;
+        _response.ContentType = audioData.ContentType;
         _response.Headers.ContentDisposition = "attachment";
-        _response.ContentLength = bytes.Length;
-        await _response.BodyWriter.WriteAsync(bytes, cancellationToken);
-    }
-
-    public string? GetPath()
-    {
-        return null;
+        audioData.Stream.Seek(0, SeekOrigin.Begin);
+        _response.ContentLength = audioData.Stream.Length - audioData.Stream.Position;
+        await audioData.Stream.CopyToAsync(_response.Body, cancellationToken);
     }
 }

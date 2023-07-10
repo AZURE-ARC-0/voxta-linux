@@ -6,6 +6,7 @@ using ChatMate.Common;
 using ChatMate.Server.ViewModels;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.ElevenLabs;
+using ChatMate.Services.NovelAI;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
