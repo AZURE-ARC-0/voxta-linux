@@ -95,7 +95,7 @@ public class PagesController : Controller
         });
         await settingsRepository.SaveAsync(ElevenLabsConstants.ServiceName, new ElevenLabsSettings
         {
-            ApiKey = model.ElevenLabs.ApiKey,
+            ApiKey = string.IsNullOrEmpty(model.ElevenLabs.ApiKey) ? "" : Crypto.EncryptString(model.ElevenLabs.ApiKey.Trim('"', ' ')),
         });
         await profileRepository.SaveProfileAsync(new ProfileSettings
         {
