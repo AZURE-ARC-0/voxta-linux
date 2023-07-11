@@ -1,5 +1,5 @@
 ﻿using ChatMate.Abstractions.Repositories;
-using ChatMate.Server.Data.Bots;
+using ChatMate.Server.Samples;
 
 namespace ChatMate.Server.Filters;
 
