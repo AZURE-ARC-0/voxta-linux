@@ -7,7 +7,7 @@
 
 <div class="container">
     <form method="post" asp-action="bot">
-        <h3>Storage</h3>
+        <h2>Storage</h2>
         
         <div class="form-group">
             <label asp-for="Bot.Id">Id:</label>
@@ -15,7 +15,7 @@
             @Html.ValidationMessageFor(m => m.Bot.Id)
         </div>
         
-        <h3>General</h3>
+        <h2>General</h2>
 
         <div class="form-group">
             <label asp-for="Bot.Name">Bot.Name:</label>
@@ -29,7 +29,7 @@
             @Html.ValidationMessageFor(m => m.Bot.Description)
         </div>
         
-        <h3>Prompt</h3>
+        <h2>Prompt</h2>
 
         <div class="form-group">
             <label asp-for="Bot.Preamble">Bot.Preamble:</label>
@@ -49,7 +49,7 @@
             @Html.ValidationMessageFor(m => m.Bot.Greeting)
         </div>
 
-        <h3>Text Generation</h3>
+        <h2>Text Generation</h2>
 
         <div class="form-group">
             <label asp-for="Bot.Services.TextGen.Service">Bot.Services.TextGen.Service:</label>
@@ -57,7 +57,7 @@
             @Html.ValidationMessageFor(m => m.Bot.Services.TextGen.Service)
         </div>
 
-        <h3>Text To Speech</h3>
+        <h2>Text To Speech</h2>
 
         <div class="form-group">
             <label asp-for="Bot.Services.SpeechGen.Service">Bot.Services.SpeechGen.Service:</label>
@@ -92,7 +92,7 @@
             };
         </script>
 
-        <h3>Options</h3>
+        <h2>Options</h2>
 
         <div class="form-group">
             <label asp-for="Bot.Options!.EnableThinkingSpeech">EnableThinkingSpeech:</label>

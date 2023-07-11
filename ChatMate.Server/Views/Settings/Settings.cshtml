@@ -6,7 +6,7 @@
 
 <div class="container">
     <form method="post" asp-action="settings">
-        <h3>OpenAI</h3>
+        <h2>OpenAI</h2>
         <div class="form-group">
             <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
             <input asp-for="OpenAI.ApiKey" class="form-control"/>
@@ -18,7 +18,7 @@
             @Html.ValidationMessageFor(m => m.OpenAI.Model)
         </div>
         
-        <h3>NovelAI</h3>
+        <h2>NovelAI</h2>
         <div class="form-group">
             <label asp-for="NovelAI.Token">NovelAI token:</label>
             <input asp-for="NovelAI.Token" class="form-control"/>
@@ -30,21 +30,21 @@
             @Html.ValidationMessageFor(m => m.NovelAI.Model)
         </div>
         
-        <h3>KoboldAI</h3>
+        <h2>KoboldAI</h2>
         <div class="form-group">
             <label asp-for="KoboldAI.Uri">KoboldAI uri:</label>
             <input asp-for="KoboldAI.Uri" class="form-control"/>
             @Html.ValidationMessageFor(m => m.KoboldAI.Uri)
         </div>
         
-        <h3>ElevenLabs</h3>
+        <h2>ElevenLabs</h2>
         <div class="form-group">
             <label asp-for="ElevenLabs.ApiKey">ElevenLabs API key:</label>
             <input asp-for="ElevenLabs.ApiKey" class="form-control"/>
             @Html.ValidationMessageFor(m => m.ElevenLabs.ApiKey)
         </div>
         
-        <h3>Profile</h3>
+        <h2>Profile</h2>
         <div class="form-group">
             <label asp-for="Profile.Name">Profile name:</label>
             <input asp-for="Profile.Name" class="form-control"/>
@@ -56,7 +56,7 @@
             @Html.ValidationMessageFor(m => m.Profile.Description)
         </div>
         
-        <h3>Services</h3>
+        <h2>Services</h2>
         <div class="form-group">
             <label asp-for="Profile.AnimationSelectionService">Animation selection service</label>
             <select asp-for="Profile.AnimationSelectionService" class="form-control">
@@ -66,7 +66,7 @@
             @Html.ValidationMessageFor(m => m.Profile.AnimationSelectionService)
         </div>
         
-        <h3>Options</h3>
+        <h2>Options</h2>
         <div class="form-group">
             <label asp-for="Profile.EnableSpeechRecognition">Enable speech recognition</label>
             <input asp-for="Profile.EnableSpeechRecognition" type="checkbox" class="form-check-input"/>
