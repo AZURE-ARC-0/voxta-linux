@@ -2,7 +2,4 @@ bin/
 obj/
 publish/
 ChatMate.Server/Data/*
-!ChatMate.Server/Data/Bots/
-ChatMate.Server/Data/Bots/*
-!ChatMate.Server/Data/Bots/Sample*
-ChatMate.Server/Models
+ChatMate.Server/Models/*

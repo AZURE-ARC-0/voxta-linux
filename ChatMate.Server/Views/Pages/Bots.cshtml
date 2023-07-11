@@ -19,14 +19,21 @@
                 <td>@bot.Name</td>
                 <td>@bot.Description</td>
                 <td>
-                    <a class="btn btn-secondary" href="/bots/@bot.Id">Edit</a>
+                    @if (!bot.ReadOnly)
+                    {
+                        <a class="btn btn-secondary" href="/bots/@bot.Id">Edit</a>
+                    }
                     <a class="btn btn-secondary" href="/bots/new?from=@bot.Id">Clone</a>
                 </td>
             </tr>
         }
         <tr>
             <td colspan="2"></td>
-            <td><a class="btn btn-primary" href="/bots/new">Add new bot</a></td>
+            <td>
+                @* ReSharper disable Html.PathError *@
+                <a class="btn btn-primary" href="/bots/new">Add new bot</a>
+                @* ReSharper restore Html.PathError *@
+            </td>
         </tr>
     </table>
 </div>

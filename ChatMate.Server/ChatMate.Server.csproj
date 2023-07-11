@@ -32,7 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ChatMate.Abstractions\ChatMate.Abstractions.csproj" />
     <ProjectReference Include="..\ChatMate.Core\ChatMate.Core.csproj" />
-    <ProjectReference Include="..\ChatMate.Data.Yaml\ChatMate.Data.Yaml.csproj" />
+    <ProjectReference Include="..\ChatMate.Data.LiteDB\ChatMate.Data.LiteDB.csproj" />
     <ProjectReference Include="..\ChatMate.Services.ElevenLabs\ChatMate.Services.ElevenLabs.csproj" />
     <ProjectReference Include="..\ChatMate.Services.KoboldAI\ChatMate.Services.KoboldAI.csproj" />
     <ProjectReference Include="..\ChatMate.Services.NAudio\ChatMate.Services.NAudio.csproj" />

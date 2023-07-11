@@ -4,6 +4,7 @@ namespace ChatMate.Abstractions.Model;
 public class BotDefinition
 {
     public string? Id { get; set; }
+    public bool ReadOnly { get; set; }
     
     public required string Name { get; init; }
     public string? Description { get; init; }

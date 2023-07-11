@@ -13,7 +13,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<UserConnectionFactory>();
         services.AddScoped<ChatSessionFactory>();
         services.AddScoped<SpeechGeneratorFactory>();
-        services.AddSingleton<ChatRepositories>();
         
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<Sanitizer>();

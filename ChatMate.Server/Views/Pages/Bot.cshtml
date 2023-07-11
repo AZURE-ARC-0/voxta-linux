@@ -10,8 +10,8 @@
         <h3>Storage</h3>
         
         <div class="form-group">
-            <label asp-for="Bot.Id">Filename:</label>
-            <input asp-for="Bot.Id" class="form-control" readonly="@(Model.IsNew ? null : "readonly")" />
+            <label asp-for="Bot.Id">Id:</label>
+            <input asp-for="Bot.Id" class="form-control" readonly="readonly" />
             @Html.ValidationMessageFor(m => m.Bot.Id)
         </div>
         

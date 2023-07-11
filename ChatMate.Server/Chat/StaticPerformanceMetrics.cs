@@ -24,7 +24,7 @@ public class StaticPerformanceMetrics : IPerformanceMetrics
         _counters.AddOrUpdate(key, new Counter { Elapsed = elapsed, Count = 1 }, (_, c) => new Counter { Elapsed = c.Elapsed + elapsed, Count = c.Count + 1 });
     }
 
-    public ICollection<string> GetKeys()
+    public IEnumerable<string> GetKeys()
     {
         return _counters.Keys;
     }

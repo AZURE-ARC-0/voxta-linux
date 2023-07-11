@@ -1,6 +1,7 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
+using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ namespace ChatMate.Core;
 public class ChatSessionFactory
 {
     private readonly ILoggerFactory _loggerFactory;
-    private readonly ChatRepositories _repositories;
+    private readonly IProfileRepository _profileRepository;
     private readonly ExclusiveLocalInputManager _localInputManager;
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
@@ -19,20 +20,22 @@ public class ChatSessionFactory
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
-        ChatRepositories repositories,
+        IProfileRepository profileRepository,
         ExclusiveLocalInputManager localInputManager,
         SpeechGeneratorFactory speechGeneratorFactory,
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
-        IServiceFactory<IAnimationSelectionService> animationSelectionFactory)
+        IServiceFactory<IAnimationSelectionService> animationSelectionFactory
+        )
     {
         _loggerFactory = loggerFactory;
-        _repositories = repositories;
+        _profileRepository = profileRepository;
         _localInputManager = localInputManager;
         _speechGeneratorFactory = speechGeneratorFactory;
         _textGenFactory = textGenFactory;
         _textToSpeechFactory = textToSpeechFactory;
         _animationSelectionFactory = animationSelectionFactory;
+        _profileRepository = profileRepository;
     }
 
     public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
@@ -42,7 +45,7 @@ public class ChatSessionFactory
             Directory.CreateDirectory(startChatMessage.AudioPath);
         }
         
-        var profile = await _repositories.Profile.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
         var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
 
         var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService, cancellationToken);

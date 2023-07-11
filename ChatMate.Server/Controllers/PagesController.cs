@@ -160,7 +160,7 @@ public class PagesController : Controller
             bot = await botRepository.GetBotAsync(from ?? botId, cancellationToken);
             if (bot == null)
                 return NotFound("Bot not found");
-            if (isNew) bot.Id = "";
+            if (isNew) bot.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
         }
 
         var vm = await GenerateBotViewModelAsync(ttsServiceFactory, bot, isNew, cancellationToken);

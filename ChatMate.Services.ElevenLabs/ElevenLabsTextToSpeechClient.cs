@@ -88,7 +88,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
 
     public async Task<VoiceInfo[]> GetVoicesAsync(CancellationToken cancellationToken)
     {
-        var response = await _httpClient.GetFromJsonAsync<VoicesResponse>("/vi/voices", cancellationToken);
+        var response = await _httpClient.GetFromJsonAsync<VoicesResponse>("/v1/voices", cancellationToken);
         if (response == null) throw new NullReferenceException("No voices returned");
         return response.voices.Select(v => new VoiceInfo { Id = v.voice_id, Label = v.name }).ToArray();
     }
