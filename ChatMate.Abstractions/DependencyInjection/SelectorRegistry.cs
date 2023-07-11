@@ -45,8 +45,8 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
             throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {key}");
         
         instance = (TInterface)_sp.GetRequiredService(type);
-        await instance.InitializeAsync(cancellationToken);
         _instances.Add(key, instance);
+        await instance.InitializeAsync(cancellationToken);
         
         return instance;
     }
