@@ -4,13 +4,12 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Vosk;
 
 namespace ChatMate.Services.Vosk;
 
 public interface IVoskModelDownloader
 {
-    Task<Model> AcquireModelAsync();
+    Task<global::Vosk.Model> AcquireModelAsync();
 }
 
 public class VoskModelDownloader : IVoskModelDownloader
@@ -24,7 +23,7 @@ public class VoskModelDownloader : IVoskModelDownloader
         _options = options;
     }
     
-    public async Task<Model> AcquireModelAsync()
+    public async Task<global::Vosk.Model> AcquireModelAsync()
     {
         var modelsPath = Path.GetFullPath("Models/Vosk");
         var modelName = _options.Value.Model;
@@ -34,7 +33,7 @@ public class VoskModelDownloader : IVoskModelDownloader
         if (Directory.Exists(modelPath))
         {
             _logger.LogInformation("Vosk model already downloaded");
-            return new Model(modelPath);
+            return new global::Vosk.Model(modelPath);
         }
         
         var fileUrl = $"https://alphacephei.com/vosk/models/{modelName}.zip";
@@ -61,6 +60,6 @@ public class VoskModelDownloader : IVoskModelDownloader
         _logger.LogInformation("Extracted Vosk model");
         if (!Directory.Exists(modelPath))
             throw new Exception("Vosk model directory does not exist after extracting");
-        return new Model(modelPath);
+        return new global::Vosk.Model(modelPath);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using ChatMate.Abstractions.Services;
+using ChatMate.Services.Vosk.Model;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NAudio.Wave;
@@ -48,12 +49,10 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
             {
                 _speaking = false;
                 var result = _recognizer.Result();
-                var json = JsonSerializer.Deserialize<Result>(result, SerializeOptions);
-                var text = json?.Text;
-                if (string.IsNullOrEmpty(text)) return;
-                #warning Instead, check for single-word, low-certainty results
-                if (text == "huh") return;
-                SpeechEnd?.Invoke(this, text);
+                var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
+                if (json?.Result == null || string.IsNullOrEmpty(json.Text)) return;
+                if (json.Result is [{ Conf: < 0.9 }]) return;
+                SpeechEnd?.Invoke(this, json.Text);
             }
             else
             {
