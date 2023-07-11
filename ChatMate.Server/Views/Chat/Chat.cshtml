@@ -278,7 +278,9 @@
             const msg = JSON.stringify({
                 ...template, 
                 $type: "startChat",
-                useServerSpeechRecognition: useServerSpeechRecognition()
+                audioPath: "F:\\Games\\VaM\\Custom\\Sounds\\ChatMate\\",
+                useServerSpeechRecognition: useServerSpeechRecognition(),
+                acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
             });
             socket.send(msg);
         }

@@ -2,5 +2,5 @@
 
 public interface ITemporaryFileCleanup
 {
-    void MarkForDeletion(string filename);
+    void MarkForDeletion(string filename, bool reusable);
 }

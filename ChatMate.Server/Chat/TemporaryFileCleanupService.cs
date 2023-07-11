@@ -11,6 +11,7 @@ namespace ChatMate.Server.Chat
         private readonly ILogger<TemporaryFileCleanupService> _logger;
         private readonly IHostApplicationLifetime _appLifetime;
         private readonly ConcurrentDictionary<string, DateTime> _filesToDelete;
+        private readonly ConcurrentBag<string> _filesToDeleteOnCleanup;
         private readonly Timer _timer;
         private bool _isRunning;
 
@@ -19,13 +20,21 @@ namespace ChatMate.Server.Chat
             _logger = logger;
             _appLifetime = appLifetime;
             _filesToDelete = new ConcurrentDictionary<string, DateTime>();
+            _filesToDeleteOnCleanup = new ConcurrentBag<string>();
             _timer = new Timer(CheckFiles);
         }
 
-        public void MarkForDeletion(string filename)
+        public void MarkForDeletion(string filename, bool reusable)
         {
-            _filesToDelete.TryAdd(filename, DateTime.Now.Add(Expiration));
-            ScheduleNextCheck();
+            if (reusable)
+            {
+                _filesToDeleteOnCleanup.Add(filename);
+            }
+            else
+            {
+                _filesToDelete.TryAdd(filename, DateTime.Now.Add(Expiration));
+                ScheduleNextCheck();
+            }
         }
 
         private void ScheduleNextCheck()
@@ -34,6 +43,7 @@ namespace ChatMate.Server.Chat
             if (_filesToDelete.IsEmpty) return;
             var nextCheck = _filesToDelete.MinBy(f => f.Value);
             var dueTime = nextCheck.Value - DateTime.Now;
+            if (dueTime.Ticks < 0) dueTime = TimeSpan.Zero;
             _timer.Change(dueTime, TimeSpan.FromMilliseconds(-1));
         }
 
@@ -44,18 +54,7 @@ namespace ChatMate.Server.Chat
             foreach (var file in _filesToDelete.OrderBy(f => f.Value).ToList())
             {
                 if (DateTime.Now < file.Value) break;
-                
-                try
-                {
-                    if (!File.Exists(file.Key)) continue;
-                    File.Delete(file.Key);
-                    _filesToDelete.TryRemove(file.Key, out _);
-                    _logger.LogInformation("Deleted file: {File}", file.Key);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error deleting file: {File}", file.Key);
-                }
+                DeleteFile(file.Key);
             }
 
             _isRunning = false;
@@ -70,20 +69,30 @@ namespace ChatMate.Server.Chat
                 
                 foreach (var file in _filesToDelete.Keys)
                 {
-                    try
-                    {
-                        if (!File.Exists(file)) continue;
-                        File.Delete(file);
-                        _logger.LogInformation("Deleted file at shutdown: {File}", file);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error deleting file at shutdown: {File}", file);
-                    }
+                    DeleteFile(file);
+                }
+                foreach (var file in _filesToDeleteOnCleanup)
+                {
+                    DeleteFile(file);
                 }
             });
 
             return Task.CompletedTask;
+        }
+
+        private void DeleteFile(string file)
+        {
+            try
+            {
+                if (!File.Exists(file)) return;
+                File.Delete(file);
+                _filesToDelete.TryRemove(file, out _);
+                _logger.LogInformation("Deleted file: {File}", file);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting file: {File}", file);
+            }
         }
     }
 }

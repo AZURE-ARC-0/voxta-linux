@@ -48,50 +48,54 @@ public class NAudioAudioConverter : IAudioConverter
         
         var audioConvPerf = _performanceMetrics.Start("NAudio.AudioConversion");
 
-        if (input.ContentType == "audio/webm")
+        return input.ContentType switch
         {
-            var tmp = Path.GetTempFileName();
-            await using var f = File.OpenWrite(tmp);
-            await input.Stream.CopyToAsync(f, cancellationToken);
-            f.Close();
-            try
-            {
-                await using var reader = new MediaFoundationReader(tmp);
-                var ms = new MemoryStream();
-                switch (_outputContentType)
-                {
-                    case "audio/mpeg":
-                        // ReSharper disable once RedundantArgumentDefaultValue
-                        MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
-                        ms.Seek(0, SeekOrigin.Begin);
-                        return new AudioData(ms, _outputContentType);
-                    case "audio/wav":
-                    case "audio/x-wav":
-                        WaveFileWriter.WriteWavFileToStream(ms, reader);
-                        ms.Seek(0, SeekOrigin.Begin);
-                        return new AudioData(ms, _outputContentType);
-                    default:
-                        throw new InvalidOperationException("Unexpected extension {extension}");
-                }
-            }
-            finally
-            {
-                File.Delete(tmp);
-                audioConvPerf.Done();
-            }
-        }
+            "audio/webm" => await ConvertWebm(input, cancellationToken, audioConvPerf),
+            "audio/mpeg" when _outputContentType is "audio/wav" or "audio/x-wav" => await ConvertMp3ToWavAsync(input),
+            _ => throw new NotSupportedException($"Input {input.ContentType} and output {_outputContentType} pair is not supported")
+        };
+    }
 
-        if(input.ContentType == "audio/mpeg" && _outputContentType is "audio/wav" or "audio/x-wav")
+    private async Task<AudioData> ConvertWebm(AudioData input, CancellationToken cancellationToken, IPerformanceMetricsTracker audioConvPerf)
+    {
+        var tmp = Path.GetTempFileName();
+        await using var f = File.OpenWrite(tmp);
+        await input.Stream.CopyToAsync(f, cancellationToken);
+        f.Close();
+        try
         {
-            // TODO: Add unit tests?
-            await using var mp3Reader = new Mp3FileReader(input.Stream);
+            await using var reader = new MediaFoundationReader(tmp);
             var ms = new MemoryStream();
-            await using var wavWriter = new WaveFileWriter(new IgnoreDisposeStream(ms), mp3Reader.WaveFormat);
-            await mp3Reader.CopyToAsync(wavWriter, cancellationToken);
-            ms.Seek(0, SeekOrigin.Begin);
-            return new AudioData(ms, _outputContentType);
+            switch (_outputContentType)
+            {
+                case "audio/mpeg":
+                    // ReSharper disable once RedundantArgumentDefaultValue
+                    MediaFoundationEncoder.EncodeToMp3(reader, ms, 192_000);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    return new AudioData(ms, _outputContentType);
+                case "audio/wav":
+                case "audio/x-wav":
+                    WaveFileWriter.WriteWavFileToStream(ms, reader);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    return new AudioData(ms, _outputContentType);
+                default:
+                    throw new InvalidOperationException("Unexpected extension {extension}");
+            }
         }
+        finally
+        {
+            File.Delete(tmp);
+            audioConvPerf.Done();
+        }
+    }
 
-        throw new NotSupportedException($"Input {input.ContentType} and output {_outputContentType} pair is not supported");
+    private async Task<AudioData> ConvertMp3ToWavAsync(AudioData input)
+    {
+        await using var mp3 = new Mp3FileReader(input.Stream);
+        var pcm = WaveFormatConversionStream.CreatePcmStream(mp3);
+        var ms = new MemoryStream();
+        WaveFileWriter.WriteWavFileToStream(ms, pcm);
+        ms.Seek(0, SeekOrigin.Begin);
+        return new AudioData(ms, _outputContentType);
     }
 }

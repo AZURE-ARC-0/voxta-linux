@@ -18,7 +18,7 @@ public partial class ChatSession
         {
             foreach (var thinkingSpeech in _chatSessionData.ThinkingSpeech)
             {
-                var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, Crypto.CreateCryptographicallySecureGuid().ToString(), cancellationToken);
+                var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, $"think_{Crypto.CreateCryptographicallySecureGuid()}", true, cancellationToken);
                 if (thinkingSpeechUrl != null)
                     thinkingSpeechUrls.Add(thinkingSpeechUrl);
             }
@@ -37,7 +37,7 @@ public partial class ChatSession
         {
             var reply = ChatMessageData.FromGen(_chatSessionData.BotName, _chatSessionData.Greeting);
             _chatSessionData.Messages.Add(reply);
-            await SendReplyWithSpeechAsync(reply, cancellationToken);
+            await SendReplyWithSpeechAsync(reply, "greet", cancellationToken);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace ChatMate.Core;
 
 public interface ISpeechGenerator
 {
-    Task<string?> CreateSpeechAsync(string text, string id, CancellationToken cancellationToken);
+    Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken);
 }
 
 public class SpeechGeneratorFactory
@@ -41,7 +41,7 @@ public class SpeechGeneratorFactory
 
 public class NoSpeechGenerator : ISpeechGenerator
 {
-    public Task<string?> CreateSpeechAsync(string text, string id, CancellationToken cancellationToken)
+    public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
     {
         return Task.FromResult<string?>(null);
     }
@@ -64,12 +64,12 @@ public class LocalSpeechGenerator : ISpeechGenerator
         _audioConverter = audioConverter;
     }
     
-    public async Task<string?> CreateSpeechAsync(string text, string id, CancellationToken cancellationToken)
+    public async Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
     {
         var speechUrl = Path.Combine(_audioPath, $"{id}.{AudioData.GetExtension(_audioConverter.ContentType)}");
         var speechTunnel = new ConversionSpeechTunnel(new FileSpeechTunnel(speechUrl), _audioConverter);
         if (File.Exists(speechUrl)) return speechUrl;
-        _temporaryFileCleanup.MarkForDeletion(speechUrl);
+        _temporaryFileCleanup.MarkForDeletion(speechUrl, reusable);
         await _textToSpeechService.GenerateSpeechAsync(new SpeechRequest
             {
                 Service = _textToSpeechService.ServiceName,
@@ -99,12 +99,12 @@ public class RemoteSpeechGenerator : ISpeechGenerator
         _contentType = contentType;
     }
 
-    public Task<string?> CreateSpeechAsync(string text, string id, CancellationToken cancellationToken)
+    public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
     {
-        return Task.FromResult<string?>(CreateSpeechUrl(Crypto.CreateCryptographicallySecureGuid().ToString(), text, _ttsService, _ttsVoice));
+        return Task.FromResult<string?>(CreateSpeechUrl(Crypto.CreateCryptographicallySecureGuid().ToString(), text, _ttsService, _ttsVoice, reusable));
     }
 
-    private string CreateSpeechUrl(string id, string text, string ttsService, string ttsVoice)
+    private string CreateSpeechUrl(string id, string text, string ttsService, string ttsVoice, bool reusable)
     {
         _pendingSpeech.Push(id, new SpeechRequest
         {
@@ -112,6 +112,7 @@ public class RemoteSpeechGenerator : ISpeechGenerator
             Text = text,
             Voice = ttsVoice,
             ContentType = _contentType,
+            Reusable = reusable,
         });
         var speechUrl = $"/tts/gens/{id}.{AudioData.GetExtension(_contentType)}";
         return speechUrl;
