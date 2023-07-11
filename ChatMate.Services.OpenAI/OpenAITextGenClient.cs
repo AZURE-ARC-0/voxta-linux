@@ -37,7 +37,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
-        _httpClient = httpClientFactory.CreateClient(OpenAIConstants.ServiceName);
+        _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
         _settingsRepository = settingsRepository;
         _tokenizer = tokenizer;
         _sanitizer = sanitizer;

@@ -31,7 +31,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _logger = loggerFactory.CreateLogger<NovelAITextToSpeechClient>();
-        _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
+        _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
     
     public async Task InitializeAsync(CancellationToken cancellationToken)

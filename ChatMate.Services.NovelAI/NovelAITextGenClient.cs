@@ -31,7 +31,7 @@ public class NovelAITextGenClient : ITextGenService
         _settingsRepository = settingsRepository;
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
-        _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
+        _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextGen");
         _parameters = new
         {
             temperature = 1.05,

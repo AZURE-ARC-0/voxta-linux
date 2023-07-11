@@ -26,7 +26,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _logger = loggerFactory.CreateLogger<ElevenLabsTextToSpeechClient>();
-        _httpClient = httpClientFactory.CreateClient(ElevenLabsConstants.ServiceName);
+        _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
     public async Task InitializeAsync(CancellationToken cancellationToken)

@@ -19,7 +19,7 @@ public class KoboldAITextGenClient : ITextGenService
 
     public KoboldAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
-        _httpClient = httpClientFactory.CreateClient("TextGen");
+        _httpClient = httpClientFactory.CreateClient($"{KoboldAIConstants.ServiceName}.TextGen");
         _settingsRepository = settingsRepository;
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
