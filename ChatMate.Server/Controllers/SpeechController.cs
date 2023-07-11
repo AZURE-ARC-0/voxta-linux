@@ -32,7 +32,7 @@ public class SpeechController : ControllerBase
         }
 
         var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, cancellationToken);
-        audioConverter.SelectContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
+        audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
         var speechTunnel = new ConversionSpeechTunnel(new HttpResponseSpeechTunnel(Response), audioConverter);
         await textToSpeech.GenerateSpeechAsync(speechRequest, speechTunnel, cancellationToken);
     }

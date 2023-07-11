@@ -30,7 +30,7 @@ public class SpeechGeneratorFactory
         var textToSpeech = await _sp.GetRequiredService<IServiceFactory<ITextToSpeechService>>().CreateAsync(ttsService, cancellationToken);
         
         var audioConverter = _sp.GetRequiredService<IAudioConverter>();
-        audioConverter.SelectContentType(acceptContentTypes, textToSpeech.ContentType);
+        audioConverter.SelectOutputContentType(acceptContentTypes, textToSpeech.ContentType);
 
         if (audioPath == null)
             return new RemoteSpeechGenerator(ttsService, ttsVoice, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);

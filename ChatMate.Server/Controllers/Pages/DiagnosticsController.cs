@@ -16,6 +16,23 @@ namespace ChatMate.Server.Controllers.Pages;
 [Controller]
 public class DiagnosticsController : Controller
 {
+    private static readonly object Lock = new();
+    private static readonly DiagnosticsViewModel AlreadyRunningVm = new()
+    {
+        Services =
+        {
+            new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                Name = "Diagnostics Error",
+                IsHealthy = false,
+                IsReady = false,
+                Status = "Another diagnostic is still running. Wait and try again later."
+            }
+        }
+    };
+
+    private static bool _running;
+
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IProfileRepository _profileRepository;
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
@@ -40,10 +57,39 @@ public class DiagnosticsController : Controller
     [HttpGet("/diagnostics")]
     public async Task<IActionResult> Diagnostics(CancellationToken cancellationToken)
     {
+        lock (Lock)
+        {
+            if (_running)
+                return View(AlreadyRunningVm);
+
+            _running = true;
+        }
+
+        try
+        {
+            var vm = await RunDiagnosticsAsync(cancellationToken);
+
+            return View(vm);
+        }
+        finally
+        {
+            _running = false;
+        }
+    }
+
+    private async Task<DiagnosticsViewModel> RunDiagnosticsAsync(CancellationToken cancellationToken)
+    {
         var vm = new DiagnosticsViewModel();
 
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
-        vm.Services.Add(new DiagnosticsViewModel.ServiceStateViewModel { Name = "ChatMate Profile", Status = profile?.Name ?? "No profile", IsHealthy = !string.IsNullOrEmpty(profile?.Name) });
+        vm.Services.Add(new DiagnosticsViewModel.ServiceStateViewModel
+        {
+            IsReady = true,
+            IsHealthy = !string.IsNullOrEmpty(profile?.Name),
+            Name = "ChatMate Profile",
+            Status = profile?.Name ?? "No profile",
+        });
+        
         var services = await Task.WhenAll(
             Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextGenAsync(NovelAIConstants.ServiceName, cancellationToken), cancellationToken),
@@ -52,39 +98,29 @@ public class DiagnosticsController : Controller
             Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, cancellationToken), cancellationToken)
         );
-        vm.Services.AddRange(services);
+        vm.Services.AddRange(services.OrderBy(x => x.IsHealthy).ThenBy(x => x.IsReady).ThenBy(x => x.Name));
 
         vm.PerformanceMetrics = _performanceMetrics
             .GetKeys()
             .Select(k => new DiagnosticsViewModel.PerformanceMetricsViewModel { Key = k, Avg = _performanceMetrics.GetAverage(k) })
             .ToArray();
-        
-        return View(vm);
+        return vm;
     }
 
     private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryTextGenAsync(string key, CancellationToken cancellationToken)
     {
         var name = $"{key} (Text Gen)";
+        
+        ITextGenService service;
         try
         {
-            var service = await _textGenFactory.CreateAsync(key, cancellationToken);
-            var result = await service.GenerateReplyAsync(new ChatSessionData
-            {
-                Preamble = new TextData { Text = "You are a nice chat bot." },
-                BotName = "Text Bot",
-                UserName = "Test User",
-            }, cancellationToken);
-            return new DiagnosticsViewModel.ServiceStateViewModel
-            {
-                IsHealthy = true,
-                Name = name,
-                Status = "Response: " + result.Text
-            };
+            service = await _textGenFactory.CreateAsync(key, cancellationToken);
         }
         catch (OperationCanceledException)
         {
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = false,
                 IsHealthy = false,
                 Name = name,
                 Status = "Canceled"
@@ -94,6 +130,44 @@ public class DiagnosticsController : Controller
         {
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = false,
+                IsHealthy = false,
+                Name = name,
+                Status = exc.Message
+            };
+        }
+        
+        try
+        {
+            var result = await service.GenerateReplyAsync(new ChatSessionData
+            {
+                Preamble = new TextData { Text = "You are a nice chat bot." },
+                BotName = "Text Bot",
+                UserName = "Test User",
+            }, cancellationToken);
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = true,
+                Name = name,
+                Status = "Response: " + result.Text
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = false,
+                Name = name,
+                Status = "Canceled"
+            };
+        }
+        catch (Exception exc)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
                 IsHealthy = false,
                 Name = name,
                 Status = exc.ToString()
@@ -104,9 +178,35 @@ public class DiagnosticsController : Controller
     private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryTextToSpeechAsync(string key, CancellationToken cancellationToken)
     {
         var name = $"{key} (TTS)";
+        
+        ITextToSpeechService service;
         try
         {
-            var service = await _textToSpeechFactory.CreateAsync(key, cancellationToken);
+            service = await _textToSpeechFactory.CreateAsync(key, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = false,
+                IsHealthy = false,
+                Name = name,
+                Status = "Canceled"
+            };
+        }
+        catch (Exception exc)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = false,
+                IsHealthy = false,
+                Name = name,
+                Status = exc.Message
+            };
+        }
+        
+        try
+        {
             var voices = await service.GetVoicesAsync(cancellationToken);
             var tunnel = new DeadSpeechTunnel();
             await service.GenerateSpeechAsync(new SpeechRequest
@@ -118,6 +218,7 @@ public class DiagnosticsController : Controller
             }, tunnel, cancellationToken);
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = true,
                 IsHealthy = tunnel.Result != null,
                 Name = name,
                 Status = tunnel.Result ?? "No result"
@@ -127,6 +228,7 @@ public class DiagnosticsController : Controller
         {
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = true,
                 IsHealthy = false,
                 Name = name,
                 Status = "Canceled"
@@ -136,6 +238,7 @@ public class DiagnosticsController : Controller
         {
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = true,
                 IsHealthy = false,
                 Name = name,
                 Status = exc.ToString()
@@ -162,26 +265,17 @@ public class DiagnosticsController : Controller
     private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryAnimSelect(string key, CancellationToken cancellationToken)
     {
         var name = $"{key} (Animation Selector)";
+        
+        IAnimationSelectionService service;
         try
         {
-            var service = await _animationSelectionFactory.CreateAsync(key, cancellationToken);
-            var result = await service.SelectAnimationAsync(new ChatSessionData
-            {
-                Preamble = new TextData { Text = "You are a nice chat bot." },
-                BotName = "Text Bot",
-                UserName = "Test User",
-            }, cancellationToken);
-            return new DiagnosticsViewModel.ServiceStateViewModel
-            {
-                IsHealthy = true,
-                Name = name,
-                Status = "Response: " + result
-            };
+            service = await _animationSelectionFactory.CreateAsync(key, cancellationToken);
         }
         catch (OperationCanceledException)
         {
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = false,
                 IsHealthy = false,
                 Name = name,
                 Status = "Canceled"
@@ -191,6 +285,44 @@ public class DiagnosticsController : Controller
         {
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
+                IsReady = false,
+                IsHealthy = false,
+                Name = name,
+                Status = exc.Message
+            };
+        }
+        
+        try
+        {
+            var result = await service.SelectAnimationAsync(new ChatSessionData
+            {
+                Preamble = new TextData { Text = "You are a nice chat bot." },
+                BotName = "Text Bot",
+                UserName = "Test User",
+            }, cancellationToken);
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = true,
+                Name = name,
+                Status = "Response: " + result
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = false,
+                Name = name,
+                Status = "Canceled"
+            };
+        }
+        catch (Exception exc)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
                 IsHealthy = false,
                 Name = name,
                 Status = exc.ToString()

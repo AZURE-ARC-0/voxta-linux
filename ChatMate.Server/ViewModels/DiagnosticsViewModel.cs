@@ -7,6 +7,7 @@ public class DiagnosticsViewModel
 
     public class ServiceStateViewModel
     {
+        public bool IsReady { get; init; }
         public bool IsHealthy { get; init; }
         public required string Name { get; init; }
         public required string Status { get; init; }

@@ -19,6 +19,10 @@
         {
             <tr>
                 <td>
+                    @if (!s.IsReady)
+                    {
+                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                    }
                     @if (s.IsHealthy)
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
