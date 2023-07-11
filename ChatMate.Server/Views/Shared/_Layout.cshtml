@@ -25,22 +25,22 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2">
         <div class="container d-flex justify-content-between">
-            <a class="navbar-brand" href="@Url.Action("Index", "Pages")">ChatMate</a>
+            <a class="navbar-brand" href="@Url.Action("Index", "Home")">ChatMate</a>
             <ul class="navbar-nav">
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
-                    <a class="nav-link" href="@Url.Action("Index", "Pages")">Home</a>
+                    <a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
                 </li>
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Chat" ? "active" : "")">
-                    <a class="nav-link" href="@Url.Action("Chat", "Pages")">Chat</a>
+                    <a class="nav-link" href="@Url.Action("Chat", "Chat")">Chat</a>
                 </li>
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
-                    <a class="nav-link" href="@Url.Action("Settings", "Pages")">Settings</a>
+                    <a class="nav-link" href="@Url.Action("Settings", "Settings")">Settings</a>
                 </li>
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Bots" ? "active" : "")">
-                    <a class="nav-link" href="@Url.Action("Bots", "Pages")">Bots</a>
+                    <a class="nav-link" href="@Url.Action("Bots", "Bots")">Bots</a>
                 </li>
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Diagnostics" ? "active" : "")">
-                    <a class="nav-link" href="@Url.Action("Diagnostics", "Pages")">Diagnostics</a>
+                    <a class="nav-link" href="@Url.Action("Diagnostics", "Diagnostics")">Diagnostics</a>
                 </li>
             </ul>
         </div>
