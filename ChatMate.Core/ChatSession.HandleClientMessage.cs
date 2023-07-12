@@ -32,7 +32,7 @@ public partial class ChatSession
                     _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);
                 }
 
-                text = "*interrupts {{Bot}}* " + text;
+                text = "*interrupts {{char}}* " + text;
                 _logger.LogInformation("Added interruption notice to the user message: {Text}", text);
             }
 

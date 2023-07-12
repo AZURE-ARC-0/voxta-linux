@@ -96,8 +96,8 @@ public class ChatSessionFactory
             {
                 User = parts[0] switch
                 {
-                    "{{User}}" => profile.Name,
-                    "{{Bot}}" => startChatMessage.BotName,
+                    "{{user}}" => profile.Name,
+                    "{{char}}" => startChatMessage.BotName,
                     _ => startChatMessage.BotName
                 },
                 Text = textProcessor.ProcessText(parts[1].Trim())

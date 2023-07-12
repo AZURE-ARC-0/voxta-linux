@@ -131,7 +131,7 @@ public class ChatSessionTests
             Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
                 User: Hello!
                 Bot: This speech will...
-                User: *interrupts {{Bot}}* Stop!
+                User: *interrupts {{char}}* Stop!
                 Bot: How rude!
                 """.ReplaceLineEndings("\n")));
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("This speech will be interrupted."));

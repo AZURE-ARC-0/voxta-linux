@@ -38,7 +38,7 @@ public class BotsController : Controller
             bot = new BotDefinition
             {
                 Name = "New bot",
-                Preamble = "{{Bot}} is a virtual companion for {{User}}.",
+                Preamble = "{{char}} is a virtual companion for {{user}}.",
                 Postamble = "",
                 Greeting = "Hi!",
                 SampleMessages = Array.Empty<BotDefinition.Message>(),
