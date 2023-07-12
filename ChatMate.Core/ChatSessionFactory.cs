@@ -46,7 +46,7 @@ public class ChatSessionFactory
         }
         
         var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
-        var textProcessor = new ChatTextProcessor(profile, startChatMessage.BotName);
+        var textProcessor = new ChatTextProcessor(profile, startChatMessage.CharacterName);
 
         var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService, cancellationToken);
         var animationSelection = string.IsNullOrEmpty(profile.AnimationSelectionService)
@@ -67,7 +67,7 @@ public class ChatSessionFactory
         {
             ChatId = startChatMessage.ChatId ?? Crypto.CreateCryptographicallySecureGuid(),
             UserName = profile.Name,
-            BotName = startChatMessage.BotName,
+            CharacterName = startChatMessage.CharacterName,
             Preamble = new TextData
             {
                 Text = textProcessor.ProcessText(startChatMessage.Preamble)
@@ -97,8 +97,8 @@ public class ChatSessionFactory
                 User = parts[0] switch
                 {
                     "{{user}}" => profile.Name,
-                    "{{char}}" => startChatMessage.BotName,
-                    _ => startChatMessage.BotName
+                    "{{char}}" => startChatMessage.CharacterName,
+                    _ => startChatMessage.CharacterName
                 },
                 Text = textProcessor.ProcessText(parts[1].Trim())
             };

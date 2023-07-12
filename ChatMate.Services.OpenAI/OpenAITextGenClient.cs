@@ -74,7 +74,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
             var message = chatMessages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= 4096) break;
-            var role = message.User == chatSessionData.BotName ? "assistant" : "user";
+            var role = message.User == chatSessionData.CharacterName ? "assistant" : "user";
             messages.Insert(1, new { role, content = message.Text });
         }
 
@@ -112,7 +112,7 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         sb.AppendLine($"""
         ---
         Available animations: smile, frown, pensive, excited, sad, curious, afraid, angry, surprised, laugh, cry, idle
-        Write the animation {chatSessionData.BotName} should play.
+        Write the animation {chatSessionData.CharacterName} should play.
         """);
         var messages = new List<object>
         {

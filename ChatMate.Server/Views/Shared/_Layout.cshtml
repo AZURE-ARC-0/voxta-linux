@@ -36,8 +36,8 @@
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Settings", "Settings")">Settings</a>
                 </li>
-                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Bots" ? "active" : "")">
-                    <a class="nav-link" href="@Url.Action("Bots", "Bots")">Bots</a>
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Characters" ? "active" : "")">
+                    <a class="nav-link" href="@Url.Action("Characters", "Characters")">Character</a>
                 </li>
                 <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Diagnostics" ? "active" : "")">
                     <a class="nav-link" href="@Url.Action("Diagnostics", "Diagnostics")">Diagnostics</a>

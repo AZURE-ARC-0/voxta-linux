@@ -46,7 +46,7 @@ public class KoboldAITextGenClient : ITextGenService
         <START>
         {string.Join("\n", chatMessages.Select(x => $"{x.User}: {x.Text}"))}
         {chatSessionData.Postamble?.Text}
-        {chatSessionData.BotName}:
+        {chatSessionData.CharacterName}:
         """.ReplaceLineEndings("\n").Replace("\n\n", "\n");
         var body = new
         {
@@ -63,7 +63,7 @@ public class KoboldAITextGenClient : ITextGenService
             top_p = 0.9,
             sampler_order = new[] { 6, 0, 1, 2, 3, 4, 5 },
             prompt,
-            stop_sequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.BotName}:", "\n" }
+            stop_sequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.CharacterName}:", "\n" }
         };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 

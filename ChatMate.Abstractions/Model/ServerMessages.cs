@@ -4,7 +4,7 @@ namespace ChatMate.Abstractions.Model;
 
 [Serializable]
 [JsonDerivedType(typeof(ServerWelcomeMessage), typeDiscriminator: "welcome")]
-[JsonDerivedType(typeof(BotTemplateLoadedMessage), typeDiscriminator: "botTemplateLoaded")]
+[JsonDerivedType(typeof(CharacterLoadedMessage), typeDiscriminator: "characterLoaded")]
 [JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
 [JsonDerivedType(typeof(ServerSpeechRecognitionStartMessage), typeDiscriminator: "speechRecognitionStart")]
@@ -19,10 +19,10 @@ public abstract class ServerMessage
 [Serializable]
 public class ServerWelcomeMessage : ServerMessage
 {
-    public required BotTemplate[] BotTemplates { get; set; }
+    public required CharactersListItem[] Characters { get; set; }
     
     [Serializable]
-    public class BotTemplate
+    public class CharactersListItem
     {
         public required string Id { get; init; }
         public required string Name { get; init; }
@@ -32,9 +32,9 @@ public class ServerWelcomeMessage : ServerMessage
 }
 
 [Serializable]
-public class BotTemplateLoadedMessage : ServerMessage
+public class CharacterLoadedMessage : ServerMessage
 {
-    public required string BotName { get; init; }
+    public required string CharacterName { get; init; }
     public required string Preamble { get; init; }
     public required string Postamble { get; init; }
     public required string Greeting { get; init; }

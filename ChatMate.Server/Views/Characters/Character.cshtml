@@ -1,0 +1,117 @@
+﻿@using ChatMate.Abstractions.Model
+@model CharacterViewModelWithOptions
+@{
+    Layout = "_Layout";
+    ViewBag.Title = Model.Character.Name;
+}
+
+<div class="container">
+    <h1>@(Model.IsEditable ? "Edit" : "View") Character</h1>
+    
+    <form method="post" asp-action="Character">
+        <h2>Storage</h2>
+
+        <div class="form-group">
+            <label asp-for="Character.Id">Id:</label>
+            <input asp-for="Character.Id" class="form-control" readonly="readonly"/>
+            @Html.ValidationMessageFor(m => m.Character.Id)
+        </div>
+
+        <h2>General</h2>
+
+        <div class="form-group">
+            <label asp-for="Character.Name">Name:</label>
+            <input asp-for="Character.Name" class="form-control"/>
+            @Html.ValidationMessageFor(m => m.Character.Name)
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Character.Description">Description: <span class="text-muted">Only for display</span></label>
+            <input asp-for="Character.Description" class="form-control"/>
+            @Html.ValidationMessageFor(m => m.Character.Description)
+        </div>
+
+        <h2>Prompt</h2>
+
+        <div class="form-group">
+            <label asp-for="Character.Preamble">Preamble:</label>
+            <textarea asp-for="Character.Preamble" class="form-control"></textarea>
+            @Html.ValidationMessageFor(m => m.Character.Preamble)
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Character.Postamble">Postamble:</label>
+            <textarea asp-for="Character.Postamble" class="form-control"></textarea>
+            @Html.ValidationMessageFor(m => m.Character.Postamble)
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Character.Greeting">Greeting: <span class="text-muted">The text the character will say when starting a new chat</span></label>
+            <input asp-for="Character.Greeting" class="form-control"/>
+            @Html.ValidationMessageFor(m => m.Character.Greeting)
+        </div>
+
+        <h2>Text Generation</h2>
+
+        <div class="form-group">
+            <label asp-for="Character.Services.TextGen.Service">TextGen Service:</label>
+            <select asp-for="Character.Services.TextGen.Service" asp-items="@(new SelectList(Model.TextGenServices))" class="form-control"></select>
+            @Html.ValidationMessageFor(m => m.Character.Services.TextGen.Service)
+        </div>
+
+        <h2>Text To Speech</h2>
+
+        <div class="form-group">
+            <label asp-for="Character.Services.SpeechGen.Service">SpeechGen Service:</label>
+            <select asp-for="Character.Services.SpeechGen.Service" asp-items="@(new SelectList(Model.TextToSpeechServices))" class="form-control"></select>
+            @Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Service)
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Character.Services.SpeechGen.Voice">SpeechGen Voice:</label>
+            <select asp-for="Character.Services.SpeechGen.Voice" asp-items="@(new SelectList(Model.Voices, nameof(VoiceInfo.Id), nameof(VoiceInfo.Label)))" class="form-control"></select>
+            @Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Voice)
+        </div>
+
+        <script type="text/javascript">
+            document.getElementById("Character_Services_SpeechGen_Service").onchange = function() {
+                const selectedService = this.value;
+
+                fetch('/tts/services/' + selectedService + '/voices')
+                    .then(response => response.json())
+                    .then(data => {
+                        const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
+                        voicesSelect.innerHTML = ""; // Clear existing options
+
+                        data.forEach(function(voice) {
+                            const option = document.createElement("option");
+                            option.value = voice.id;
+                            option.text = voice.label;
+                            voicesSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            };
+        </script>
+
+        <h2>Options</h2>
+
+        <div class="form-group">
+            <label asp-for="Character.Options!.EnableThinkingSpeech">EnableThinkingSpeech:</label>
+            <input asp-for="Character.Options!.EnableThinkingSpeech" type="checkbox"/>
+            @Html.ValidationMessageFor(m => m.Character.Options!.EnableThinkingSpeech)
+        </div>
+
+        <br/>
+
+        @if (Model.IsEditable)
+        {
+            <button type="submit" class="btn btn-primary">Save</button>
+            @Html.ValidationSummary(true)
+        }
+        else
+        {
+            <p class="text-muted">This character is non editable. You can make a clone to edit it.</p>
+        }
+    </form>
+</div>

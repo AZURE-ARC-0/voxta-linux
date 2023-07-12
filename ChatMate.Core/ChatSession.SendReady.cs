@@ -35,7 +35,7 @@ public partial class ChatSession
 
         if (_chatSessionData.Greeting != null)
         {
-            var reply = ChatMessageData.FromGen(_chatSessionData.BotName, _chatSessionData.Greeting);
+            var reply = ChatMessageData.FromGen(_chatSessionData.CharacterName, _chatSessionData.Greeting);
             _chatSessionData.Messages.Add(reply);
             await SendReplyWithSpeechAsync(reply, "greet", cancellationToken);
         }

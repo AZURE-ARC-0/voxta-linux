@@ -141,9 +141,9 @@ public class DiagnosticsController : Controller
         {
             var result = await service.GenerateReplyAsync(new ChatSessionData
             {
-                Preamble = new TextData { Text = "You are a nice chat bot." },
-                BotName = "Text Bot",
-                UserName = "Test User",
+                Preamble = new TextData { Text = "You are a test assistant." },
+                CharacterName = "Assistant",
+                UserName = "User",
             }, cancellationToken);
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
@@ -296,9 +296,9 @@ public class DiagnosticsController : Controller
         {
             var result = await service.SelectAnimationAsync(new ChatSessionData
             {
-                Preamble = new TextData { Text = "You are a nice chat bot." },
-                BotName = "Text Bot",
-                UserName = "Test User",
+                Preamble = new TextData { Text = "You are a test assistant." },
+                CharacterName = "Assistant",
+                UserName = "User",
             }, cancellationToken);
             return new DiagnosticsViewModel.ServiceStateViewModel
             {

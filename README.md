@@ -15,7 +15,9 @@ Download the latest `AcidBubbles.ChatMate.Server.VERSION.zip` release from the [
 
 ### Entering your API keys
 
-Open <http://127.0.0.1:5384/settings>
+Open <http://127.0.0.1:5384/settings> and select the backends you want to use. Note that you only need one Text Gen and one Text To Speech backend.
+
+To get started, I recommend using NovelAI for both Text Gen and Text To Speech, and OpenAI for Animation Selection.
 
 #### OpenAI
 
@@ -41,6 +43,12 @@ You can technically user another model, but only `gpt-3.5-turbo` is supported at
 
 You can technically user another model, but only `clio-v1` is supported at the moment.
 
+#### KoboldAI
+
+KoboldAI can run LLMs locally. You can either use the [henk717 version](https://github.com/henk717/KoboldAI) or [koboldcpp](https://github.com/LostRuins/koboldcpp). You'll need to understand how it works and how to run custom models first.
+
+If you use koboldcpp, the default url (localhost:5001) should work if the server is running.
+
 #### Vosk
 
 Vosk is used to do speech to text outside of Virt-A-Mate (because it's better, faster and uncensored).
@@ -55,13 +63,18 @@ When launching for the first time, a model will be downloaded. You can change it
 
 Choose a name you'd like to be called, and describe how the AI should see you, and what hey know about you.
 
+### Validate your settings
+
+1. Open <http://127.0.0.1:5384/diagnostics>
+2. Verify that all backends you plan on using are green.
+
 ### Testing the chat
 
 This UI is mostly for testing, but it's great way to make sure things work.
 
 1. Open <http://127.0.0.1:5384/chat>
 2. Choose a character in the drop down on the top left
-3. Type something in the text box and press enter or use the microphone button to speak
+3. Talk, the character should be listening!
 
 ## How to install the plugin in Virt-A-Mate
 
@@ -91,11 +104,11 @@ You can now launch Virt-A-Mate, open the main menu and go to User Preferences. F
 
 ### Using a demo scenes
 
-If you download a scene that uses ChatMate, and the previous steps are done correctly, you can simply open the scene and it should work. You can validate that the plugin is running by opening the plugin's custom UI (go in Edit mode, select the Person atom, go to Plugins, find ChatMate, click on Open Custom UI), and you should see "Connected". If you have a Bot selected, the State should be idle.
+If you download a scene that uses ChatMate, and the previous steps are done correctly, you can simply open the scene and it should work. You can validate that the plugin is running by opening the plugin's custom UI (go in Edit mode, select the Person atom, go to Plugins, find ChatMate, click on Open Custom UI), and you should see "Connected". If you have a character selected, the State should be idle.
 
 ### Adding ChatMate to a scene
 
-You can add `ChatMate.cslist` to a Person atom, and in the custom UI, select a Bot. Note that no animations will be played; to play animations, you can use something like Scripter and use On state changed and On animation changed to run animations in Timeline. You can also use the demo scenes as a starting point.
+You can add `ChatMate.cslist` to a Person atom, and in the custom UI, select a character. Note that no animations will be played; to play animations, you can use something like Scripter and use On state changed and On animation changed to run animations in Timeline. You can also use the demo scenes as a starting point.
 
 You may also want to enable lip sync in the Person atom, in Auto Behaviors, Lip Sync, Enabled.
 
@@ -104,10 +117,11 @@ Here are a few things to help make the character more alive:
 - Build quality Timeline animations
 - Use plugins like Glance for eye movements
 
-## Built-in bots
+## Built-in characters
 
-- Melly: She's using OpenAI for text generation, and NovelAI for TTS. She's a bit more coherent than the other bots, but she's not as good at nsfw content. If you want to have productive conversations, she's the one to go to.
+- Melly: She's using OpenAI for text generation, and NovelAI for TTS. She's a bit more coherent than the other characters, but she's not as good at nsfw content. If you want to have productive conversations, she's the one to go to.
 - Kate: She's using NovelAI for both text generation and TTS. She's not as coherent as Melly, but she's better at nsfw content. If you want to have fun and very adult conversations, she's the one to go to.
+- Kally: She's using KoboldAI for text generation, and NovelAI for TTS. She's subservient and her persona will greatly depend on which backend you use.
 
 ## How to build from source
 

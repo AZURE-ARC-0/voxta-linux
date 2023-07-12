@@ -1,7 +1,7 @@
 namespace ChatMate.Abstractions.Model;
 
 [Serializable]
-public class BotDefinition
+public class Character
 {
     public string? Id { get; set; }
     public bool ReadOnly { get; set; }
@@ -13,7 +13,7 @@ public class BotDefinition
     public string? Greeting { get; init; }
     public Message[]? SampleMessages { get; init; }
     public required ServicesMap Services { get; init; }
-    public BotOptions? Options { get; init; }
+    public CharacterOptions? Options { get; init; }
 
     [Serializable]
     public class Message
@@ -42,7 +42,7 @@ public class BotDefinition
     }
     
     [Serializable]
-    public class BotOptions
+    public class CharacterOptions
     {
         public bool EnableThinkingSpeech { get; init; }
     }

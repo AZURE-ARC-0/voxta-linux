@@ -1,0 +1,37 @@
+﻿@model ChatMate.Abstractions.Model.ServerWelcomeMessage.CharactersListItem[]
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Character";
+}
+
+<div class="container">
+    <h1>Characters</h1>
+    
+    <table class="table">
+        <thead>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Edit</th>
+        </thead>
+
+        @foreach (var character in Model)
+        {
+            <tr>
+                <td>@character.Name</td>
+                <td>@character.Description</td>
+                <td>
+                    <a class="btn btn-secondary" href="/characters/@character.Id?edit=@(!character.ReadOnly)">@(character.ReadOnly ? "View" : "Edit")</a>
+                    <a class="btn btn-secondary" href="/characters/new?from=@character.Id">Clone</a>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan="2"></td>
+            <td>
+                @* ReSharper disable Html.PathError *@
+                <a class="btn btn-primary" href="/characters/new">Add new character</a>
+                @* ReSharper restore Html.PathError *@
+            </td>
+        </tr>
+    </table>
+</div>

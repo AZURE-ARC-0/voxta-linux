@@ -3,7 +3,7 @@
 public interface IReadOnlyChatSessionData
 {
     public string UserName { get; }
-    public string BotName { get; }
+    public string CharacterName { get; }
     public TextData Preamble { get; }
     public TextData? Postamble { get; }
 
@@ -15,7 +15,7 @@ public class ChatSessionData : IReadOnlyChatSessionData
 {
     public Guid ChatId { get; init; }
     public required string UserName { get; init; }
-    public required string BotName { get; init; }
+    public required string CharacterName { get; init; }
     public required TextData Preamble { get; init; }
     public TextData? Postamble { get; init; }
     public TextData? Greeting { get; set; }

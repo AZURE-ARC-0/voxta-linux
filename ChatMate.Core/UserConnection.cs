@@ -8,26 +8,26 @@ namespace ChatMate.Core;
 public sealed class UserConnection : IAsyncDisposable
 {
     private readonly IUserConnectionTunnel _tunnel;
-    private readonly IBotRepository _botRepository;
+    private readonly ICharacterRepository _charactersRepository;
     private readonly ChatSessionFactory _chatSessionFactory;
     private readonly ILogger<UserConnection> _logger;
 
     private IChatSession? _chat;
 
-    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, IBotRepository botRepository, ChatSessionFactory chatSessionFactory)
+    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ICharacterRepository charactersRepository, ChatSessionFactory chatSessionFactory)
     {
         _tunnel = tunnel;
-        _botRepository = botRepository;
+        _charactersRepository = charactersRepository;
         _chatSessionFactory = chatSessionFactory;
         _logger = loggerFactory.CreateLogger<UserConnection>();
     }
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
-        var bots = await _botRepository.GetBotsListAsync(cancellationToken);
+        var characters = await _charactersRepository.GetCharactersListAsync(cancellationToken);
         await _tunnel.SendAsync(new ServerWelcomeMessage
         {
-            BotTemplates = bots
+            Characters = characters
         }, cancellationToken);
 
         while (!_tunnel.Closed)
@@ -58,8 +58,8 @@ public sealed class UserConnection : IAsyncDisposable
                     case ClientSpeechPlaybackCompleteMessage:
                         _chat?.HandleSpeechPlaybackComplete();
                         break;
-                    case ClientLoadBotTemplateMessage loadBotTemplateMessage:
-                        await LoadBotTemplateAsync(loadBotTemplateMessage.BotTemplateId, cancellationToken);
+                    case ClientLoadCharacterMessage loadCharacterMessage:
+                        await LoadCharacterAsync(loadCharacterMessage.CharacterId, cancellationToken);
                         break;
                     default:
                         _logger.LogError("Unknown message type {ClientMessage}", clientMessage.GetType().Name);
@@ -81,28 +81,28 @@ public sealed class UserConnection : IAsyncDisposable
         }
     }
 
-    private async Task LoadBotTemplateAsync(string botTemplateId, CancellationToken cancellationToken)
+    private async Task LoadCharacterAsync(string characterId, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Loading bot template {BotTemplateId}", botTemplateId);
+        _logger.LogInformation("Loading character {CharacterId}", characterId);
         
-        var bot = await _botRepository.GetBotAsync(botTemplateId, cancellationToken);
-        if (bot == null)
+        var character = await _charactersRepository.GetCharacterAsync(characterId, cancellationToken);
+        if (character == null)
         {
-            await SendError("This bot template does not exist", cancellationToken);
+            await SendError("This character does not exist", cancellationToken);
             return;
         }
 
-        await _tunnel.SendAsync(new BotTemplateLoadedMessage
+        await _tunnel.SendAsync(new CharacterLoadedMessage
         {
-            BotName = bot.Name,
-            Preamble = bot.Preamble,
-            Postamble = bot.Postamble ?? "",
-            Greeting = bot.Greeting ?? "",
-            SampleMessages = bot.SampleMessages != null ?string.Join("\n", bot.SampleMessages.Select(x => $"{x.User}: {x.Text}")) : "",
-            TextGenService = bot.Services.TextGen.Service,
-            TtsService = bot.Services.SpeechGen.Service,
-            TtsVoice = bot.Services.SpeechGen.Voice,
-            EnableThinkingSpeech = bot.Options?.EnableThinkingSpeech ?? true,
+            CharacterName = character.Name,
+            Preamble = character.Preamble,
+            Postamble = character.Postamble ?? "",
+            Greeting = character.Greeting ?? "",
+            SampleMessages = character.SampleMessages != null ?string.Join("\n", character.SampleMessages.Select(x => $"{x.User}: {x.Text}")) : "",
+            TextGenService = character.Services.TextGen.Service,
+            TtsService = character.Services.SpeechGen.Service,
+            TtsVoice = character.Services.SpeechGen.Voice,
+            EnableThinkingSpeech = character.Options?.EnableThinkingSpeech ?? true,
         }, cancellationToken);
     }
 

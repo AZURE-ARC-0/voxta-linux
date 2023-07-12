@@ -96,7 +96,7 @@ public class NovelAITextGenClient : ITextGenService
         var input = $"""
         Scenario: {chatSessionData.Preamble.Text}
         {string.Join("\n", chatMessages.Select(x => $"{x.User}: \"{x.Text}\""))}
-        {chatSessionData.BotName}: \"
+        {chatSessionData.CharacterName}: \"
         """.ReplaceLineEndings("\n");
         var body = new
         {

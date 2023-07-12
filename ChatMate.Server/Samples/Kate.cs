@@ -4,7 +4,7 @@ namespace ChatMate.Server.Samples;
 
 public static class Kate
 {
-    public static BotDefinition Create() => new()
+    public static Character Create() => new()
     {
         Id = "e8528c8f-7033-42db-8cb5-3c2bacd930b1",
         ReadOnly = true,

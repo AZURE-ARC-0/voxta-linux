@@ -59,14 +59,14 @@
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = window.SpeechRecognition ? new SpeechRecognition() : null;
     
-    const Header = ({ animation, botTemplatesList, onBotTemplateSelect }) => {
+    const Header = ({ animation, charactersList, onCharacterSelect }) => {
         return () => html`
             <div class="d-flex justify-content-between align-items-center mb-3 p-2">
                 <div class="d-flex align-items-center">
-                    <b>Bot:</b>
-                    <select class="ms-2 form-select" onChange=${e => onBotTemplateSelect(e.target.value)}>
-                        <option value="">Select Bot</option>
-                        <${For} each=${botTemplatesList}>
+                    <b>Character:</b>
+                    <select class="ms-2 form-select" onChange=${e => onCharacterSelect(e.target.value)}>
+                        <option value="">Select character</option>
+                        <${For} each=${charactersList}>
                             ${bot => html`
                                 <option value=${bot.id}>${bot.name} - ${bot.description}</option>
                             `}
@@ -156,7 +156,7 @@
     
         return () => html`
             <div class="input-group mt-3">
-                <Show when=${useServerSpeechRecognition}>
+                <Show when=${!useServerSpeechRecognition}>
                     <div class="input-group-text">
                         <button class="btn btn-secondary" onClick=${startSpeechRecognition}>
                             <i class="bi bi-mic"></i>
@@ -179,7 +179,7 @@
         const [ready, setReady] = createSignal(false);
         const [messages, setMessages] = createSignal([]);
         const [animation, setAnimation] = createSignal('idle');
-        const [botTemplatesList, setBotTemplatesList] = createSignal([]);
+        const [charactersList, setCharactersList] = createSignal([]);
         const [useServerSpeechRecognition, _] = createSignal(true);
         
         let thinkingSpeechUrls = [];
@@ -226,10 +226,10 @@
                     setReady(true);
                     break;
                 case 'welcome':
-                    setBotTemplatesList(data.botTemplates);
+                    setCharactersList(data.characters);
                     break;
-                case 'botTemplateLoaded':
-                    onBotTemplateLoaded(data);
+                case 'characterLoaded':
+                    onCharacterLoaded(data);
                     break;
                 default:
                     console.error('unknown message type', data)
@@ -264,21 +264,20 @@
             connect();
         });
         
-        function onBotTemplateSelect(botTemplateId) {
+        function onCharacterSelect(characterId) {
             setMessages([]);
             const msg = JSON.stringify({
-                $type: "loadBotTemplate",
-                botTemplateId
+                $type: "loadCharacter",
+                characterId
             });
             socket.send(msg);
         }
         
-        function onBotTemplateLoaded(template) {
+        function onCharacterLoaded(template) {
             setMessages([]);
             const msg = JSON.stringify({
                 ...template, 
                 $type: "startChat",
-                audioPath: "F:\\Games\\VaM\\Custom\\Sounds\\ChatMate\\",
                 useServerSpeechRecognition: useServerSpeechRecognition(),
                 acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
             });
@@ -295,7 +294,7 @@
         
         return () => html`
             <div class="container parent-container p-2">
-                <${Header} animation=${animation()} botTemplatesList=${botTemplatesList()} onBotTemplateSelect=${onBotTemplateSelect} />
+                <${Header} animation=${animation()} charactersList=${charactersList()} onCharacterSelect=${onCharacterSelect} />
                 <${Chat} messages=${messages()} />
                 <${MessageInput} onSend=${onSend} enabled=${ready()}, useServerSpeechRecognition=${useServerSpeechRecognition()} />
             </div>

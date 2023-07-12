@@ -21,7 +21,7 @@ public class UserConnectionFactory
         return new UserConnection(
             tunnel,
             _sp.GetRequiredService<ILoggerFactory>(),
-            _sp.GetRequiredService<IBotRepository>(),
+            _sp.GetRequiredService<ICharacterRepository>(),
             _sp.GetRequiredService<ChatSessionFactory>()
         );
     }

@@ -4,7 +4,7 @@ namespace ChatMate.Server.Samples;
 
 public static class Melly
 {
-    public static BotDefinition Create() => new()
+    public static Character Create() => new()
     {
         Id = "4221e5bd-1936-42fc-8c04-ed9adffc254f",
         ReadOnly = true,

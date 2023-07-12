@@ -23,13 +23,13 @@ public partial class ChatSession
             var speechInterruptionRatio = _chatSessionState.InterruptSpeech();
             if (speechInterruptionRatio is > 0.05f and < 0.95f)
             {
-                var lastBotMessage = _chatSessionData.Messages.LastOrDefault();
-                if (lastBotMessage?.User == _chatSessionData.BotName)
+                var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
+                if (lastCharacterMessage?.User == _chatSessionData.CharacterName)
                 {
-                    var cutoff = Math.Clamp((int)Math.Round(lastBotMessage.Text.Length * speechInterruptionRatio), 1, lastBotMessage.Text.Length - 2);
-                    lastBotMessage.Text = lastBotMessage.Text[..cutoff] + "...";
-                    lastBotMessage.Tokens = _textGen.GetTokenCount(lastBotMessage.Text);
-                    _logger.LogInformation("Cutoff last bot message to account for the interruption: {Text}", lastBotMessage.Text);
+                    var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
+                    lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
+                    lastCharacterMessage.Tokens = _textGen.GetTokenCount(lastCharacterMessage.Text);
+                    _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Text);
                 }
 
                 text = "*interrupts {{char}}* " + text;
@@ -62,7 +62,7 @@ public partial class ChatSession
                 var linkedCancellationToken = linkedCancellationSource.Token;
                 var gen = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
                 if (string.IsNullOrWhiteSpace(gen.Text)) throw new InvalidOperationException("AI service returned an empty string.");
-                reply = ChatMessageData.FromGen(_chatSessionData.BotName, gen);
+                reply = ChatMessageData.FromGen(_chatSessionData.CharacterName, gen);
             }
             catch (OperationCanceledException)
             {

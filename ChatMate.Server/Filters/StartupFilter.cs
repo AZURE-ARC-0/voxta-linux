@@ -5,20 +5,20 @@ namespace ChatMate.Server.Filters;
 
 public class AutoRequestServicesStartupFilter : IStartupFilter
 {
-    private readonly IBotRepository _botsRepository;
+    private readonly ICharacterRepository _charactersRepository;
 
-    public AutoRequestServicesStartupFilter(IBotRepository botsRepository)
+    public AutoRequestServicesStartupFilter(ICharacterRepository charactersRepository)
     {
-        _botsRepository = botsRepository;
+        _charactersRepository = charactersRepository;
     }
     
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
     {
         Task.Run(async () =>
         {
-            await _botsRepository.SaveBotAsync(Kally.Create());
-            await _botsRepository.SaveBotAsync(Melly.Create());
-            await _botsRepository.SaveBotAsync(Kate.Create());
+            await _charactersRepository.SaveCharacterAsync(Kally.Create());
+            await _charactersRepository.SaveCharacterAsync(Melly.Create());
+            await _charactersRepository.SaveCharacterAsync(Kate.Create());
         }).Wait();
         
         return next;

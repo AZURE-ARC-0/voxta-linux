@@ -25,7 +25,7 @@ public class ChatSessionTests
         _chatSessionData = new ChatSessionData
         {
             UserName = "User",
-            BotName = "Bot",
+            CharacterName = "Assistant",
             Preamble = new TextData
             {
                 Text = "Preamble",
@@ -130,9 +130,9 @@ public class ChatSessionTests
         {
             Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
                 User: Hello!
-                Bot: This speech will...
+                Assistant: This speech will...
                 User: *interrupts {{char}}* Stop!
-                Bot: How rude!
+                Assistant: How rude!
                 """.ReplaceLineEndings("\n")));
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("This speech will be interrupted."));
             Assert.That(_tunnelMock.Invocations[1].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("How rude!"));
@@ -162,7 +162,7 @@ public class ChatSessionTests
             Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
                 User: Ping 1!
                 Ping 2!
-                Bot: Pong 2!
+                Assistant: Pong 2!
                 """.ReplaceLineEndings("\n")));
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong 2!"));
         });
