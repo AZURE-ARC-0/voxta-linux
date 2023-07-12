@@ -40,13 +40,12 @@ public class KoboldAITextGenClient : ITextGenService
     {
         // TODO: count tokens?
         // TODO: Hardcoded Guanaco formatting
-        var chatMessages = chatSessionData.GetMessages();
+        var preamble = MakePreamble(chatSessionData.Character);
+        var messages = string.Join("\n", chatSessionData.GetMessages().Select(x => $"{x.User}: \"{x.Text}\""));
         var prompt = $"""
-        {chatSessionData.Preamble.Text}
-        <START>
-        {string.Join("\n", chatMessages.Select(x => $"{x.User}: {x.Text}"))}
-        {chatSessionData.Postamble?.Text}
-        {chatSessionData.CharacterName}:
+        {preamble}
+        {messages}
+        {chatSessionData.Character.Name}:
         """.ReplaceLineEndings("\n").Replace("\n\n", "\n");
         var body = new
         {
@@ -63,7 +62,7 @@ public class KoboldAITextGenClient : ITextGenService
             top_p = 0.9,
             sampler_order = new[] { 6, 0, 1, 2, 3, 4, 5 },
             prompt,
-            stop_sequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.CharacterName}:", "\n" }
+            stop_sequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" }
         };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
@@ -106,6 +105,16 @@ public class KoboldAITextGenClient : ITextGenService
             Text = sanitized,
             Tokens = 0,
         };
+    }
+    
+    private string MakePreamble(CharacterCard character)
+    {
+        return $"""
+            {character.SystemPrompt}
+            Description of {character.Name}: {character.Description}
+            Personality of {character.Name}: {character.Personality}
+            Circumstances and context of the dialogue: {character.Scenario}
+            """;
     }
     
     [Serializable]

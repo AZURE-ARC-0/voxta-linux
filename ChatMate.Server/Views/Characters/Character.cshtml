@@ -8,6 +8,10 @@
 <div class="container">
     <h1>@(Model.IsEditable ? "Edit" : "View") Character</h1>
     
+    <p>
+        See <a href="https://github.com/malfoyslastname/character-card-spec-v2">Character Card Spec V2</a> for more information.
+    </p>
+    
     <form method="post" asp-action="Character">
         <h2>Storage</h2>
 
@@ -26,29 +30,58 @@
         </div>
 
         <div class="form-group">
-            <label asp-for="Character.Description">Description: <span class="text-muted">Only for display</span></label>
-            <input asp-for="Character.Description" class="form-control"/>
+            <label asp-for="Character.CreatorNotes">Creator Notes: <span class="text-muted">Only for display</span></label>
+            <input asp-for="Character.CreatorNotes" class="form-control"/>
+            @Html.ValidationMessageFor(m => m.Character.CreatorNotes)
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Character.Description">Description:</label>
+            <textarea asp-for="Character.Description" class="form-control"></textarea>
+            
             @Html.ValidationMessageFor(m => m.Character.Description)
         </div>
-
-        <h2>Prompt</h2>
-
+        
         <div class="form-group">
-            <label asp-for="Character.Preamble">Preamble:</label>
-            <textarea asp-for="Character.Preamble" class="form-control"></textarea>
-            @Html.ValidationMessageFor(m => m.Character.Preamble)
+            <label asp-for="Character.Personality">Personality:</label>
+            <textarea asp-for="Character.Personality" class="form-control"></textarea>
+            
+            @Html.ValidationMessageFor(m => m.Character.Personality)
         </div>
-
+        
         <div class="form-group">
-            <label asp-for="Character.Postamble">Postamble:</label>
-            <textarea asp-for="Character.Postamble" class="form-control"></textarea>
-            @Html.ValidationMessageFor(m => m.Character.Postamble)
+            <label asp-for="Character.Scenario">Scenario:</label>
+            <textarea asp-for="Character.Scenario" class="form-control"></textarea>
+            
+            @Html.ValidationMessageFor(m => m.Character.Scenario)
         </div>
-
+        
         <div class="form-group">
-            <label asp-for="Character.Greeting">Greeting: <span class="text-muted">The text the character will say when starting a new chat</span></label>
-            <input asp-for="Character.Greeting" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.Character.Greeting)
+            <label asp-for="Character.FirstMessage">FirstMessage:</label>
+            <textarea asp-for="Character.FirstMessage" class="form-control"></textarea>
+            
+            @Html.ValidationMessageFor(m => m.Character.FirstMessage)
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Character.MessageExamples">MessageExamples:</label>
+            <textarea asp-for="Character.MessageExamples" class="form-control"></textarea>
+            
+            @Html.ValidationMessageFor(m => m.Character.MessageExamples)
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Character.SystemPrompt">SystemPrompt:</label>
+            <textarea asp-for="Character.SystemPrompt" class="form-control"></textarea>
+            
+            @Html.ValidationMessageFor(m => m.Character.SystemPrompt)
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Character.PostHistoryInstructions">PostHistoryInstructions:</label>
+            <textarea asp-for="Character.PostHistoryInstructions" class="form-control"></textarea>
+            
+            @Html.ValidationMessageFor(m => m.Character.PostHistoryInstructions)
         </div>
 
         <h2>Text Generation</h2>

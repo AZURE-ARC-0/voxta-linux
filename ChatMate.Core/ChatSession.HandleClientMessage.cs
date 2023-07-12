@@ -24,7 +24,7 @@ public partial class ChatSession
             if (speechInterruptionRatio is > 0.05f and < 0.95f)
             {
                 var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
-                if (lastCharacterMessage?.User == _chatSessionData.CharacterName)
+                if (lastCharacterMessage?.User == _chatSessionData.Character.Name)
                 {
                     var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
                     lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
@@ -61,13 +61,22 @@ public partial class ChatSession
                 using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(queueCancellationToken, abortCancellationToken);
                 var linkedCancellationToken = linkedCancellationSource.Token;
                 var gen = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
-                if (string.IsNullOrWhiteSpace(gen.Text)) throw new InvalidOperationException("AI service returned an empty string.");
-                reply = ChatMessageData.FromGen(_chatSessionData.CharacterName, gen);
+                if (string.IsNullOrWhiteSpace(gen.Text))
+                {
+                    throw new InvalidOperationException("AI service returned an empty string.");
+                }
+
+                reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, gen);
             }
             catch (OperationCanceledException)
             {
                 // Reply will simply be dropped
                 return;
+            }
+            catch
+            {
+                if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestResumeSpeechRecognition();
+                throw;
             }
 
             _chatSessionState.PendingUserMessage = null;

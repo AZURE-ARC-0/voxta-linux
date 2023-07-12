@@ -61,25 +61,27 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
+        var systemPrompt = MakeSystemPrompt(chatSessionData.Character);
+        var postHistoryPrompt = MakePostHistoryPrompt(chatSessionData.Character);
+        
         var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
+
+        #warning Save this
+        var totalTokens = _tokenizer.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count + _tokenizer.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count;
         
-        var totalTokens = chatSessionData.Preamble.Tokens + 4;
-        if (!string.IsNullOrEmpty(chatSessionData.Postamble?.Text))
-            totalTokens += chatSessionData.Postamble.Tokens + 4;
-        
-        var messages = new List<object> { new { role = "system", content = chatSessionData.Preamble.Text } };
+        var messages = new List<object> { new { role = "system", content = systemPrompt } };
         var chatMessages = chatSessionData.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= 4096) break;
-            var role = message.User == chatSessionData.CharacterName ? "assistant" : "user";
+            var role = message.User == chatSessionData.Character.Name ? "assistant" : "user";
             messages.Insert(1, new { role, content = message.Text });
         }
 
-        if (!string.IsNullOrEmpty(chatSessionData.Postamble?.Text))
-            messages.Add(new { role = "system", content = chatSessionData.Postamble.Text });
+        if (!string.IsNullOrEmpty(postHistoryPrompt))
+            messages.Add(new { role = "system", content = postHistoryPrompt });
 
         tokenizePerf.Pause();
 
@@ -100,19 +102,34 @@ public class OpenAITextGenClient : ITextGenService, IAnimationSelectionService
         };
     }
 
+    private string MakeSystemPrompt(CharacterCard character)
+    {
+        return $"""
+            {character.SystemPrompt}
+            Description of {character.Name}: {character.Description}
+            Personality of {character.Name}: {character.Personality}
+            Circumstances and context of the dialogue: {character.Scenario}
+            """;
+    }
+
+    private string MakePostHistoryPrompt(CharacterCard character)
+    {
+        return character.PostHistoryInstructions ?? "";
+    }
+
     public async ValueTask<string> SelectAnimationAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var sb = new StringBuilder(chatSessionData.Preamble.Text);
-        sb.AppendLine("");
+        var sb = new StringBuilder();
+        sb.AppendLine(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
+        sb.AppendLine("Scenario: " + chatSessionData.Character.Scenario);
         foreach (var message in chatSessionData.Messages.TakeLast(4))
         {
             sb.AppendLine($"{message.User}: {message.Text}");
         }
-
         sb.AppendLine($"""
         ---
         Available animations: smile, frown, pensive, excited, sad, curious, afraid, angry, surprised, laugh, cry, idle
-        Write the animation {chatSessionData.CharacterName} should play.
+        Write the animation {chatSessionData.Character.Name} should play.
         """);
         var messages = new List<object>
         {

@@ -3,9 +3,7 @@
 public interface IReadOnlyChatSessionData
 {
     public string UserName { get; }
-    public string CharacterName { get; }
-    public TextData Preamble { get; }
-    public TextData? Postamble { get; }
+    public CharacterCard Character { get; }
 
     public IReadOnlyList<ChatMessageData> GetMessages();
 }
@@ -15,16 +13,11 @@ public class ChatSessionData : IReadOnlyChatSessionData
 {
     public Guid ChatId { get; init; }
     public required string UserName { get; init; }
-    public required string CharacterName { get; init; }
-    public required TextData Preamble { get; init; }
-    public TextData? Postamble { get; init; }
-    public TextData? Greeting { get; set; }
+    public required CharacterCard Character { get; init; }
     public string[]? ThinkingSpeech { get; init; }
 
-    public IReadOnlyList<ChatMessageData> GetSampleMessages() => Messages.AsReadOnly();
     public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();
 
-    public List<ChatMessageData> SampleMessages { get; } = new();
     public List<ChatMessageData> Messages { get; } = new();
     
     public string? AudioPath { get; init; }

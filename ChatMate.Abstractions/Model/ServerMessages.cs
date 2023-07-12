@@ -34,15 +34,19 @@ public class ServerWelcomeMessage : ServerMessage
 [Serializable]
 public class CharacterLoadedMessage : ServerMessage
 {
-    public required string CharacterName { get; init; }
-    public required string Preamble { get; init; }
-    public required string Postamble { get; init; }
-    public required string Greeting { get; init; }
-    public required string SampleMessages { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required string Personality { get; init; }
+    public required string Scenario { get; init; }
+    public required string FirstMessage { get; init; }
+    public required string MessageExamples { get; init; }
+    public string? SystemPrompt { get; init; }
+    public string? PostHistoryInstructions { get; init; }
     
     public required string TextGenService { get; init; }
     public required string TtsService { get; init; }
     public required string TtsVoice { get; init; }
+    
     public bool EnableThinkingSpeech { get; init; }
 }
 

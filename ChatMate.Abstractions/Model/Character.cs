@@ -1,26 +1,31 @@
 namespace ChatMate.Abstractions.Model;
 
+/// <summary>
+/// See https://github.com/malfoyslastname/character-card-spec-v2 
+/// </summary>
 [Serializable]
-public class Character
+public class CharacterCard
+{
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required string Personality { get; init; }
+    public required string Scenario { get; init; }
+    public string? FirstMessage { get; init; }
+    public string? MessageExamples { get; init; }
+    public string? SystemPrompt { get; init; }
+    public string? PostHistoryInstructions { get; init; }
+    
+    public string? CreatorNotes { get; init; }
+}
+
+[Serializable]
+public class Character : CharacterCard
 {
     public string? Id { get; set; }
     public bool ReadOnly { get; set; }
     
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public required string Preamble { get; init; }
-    public string? Postamble { get; init; }
-    public string? Greeting { get; init; }
-    public Message[]? SampleMessages { get; init; }
     public required ServicesMap Services { get; init; }
     public CharacterOptions? Options { get; init; }
-
-    [Serializable]
-    public class Message
-    {
-        public required string User { get; init; }
-        public required string Text { get; init; }
-    }
     
     [Serializable]
     public class ServicesMap

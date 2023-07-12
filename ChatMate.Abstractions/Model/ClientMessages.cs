@@ -32,11 +32,14 @@ public class ClientStartChatMessage : ClientMessage
     public string? AudioPath { get; init; }
     public bool UseServerSpeechRecognition { get; init; }
     
-    public required string CharacterName { get; init; }
-    public required string Preamble { get; init; }
-    public string? Postamble { get; init; }
-    public string? Greeting { get; init; }
-    public string? SampleMessages { get; init; }
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required string Personality { get; init; }
+    public required string Scenario { get; init; }
+    public string? FirstMessage { get; init; }
+    public string? MessageExamples { get; init; }
+    public string? SystemPrompt { get; init; }
+    public string? PostHistoryInstructions { get; init; }
     
     public required string TextGenService { get; init; }
     public string? TtsService { get; init; }

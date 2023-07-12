@@ -25,11 +25,14 @@ public class ChatSessionTests
         _chatSessionData = new ChatSessionData
         {
             UserName = "User",
-            CharacterName = "Assistant",
-            Preamble = new TextData
+            Character = new Character
             {
-                Text = "Preamble",
-                Tokens = 1,
+                Name = "Assistant",
+                SystemPrompt = "You are a test assistant",
+                Description = "",
+                Personality = "",
+                Scenario = "This is a test",
+                Services = null!
             },
             AudioPath = "/audio-path",
             TtsVoice = "voice",

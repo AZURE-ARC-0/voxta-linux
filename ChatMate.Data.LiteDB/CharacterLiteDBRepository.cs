@@ -17,14 +17,14 @@ public class CharacterLiteDBRepository : ICharacterRepository
     public Task<ServerWelcomeMessage.CharactersListItem[]> GetCharactersListAsync(CancellationToken cancellationToken)
     {
         var cards = _charactersCollection.Query()
-            .Select(x => new { x.Id, x.Name, x.Description, x.ReadOnly })
+            .Select(x => new { x.Id, x.Name, x.CreatorNotes, x.Services, x.ReadOnly })
             .ToList();
         
         var result = cards.Select(b => new ServerWelcomeMessage.CharactersListItem
         {
             Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
             Name = b.Name,
-            Description = b.Description,
+            Description = $"{b.CreatorNotes} (Text: {b.Services.TextGen.Service}, TTS: {b.Services.SpeechGen.Service})",
             ReadOnly = b.ReadOnly,
         }).ToArray();
 

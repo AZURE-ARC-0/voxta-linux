@@ -90,14 +90,13 @@ public class NovelAITextGenClient : ITextGenService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        // TODO: count tokens: https://novelai.net/tokenizer
-        // TODO: Move the settings to appsettings
-        var chatMessages = chatSessionData.GetMessages();
+        var preamble = MakePreamble(chatSessionData.Character);
+        var messages = string.Join("\n", chatSessionData.GetMessages().Select(x => $"{x.User}: \"{x.Text}\""));
         var input = $"""
-        Scenario: {chatSessionData.Preamble.Text}
-        {string.Join("\n", chatMessages.Select(x => $"{x.User}: \"{x.Text}\""))}
-        {chatSessionData.CharacterName}: \"
-        """.ReplaceLineEndings("\n");
+        {preamble}
+        {messages}
+        {chatSessionData.Character.Name}: "
+        """.ReplaceLineEndings("\n").Replace("\n\n", "\n");
         var body = new
         {
             model = _model,
@@ -144,6 +143,16 @@ public class NovelAITextGenClient : ITextGenService
             Text = sanitized,
             Tokens = 0,
         };
+    }
+
+    private string MakePreamble(CharacterCard character)
+    {
+        return $"""
+            {character.SystemPrompt}
+            [ Description of {character.Name}: {character.Description} ]
+            [ Personality of {character.Name}: {character.Personality} ]
+            [ Circumstances and context of the dialogue: {character.Scenario} ]
+            """;
     }
 
     public int GetTokenCount(string message)

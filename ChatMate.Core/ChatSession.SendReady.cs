@@ -33,9 +33,14 @@ public partial class ChatSession
         
         _logger.LogInformation("Chat ready!");
 
-        if (_chatSessionData.Greeting != null)
+        if (_chatSessionData.Character.FirstMessage != null)
         {
-            var reply = ChatMessageData.FromGen(_chatSessionData.CharacterName, _chatSessionData.Greeting);
+            var textData = new TextData
+            {
+                Text = _chatSessionData.Character.FirstMessage,
+                Tokens = _textGen.GetTokenCount(_chatSessionData.Character.FirstMessage)
+            };
+            var reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, textData);
             _chatSessionData.Messages.Add(reply);
             await SendReplyWithSpeechAsync(reply, "greet", cancellationToken);
         }

@@ -46,7 +46,7 @@ public class ChatSessionFactory
         }
         
         var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
-        var textProcessor = new ChatTextProcessor(profile, startChatMessage.CharacterName);
+        var textProcessor = new ChatTextProcessor(profile, startChatMessage.Name);
 
         var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService, cancellationToken);
         var animationSelection = string.IsNullOrEmpty(profile.AnimationSelectionService)
@@ -67,44 +67,22 @@ public class ChatSessionFactory
         {
             ChatId = startChatMessage.ChatId ?? Crypto.CreateCryptographicallySecureGuid(),
             UserName = profile.Name,
-            CharacterName = startChatMessage.CharacterName,
-            Preamble = new TextData
-            {
-                Text = textProcessor.ProcessText(startChatMessage.Preamble)
-            },
-            Postamble = new TextData
-            {
-                Text = textProcessor.ProcessText(startChatMessage.Postamble)
-            },
-            Greeting = !string.IsNullOrEmpty(startChatMessage.Greeting) ? new TextData
-            {
-                Text = textProcessor.ProcessText(startChatMessage.Greeting)
-            } : null,
+            Character = new CharacterCard
+                {
+                    Name = startChatMessage.Name,
+                    Description = textProcessor.ProcessText(startChatMessage.Description),
+                    Personality = textProcessor.ProcessText(startChatMessage.Personality),
+                    Scenario = textProcessor.ProcessText(startChatMessage.Scenario),
+                    FirstMessage = textProcessor.ProcessText(startChatMessage.FirstMessage),
+                    MessageExamples = textProcessor.ProcessText(startChatMessage.MessageExamples),
+                    SystemPrompt = textProcessor.ProcessText(startChatMessage.SystemPrompt),
+                    PostHistoryInstructions = textProcessor.ProcessText(startChatMessage.PostHistoryInstructions),
+                },
             ThinkingSpeech = thinkingSpeech,
             AudioPath = startChatMessage.AudioPath,
             TtsVoice = startChatMessage.TtsVoice
         };
-        chatData.Preamble.Tokens = textGen.GetTokenCount(chatData.Preamble.Text);
-        chatData.Postamble.Tokens = textGen.GetTokenCount(chatData.Postamble.Text);
-        if(chatData.Greeting != null) chatData.Greeting.Tokens = textGen.GetTokenCount(chatData.Greeting.Text);
-        var sampleMessages = startChatMessage.SampleMessages?.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
-        foreach (var message in sampleMessages)
-        {
-            var parts = message.Split(":");
-            if (parts.Length == 1) continue;
-            var m = new ChatMessageData
-            {
-                User = parts[0] switch
-                {
-                    "{{user}}" => profile.Name,
-                    "{{char}}" => startChatMessage.CharacterName,
-                    _ => startChatMessage.CharacterName
-                },
-                Text = textProcessor.ProcessText(parts[1].Trim())
-            };
-            m.Tokens = textGen.GetTokenCount(m.Text);
-            chatData.SampleMessages.Add(m);
-        }
+        // TODO: Optimize by pre-calculating tokens count
         
         var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && profile.EnableSpeechRecognition;
 

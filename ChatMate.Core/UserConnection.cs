@@ -94,11 +94,14 @@ public sealed class UserConnection : IAsyncDisposable
 
         await _tunnel.SendAsync(new CharacterLoadedMessage
         {
-            CharacterName = character.Name,
-            Preamble = character.Preamble,
-            Postamble = character.Postamble ?? "",
-            Greeting = character.Greeting ?? "",
-            SampleMessages = character.SampleMessages != null ?string.Join("\n", character.SampleMessages.Select(x => $"{x.User}: {x.Text}")) : "",
+            Name = character.Name,
+            Description = character.Description,
+            Personality = character.Personality,
+            Scenario = character.Scenario,
+            FirstMessage = character.FirstMessage ?? "",
+            MessageExamples = character.MessageExamples ?? "",
+            SystemPrompt = character.SystemPrompt,
+            PostHistoryInstructions = character.PostHistoryInstructions,
             TextGenService = character.Services.TextGen.Service,
             TtsService = character.Services.SpeechGen.Service,
             TtsVoice = character.Services.SpeechGen.Voice,

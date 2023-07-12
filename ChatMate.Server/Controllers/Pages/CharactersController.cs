@@ -38,10 +38,13 @@ public class CharactersController : Controller
             character = new Character
             {
                 Name = "",
-                Preamble = "{{char}} is a virtual companion.",
-                Postamble = "",
-                Greeting = "Hi!",
-                SampleMessages = Array.Empty<Character.Message>(),
+                Description = "",
+                Personality = "",
+                Scenario = "",
+                FirstMessage = "",
+                MessageExamples = "",
+                SystemPrompt = "",
+                PostHistoryInstructions = "",
                 Services = new Character.ServicesMap
                 {
                     TextGen = new Character.ServiceMap

@@ -141,9 +141,15 @@ public class DiagnosticsController : Controller
         {
             var result = await service.GenerateReplyAsync(new ChatSessionData
             {
-                Preamble = new TextData { Text = "You are a test assistant." },
-                CharacterName = "Assistant",
                 UserName = "User",
+                Character = new CharacterCard
+                {
+                    Name = "Assistant",
+                    SystemPrompt = "You are a test assistant",
+                    Description = "",
+                    Personality = "",
+                    Scenario = "This is a test",
+                }
             }, cancellationToken);
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
@@ -296,9 +302,15 @@ public class DiagnosticsController : Controller
         {
             var result = await service.SelectAnimationAsync(new ChatSessionData
             {
-                Preamble = new TextData { Text = "You are a test assistant." },
-                CharacterName = "Assistant",
                 UserName = "User",
+                Character = new CharacterCard
+                {
+                    Name = "Assistant",
+                    SystemPrompt = "You are a test assistant",
+                    Description = "",
+                    Personality = "",
+                    Scenario = "This is a test",
+                }
             }, cancellationToken);
             return new DiagnosticsViewModel.ServiceStateViewModel
             {
