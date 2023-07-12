@@ -69,11 +69,20 @@ public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
 
     public async Task<T?> ReceiveAsync<T>(CancellationToken cancellationToken) where T : ClientMessage
     {
-        var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(_buffer), cancellationToken);
-        if (result.CloseStatus.HasValue) return null;
+        WebSocketReceiveResult result;
+        using var message = new MemoryStream();
+        do
+        {
+            result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(_buffer), cancellationToken);
+            if (result.CloseStatus.HasValue) return null;
+            message.Write(_buffer, 0, result.Count);
+        }
+        while (!result.EndOfMessage);
+        
         try
         {
-            return JsonSerializer.Deserialize<T>(_buffer.AsMemory(0, result.Count).Span, SerializeOptions);
+            message.Seek(0, SeekOrigin.Begin);
+            return await JsonSerializer.DeserializeAsync<T>(message, SerializeOptions, cancellationToken);
         }
         catch (JsonException exc)
         {

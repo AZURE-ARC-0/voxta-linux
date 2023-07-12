@@ -3,6 +3,7 @@ using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
+using ChatMate.Server.Utils;
 using ChatMate.Server.ViewModels;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.ElevenLabs;
@@ -15,10 +16,17 @@ namespace ChatMate.Server.Controllers.Pages;
 [Controller]
 public class CharactersController : Controller
 {
-    [HttpGet("/characters")]
-    public async Task<IActionResult> Characters([FromServices] ICharacterRepository charactersRepository, CancellationToken cancellationToken)
+    private readonly ICharacterRepository _characterRepository;
+
+    public CharactersController(ICharacterRepository characterRepository)
     {
-        var model = await charactersRepository.GetCharactersListAsync(cancellationToken);
+        _characterRepository = characterRepository;
+    }
+    
+    [HttpGet("/characters")]
+    public async Task<IActionResult> Characters(CancellationToken cancellationToken)
+    {
+        var model = await _characterRepository.GetCharactersListAsync(cancellationToken);
         return View(model);
     }
     
@@ -26,7 +34,6 @@ public class CharactersController : Controller
     public async Task<IActionResult> Character(
         [FromRoute] string charId,
         [FromQuery] string? from,
-        [FromServices] ICharacterRepository charactersRepository,
         [FromServices] IServiceFactory<ITextToSpeechService> ttsServiceFactory,
         CancellationToken cancellationToken
         )
@@ -37,6 +44,7 @@ public class CharactersController : Controller
         {
             character = new Character
             {
+                ReadOnly = false,
                 Name = "",
                 Description = "",
                 Personality = "",
@@ -65,7 +73,7 @@ public class CharactersController : Controller
         }
         else
         {
-            character = await charactersRepository.GetCharacterAsync(from ?? charId, cancellationToken);
+            character = await _characterRepository.GetCharacterAsync(from ?? charId, cancellationToken);
             if (character == null)
                 return NotFound("Character not found");
             if (isNew) character.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
@@ -75,12 +83,18 @@ public class CharactersController : Controller
 
         return View(vm);
     }
-
+    
+    [HttpPost("/characters/delete")]
+    public async Task<IActionResult> Delete([FromForm] string charId)
+    {
+        await _characterRepository.DeleteAsync(charId);
+        return RedirectToAction("Characters");
+    }
+    
     [HttpPost("/characters/{charId}")]
     public async Task<IActionResult> Character(
         [FromRoute] string charId,
         [FromForm] CharacterViewModel data,
-        [FromServices] ICharacterRepository charactersRepository,
         [FromServices] IServiceFactory<ITextToSpeechService> ttsServiceFactory,
         CancellationToken cancellationToken
     )
@@ -94,7 +108,7 @@ public class CharactersController : Controller
 
         if (charId != "new" && charId != data.Character.Id)
             return BadRequest("Character ID mismatch");
-        await charactersRepository.SaveCharacterAsync(data.Character);
+        await _characterRepository.SaveCharacterAsync(data.Character);
         return RedirectToAction("Character", new { characterId = data.Character.Id });
     }
 
@@ -125,5 +139,50 @@ public class CharactersController : Controller
         }
 
         return vm;
+    }
+    
+    [HttpPost("/characters/import")]
+    public async Task<IActionResult> Upload(IFormFile[] files)
+    {
+        if (files is not { Length: 1 }) throw new Exception("File required");
+
+        var file = files[0];
+        await using var stream = file.OpenReadStream();
+        var card = await TavernCardV2Import.ExtractCardDataAsync(stream);
+
+        var character = new Character
+        {
+            Name = card.Data.Name,
+            Description = card.Data.Description,
+            Personality = card.Data.Personality,
+            Scenario = card.Data.Scenario,
+            MessageExamples = card.Data.MesExample,
+            FirstMessage = card.Data.FirstMes,
+            PostHistoryInstructions = card.Data.PostHistoryInstructions,
+            CreatorNotes = card.Data.CreatorNotes,
+            Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
+            SystemPrompt = card.Data.SystemPrompt,
+            ReadOnly = false,
+            Services = new Character.ServicesMap
+            {
+                TextGen = new Character.ServiceMap
+                {
+                    Service = "NovelAI"
+                },
+                SpeechGen = new Character.VoiceServiceMap
+                {
+                    Service = "NovelAI",
+                    Voice = "Naia"
+                },
+            },
+            Options = new()
+            {
+                EnableThinkingSpeech = false,
+            },
+        };
+
+        await _characterRepository.SaveCharacterAsync(character);
+        
+        return RedirectToAction("Character", new { charId = character.Id });
     }
 }

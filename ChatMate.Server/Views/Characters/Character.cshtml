@@ -6,7 +6,7 @@
 }
 
 <div class="container">
-    <h1>@(Model.IsEditable ? "Edit" : "View") Character</h1>
+    <h1>@(Model.Character.ReadOnly ? "View" : "Edit") Character</h1>
     
     <p>
         See <a href="https://github.com/malfoyslastname/character-card-spec-v2">Character Card Spec V2</a> for more information.
@@ -137,14 +137,14 @@
 
         <br/>
 
-        @if (Model.IsEditable)
+        @if (Model.Character.ReadOnly)
         {
-            <button type="submit" class="btn btn-primary">Save</button>
-            @Html.ValidationSummary(true)
+            <p class="text-muted">This character is non editable. You can make a clone to edit it.</p>
         }
         else
         {
-            <p class="text-muted">This character is non editable. You can make a clone to edit it.</p>
+            <button type="submit" class="btn btn-primary">Save</button>
+            @Html.ValidationSummary(true)
         }
     </form>
 </div>

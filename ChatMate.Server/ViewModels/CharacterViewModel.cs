@@ -13,5 +13,4 @@ public class CharacterViewModelWithOptions : CharacterViewModel
     public required string[] TextGenServices { get; init; }
     public required string[] TextToSpeechServices { get; init; }
     public bool IsNew { get; set; }
-    public bool IsEditable { get; set; }
 }

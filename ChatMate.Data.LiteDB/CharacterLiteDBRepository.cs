@@ -24,7 +24,7 @@ public class CharacterLiteDBRepository : ICharacterRepository
         {
             Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
             Name = b.Name,
-            Description = $"{b.CreatorNotes} (Text: {b.Services.TextGen.Service}, TTS: {b.Services.SpeechGen.Service})",
+            Description = $"{b.CreatorNotes?[..Math.Min(50, b.CreatorNotes.Length)]} (Text: {b.Services.TextGen.Service}, TTS: {b.Services.SpeechGen.Service})",
             ReadOnly = b.ReadOnly,
         }).ToArray();
 
@@ -40,6 +40,12 @@ public class CharacterLiteDBRepository : ICharacterRepository
     public Task SaveCharacterAsync(Character card)
     {
         _charactersCollection.Upsert(card);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(string charId)
+    {
+        _charactersCollection.DeleteMany(x => x.Id == charId);
         return Task.CompletedTask;
     }
 }

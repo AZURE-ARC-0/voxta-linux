@@ -11,26 +11,54 @@
         <thead>
         <th>Name</th>
         <th>Description</th>
-        <th>Edit</th>
+        <th colspan="3">Actions</th>
         </thead>
 
         @foreach (var character in Model)
         {
             <tr>
-                <td>@character.Name</td>
-                <td>@character.Description</td>
+                <td>
+                    @character.Name
+                </td>
+                <td>
+                    @character.Description
+                    @if (character.ReadOnly)
+                    {
+                        <span class="badge badge-secondary">Read-only</span>
+                    }
+                </td>
                 <td>
                     <a class="btn btn-secondary" href="/characters/@character.Id?edit=@(!character.ReadOnly)">@(character.ReadOnly ? "View" : "Edit")</a>
+                </td>
+                <td>
                     <a class="btn btn-secondary" href="/characters/new?from=@character.Id">Clone</a>
+                </td>
+                <td>
+                    <form action="/characters/delete" method="post">
+                        <input type="hidden" name="charId" value="@character.Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
         }
         <tr>
-            <td colspan="2"></td>
-            <td>
+            <td colspan="2"><span class="text-muted">Create a new character</span></td>
+            <td colspan="3">
                 @* ReSharper disable Html.PathError *@
-                <a class="btn btn-primary" href="/characters/new">Add new character</a>
+                <a class="btn btn-primary" href="/characters/new">Create blank caracter</a>
                 @* ReSharper restore Html.PathError *@
+            </td>
+        </tr>
+        
+        <tr>
+            <td colspan="2"><span class="text-muted">Upload a Tavern V2 card</span></td>
+            <td colspan="3">
+                <form action="/characters/import" enctype="multipart/form-data" method="post">
+                    <div class="mb-3">
+                        <input type="file" class="form-control" name="files" accept="image/png" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload and import</button>
+                </form>
             </td>
         </tr>
     </table>
