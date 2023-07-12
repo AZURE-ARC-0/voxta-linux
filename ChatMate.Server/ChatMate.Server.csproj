@@ -22,8 +22,8 @@
   </Target>
 
   <ItemGroup>
-    <None Remove="Data\**\.yaml" />
-    <Content Include="Data\**\*.yaml">
+    <None Remove="Data\README.txt" />
+    <Content Include="Data\README.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>

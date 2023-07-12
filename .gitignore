@@ -2,4 +2,5 @@ bin/
 obj/
 publish/
 ChatMate.Server/Data/*
+!ChatMate.Server/Data/README.txt
 ChatMate.Server/Models/*
