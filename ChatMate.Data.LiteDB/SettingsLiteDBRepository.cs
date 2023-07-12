@@ -12,16 +12,15 @@ public class SettingsLiteDBRepository : ISettingsRepository
         _db = db;
     }
 
-    public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class, ISettings
+    public Task<T?> GetAsync<T>(CancellationToken cancellationToken = default) where T : SettingsBase
     {
         var collection = _db.GetCollection<T>();
-        var settings = collection.FindOne(x => true);
+        var settings = collection.FindOne(x => x.Id == SettingsBase.SharedId);
         return Task.FromResult<T?>(settings);
     }
 
-    public Task SaveAsync<T>(string key, T value) where T : class, ISettings
+    public Task SaveAsync<T>(T value) where T : SettingsBase
     {
-        #warning Remove key?
         var collection = _db.GetCollection<T>();
         collection.Upsert(value);
         return Task.CompletedTask;

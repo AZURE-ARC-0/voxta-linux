@@ -27,6 +27,7 @@ public class ChatSessionTests
             UserName = "User",
             Character = new Character
             {
+                Id = Guid.NewGuid().ToString(),
                 Name = "Assistant",
                 SystemPrompt = "You are a test assistant",
                 Description = "",

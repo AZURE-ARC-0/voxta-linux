@@ -16,7 +16,7 @@ public class ProfileLiteDBRepository : IProfileRepository
     
     public Task<ProfileSettings?> GetProfileAsync(CancellationToken cancellationToken)
     {
-        var profile = _profilesCollection.FindOne(_ => true);
+        var profile = _profilesCollection.FindOne(x => x.Id == ProfileSettings.SharedId);
         return Task.FromResult<ProfileSettings?>(profile);
     }
 

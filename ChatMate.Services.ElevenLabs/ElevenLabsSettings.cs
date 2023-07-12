@@ -3,7 +3,7 @@
 namespace ChatMate.Services.ElevenLabs;
 
 [Serializable]
-public class ElevenLabsSettings : ISettings
+public class ElevenLabsSettings : SettingsBase
 {
     public required string ApiKey { get; set; }
 }

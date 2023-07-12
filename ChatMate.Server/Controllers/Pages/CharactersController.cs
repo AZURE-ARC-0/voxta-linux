@@ -44,6 +44,7 @@ public class CharactersController : Controller
         {
             character = new Character
             {
+                Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
                 ReadOnly = false,
                 Name = "",
                 Description = "",
@@ -76,7 +77,11 @@ public class CharactersController : Controller
             character = await _characterRepository.GetCharacterAsync(from ?? charId, cancellationToken);
             if (character == null)
                 return NotFound("Character not found");
-            if (isNew) character.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
+            if (isNew)
+            {
+                character.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
+                character.ReadOnly = false;
+            }
         }
 
         var vm = await GenerateCharacterViewModelAsync(ttsServiceFactory, character, isNew, cancellationToken);
@@ -149,13 +154,14 @@ public class CharactersController : Controller
         var file = files[0];
         await using var stream = file.OpenReadStream();
         var card = await TavernCardV2Import.ExtractCardDataAsync(stream);
+        if (card.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
 
         var character = new Character
         {
             Name = card.Data.Name,
-            Description = card.Data.Description,
-            Personality = card.Data.Personality,
-            Scenario = card.Data.Scenario,
+            Description = card.Data.Description ?? "",
+            Personality = card.Data.Personality ?? "",
+            Scenario = card.Data.Scenario ?? "",
             MessageExamples = card.Data.MesExample,
             FirstMessage = card.Data.FirstMes,
             PostHistoryInstructions = card.Data.PostHistoryInstructions,

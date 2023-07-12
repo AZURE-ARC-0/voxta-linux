@@ -19,10 +19,10 @@ public class SettingsController : Controller
         [FromServices] IProfileRepository profileRepository,
         CancellationToken cancellationToken)
     {
-        var openai = await settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName, cancellationToken);
-        var novelai = await settingsRepository.GetAsync<NovelAISettings>(NovelAIConstants.ServiceName, cancellationToken);
-        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(KoboldAIConstants.ServiceName, cancellationToken);
-        var elevenlabs = await settingsRepository.GetAsync<ElevenLabsSettings>(ElevenLabsConstants.ServiceName, cancellationToken);
+        var openai = await settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
+        var novelai = await settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
+        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
+        var elevenlabs = await settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
 
         var vm = new SettingsViewModel
@@ -66,21 +66,21 @@ public class SettingsController : Controller
             return View("Settings", model);
         }
         
-        await settingsRepository.SaveAsync(OpenAIConstants.ServiceName, new OpenAISettings
+        await settingsRepository.SaveAsync(new OpenAISettings
         {
             ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey.Trim('"', ' ')),
             Model = model.OpenAI.Model.Trim(),
         });
-        await settingsRepository.SaveAsync(NovelAIConstants.ServiceName, new NovelAISettings
+        await settingsRepository.SaveAsync(new NovelAISettings
         {
             Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
             Model = model.NovelAI.Model.Trim(),
         });
-        await settingsRepository.SaveAsync(KoboldAIConstants.ServiceName, new KoboldAISettings
+        await settingsRepository.SaveAsync(new KoboldAISettings
         {
             Uri = model.KoboldAI.Uri,
         });
-        await settingsRepository.SaveAsync(ElevenLabsConstants.ServiceName, new ElevenLabsSettings
+        await settingsRepository.SaveAsync(new ElevenLabsSettings
         {
             ApiKey = string.IsNullOrEmpty(model.ElevenLabs.ApiKey) ? "" : Crypto.EncryptString(model.ElevenLabs.ApiKey.Trim('"', ' ')),
         });

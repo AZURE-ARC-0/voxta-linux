@@ -3,7 +3,7 @@
 namespace ChatMate.Services.NovelAI;
 
 [Serializable]
-public class NovelAISettings : ISettings
+public class NovelAISettings : SettingsBase
 {
     public const string DefaultModel = "clio-v1";
 

@@ -32,7 +32,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         _httpClient.BaseAddress = new Uri("https://api.elevenlabs.io");
-        var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(ElevenLabsConstants.ServiceName, cancellationToken);
+        var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("ElevenLabs token is missing.");
         _httpClient.DefaultRequestHeaders.Add("xi-api-key", Crypto.DecryptString(settings.ApiKey));
     }

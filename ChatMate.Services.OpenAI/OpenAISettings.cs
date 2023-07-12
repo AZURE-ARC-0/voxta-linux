@@ -3,7 +3,7 @@
 namespace ChatMate.Services.OpenAI;
 
 [Serializable]
-public class OpenAISettings : ISettings
+public class OpenAISettings : SettingsBase
 {
     public const string DefaultModel = "gpt-3.5-turbo";
 

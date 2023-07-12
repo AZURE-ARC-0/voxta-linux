@@ -1,3 +1,5 @@
+using LiteDB;
+
 namespace ChatMate.Abstractions.Model;
 
 /// <summary>
@@ -21,7 +23,7 @@ public class CharacterCard
 [Serializable]
 public class Character : CharacterCard
 {
-    public string? Id { get; set; }
+    [BsonId] public required string Id { get; set; }
     public bool ReadOnly { get; set; }
     
     public required ServicesMap Services { get; init; }

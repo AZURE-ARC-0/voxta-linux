@@ -1,10 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using LiteDB;
 
 namespace ChatMate.Abstractions.Model;
 
 [Serializable]
 public class ProfileSettings
 {
+    public static readonly string SharedId = Guid.Empty.ToString();
+    
+    [BsonId] public string Id { get; init; } = SharedId;
+    
     [MinLength(1)]
     public required string Name { get; init; }
     public string? Description { get; init; }

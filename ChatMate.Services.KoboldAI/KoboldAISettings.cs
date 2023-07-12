@@ -3,7 +3,7 @@
 namespace ChatMate.Services.KoboldAI;
 
 [Serializable]
-public class KoboldAISettings : ISettings
+public class KoboldAISettings : SettingsBase
 {
     public string Uri { get; set; } = "http://localhost:5001";
 }

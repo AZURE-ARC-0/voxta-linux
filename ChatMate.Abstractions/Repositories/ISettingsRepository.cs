@@ -1,11 +1,17 @@
-﻿namespace ChatMate.Abstractions.Repositories;
+﻿using LiteDB;
+
+namespace ChatMate.Abstractions.Repositories;
 
 public interface ISettingsRepository
 {
-    Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class, ISettings;
-    Task SaveAsync<T>(string key, T value) where T : class, ISettings;
+    Task<T?> GetAsync<T>(CancellationToken cancellationToken = default) where T : SettingsBase;
+    Task SaveAsync<T>(T value) where T : SettingsBase;
 }
 
-public interface ISettings
+[Serializable]
+public abstract class SettingsBase
 {
+    public static readonly string SharedId = Guid.Empty.ToString();
+    
+    [BsonId] public string Id { get; init; } = SharedId;
 }

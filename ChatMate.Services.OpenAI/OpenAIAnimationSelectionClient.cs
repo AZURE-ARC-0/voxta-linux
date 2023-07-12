@@ -18,7 +18,7 @@ public class OpenAIAnimationSelectionClient : OpenAIClientBase, IAnimationSelect
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>(OpenAIConstants.ServiceName, cancellationToken);
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
         InitializeClient(settings);
     }
 
