@@ -29,8 +29,7 @@ namespace ChatMate.Server.Tests
                 .UseContentRoot(webDir);
             builder.ConfigureAppConfiguration((_, config) =>
             {
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-                config.AddJsonFile("appsettings.Local.json", optional: false, reloadOnChange: true);
+                config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             });
             _server = new TestServer(builder);
             _httpClient = _server.CreateClient();
@@ -60,13 +59,10 @@ namespace ChatMate.Server.Tests
         [Test]
         public async Task SendMessageAndGetReply()
         {
-            
             var requestBytes = JsonSerializer.SerializeToUtf8Bytes<ClientMessage>(
                 new ClientSendMessage { Text = "Hello, world!" },
                 _serializerOptions
             );
-            string tmp2 = Encoding.UTF8.GetString(requestBytes);
-            Console.WriteLine(tmp2);
             await _wsConnection.SendAsync(
                 requestBytes,
                 WebSocketMessageType.Text,
@@ -77,6 +73,15 @@ namespace ChatMate.Server.Tests
             var buffer = new byte[1024];
             
             var result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
+            var ready = (ServerReadyMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
+            Assert.Multiple(() =>
+            {
+                Assert.That(ready, Is.Not.Null);
+                Assert.That(ready?.ChatId, Is.Not.Null.Or.Empty);
+            });
+            
+            result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
             var reply = (ServerReplyMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
             Assert.Multiple(() =>
