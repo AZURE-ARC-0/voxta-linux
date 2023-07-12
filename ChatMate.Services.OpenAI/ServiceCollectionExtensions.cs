@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         var tokenizer = TokenizerBuilder.CreateByModelName("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
         services.AddSingleton<ITokenizer>(_ => tokenizer);
         services.AddScoped<OpenAITextGenClient>();
+        services.AddScoped<OpenAIAnimationSelectionClient>();
     }
     
     public static void RegisterOpenAI(this IServiceRegistry<ITextGenService> registry)
@@ -21,6 +22,6 @@ public static class ServiceCollectionExtensions
     
     public static void RegisterOpenAI(this IServiceRegistry<IAnimationSelectionService> registry)
     {
-        registry.Add<OpenAITextGenClient>(OpenAIConstants.ServiceName);
+        registry.Add<OpenAIAnimationSelectionClient>(OpenAIConstants.ServiceName);
     }
 }

@@ -145,7 +145,7 @@ public class NovelAITextGenClient : ITextGenService
         };
     }
 
-    private string MakePreamble(CharacterCard character)
+    private static string MakePreamble(CharacterCard character)
     {
         return $"""
             {character.SystemPrompt}
