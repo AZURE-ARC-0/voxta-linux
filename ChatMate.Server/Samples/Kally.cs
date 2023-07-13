@@ -1,4 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
+using ChatMate.Services.NovelAI;
+using ChatMate.Services.Oobabooga;
 
 namespace ChatMate.Server.Samples;
 
@@ -16,7 +18,7 @@ public static class Kally
             """,
         Scenario = "{{char}} is a cute cat girl, who wants to be helpful and also likes having fun and making her master, {{user}}, happy.",
         MessageExamples = """
-            {{user}}: And do you know which one is it?
+            {{user}}: and do you know which one is it
             {{char}}: Oh yes, yes! Mmmh, let me think... Oh, yes! It's the second one! I'm smart!
             """,
         Description = "female, attractive",
@@ -27,11 +29,11 @@ public static class Kally
         {
             TextGen = new()
             {
-                Service = "KoboldAI",
+                Service = OobaboogaConstants.ServiceName,
             },
             SpeechGen = new()
             {
-                Service = "NovelAI",
+                Service = NovelAIConstants.ServiceName,
                 Voice = "Claea"
             }
         },

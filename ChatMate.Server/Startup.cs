@@ -24,6 +24,7 @@ public class Startup
         services.AddWebSockets(_ => { });
         
         services.AddHttpClient();
+        services.AddNAudio();
         services.AddChatMate();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddSingleton<TemporaryFileCleanupService>();
@@ -39,6 +40,11 @@ public class Startup
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
         var animationSelectionRegistry = services.AddAnimationServiceRegistry();
 
+        services.AddFakes();
+        textGenRegistry.RegisterFakes();
+        textToSpeechRegistry.RegisterFakes();
+        animationSelectionRegistry.RegisterFakes();
+        
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
         animationSelectionRegistry.RegisterOpenAI();
@@ -50,10 +56,11 @@ public class Startup
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();
         
+        services.AddOobabooga();
+        textGenRegistry.RegisterOobabooga();
+        
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();
-        
-        services.AddNAudio();
 
         services.AddVosk(_configuration.GetSection("Vosk"));
         services.AddHostedService<SpeechRecognitionBackgroundTask>();

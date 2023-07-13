@@ -34,9 +34,11 @@
     <ProjectReference Include="..\ChatMate.Core\ChatMate.Core.csproj" />
     <ProjectReference Include="..\ChatMate.Data.LiteDB\ChatMate.Data.LiteDB.csproj" />
     <ProjectReference Include="..\ChatMate.Services.ElevenLabs\ChatMate.Services.ElevenLabs.csproj" />
+    <ProjectReference Include="..\ChatMate.Services.Fakes\ChatMate.Services.Fakes.csproj" />
     <ProjectReference Include="..\ChatMate.Services.KoboldAI\ChatMate.Services.KoboldAI.csproj" />
     <ProjectReference Include="..\ChatMate.Services.NAudio\ChatMate.Services.NAudio.csproj" />
     <ProjectReference Include="..\ChatMate.Services.NovelAI\ChatMate.Services.NovelAI.csproj" />
+    <ProjectReference Include="..\ChatMate.Services.Oobabooga\ChatMate.Services.Oobabooga.csproj" />
     <ProjectReference Include="..\ChatMate.Services.OpenAI\ChatMate.Services.OpenAI.csproj" />
     <ProjectReference Include="..\ChatMate.Services.Vosk\ChatMate.Services.Vosk.csproj" />
   </ItemGroup>

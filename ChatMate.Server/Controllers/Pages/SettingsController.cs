@@ -5,6 +5,7 @@ using ChatMate.Server.ViewModels;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.ElevenLabs;
 using ChatMate.Services.NovelAI;
+using ChatMate.Services.Oobabooga;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +23,7 @@ public class SettingsController : Controller
         var openai = await settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
         var novelai = await settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
         var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
+        var oobabooga = await settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken);
         var elevenlabs = await settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
 
@@ -40,6 +42,10 @@ public class SettingsController : Controller
             KoboldAI = new KoboldAISettings
             {
                 Uri = koboldai?.Uri,
+            },
+            Oobabooga = new OobaboogaSettings
+            {
+                Uri = oobabooga?.Uri,
             },
             ElevenLabs = new ElevenLabsSettings
             {
@@ -79,6 +85,10 @@ public class SettingsController : Controller
         await settingsRepository.SaveAsync(new KoboldAISettings
         {
             Uri = model.KoboldAI.Uri,
+        });
+        await settingsRepository.SaveAsync(new OobaboogaSettings
+        {
+            Uri = model.Oobabooga.Uri,
         });
         await settingsRepository.SaveAsync(new ElevenLabsSettings
         {

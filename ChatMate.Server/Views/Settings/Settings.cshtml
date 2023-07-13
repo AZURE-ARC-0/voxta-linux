@@ -1,4 +1,6 @@
-﻿@model SettingsViewModel
+﻿@using ChatMate.Services.OpenAI
+@using ChatMate.Services.Fakes
+@model SettingsViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings";
@@ -8,6 +10,18 @@
     <h1>Settings</h1>
     
     <form method="post" asp-action="settings">
+        <h2>Profile</h2>
+        <div class="form-group">
+            <label asp-for="Profile.Name">Profile name:</label>
+            <input asp-for="Profile.Name" class="form-control"/>
+            <span asp-validation-for="Profile.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Profile.Description">Profile description:</label>
+            <input asp-for="Profile.Description" class="form-control"/>
+            <span asp-validation-for="Profile.Description" class="text-danger"></span>
+        </div>
+        
         <h2>OpenAI</h2>
         <div class="form-group">
             <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
@@ -34,9 +48,16 @@
 
         <h2>KoboldAI</h2>
         <div class="form-group">
-            <label asp-for="KoboldAI.Uri">KoboldAI URI:</label>
+            <label asp-for="KoboldAI.Uri">KoboldAI URI: <span class="text-muted">Example: http://127.0.0.1:5001</span></label>
             <input asp-for="KoboldAI.Uri" class="form-control"/>
             <span asp-validation-for="KoboldAI.Uri" class="text-danger"></span>
+        </div>
+
+        <h2>Text generation web UI</h2>
+        <div class="form-group">
+            <label asp-for="Oobabooga.Uri">Text generation web UI URI: <span class="text-muted">Example: http://127.0.0.1:5000</span></label>
+            <input asp-for="Oobabooga.Uri" class="form-control"/>
+            <span asp-validation-for="Oobabooga.Uri" class="text-danger"></span>
         </div>
 
         <h2>ElevenLabs</h2>
@@ -46,24 +67,13 @@
             <span asp-validation-for="ElevenLabs.ApiKey" class="text-danger"></span>
         </div>
 
-        <h2>Profile</h2>
-        <div class="form-group">
-            <label asp-for="Profile.Name">Profile name:</label>
-            <input asp-for="Profile.Name" class="form-control"/>
-            <span asp-validation-for="Profile.Name" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Profile.Description">Profile description:</label>
-            <input asp-for="Profile.Description" class="form-control"/>
-            <span asp-validation-for="Profile.Description" class="text-danger"></span>
-        </div>
-
         <h2>Services</h2>
         <div class="form-group">
             <label asp-for="Profile.AnimationSelectionService">Animation selection service</label>
             <select asp-for="Profile.AnimationSelectionService" class="form-control">
                 <option value="">None</option>
-                <option value="OpenAI">OpenAI</option>
+                <option value="@OpenAIConstants.ServiceName">OpenAI</option>
+                <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
             </select>
             <span asp-validation-for="Profile.AnimationSelectionService" class="text-danger"></span>
         </div>

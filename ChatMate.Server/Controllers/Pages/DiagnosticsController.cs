@@ -8,6 +8,7 @@ using ChatMate.Server.ViewModels;
 using ChatMate.Services.ElevenLabs;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.NovelAI;
+using ChatMate.Services.Oobabooga;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
@@ -94,6 +95,7 @@ public class DiagnosticsController : Controller
             Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextGenAsync(NovelAIConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextGenAsync(KoboldAIConstants.ServiceName, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryTextGenAsync(OobaboogaConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, cancellationToken), cancellationToken),
             Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, cancellationToken), cancellationToken)

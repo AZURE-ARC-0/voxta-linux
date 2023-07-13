@@ -1,7 +1,7 @@
 ﻿using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Services;
-using NAudio.Utils;
+using NAudio.MediaFoundation;
 using NAudio.Wave;
 
 namespace ChatMate.Services.NAudio;
@@ -14,6 +14,11 @@ public class NAudioAudioConverter : IAudioConverter
         "audio/wav",
         "audio/x-wav",
     };
+    
+    static NAudioAudioConverter()
+    {
+        MediaFoundationApi.Startup();
+    }
     
     private readonly IPerformanceMetrics _performanceMetrics;
     private string? _outputContentType;
@@ -91,6 +96,7 @@ public class NAudioAudioConverter : IAudioConverter
 
     private async Task<AudioData> ConvertMp3ToWavAsync(AudioData input)
     {
+        if (_outputContentType == null) throw new InvalidOperationException("Call SelectContentType first.");
         await using var mp3 = new Mp3FileReader(input.Stream);
         var pcm = WaveFormatConversionStream.CreatePcmStream(mp3);
         var ms = new MemoryStream();

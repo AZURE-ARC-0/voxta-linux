@@ -8,7 +8,6 @@ using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
 using Microsoft.Extensions.Logging;
-using NAudio.MediaFoundation;
 
 namespace ChatMate.Services.NovelAI;
 
@@ -20,11 +19,6 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
     private readonly ILogger<NovelAITextToSpeechClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
-
-    static NovelAITextToSpeechClient()
-    {
-        MediaFoundationApi.Startup();
-    }
 
     public NovelAITextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
     {

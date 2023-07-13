@@ -28,7 +28,9 @@ public class KoboldAITextGenClient : ITextGenService
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
-        _httpClient.BaseAddress = new Uri(settings!.Uri);
+        var uri = settings?.Uri;
+        if (string.IsNullOrEmpty(uri)) throw new KoboldAIException("Missing uri in settings");
+        _httpClient.BaseAddress = new Uri(uri);
     }
 
     public int GetTokenCount(string message)
@@ -39,7 +41,6 @@ public class KoboldAITextGenClient : ITextGenService
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         // TODO: count tokens?
-        // TODO: Hardcoded Guanaco formatting
         var preamble = MakePreamble(chatSessionData.Character);
         var messages = string.Join("\n", chatSessionData.GetMessages().Select(x => $"{x.User}: \"{x.Text}\""));
         var prompt = $"""

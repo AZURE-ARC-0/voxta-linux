@@ -83,8 +83,9 @@ public class NovelAITextGenClient : ITextGenService
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
-        if (string.IsNullOrEmpty(settings?.Token)) throw new AuthenticationException("NovelAI token is missing.");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
+        var token = settings?.Token;
+        if (settings == null || string.IsNullOrEmpty(token)) throw new AuthenticationException("NovelAI token is missing.");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(token));
         _model = settings.Model;
     }
 

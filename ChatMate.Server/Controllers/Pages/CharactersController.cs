@@ -7,7 +7,9 @@ using ChatMate.Server.Utils;
 using ChatMate.Server.ViewModels;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.ElevenLabs;
+using ChatMate.Services.Fakes;
 using ChatMate.Services.NovelAI;
+using ChatMate.Services.Oobabooga;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
@@ -129,11 +131,14 @@ public class CharactersController : Controller
                 OpenAIConstants.ServiceName,
                 NovelAIConstants.ServiceName,
                 KoboldAIConstants.ServiceName,
+                OobaboogaConstants.ServiceName,
+                FakesConstants.ServiceName,
             },
             TextToSpeechServices = new[]
             {
                 NovelAIConstants.ServiceName,
                 ElevenLabsConstants.ServiceName,
+                FakesConstants.ServiceName,
             },
         };
 
@@ -173,11 +178,11 @@ public class CharactersController : Controller
             {
                 TextGen = new Character.ServiceMap
                 {
-                    Service = "NovelAI"
+                    Service = NovelAIConstants.ServiceName
                 },
                 SpeechGen = new Character.VoiceServiceMap
                 {
-                    Service = "NovelAI",
+                    Service = NovelAIConstants.ServiceName,
                     Voice = "Naia"
                 },
             },

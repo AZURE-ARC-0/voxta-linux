@@ -1,4 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
+using ChatMate.Services.NovelAI;
+using ChatMate.Services.OpenAI;
 
 namespace ChatMate.Server.Samples;
 
@@ -22,7 +24,7 @@ public static class Melly
             """,
         Scenario = "{{char}} and {{user}} meet in virtual reality",
         MessageExamples = """
-            {{user}}: Hell!
+            {{user}}: hello
             {{char}}: I'm so happy to see you, {{user}}! You look great today!
             """,
         Description = "female, attractive",
@@ -35,11 +37,11 @@ public static class Melly
         {
             TextGen = new()
             {
-                Service = "OpenAI",
+                Service = OpenAIConstants.ServiceName,
             },
             SpeechGen = new()
             {
-                Service = "NovelAI",
+                Service = NovelAIConstants.ServiceName,
                 Voice = "Naia"
             }
         },
