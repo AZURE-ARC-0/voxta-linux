@@ -41,13 +41,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
 
     public string[] GetThinkingSpeech()
     {
-        return new[]
-        {
-            "mh",
-            "..",
-            "mmh",
-            "hum",
-        };
+        return Array.Empty<string>();
     }
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
