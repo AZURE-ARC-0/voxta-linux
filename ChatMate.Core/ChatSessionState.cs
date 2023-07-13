@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 
 namespace ChatMate.Core;
@@ -9,12 +10,14 @@ public class ChatSessionState
     
     private readonly Stopwatch _audioPlaybackStopwatch = new();
     private double _audioPlaybackDuration;
+    private IPerformanceMetricsTracker? _perfTracker;
     
     private CancellationTokenSource? _generateReplyAbort;
     private TaskCompletionSource<bool>? _generateReplyTaskCompletionSource;
-
-    public CancellationToken GenerateReplyBegin()
+    
+    public CancellationToken GenerateReplyBegin(IPerformanceMetricsTracker perfTracker)
     {
+        _perfTracker = perfTracker;
         _generateReplyTaskCompletionSource = new TaskCompletionSource<bool>();
         var cts = new CancellationTokenSource();
         _generateReplyAbort = cts;
@@ -54,6 +57,8 @@ public class ChatSessionState
     {
         _audioPlaybackStopwatch.Restart();
         _audioPlaybackDuration = duration;
+        _perfTracker?.Done();
+        _perfTracker = null;
     }
     
     public void StopSpeechAudio()
@@ -68,6 +73,7 @@ public class ChatSessionState
         _audioPlaybackStopwatch.Stop();
         var ratio = _audioPlaybackStopwatch.Elapsed.TotalSeconds / _audioPlaybackDuration;
         _audioPlaybackDuration = 0;
+        _perfTracker = null;
         return ratio;
     }
 }

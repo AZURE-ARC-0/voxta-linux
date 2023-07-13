@@ -1,4 +1,5 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
+using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Repositories;
@@ -11,6 +12,7 @@ namespace ChatMate.Core;
 public class ChatSessionFactory
 {
     private readonly ILoggerFactory _loggerFactory;
+    private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IProfileRepository _profileRepository;
     private readonly ExclusiveLocalInputManager _localInputManager;
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
@@ -20,6 +22,7 @@ public class ChatSessionFactory
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
+        IPerformanceMetrics performanceMetrics,
         IProfileRepository profileRepository,
         ExclusiveLocalInputManager localInputManager,
         SpeechGeneratorFactory speechGeneratorFactory,
@@ -29,6 +32,7 @@ public class ChatSessionFactory
         )
     {
         _loggerFactory = loggerFactory;
+        _performanceMetrics = performanceMetrics;
         _profileRepository = profileRepository;
         _localInputManager = localInputManager;
         _speechGeneratorFactory = speechGeneratorFactory;
@@ -89,6 +93,7 @@ public class ChatSessionFactory
         return new ChatSession(
             tunnel,
             _loggerFactory,
+            _performanceMetrics,
             textGen,
             chatData,
             textProcessor,

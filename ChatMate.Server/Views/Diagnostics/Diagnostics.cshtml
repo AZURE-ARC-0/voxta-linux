@@ -8,38 +8,46 @@
     <h1>Diagnostics</h1>
     
     <h2>Services: </h2>
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">Status</th>
-            <th scope="col">Service</th>
-            <th scope="col">Message</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var s in Model.Services)
-        {
+    <form action="/diagnostics" method="post">
+        <input type="hidden" name="test" value="true" />
+        <button type="submit" class="btn btn-primary">Test Now</button>
+        <span class="text-muted">Click once an wait for the result, it can take some time.</span>
+    </form>
+    @if (Model.Services != null)
+    {
+        <table class="table">
+            <thead>
             <tr>
-                <td>
-                    @if (!s.IsReady)
-                    {
-                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                    }
-                    else if (s.IsHealthy)
-                    {
-                        <i class="bi bi-check-circle-fill text-success"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-exclamation-circle-fill text-danger"></i>
-                    }
-                </td>
-                <td>@s.Name</td>
-                <td><code><pre>@s.Status</pre></code></td>
+                <th scope="col">Status</th>
+                <th scope="col">Service</th>
+                <th scope="col">Message</th>
             </tr>
-        }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            @foreach (var s in Model.Services)
+            {
+                <tr>
+                    <td>
+                        @if (!s.IsReady)
+                        {
+                            <i class="bi bi-dash-circle-fill text-secondary"></i>
+                        }
+                        else if (s.IsHealthy)
+                        {
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                        }
+                    </td>
+                    <td>@s.Name</td>
+                    <td><code><pre>@s.Status</pre></code></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
 
     <h2>Performance Metrics: </h2>
     <table class="table">
@@ -50,6 +58,12 @@
         </tr>
         </thead>
         <tbody>
+        @if (Model.PerformanceMetrics.Length == 0)
+        {
+            <tr>
+                <td colspan="2">No metrics recorded. Run tests or chat to generate metrics.</td>
+            </tr>
+        }
         @foreach (var m in Model.PerformanceMetrics)
         {
             <tr>

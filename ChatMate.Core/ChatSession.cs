@@ -1,4 +1,5 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using ChatMate.Abstractions.Diagnostics;
+using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ public interface IChatSession : IAsyncDisposable
 public sealed partial class ChatSession : IChatSession
 {
     private readonly IUserConnectionTunnel _tunnel;
+    private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextGenService _textGen;
     private readonly ChatSessionData _chatSessionData;
     private readonly IChatTextProcessor _chatTextProcessor;
@@ -28,6 +30,7 @@ public sealed partial class ChatSession : IChatSession
 
     public ChatSession(IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
+        IPerformanceMetrics performanceMetrics,
         ITextGenService textGen,
         ChatSessionData chatSessionData,
         IChatTextProcessor chatTextProcessor,
@@ -38,6 +41,7 @@ public sealed partial class ChatSession : IChatSession
         IAnimationSelectionService? animationSelection)
     {
         _tunnel = tunnel;
+        _performanceMetrics = performanceMetrics;
         _textGen = textGen;
         _chatSessionData = chatSessionData;
         _chatTextProcessor = chatTextProcessor;

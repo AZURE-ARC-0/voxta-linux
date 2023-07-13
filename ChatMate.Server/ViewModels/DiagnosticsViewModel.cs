@@ -3,7 +3,7 @@
 public class DiagnosticsViewModel
 {
     public PerformanceMetricsViewModel[] PerformanceMetrics { get; set; } = Array.Empty<PerformanceMetricsViewModel>();
-    public List<ServiceStateViewModel> Services { get; } = new();
+    public List<ServiceStateViewModel>? Services { get; set; }
 
     public class ServiceStateViewModel
     {

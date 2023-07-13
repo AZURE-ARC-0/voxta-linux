@@ -20,9 +20,9 @@ public class DiagnosticsController : Controller
     private static readonly object Lock = new();
     private static readonly DiagnosticsViewModel AlreadyRunningVm = new()
     {
-        Services =
+        Services = new List<DiagnosticsViewModel.ServiceStateViewModel>
         {
-            new DiagnosticsViewModel.ServiceStateViewModel
+            new()
             {
                 Name = "Diagnostics Error",
                 IsHealthy = false,
@@ -58,6 +58,13 @@ public class DiagnosticsController : Controller
     [HttpGet("/diagnostics")]
     public async Task<IActionResult> Diagnostics(CancellationToken cancellationToken)
     {
+        var vm = await RunDiagnosticsAsync(false, cancellationToken);
+        return View(vm);
+    }
+
+    [HttpPost("/diagnostics")]
+    public async Task<IActionResult> Diagnostics([FromForm] string test, CancellationToken cancellationToken)
+    {
         lock (Lock)
         {
             if (_running)
@@ -68,7 +75,7 @@ public class DiagnosticsController : Controller
 
         try
         {
-            var vm = await RunDiagnosticsAsync(cancellationToken);
+            var vm = await RunDiagnosticsAsync(true, cancellationToken);
 
             return View(vm);
         }
@@ -78,27 +85,30 @@ public class DiagnosticsController : Controller
         }
     }
 
-    private async Task<DiagnosticsViewModel> RunDiagnosticsAsync(CancellationToken cancellationToken)
+    private async Task<DiagnosticsViewModel> RunDiagnosticsAsync(bool runTests, CancellationToken cancellationToken)
     {
         var vm = new DiagnosticsViewModel();
 
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
-        vm.Services.Add(new DiagnosticsViewModel.ServiceStateViewModel
+        vm.Services = new List<DiagnosticsViewModel.ServiceStateViewModel>
         {
-            IsReady = true,
-            IsHealthy = !string.IsNullOrEmpty(profile?.Name),
-            Name = "ChatMate Profile",
-            Status = profile?.Name ?? "No profile",
-        });
-        
+            new()
+            {
+                IsReady = true,
+                IsHealthy = !string.IsNullOrEmpty(profile?.Name),
+                Name = "ChatMate Profile",
+                Status = profile?.Name ?? "No profile",
+            }
+        };
+
         var services = await Task.WhenAll(
-            Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextGenAsync(NovelAIConstants.ServiceName, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextGenAsync(KoboldAIConstants.ServiceName, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextGenAsync(OobaboogaConstants.ServiceName, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, cancellationToken), cancellationToken)
+            Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryTextGenAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryTextGenAsync(KoboldAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryTextGenAsync(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken)
         );
         vm.Services.AddRange(services.OrderBy(x => x.IsHealthy).ThenBy(x => x.IsReady).ThenBy(x => x.Name));
 
@@ -109,7 +119,7 @@ public class DiagnosticsController : Controller
         return vm;
     }
 
-    private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryTextGenAsync(string key, CancellationToken cancellationToken)
+    private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryTextGenAsync(string key, bool runTests, CancellationToken cancellationToken)
     {
         var name = $"{key} (Text Gen)";
         
@@ -136,6 +146,17 @@ public class DiagnosticsController : Controller
                 IsHealthy = false,
                 Name = name,
                 Status = exc.Message
+            };
+        }
+        
+        if (!runTests)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = true,
+                Name = name,
+                Status = "Configuration OK (not tested)"
             };
         }
         
@@ -183,7 +204,7 @@ public class DiagnosticsController : Controller
         }
     }
     
-    private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryTextToSpeechAsync(string key, CancellationToken cancellationToken)
+    private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryTextToSpeechAsync(string key, bool runTests, CancellationToken cancellationToken)
     {
         var name = $"{key} (TTS)";
         
@@ -210,6 +231,17 @@ public class DiagnosticsController : Controller
                 IsHealthy = false,
                 Name = name,
                 Status = exc.Message
+            };
+        }
+        
+        if (!runTests)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = true,
+                Name = name,
+                Status = "Configuration OK (not tested)"
             };
         }
         
@@ -270,7 +302,7 @@ public class DiagnosticsController : Controller
         }
     }
     
-    private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryAnimSelect(string key, CancellationToken cancellationToken)
+    private async Task<DiagnosticsViewModel.ServiceStateViewModel> TryAnimSelect(string key, bool runTests, CancellationToken cancellationToken)
     {
         var name = $"{key} (Animation Selector)";
         
@@ -297,6 +329,17 @@ public class DiagnosticsController : Controller
                 IsHealthy = false,
                 Name = name,
                 Status = exc.Message
+            };
+        }
+        
+        if (!runTests)
+        {
+            return new DiagnosticsViewModel.ServiceStateViewModel
+            {
+                IsReady = true,
+                IsHealthy = true,
+                Name = name,
+                Status = "Configuration OK (not tested)"
             };
         }
         

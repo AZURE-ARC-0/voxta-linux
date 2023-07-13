@@ -8,7 +8,7 @@ public partial class ChatSession
     public void HandleClientMessage(ClientSendMessage clientSendMessage)
     {
         _chatSessionState.AbortGeneratingReplyAsync().AsTask().GetAwaiter().GetResult();
-        var abortCancellationToken = _chatSessionState.GenerateReplyBegin();
+        var abortCancellationToken = _chatSessionState.GenerateReplyBegin(_performanceMetrics.Start("GenerateReply.Total"));
         Enqueue(ct => HandleClientMessageAsync(clientSendMessage, abortCancellationToken, ct));
     }
 

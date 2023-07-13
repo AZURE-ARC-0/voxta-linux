@@ -1,3 +1,4 @@
+using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
@@ -55,6 +56,7 @@ public class ChatSessionTests
         _session = new ChatSession(
             _tunnelMock.Object,
             new NullLoggerFactory(),
+            Mock.Of<IPerformanceMetrics>(),
             _textGen.Object,
             _chatSessionData,
             chatTextProcessor.Object,
