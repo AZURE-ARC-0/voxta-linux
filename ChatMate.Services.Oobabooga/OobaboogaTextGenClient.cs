@@ -8,6 +8,7 @@ using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
+using ChatMate.Services.OpenAI;
 
 namespace ChatMate.Services.Oobabooga;
 
@@ -41,14 +42,10 @@ public class OobaboogaTextGenClient : ITextGenService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
+        var builder = new GenericPromptBuilder();
         // TODO: count tokens?
-        var preamble = MakePreamble(chatSessionData.Character);
-        var messages = string.Join("\n", chatSessionData.GetMessages().Select(x => $"{x.User}: \"{x.Text}\""));
-        var prompt = $"""
-        {preamble}
-        {messages}
-        {chatSessionData.Character.Name}:
-        """.ReplaceLineEndings("\n").Replace("\n\n", "\n");
+        var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
+        
         var body = new
         {
             preset = "None",
@@ -100,16 +97,6 @@ public class OobaboogaTextGenClient : ITextGenService
             Text = sanitized,
             Tokens = 0,
         };
-    }
-    
-    private static string MakePreamble(CharacterCard character)
-    {
-        return $"""
-            {character.SystemPrompt}
-            Description of {character.Name}: {character.Description}
-            Personality of {character.Name}: {character.Personality}
-            Circumstances and context of the dialogue: {character.Scenario}
-            """;
     }
     
     [Serializable]

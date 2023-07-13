@@ -25,7 +25,7 @@ public abstract class OpenAIClientBase
         _model = settings.Model;
     }
     
-    protected async Task<string> SendChatRequestAsync(List<object> messages, CancellationToken cancellationToken)
+    protected async Task<string> SendChatRequestAsync(List<OpenAIMessage> messages, CancellationToken cancellationToken)
     {
         var body = new
         {

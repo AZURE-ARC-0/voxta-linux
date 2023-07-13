@@ -26,6 +26,6 @@ public class ChatTextProcessor : IChatTextProcessor
         text = text.Replace("{{char}}", _characterName);
         text = text.Replace("{{user}}", _profile.Name);
         text = text.Replace("{{UserDescription}}", _profile.Description?.Trim(' ', '\r', '\n') ?? "Not specified");
-        return text.Trim(' ', '\r', '\n');
+        return text.TrimExcess();
     }
 }

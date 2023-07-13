@@ -38,27 +38,11 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var systemPrompt = MakeSystemPrompt(chatSessionData.Character);
-        var postHistoryPrompt = MakePostHistoryPrompt(chatSessionData.Character, chatSessionData.Context, chatSessionData.Actions);
+        var builder = new OpenAIPromptBuilder(_tokenizer);
         
-        var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
+        var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
 
-        #warning Save this
-        var totalTokens = _tokenizer.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count + _tokenizer.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count;
-        
-        var messages = new List<object> { new { role = "system", content = systemPrompt } };
-        var chatMessages = chatSessionData.GetMessages();
-        for (var i = chatMessages.Count - 1; i >= 0; i--)
-        {
-            var message = chatMessages[i];
-            totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
-            if (totalTokens >= 4096) break;
-            var role = message.User == chatSessionData.Character.Name ? "assistant" : "user";
-            messages.Insert(1, new { role, content = message.Text });
-        }
-
-        if (!string.IsNullOrEmpty(postHistoryPrompt))
-            messages.Add(new { role = "system", content = postHistoryPrompt });
+        var messages = builder.BuildReplyPrompt(chatSessionData, 4096);
 
         tokenizePerf.Pause();
 
@@ -77,25 +61,5 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
             Text = sanitized,
             Tokens = tokens.Count
         };
-    }
-
-    private static string MakeSystemPrompt(CharacterCard character)
-    {
-        return $"""
-            {character.SystemPrompt}
-            Description of {character.Name}: {character.Description}
-            Personality of {character.Name}: {character.Personality}
-            Circumstances and context of the dialogue: {character.Scenario}
-            """;
-    }
-
-    private static string MakePostHistoryPrompt(CharacterCard character, string? context, string[]? actions)
-    {
-        var prompt = character.PostHistoryInstructions ?? "";
-        if (!string.IsNullOrEmpty(context))
-            prompt += $"\nCurrent context: {context}";
-        if (actions is { Length: > 1 })
-            prompt += $"Available actions to be inferred after the response: {string.Join(", ", actions)}";
-        return prompt;
     }
 }
