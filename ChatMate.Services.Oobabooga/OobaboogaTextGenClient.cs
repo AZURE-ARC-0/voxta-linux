@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -12,12 +11,13 @@ using ChatMate.Services.OpenAI;
 
 namespace ChatMate.Services.Oobabooga;
 
-public class OobaboogaTextGenClient : ITextGenService
+public class OobaboogaTextGenClient : ITextGenService, IActionInferenceService
 {
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private bool _initialized;
 
     public OobaboogaTextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
@@ -29,6 +29,8 @@ public class OobaboogaTextGenClient : ITextGenService
     
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
+        if (_initialized) return;
+        _initialized = true;
         var settings = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken);
         var uri = settings?.Uri;
         if (string.IsNullOrEmpty(uri)) throw new OobaboogaException("Missing uri in settings");
@@ -46,6 +48,27 @@ public class OobaboogaTextGenClient : ITextGenService
         // TODO: count tokens?
         var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
         
+        var text = await SendCompletionRequest(prompt, new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" }, cancellationToken);
+        var sanitized = _sanitizer.Sanitize(text);
+        
+        return new TextData
+        {
+            Text = sanitized,
+            Tokens = 0,
+        };
+    }
+
+    public async ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
+    {
+        var builder = new GenericPromptBuilder();
+        var prompt = builder.BuildActionInferencePrompt(chatSessionData);
+        
+        var animation = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);
+        return animation.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
+    }
+
+    private async Task<string> SendCompletionRequest(string prompt, string[] stoppingStrings, CancellationToken cancellationToken)
+    {
         var body = new
         {
             preset = "None",
@@ -71,7 +94,7 @@ public class OobaboogaTextGenClient : ITextGenService
             truncation_length = 2048,
             ban_eos_token = false,
             skip_special_tokens = true,
-            stopping_strings = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" },
+            stopping_strings = stoppingStrings,
             prompt
         };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
@@ -86,19 +109,13 @@ public class OobaboogaTextGenClient : ITextGenService
             throw new OobaboogaException(await response.Content.ReadAsStringAsync(cancellationToken));
 
         var json = await response.Content.ReadFromJsonAsync<TextGenResponse>(cancellationToken: cancellationToken);
-        
+
         textGenPerf.Done();
 
         var text = json?.results?[0].text ?? throw new OobaboogaException("Missing text in response");
-        var sanitized = _sanitizer.Sanitize(text);
-        
-        return new TextData
-        {
-            Text = sanitized,
-            Tokens = 0,
-        };
+        return text;
     }
-    
+
     [Serializable]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     private class TextGenResponse

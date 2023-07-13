@@ -58,6 +58,7 @@ public class Startup
         
         services.AddOobabooga();
         textGenRegistry.RegisterOobabooga();
+        actionInferenceRegistry.RegisterOobabooga();
         
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();

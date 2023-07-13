@@ -15,4 +15,9 @@ public static class ServiceCollectionExtensions
     {
         registry.Add<OobaboogaTextGenClient>(OobaboogaConstants.ServiceName);
     }
+    
+    public static void RegisterOobabooga(this IServiceRegistry<IActionInferenceService> registry)
+    {
+        registry.Add<OobaboogaTextGenClient>(OobaboogaConstants.ServiceName);
+    }
 }

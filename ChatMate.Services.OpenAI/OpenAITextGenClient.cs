@@ -7,12 +7,13 @@ using Microsoft.DeepDev;
 
 namespace ChatMate.Services.OpenAI;
 
-public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
+public class OpenAITextGenClient : OpenAIClientBase, ITextGenService, IActionInferenceService
 {
     private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private bool _initialized;
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
         : base(httpClientFactory)
@@ -26,6 +27,8 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
+        if (_initialized) return;
+        _initialized = true;
         var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
         InitializeClient(settings);
     }
@@ -61,5 +64,18 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
             Text = sanitized,
             Tokens = tokens.Count
         };
+    }
+
+    public async ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
+    {
+        if(chatSessionData.Actions is null || chatSessionData.Actions.Length == 0)
+            return "idle";
+        if (chatSessionData.Actions.Length == 1) return chatSessionData.Actions[0];
+
+        var builder = new OpenAIPromptBuilder(null);
+        var messages = builder.BuildActionInferencePrompt(chatSessionData);
+        
+        var animation = await SendChatRequestAsync(messages, cancellationToken);
+        return animation.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
     }
 }
