@@ -12,50 +12,50 @@
         <div class="form-group">
             <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
             <input asp-for="OpenAI.ApiKey" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.OpenAI.ApiKey)
+            <span asp-validation-for="OpenAI.ApiKey" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="OpenAI.Model">OpenAI model:</label>
             <input asp-for="OpenAI.Model" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.OpenAI.Model)
+            <span asp-validation-for="OpenAI.Model" class="text-danger"></span>
         </div>
 
         <h2>NovelAI</h2>
         <div class="form-group">
             <label asp-for="NovelAI.Token">NovelAI token:</label>
             <input asp-for="NovelAI.Token" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.NovelAI.Token)
+            <span asp-validation-for="NovelAI.Token" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="NovelAI.Model">NovelAI model:</label>
             <input asp-for="NovelAI.Model" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.NovelAI.Model)
+            <span asp-validation-for="NovelAI.Model" class="text-danger"></span>
         </div>
 
         <h2>KoboldAI</h2>
         <div class="form-group">
-            <label asp-for="KoboldAI.Uri">KoboldAI uri:</label>
+            <label asp-for="KoboldAI.Uri">KoboldAI URI:</label>
             <input asp-for="KoboldAI.Uri" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.KoboldAI.Uri)
+            <span asp-validation-for="KoboldAI.Uri" class="text-danger"></span>
         </div>
 
         <h2>ElevenLabs</h2>
         <div class="form-group">
             <label asp-for="ElevenLabs.ApiKey">ElevenLabs API key:</label>
             <input asp-for="ElevenLabs.ApiKey" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.ElevenLabs.ApiKey)
+            <span asp-validation-for="ElevenLabs.ApiKey" class="text-danger"></span>
         </div>
 
         <h2>Profile</h2>
         <div class="form-group">
             <label asp-for="Profile.Name">Profile name:</label>
             <input asp-for="Profile.Name" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.Profile.Name)
+            <span asp-validation-for="Profile.Name" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="Profile.Description">Profile description:</label>
             <input asp-for="Profile.Description" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.Profile.Description)
+            <span asp-validation-for="Profile.Description" class="text-danger"></span>
         </div>
 
         <h2>Services</h2>
@@ -65,23 +65,25 @@
                 <option value="">None</option>
                 <option value="OpenAI">OpenAI</option>
             </select>
-            @Html.ValidationMessageFor(m => m.Profile.AnimationSelectionService)
+            <span asp-validation-for="Profile.AnimationSelectionService" class="text-danger"></span>
         </div>
 
         <h2>Options</h2>
         <div class="form-group">
             <label asp-for="Profile.EnableSpeechRecognition">Enable speech recognition</label>
             <input asp-for="Profile.EnableSpeechRecognition" type="checkbox" class="form-check-input"/>
-            @Html.ValidationMessageFor(m => m.Profile.EnableSpeechRecognition)
+            <span asp-validation-for="Profile.EnableSpeechRecognition" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label asp-for="Profile.PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback: <span class="text-muted">Turn off to allow interruptions, requires a headset</span></label>
             <input asp-for="Profile.PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
-            @Html.ValidationMessageFor(m => m.Profile.PauseSpeechRecognitionDuringPlayback)
+            <span asp-validation-for="Profile.PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
         </div>
 
         <br/>
         <button type="submit" class="btn btn-primary">Save</button>
-        @Html.ValidationSummary(true)
+        <span class="text-danger">
+            @Html.ValidationSummary(false)
+        </span>
     </form>
 </div>

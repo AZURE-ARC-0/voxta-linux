@@ -29,21 +29,21 @@ public class SettingsController : Controller
         {
             OpenAI = new OpenAISettings
             {
-                ApiKey = string.IsNullOrEmpty(openai?.ApiKey) ? "" : Crypto.DecryptString(openai.ApiKey),
+                ApiKey = string.IsNullOrEmpty(openai?.ApiKey) ? null : Crypto.DecryptString(openai.ApiKey),
                 Model = openai?.Model ?? OpenAISettings.DefaultModel,
             },
             NovelAI = new NovelAISettings
             {
-                Token = string.IsNullOrEmpty(novelai?.Token) ? "" : Crypto.DecryptString(novelai.Token),
+                Token = string.IsNullOrEmpty(novelai?.Token) ? null : Crypto.DecryptString(novelai.Token),
                 Model = novelai?.Model ?? NovelAISettings.DefaultModel,
             },
             KoboldAI = new KoboldAISettings
             {
-                Uri = koboldai?.Uri ?? "http://localhost:5001",
+                Uri = koboldai?.Uri,
             },
             ElevenLabs = new ElevenLabsSettings
             {
-              ApiKey  = string.IsNullOrEmpty(elevenlabs?.ApiKey) ? "" : Crypto.DecryptString(elevenlabs.ApiKey),
+              ApiKey  = string.IsNullOrEmpty(elevenlabs?.ApiKey) ? null : Crypto.DecryptString(elevenlabs.ApiKey),
             },
             Profile = new ProfileSettings
             {
@@ -68,12 +68,12 @@ public class SettingsController : Controller
         
         await settingsRepository.SaveAsync(new OpenAISettings
         {
-            ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? "" : Crypto.EncryptString(model.OpenAI.ApiKey.Trim('"', ' ')),
+            ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? null : Crypto.EncryptString(model.OpenAI.ApiKey.Trim('"', ' ')),
             Model = model.OpenAI.Model.Trim(),
         });
         await settingsRepository.SaveAsync(new NovelAISettings
         {
-            Token = string.IsNullOrEmpty(model.NovelAI.Token) ? "" : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
+            Token = string.IsNullOrEmpty(model.NovelAI.Token) ? null : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
             Model = model.NovelAI.Model.Trim(),
         });
         await settingsRepository.SaveAsync(new KoboldAISettings
@@ -82,7 +82,7 @@ public class SettingsController : Controller
         });
         await settingsRepository.SaveAsync(new ElevenLabsSettings
         {
-            ApiKey = string.IsNullOrEmpty(model.ElevenLabs.ApiKey) ? "" : Crypto.EncryptString(model.ElevenLabs.ApiKey.Trim('"', ' ')),
+            ApiKey = string.IsNullOrEmpty(model.ElevenLabs.ApiKey) ? null : Crypto.EncryptString(model.ElevenLabs.ApiKey.Trim('"', ' ')),
         });
         await profileRepository.SaveProfileAsync(new ProfileSettings
         {
@@ -93,6 +93,6 @@ public class SettingsController : Controller
             AnimationSelectionService = model.Profile.AnimationSelectionService,
         });
         
-        return RedirectToAction("Chat", "Chat");
+        return RedirectToAction("Settings");
     }
 }
