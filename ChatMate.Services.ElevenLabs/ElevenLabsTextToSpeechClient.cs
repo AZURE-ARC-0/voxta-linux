@@ -71,7 +71,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         {
             var reason = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogError("Failed to generate speech: {Reason}", reason);
-            await tunnel.ErrorAsync($"Unable to generate speech: {reason}", cancellationToken);
+            await tunnel.ErrorAsync(new ElevenLabsException($"Unable to generate speech: {reason}"), cancellationToken);
             return;
         }
         

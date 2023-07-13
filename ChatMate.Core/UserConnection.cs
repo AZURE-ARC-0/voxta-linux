@@ -116,9 +116,9 @@ public sealed class UserConnection : IAsyncDisposable
 
     private async Task StartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
-
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, startChatMessage, cancellationToken);
+        
+        _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
 
         _chat.SendReady();
     }

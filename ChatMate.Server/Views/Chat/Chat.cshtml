@@ -212,8 +212,7 @@
                     if (currentAudio) currentAudio.pause();
                     break;
                 case 'speechRecognitionEnd':
-                    addMessage({ user: 'user', text: data.text });
-                    playThinkingSpeech();
+                    onSend(data.text);
                     break;
                 case 'error':
                     addMessage({ user: 'error', text: data.message });
@@ -285,8 +284,12 @@
         }
     
         function onSend(content) {
-            const speechInterruptionRatio = currentAudio ? currentAudio.currentTime / currentAudio.duration : 0;
-            const msg = JSON.stringify({ $type: "send", text: content, speechInterruptionRatio: speechInterruptionRatio });
+            const msg = JSON.stringify({
+              $type: "send",
+              text: content,
+              context: "Chatting with speech and no webcam.",
+              actions: ['idle', 'smile', 'frown', 'angry', 'sad', 'surprised', 'thinking']
+            });
             socket.send(msg);
             setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
             playThinkingSpeech();

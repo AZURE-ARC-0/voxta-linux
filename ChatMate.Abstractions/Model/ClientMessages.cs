@@ -17,6 +17,8 @@ public abstract class ClientMessage
 public class ClientSendMessage : ClientMessage
 {
     public required string Text { get; init; }
+    public string? Context { get; init; }
+    public string[]? Actions { get; init; }
 }
 
 [Serializable]

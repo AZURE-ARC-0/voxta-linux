@@ -42,6 +42,7 @@ public partial class ChatSession
             };
             var reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, textData);
             _chatSessionData.Messages.Add(reply);
+            _logger.LogInformation("Sending first message: {Message}", reply.Text);
             await SendReplyWithSpeechAsync(reply, "greet", cancellationToken);
         }
     }

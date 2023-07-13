@@ -96,7 +96,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         {
             var reason = await audioResponse.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogError("Failed to generate speech: {Reason}", reason);
-            await tunnel.ErrorAsync($"Unable to generate speech: {reason}", cancellationToken);
+            await tunnel.ErrorAsync(new NovelAIException($"Unable to generate speech: {reason}"), cancellationToken);
             return;
         }
 

@@ -18,7 +18,7 @@ public class ChatSessionFactory
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
-    private readonly IServiceFactory<IAnimationSelectionService> _animationSelectionFactory;
+    private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
@@ -28,7 +28,7 @@ public class ChatSessionFactory
         SpeechGeneratorFactory speechGeneratorFactory,
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
-        IServiceFactory<IAnimationSelectionService> animationSelectionFactory
+        IServiceFactory<IActionInferenceService> animationSelectionFactory
         )
     {
         _loggerFactory = loggerFactory;

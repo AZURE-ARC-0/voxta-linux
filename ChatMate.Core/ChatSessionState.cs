@@ -14,7 +14,7 @@ public class ChatSessionState
     
     private CancellationTokenSource? _generateReplyAbort;
     private TaskCompletionSource<bool>? _generateReplyTaskCompletionSource;
-    
+
     public CancellationToken GenerateReplyBegin(IPerformanceMetricsTracker perfTracker)
     {
         _perfTracker = perfTracker;

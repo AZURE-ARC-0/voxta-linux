@@ -14,9 +14,9 @@ public class ConversionSpeechTunnel : ISpeechTunnel
         _audioConverter = audioConverter;
     }
 
-    public Task ErrorAsync(string message, CancellationToken cancellationToken)
+    public Task ErrorAsync(Exception exc, CancellationToken cancellationToken)
     {
-        return _tunnel.ErrorAsync(message, cancellationToken);
+        return _tunnel.ErrorAsync(exc, cancellationToken);
     }
 
     public async Task SendAsync(AudioData audioData, CancellationToken cancellationToken)

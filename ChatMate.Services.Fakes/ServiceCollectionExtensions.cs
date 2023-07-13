@@ -22,8 +22,8 @@ public static class ServiceCollectionExtensions
         registry.Add<FakesTextToSpeechClient>(FakesConstants.ServiceName);
     }
     
-    public static void RegisterFakes(this IServiceRegistry<IAnimationSelectionService> registry)
+    public static void RegisterFakes(this IServiceRegistry<IActionInferenceService> registry)
     {
-        registry.Add<FakesAnimationSelectionClient>(FakesConstants.ServiceName);
+        registry.Add<FakesActionInferenceClient>(FakesConstants.ServiceName);
     }
 }

@@ -39,7 +39,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var systemPrompt = MakeSystemPrompt(chatSessionData.Character);
-        var postHistoryPrompt = MakePostHistoryPrompt(chatSessionData.Character);
+        var postHistoryPrompt = MakePostHistoryPrompt(chatSessionData.Character, chatSessionData.Context, chatSessionData.Actions);
         
         var tokenizePerf = _performanceMetrics.Start("OpenAI.Tokenize");
 
@@ -89,8 +89,13 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
             """;
     }
 
-    private static string MakePostHistoryPrompt(CharacterCard character)
+    private static string MakePostHistoryPrompt(CharacterCard character, string? context, string[]? actions)
     {
-        return character.PostHistoryInstructions ?? "";
+        var prompt = character.PostHistoryInstructions ?? "";
+        if (!string.IsNullOrEmpty(context))
+            prompt += $"\nCurrent context: {context}";
+        if (actions is { Length: > 1 })
+            prompt += $"Available actions to be inferred after the response: {string.Join(", ", actions)}";
+        return prompt;
     }
 }

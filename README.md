@@ -117,6 +117,91 @@ Here are a few things to help make the character more alive:
 - Build quality Timeline animations
 - Use plugins like Glance for eye movements
 
+### Using Scripter
+
+The easiest way to integrate ChatMate with your scene logic is by using Scripter.
+
+`index.js` (your scene logic):
+```js
+import { scripter, scene } from "vam-scripter";
+
+import { initChatMate } from "./lib1.js";
+
+const person = scene.getAtom("Person");
+const timeline = person.getStorable("plugin#0_VamTimeline.AtomPlugin");
+const overlays = scene.getAtom("Overlays").getStorable("plugin#0_VAMOverlaysPlugin.VAMOverlays");
+var setSubtitles = overlays.getStringParam("Set and show subtitles");
+var subtitlesColor = overlays.getColorParam("Subtitles Color");
+
+const chatmate = initChatMate({
+    atom: scripter.containingAtom.getStorable("plugin#1_ChatMate")
+});
+
+chatmate.onStateChanged = state => {
+    console.log('state changed to ' + state);
+    timeline.invokeAction("Play cm_state_" + state);
+
+    if(state == 'thinking') {
+        subtitlesColor.val = '#90CDE0';
+        setSubtitles.val = chatmate.getLastUserMessage();
+    } else if(state == 'preparing_speech') {
+        subtitlesColor.val = '#E5BEBE';
+        setSubtitles.val = chatmate.getLastCharacterMessage();
+    }
+};
+    
+chatmate.onAction = action => {
+    console.log('action ' + action);
+    timeline.invokeAction("Play cm_anim_" + action);
+};
+```
+
+`lib1.js` (generic chatmate integration script):
+```js
+import { scene, scripter } from "vam-scripter";
+
+const that = {};
+
+let chatmateState;
+let chatmateUserMessage;
+let chatmateCharacterMessage;
+let chatmateCurrentAction;
+
+export function initChatMate(params) {
+  const chatmate = params.atom;
+  chatmateState = chatmate.getStringChooserParam("State");
+  chatmateUserMessage = chatmate.getStringParam("LastUserMessage");
+  chatmateCharacterMessage = chatmate.getStringParam("LastCharacterMessage");
+  chatmateCurrentAction = chatmate.getStringParam("CurrentAction");
+
+  scripter.declareAction("OnChatMateStateChanged", () => {
+    try {
+      if(that.onStateChanged != undefined) that.onStateChanged(chatmateState.val);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  scripter.declareAction("OnChatMateAction", () => {
+    try {
+      if(that.onAction != undefined) that.onAction(chatmateCurrentAction.val);
+    } catch (e) {
+      console.log(e);
+    }
+  });
+
+  that.getLastUserMessage = () => {
+    return chatmateUserMessage.val;
+  };
+
+  that.getLastCharacterMessage = () => {
+    return chatmateCharacterMessage.val;
+  };
+
+  return that;
+}
+```
+
 ## Built-in characters
 
 - Melly: She's using OpenAI for text generation, and NovelAI for TTS. She's a bit more coherent than the other characters, but she's not as good at nsfw content. If you want to have productive conversations, she's the one to go to.

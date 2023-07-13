@@ -55,6 +55,9 @@ public partial class ChatSession
                 _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
             }
 
+            _chatSessionData.Actions = clientSendMessage.Actions;
+            _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context);
+
             ChatMessageData reply;
             try
             {

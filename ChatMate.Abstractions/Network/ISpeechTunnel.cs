@@ -4,6 +4,6 @@ namespace ChatMate.Abstractions.Network;
 
 public interface ISpeechTunnel
 {
-    Task ErrorAsync(string message, CancellationToken cancellationToken);
+    Task ErrorAsync(Exception exc, CancellationToken cancellationToken);
     Task SendAsync(AudioData audioData, CancellationToken cancellationToken);
 }

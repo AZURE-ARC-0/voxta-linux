@@ -24,9 +24,9 @@ public partial class ChatSession
             }, cancellationToken);
         }
 
-        if (_animationSelection != null)
+        if (_animationSelection != null && _chatSessionData.Actions is { Length: > 0 })
         {
-            var animation = await _animationSelection.SelectAnimationAsync(_chatSessionData, cancellationToken);
+            var animation = await _animationSelection.SelectActionAsync(_chatSessionData, cancellationToken);
             _logger.LogInformation("Selected animation: {Animation}", animation);
             await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }

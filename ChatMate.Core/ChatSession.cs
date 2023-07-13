@@ -26,7 +26,7 @@ public sealed partial class ChatSession : IChatSession
     private readonly ExclusiveLocalInputHandle? _inputHandle;
     private readonly ChatSessionState _chatSessionState;
     private readonly ISpeechGenerator _speechGenerator;
-    private readonly IAnimationSelectionService? _animationSelection;
+    private readonly IActionInferenceService? _animationSelection;
 
     public ChatSession(IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
@@ -38,7 +38,7 @@ public sealed partial class ChatSession : IChatSession
         ExclusiveLocalInputHandle? inputHandle,
         ChatSessionState chatSessionState,
         ISpeechGenerator speechGenerator,
-        IAnimationSelectionService? animationSelection)
+        IActionInferenceService? animationSelection)
     {
         _tunnel = tunnel;
         _performanceMetrics = performanceMetrics;
@@ -93,7 +93,6 @@ public sealed partial class ChatSession : IChatSession
                 Text = e
             }, ct);
         });
-        HandleClientMessage(new ClientSendMessage { Text = e });
     }
 
     public async ValueTask DisposeAsync()

@@ -33,10 +33,10 @@ public static class ServiceCollectionExtensions
         return registry;
     }
     
-    public static ServiceRegistry<IAnimationSelectionService> AddAnimationServiceRegistry(this IServiceCollection services)
+    public static ServiceRegistry<IActionInferenceService> AddAnimationServiceRegistry(this IServiceCollection services)
     {
-        var registry = new ServiceRegistry<IAnimationSelectionService>();
-        services.AddScoped<IServiceFactory<IAnimationSelectionService>>(sp => new ServiceFactory<IAnimationSelectionService>(registry, sp));
+        var registry = new ServiceRegistry<IActionInferenceService>();
+        services.AddScoped<IServiceFactory<IActionInferenceService>>(sp => new ServiceFactory<IActionInferenceService>(registry, sp));
         return registry;
     }
 }

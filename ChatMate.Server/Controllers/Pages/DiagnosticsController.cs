@@ -1,4 +1,5 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
+﻿using System.Runtime.ExceptionServices;
+using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Diagnostics;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
@@ -38,14 +39,14 @@ public class DiagnosticsController : Controller
     private readonly IProfileRepository _profileRepository;
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
-    private readonly IServiceFactory<IAnimationSelectionService> _animationSelectionFactory;
+    private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
 
     public DiagnosticsController(
         IPerformanceMetrics performanceMetrics,
         IProfileRepository profileRepository,
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
-        IServiceFactory<IAnimationSelectionService> animationSelectionFactory
+        IServiceFactory<IActionInferenceService> animationSelectionFactory
         )
     {
         _performanceMetrics = performanceMetrics;
@@ -290,9 +291,10 @@ public class DiagnosticsController : Controller
     {
         public string? Result { get; private set; }
 
-        public Task ErrorAsync(string message, CancellationToken cancellationToken)
+        public Task ErrorAsync(Exception exc, CancellationToken cancellationToken)
         {
-            throw new Exception(message);
+            ExceptionDispatchInfo.Capture(exc).Throw();
+            throw exc;
         }
 
         public async Task SendAsync(AudioData audioData, CancellationToken cancellationToken)
@@ -306,7 +308,7 @@ public class DiagnosticsController : Controller
     {
         var name = $"{key} (Animation Selector)";
         
-        IAnimationSelectionService service;
+        IActionInferenceService service;
         try
         {
             service = await _animationSelectionFactory.CreateAsync(key, cancellationToken);
@@ -345,7 +347,7 @@ public class DiagnosticsController : Controller
         
         try
         {
-            var result = await service.SelectAnimationAsync(new ChatSessionData
+            var result = await service.SelectActionAsync(new ChatSessionData
             {
                 UserName = "User",
                 Character = new CharacterCard

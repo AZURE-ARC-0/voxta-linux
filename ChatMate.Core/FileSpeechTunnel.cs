@@ -1,4 +1,5 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using System.Runtime.ExceptionServices;
+using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 
 namespace ChatMate.Core;
@@ -12,9 +13,10 @@ public class FileSpeechTunnel : ISpeechTunnel
         _path = path;
     }
     
-    public Task ErrorAsync(string message, CancellationToken cancellationToken)
-    {
-        throw new Exception(message);
+    public Task ErrorAsync(Exception exc, CancellationToken cancellationToken)
+    {   
+        ExceptionDispatchInfo.Capture(exc).Throw();
+        throw exc;
     }
 
     public async Task SendAsync(AudioData audioData, CancellationToken cancellationToken)

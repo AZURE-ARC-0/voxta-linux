@@ -38,16 +38,16 @@ public class Startup
 
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
-        var animationSelectionRegistry = services.AddAnimationServiceRegistry();
+        var actionInferenceRegistry = services.AddAnimationServiceRegistry();
 
         services.AddFakes();
         textGenRegistry.RegisterFakes();
         textToSpeechRegistry.RegisterFakes();
-        animationSelectionRegistry.RegisterFakes();
+        actionInferenceRegistry.RegisterFakes();
         
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
-        animationSelectionRegistry.RegisterOpenAI();
+        actionInferenceRegistry.RegisterOpenAI();
 
         services.AddNovelAI();
         textGenRegistry.RegisterNovelAI();

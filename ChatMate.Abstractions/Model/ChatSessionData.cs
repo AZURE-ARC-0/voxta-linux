@@ -2,10 +2,12 @@
 
 public interface IReadOnlyChatSessionData
 {
-    public string UserName { get; }
-    public CharacterCard Character { get; }
+    string UserName { get; }
+    CharacterCard Character { get; }
+    string? Context { get; }
+    string[]? Actions { get; }
 
-    public IReadOnlyList<ChatMessageData> GetMessages();
+    IReadOnlyList<ChatMessageData> GetMessages();
 }
 
 [Serializable]
@@ -14,6 +16,8 @@ public class ChatSessionData : IReadOnlyChatSessionData
     public Guid ChatId { get; init; }
     public required string UserName { get; init; }
     public required CharacterCard Character { get; init; }
+    public string? Context { get; set; }
+    public string[]? Actions { get; set; }
     public string[]? ThinkingSpeech { get; init; }
 
     public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();
