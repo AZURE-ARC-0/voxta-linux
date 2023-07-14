@@ -15,10 +15,17 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+        }
+        .notification-container {
+            position: fixed;
+            bottom: 60px; /* Adjust to suit your layout */
+            right: 1rem;
+            z-index: 1050; /* Higher than most elements */
         }
         .chat-container {
             overflow-y: auto;
-            flex: 1;
+            flex-grow: 1;
         }
         .chat-msg {
             margin: 0.5rem 0;
@@ -175,12 +182,27 @@
         `;
     }
     
+    const Notifications = ({ notifications }) => {
+        return () => html`
+            <div class="notification-container">
+                <${For} each=${notifications}>
+                    ${notification => html`
+                        <div class=${`alert alert-${notification.type}`} role="alert">
+                            ${notification.message}
+                        </div>
+                    `}
+                <//>
+            </div>
+        `;
+    }
+    
     const App = () => {
         const [ready, setReady] = createSignal(false);
         const [messages, setMessages] = createSignal([]);
         const [animation, setAnimation] = createSignal('idle');
         const [charactersList, setCharactersList] = createSignal([]);
         const [useServerSpeechRecognition, _] = createSignal(true);
+        const [notifications, setNotifications] = createSignal([]);
         
         let thinkingSpeechUrls = [];
         const playThinkingSpeech = () => {
@@ -193,6 +215,14 @@
         const addMessage = (message) => {
             setMessages(oldMessages => [...oldMessages, message]);
         };
+        
+        const notify = (type, message) => {
+            setNotifications([]);
+            setNotifications([{ type, message }]);
+            if (type === 'success') {
+                setTimeout(() => setNotifications([]), 5000);
+            }
+        }
         
         const onEvent = (event) => {
             console.log('ws', event.data)
@@ -245,17 +275,18 @@
             
             socket.onopen = function(event) {
                 setMessages([]);
+                notify('success', 'Connected to the server.');
             };
             
             socket.onclose = function(event) {
-                addMessage({ user: 'error', text: 'Connection lost. Reconnecting...' });
-                setTimeout(function() {
+                notify('error', 'Connection lost. Reconnecting...');
+                 setTimeout(function() {
                     connect();
                 }, 5000);
             };
         
             socket.onerror = function(error) {
-                addMessage({ user: 'error', text: 'A socket error occured: ' + error.message });
+                notify('error', 'A socket error occurred: ' + error.message);
             };
         };
     
@@ -299,6 +330,7 @@
             <div class="container parent-container p-2">
                 <${Header} animation=${animation()} charactersList=${charactersList()} onCharacterSelect=${onCharacterSelect} />
                 <${Chat} messages=${messages()} />
+                <${Notifications} notifications=${notifications()} />
                 <${MessageInput} onSend=${onSend} enabled=${ready()}, useServerSpeechRecognition=${useServerSpeechRecognition()} />
             </div>
         `;
