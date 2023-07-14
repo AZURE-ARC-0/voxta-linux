@@ -22,7 +22,7 @@
                 </thead>
 
                 <tbody>
-                    @foreach (var character in Model)
+                    @foreach (var character in Model.OrderBy(x => x.ReadOnly).ThenBy(x => x.Name))
                     {
                         <tr>
                             <td>
@@ -32,20 +32,30 @@
                                 @character.Description
                                 @if (character.ReadOnly)
                                 {
-                                    <span class="badge badge-secondary">Read-only</span>
+                                    <span class="badge badge-secondary">built-in</span>
                                 }
                             </td>
                             <td>
-                                <a class="btn btn-secondary" href="/characters/@character.Id?edit=@(!character.ReadOnly)">@(character.ReadOnly ? "View" : "Edit")</a>
+                                @if (character.ReadOnly)
+                                {
+                                    <a class="btn btn-secondary" href="/characters/@character.Id?edit=false">View</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-primary" href="/characters/@character.Id?edit=true">Edit</a>
+                                }
                             </td>
                             <td>
                                 <a class="btn btn-secondary" href="/characters/new?from=@character.Id">Clone</a>
                             </td>
                             <td>
-                                <form action="/characters/delete" method="post">
-                                    <input type="hidden" name="charId" value="@character.Id" />
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
+                                @if (!character.ReadOnly)
+                                {
+                                    <form action="/characters/delete" method="post">
+                                        <input type="hidden" name="charId" value="@character.Id"/>
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }
