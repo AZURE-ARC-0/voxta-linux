@@ -5,146 +5,145 @@
     ViewBag.Title = Model.Character.Name;
 }
 
-<div class="container">
+<div class="container py-3">
     <h1>@(Model.Character.ReadOnly ? "View" : "Edit") Character</h1>
-    
-    <p>
-        See <a href="https://github.com/malfoyslastname/character-card-spec-v2">Character Card Spec V2</a> for more information.
-    </p>
+
     
     <form method="post" action="/characters/@Model.Character.Id">
-        <h2>Storage</h2>
+        <input type="hidden" asp-for="Character.Id" class="form-control" readonly="readonly"/>
 
-        <div class="form-group">
-            <label asp-for="Character.Id">Id:</label>
-            <input asp-for="Character.Id" class="form-control" readonly="readonly"/>
-            @Html.ValidationMessageFor(m => m.Character.Id)
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Character Card</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Character.Name">Name:</label>
+                    <input asp-for="Character.Name" class="form-control"/>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Name)</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Character.CreatorNotes">Creator Notes: <span class="text-muted">Only for display</span></label>
+                    <input asp-for="Character.CreatorNotes" class="form-control"/>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.CreatorNotes)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.Description">Description:</label>
+                    <textarea asp-for="Character.Description" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Description)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.Personality">Personality:</label>
+                    <textarea asp-for="Character.Personality" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Personality)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.Scenario">Scenario:</label>
+                    <textarea asp-for="Character.Scenario" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Scenario)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.FirstMessage">First Message:</label>
+                    <textarea asp-for="Character.FirstMessage" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.FirstMessage)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.MessageExamples">Message Examples:</label>
+                    <textarea asp-for="Character.MessageExamples" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.MessageExamples)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.SystemPrompt">System Prompt: <span class="text-muted">Required, most downloaded characters rely on a built-in one and will be empty.</span></label>
+                    <textarea asp-for="Character.SystemPrompt" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.SystemPrompt)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Character.PostHistoryInstructions">Post History Instructions: <span class="text-muted">Also known as UJB</span></label>
+                    <textarea asp-for="Character.PostHistoryInstructions" class="form-control"></textarea>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.PostHistoryInstructions)</small>
+                </div>
+                
+                <p class="d-flex justify-content-end mt-3">
+                    See <a href="https://github.com/malfoyslastname/character-card-spec-v2">Character Card Spec V2</a> for more information.
+                </p>
+            </div>
         </div>
 
-        <h2>General</h2>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Services</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Character.Services.TextGen.Service">Text Generation Service:</label>
+                    <select asp-for="Character.Services.TextGen.Service" asp-items="@(new SelectList(Model.TextGenServices))" class="form-control"></select>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.TextGen.Service)</small>
+                </div>
 
-        <div class="form-group">
-            <label asp-for="Character.Name">Name:</label>
-            <input asp-for="Character.Name" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.Character.Name)
+                <div class="form-group">
+                    <label asp-for="Character.Services.SpeechGen.Service">Speech Generation Service:</label>
+                    <select asp-for="Character.Services.SpeechGen.Service" asp-items="@(new SelectList(Model.TextToSpeechServices))" class="form-control"></select>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Service)</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Character.Services.SpeechGen.Voice">Speech Generation Voice:</label>
+                    <select asp-for="Character.Services.SpeechGen.Voice" asp-items="@(new SelectList(Model.Voices, nameof(VoiceInfo.Id), nameof(VoiceInfo.Label)))" class="form-control"></select>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Voice)</small>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Character.Options!.EnableThinkingSpeech">Enable Thinking Speech: <span class="text-muted">Makes sounds when hearing speech, while a response is being generated.</span></label>
+                    <input asp-for="Character.Options!.EnableThinkingSpeech" type="checkbox"/>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Options!.EnableThinkingSpeech)</small>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label asp-for="Character.CreatorNotes">Creator Notes: <span class="text-muted">Only for display</span></label>
-            <input asp-for="Character.CreatorNotes" class="form-control"/>
-            @Html.ValidationMessageFor(m => m.Character.CreatorNotes)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.Description">Description:</label>
-            <textarea asp-for="Character.Description" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.Description)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.Personality">Personality:</label>
-            <textarea asp-for="Character.Personality" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.Personality)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.Scenario">Scenario:</label>
-            <textarea asp-for="Character.Scenario" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.Scenario)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.FirstMessage">FirstMessage:</label>
-            <textarea asp-for="Character.FirstMessage" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.FirstMessage)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.MessageExamples">MessageExamples:</label>
-            <textarea asp-for="Character.MessageExamples" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.MessageExamples)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.SystemPrompt">SystemPrompt:</label>
-            <textarea asp-for="Character.SystemPrompt" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.SystemPrompt)
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Character.PostHistoryInstructions">PostHistoryInstructions:</label>
-            <textarea asp-for="Character.PostHistoryInstructions" class="form-control"></textarea>
-            
-            @Html.ValidationMessageFor(m => m.Character.PostHistoryInstructions)
+        <div class="d-flex justify-content-end mt-3">
+            @if (Model.Character.ReadOnly)
+            {
+                <p class="text-muted">This character is non editable. You can make a clone to edit it.</p>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-primary">Save</button>
+            }
         </div>
 
-        <h2>Text Generation</h2>
-
-        <div class="form-group">
-            <label asp-for="Character.Services.TextGen.Service">TextGen Service:</label>
-            <select asp-for="Character.Services.TextGen.Service" asp-items="@(new SelectList(Model.TextGenServices))" class="form-control"></select>
-            @Html.ValidationMessageFor(m => m.Character.Services.TextGen.Service)
+        <div class="text-danger mt-3">
+            @Html.ValidationSummary(false)
         </div>
-
-        <h2>Text To Speech</h2>
-
-        <div class="form-group">
-            <label asp-for="Character.Services.SpeechGen.Service">SpeechGen Service:</label>
-            <select asp-for="Character.Services.SpeechGen.Service" asp-items="@(new SelectList(Model.TextToSpeechServices))" class="form-control"></select>
-            @Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Service)
-        </div>
-
-        <div class="form-group">
-            <label asp-for="Character.Services.SpeechGen.Voice">SpeechGen Voice:</label>
-            <select asp-for="Character.Services.SpeechGen.Voice" asp-items="@(new SelectList(Model.Voices, nameof(VoiceInfo.Id), nameof(VoiceInfo.Label)))" class="form-control"></select>
-            @Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Voice)
-        </div>
-
-        <script type="text/javascript">
-            document.getElementById("Character_Services_SpeechGen_Service").onchange = function() {
-                const selectedService = this.value;
-
-                fetch('/tts/services/' + selectedService + '/voices')
-                    .then(response => response.json())
-                    .then(data => {
-                        const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
-                        voicesSelect.innerHTML = ""; // Clear existing options
-
-                        data.forEach(function(voice) {
-                            const option = document.createElement("option");
-                            option.value = voice.id;
-                            option.text = voice.label;
-                            voicesSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => console.error('Error:', error));
-            };
-        </script>
-
-        <h2>Options</h2>
-
-        <div class="form-group">
-            <label asp-for="Character.Options!.EnableThinkingSpeech">EnableThinkingSpeech:</label>
-            <input asp-for="Character.Options!.EnableThinkingSpeech" type="checkbox"/>
-            @Html.ValidationMessageFor(m => m.Character.Options!.EnableThinkingSpeech)
-        </div>
-
-        <br/>
-
-        @if (Model.Character.ReadOnly)
-        {
-            <p class="text-muted">This character is non editable. You can make a clone to edit it.</p>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-primary">Save</button>
-            @Html.ValidationSummary(true)
-        }
     </form>
+    
+
+
+    <script type="text/javascript">
+        document.getElementById("Character_Services_SpeechGen_Service").onchange = function() {
+            const selectedService = this.value;
+
+            fetch('/tts/services/' + selectedService + '/voices')
+                .then(response => response.json())
+                .then(data => {
+                    const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
+                    voicesSelect.innerHTML = ""; // Clear existing options
+
+                    data.forEach(function(voice) {
+                        const option = document.createElement("option");
+                        option.value = voice.id;
+                        option.text = voice.label;
+                        voicesSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        };
+    </script>
 </div>
