@@ -22,6 +22,7 @@ public class VoskSpeechToText : ISpeechToTextService
     private WaveInEvent? _waveIn;
     private bool _recording;
     private bool _speaking;
+    private bool _disposed;
     
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionFinished;
@@ -43,6 +44,7 @@ public class VoskSpeechToText : ISpeechToTextService
         #warning Add perf measure for this too... somehow
         _waveIn.DataAvailable += (_, e) =>
         {
+            if (_disposed) return;
             if (e.BytesRecorded <= 0) return;
             if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
             {
@@ -81,9 +83,10 @@ public class VoskSpeechToText : ISpeechToTextService
     
     public void Dispose()
     {
+        _disposed = true;
         StopMicrophoneTranscription();
-        _waveIn?.Dispose();
         _recognizer?.Dispose();
+        _waveIn?.Dispose();
         Semaphore.Release();
     }
 }
