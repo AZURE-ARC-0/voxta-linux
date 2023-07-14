@@ -56,7 +56,6 @@ public class SettingsController : Controller
             {
                 Name = "User",
                 Description = "",
-                EnableSpeechRecognition = true,
                 PauseSpeechRecognitionDuringPlayback = true,
                 Services = new ProfileSettings.ProfileServicesMap
                 {
@@ -111,7 +110,6 @@ public class SettingsController : Controller
         {
             Name = model.Profile.Name.Trim(),
             Description = model.Profile.Description?.Trim(),
-            EnableSpeechRecognition = model.Profile.EnableSpeechRecognition,
             PauseSpeechRecognitionDuringPlayback = model.Profile.PauseSpeechRecognitionDuringPlayback,
             Services = model.Profile.Services
         });

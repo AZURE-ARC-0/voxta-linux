@@ -89,7 +89,7 @@ public class ChatSessionFactory
         };
         // TODO: Optimize by pre-calculating tokens count
         
-        var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && profile.EnableSpeechRecognition;
+        var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && !string.IsNullOrEmpty(profile.Services.SpeechToText.Service);
         
         var speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateAsync(profile.Services.SpeechToText.Service, cancellationToken) : null;
         

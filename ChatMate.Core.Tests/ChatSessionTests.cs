@@ -45,7 +45,6 @@ public class ChatSessionTests
         {
             Name = "User",
             Description = "User Description",
-            EnableSpeechRecognition = true,
             PauseSpeechRecognitionDuringPlayback = false,
             Services = new ProfileSettings.ProfileServicesMap
             {

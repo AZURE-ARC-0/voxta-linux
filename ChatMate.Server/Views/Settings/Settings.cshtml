@@ -12,115 +12,129 @@
     <h1>Settings</h1>
     
     <form method="post" asp-action="settings">
-        <h2>Profile</h2>
-        <div class="form-group">
-            <label asp-for="Profile.Name">Profile name:</label>
-            <input asp-for="Profile.Name" class="form-control"/>
-            <span asp-validation-for="Profile.Name" class="text-danger"></span>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Profile</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Profile.Name">Profile name:</label>
+                    <input asp-for="Profile.Name" class="form-control"/>
+                    <span asp-validation-for="Profile.Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Profile.Description">Profile description:</label>
+                    <input asp-for="Profile.Description" class="form-control"/>
+                    <span asp-validation-for="Profile.Description" class="text-danger"></span>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label asp-for="Profile.Description">Profile description:</label>
-            <input asp-for="Profile.Description" class="form-control"/>
-            <span asp-validation-for="Profile.Description" class="text-danger"></span>
-        </div>
-        
-        <h2>OpenAI</h2>
-        <div class="form-group">
-            <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
-            <input asp-for="OpenAI.ApiKey" class="form-control"/>
-            <span asp-validation-for="OpenAI.ApiKey" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="OpenAI.Model">OpenAI model:</label>
-            <input asp-for="OpenAI.Model" class="form-control"/>
-            <span asp-validation-for="OpenAI.Model" class="text-danger"></span>
+            
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Services</h2>
+            </div>
+            <div class="card-body">
+                <h3>OpenAI</h3>
+                <div class="form-group">
+                    <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
+                    <input asp-for="OpenAI.ApiKey" class="form-control"/>
+                    <span asp-validation-for="OpenAI.ApiKey" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="OpenAI.Model">OpenAI model:</label>
+                    <input asp-for="OpenAI.Model" class="form-control"/>
+                    <span asp-validation-for="OpenAI.Model" class="text-danger"></span>
+                </div>
+
+                <h3>NovelAI</h3>
+                <div class="form-group">
+                    <label asp-for="NovelAI.Token">NovelAI token:</label>
+                    <input asp-for="NovelAI.Token" class="form-control"/>
+                    <span asp-validation-for="NovelAI.Token" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="NovelAI.Model">NovelAI model:</label>
+                    <input asp-for="NovelAI.Model" class="form-control"/>
+                    <span asp-validation-for="NovelAI.Model" class="text-danger"></span>
+                </div>
+
+                <h3>KoboldAI</h3>
+                <div class="form-group">
+                    <label asp-for="KoboldAI.Uri">KoboldAI URI: <span class="text-muted">Example: http://127.0.0.1:5001</span></label>
+                    <input asp-for="KoboldAI.Uri" class="form-control"/>
+                    <span asp-validation-for="KoboldAI.Uri" class="text-danger"></span>
+                </div>
+
+                <h3>Text generation web UI</h3>
+                <div class="form-group">
+                    <label asp-for="Oobabooga.Uri">Text generation web UI URI: <span class="text-muted">Example: http://127.0.0.1:5000</span></label>
+                    <input asp-for="Oobabooga.Uri" class="form-control"/>
+                    <span asp-validation-for="Oobabooga.Uri" class="text-danger"></span>
+                </div>
+
+                <h3>ElevenLabs</h3>
+                <div class="form-group">
+                    <label asp-for="ElevenLabs.ApiKey">ElevenLabs API key:</label>
+                    <input asp-for="ElevenLabs.ApiKey" class="form-control"/>
+                    <span asp-validation-for="ElevenLabs.ApiKey" class="text-danger"></span>
+                </div>
+                
+                <h3>Vosk</h3>
+                <div class="form-group">
+                    <label asp-for="Profile.Services.SpeechToText.Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models">models list</a>, smaller is faster.</span></label>
+                    <input asp-for="Profile.Services.SpeechToText.Model" class="form-control" />
+                    <span asp-validation-for="Profile.Services.SpeechToText.Model" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Profile.Services.SpeechToText.Hash">Model Download Hash <span class="text-muted">Optional, increases security by checking if the file is the expected one.</span></label>
+                    <input asp-for="Profile.Services.SpeechToText.Hash" class="form-control" />
+                    <span asp-validation-for="Profile.Services.SpeechToText.Hash" class="text-danger"></span>
+                </div>
+            </div>
         </div>
 
-        <h2>NovelAI</h2>
-        <div class="form-group">
-            <label asp-for="NovelAI.Token">NovelAI token:</label>
-            <input asp-for="NovelAI.Token" class="form-control"/>
-            <span asp-validation-for="NovelAI.Token" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="NovelAI.Model">NovelAI model:</label>
-            <input asp-for="NovelAI.Model" class="form-control"/>
-            <span asp-validation-for="NovelAI.Model" class="text-danger"></span>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Default Services</h2>
+            </div>
+            <div class="card-body">
+                <h3>Speech To Text</h3>
+                <p>This is the engine that listens to what you say and convert it to text.</p>
+                <div class="form-group">
+                    <label asp-for="Profile.Services.SpeechToText.Service">Speech To Text Service</label>
+                    <select asp-for="Profile.Services.SpeechToText.Service" class="form-control">
+                        <option value="">None</option>
+                        <option value="@VoskConstants.ServiceName">Vosk</option>
+                    </select>
+                    <span asp-validation-for="Profile.Services.SpeechToText.Service" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Profile.PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback: <span class="text-muted">Turn off to allow interruptions, requires a headset</span></label>
+                    <input asp-for="Profile.PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
+                    <span asp-validation-for="Profile.PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
+                </div>
+
+                <h3>Action Inference</h3>
+                <p>This is what allows the model to determine actions they can take after speaking.</p>
+                <div class="form-group">
+                    <label asp-for="Profile.Services.ActionInference.Service">Action Inference Service</label>
+                    <select asp-for="Profile.Services.ActionInference.Service" class="form-control">
+                        <option value="">None</option>
+                        <option value="@OpenAIConstants.ServiceName">OpenAI</option>
+                        <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
+                    </select>
+                    <span asp-validation-for="Profile.Services.ActionInference.Service" class="text-danger"></span>
+                </div>
+            </div>
         </div>
 
-        <h2>KoboldAI</h2>
-        <div class="form-group">
-            <label asp-for="KoboldAI.Uri">KoboldAI URI: <span class="text-muted">Example: http://127.0.0.1:5001</span></label>
-            <input asp-for="KoboldAI.Uri" class="form-control"/>
-            <span asp-validation-for="KoboldAI.Uri" class="text-danger"></span>
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">Save</button>
         </div>
 
-        <h2>Text generation web UI</h2>
-        <div class="form-group">
-            <label asp-for="Oobabooga.Uri">Text generation web UI URI: <span class="text-muted">Example: http://127.0.0.1:5000</span></label>
-            <input asp-for="Oobabooga.Uri" class="form-control"/>
-            <span asp-validation-for="Oobabooga.Uri" class="text-danger"></span>
-        </div>
-
-        <h2>ElevenLabs</h2>
-        <div class="form-group">
-            <label asp-for="ElevenLabs.ApiKey">ElevenLabs API key:</label>
-            <input asp-for="ElevenLabs.ApiKey" class="form-control"/>
-            <span asp-validation-for="ElevenLabs.ApiKey" class="text-danger"></span>
-        </div>
-
-        <h2>Services</h2>
-        <h3>Speech To Text</h3>
-        <p>This is the engine that listens to what you say and convert it to text.</p>
-        <div class="form-group">
-            <label asp-for="Profile.Services.SpeechToText.Service">Speech To Text Service</label>
-            <select asp-for="Profile.Services.SpeechToText.Service" class="form-control">
-                <option value="">None</option>
-                <option value="@VoskConstants.ServiceName">Vosk</option>
-            </select>
-            <span asp-validation-for="Profile.Services.SpeechToText.Service" class="text-danger"></span>
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Profile.Services.SpeechToText.Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models">models list</a>, smaller is faster.</span></label>
-            <input asp-for="Profile.Services.SpeechToText.Model" class="form-control" />
-            <span asp-validation-for="Profile.Services.SpeechToText.Model" class="text-danger"></span>
-        </div>
-        
-        <div class="form-group">
-            <label asp-for="Profile.Services.SpeechToText.Hash">Model Download Hash <span class="text-muted">Optional, increases security by checking if the file is the expected one.</span></label>
-            <input asp-for="Profile.Services.SpeechToText.Hash" class="form-control" />
-            <span asp-validation-for="Profile.Services.SpeechToText.Hash" class="text-danger"></span>
-        </div>
-        
-        <h3>Action Inference</h3>
-        <p>This is what allows the model to determine actions they can take after speaking.</p>
-        <div class="form-group">
-            <label asp-for="Profile.Services.ActionInference.Service">Action Inference Service</label>
-            <select asp-for="Profile.Services.ActionInference.Service" class="form-control">
-                <option value="">None</option>
-                <option value="@OpenAIConstants.ServiceName">OpenAI</option>
-                <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
-            </select>
-            <span asp-validation-for="Profile.Services.ActionInference.Service" class="text-danger"></span>
-        </div>
-
-        <h2>Options</h2>
-        <div class="form-group">
-            <label asp-for="Profile.EnableSpeechRecognition">Enable speech recognition</label>
-            <input asp-for="Profile.EnableSpeechRecognition" type="checkbox" class="form-check-input"/>
-            <span asp-validation-for="Profile.EnableSpeechRecognition" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <label asp-for="Profile.PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback: <span class="text-muted">Turn off to allow interruptions, requires a headset</span></label>
-            <input asp-for="Profile.PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
-            <span asp-validation-for="Profile.PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
-        </div>
-
-        <br/>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <span class="text-danger">
+        <div class="text-danger mt-3">
             @Html.ValidationSummary(false)
-        </span>
+        </div>
     </form>
 </div>
