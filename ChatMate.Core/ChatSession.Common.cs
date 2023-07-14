@@ -27,6 +27,11 @@ public partial class ChatSession
         if (_animationSelection != null && _chatSessionData.Actions is { Length: > 0 })
         {
             var animation = await _animationSelection.SelectActionAsync(_chatSessionData, cancellationToken);
+            if (!_chatSessionData.Actions.Contains(animation))
+            {
+                var incorrect = animation;
+                animation = _chatSessionData.Actions.MinBy(x => incorrect.GetLevenshteinDistance(x)) ?? "idle";
+            }
             _logger.LogInformation("Selected animation: {Animation}", animation);
             await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
         }

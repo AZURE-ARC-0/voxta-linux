@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.OpenSourc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.OpenSourceLargeLanguageModels.Tests", "ChatMate.Services.OpenSourceLargeLanguageModels.Tests\ChatMate.Services.OpenSourceLargeLanguageModels.Tests.csproj", "{26F90240-0212-4C42-BCA2-F9E8842EA925}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Common.Tests", "ChatMate.Common.Tests\ChatMate.Common.Tests.csproj", "{CFE9ECBD-0F04-4974-A295-D0AA4E798381}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -150,6 +152,10 @@ Global
 		{26F90240-0212-4C42-BCA2-F9E8842EA925}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26F90240-0212-4C42-BCA2-F9E8842EA925}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26F90240-0212-4C42-BCA2-F9E8842EA925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFE9ECBD-0F04-4974-A295-D0AA4E798381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFE9ECBD-0F04-4974-A295-D0AA4E798381}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFE9ECBD-0F04-4974-A295-D0AA4E798381}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFE9ECBD-0F04-4974-A295-D0AA4E798381}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7982F708-5B40-4572-911D-C1C565622D82} = {355CF7D6-0F17-4783-BD6D-6B3265316E6A}
@@ -175,5 +181,6 @@ Global
 		{6D584196-931E-4A0F-833F-E7B53CFFC8F6} = {FF73854F-9449-4D92-94A0-BACE7107EBA2}
 		{032A2708-A0B2-41A3-A764-E4EAB0A76B9A} = {FF73854F-9449-4D92-94A0-BACE7107EBA2}
 		{26F90240-0212-4C42-BCA2-F9E8842EA925} = {FF73854F-9449-4D92-94A0-BACE7107EBA2}
+		{CFE9ECBD-0F04-4974-A295-D0AA4E798381} = {4BA91209-EA73-40A0-8219-90866EFFF78B}
 	EndGlobalSection
 EndGlobal
