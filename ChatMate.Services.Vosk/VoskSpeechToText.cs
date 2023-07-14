@@ -68,8 +68,8 @@ public class VoskSpeechToText : ISpeechToTextService
     public void StartMicrophoneTranscription()
     {
         if (_recording) return;
-        _waveIn?.StartRecording();
         _recording = true;
+        _waveIn?.StartRecording();
     }
     
     public void StopMicrophoneTranscription()

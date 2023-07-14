@@ -1,5 +1,6 @@
 ﻿@using ChatMate.Services.OpenAI
 @using ChatMate.Services.Fakes
+@using ChatMate.Services.Oobabooga
 @using ChatMate.Services.Vosk
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model SettingsViewModel
@@ -122,6 +123,7 @@
                     <select asp-for="Profile.Services.ActionInference.Service" class="form-control">
                         <option value="">None</option>
                         <option value="@OpenAIConstants.ServiceName">OpenAI</option>
+                        <option value="@OobaboogaConstants.ServiceName">Text Generation Web UI</option>
                         <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
                     </select>
                     <span asp-validation-for="Profile.Services.ActionInference.Service" class="text-danger"></span>
