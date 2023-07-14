@@ -15,6 +15,7 @@
     <ItemGroup>
       <ProjectReference Include="..\ChatMate.Abstractions\ChatMate.Abstractions.csproj" />
       <ProjectReference Include="..\ChatMate.Common\ChatMate.Common.csproj" />
+      <ProjectReference Include="..\ChatMate.Services.OpenSourceLargeLanguageModels\ChatMate.Services.OpenSourceLargeLanguageModels.csproj" />
     </ItemGroup>
 
 </Project>

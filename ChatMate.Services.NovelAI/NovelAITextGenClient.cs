@@ -8,6 +8,7 @@ using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
+using ChatMate.Services.OpenAI;
 using NAudio.MediaFoundation;
 
 namespace ChatMate.Services.NovelAI;
@@ -191,10 +192,12 @@ public class NovelAITextGenClient : ITextGenService
             },
             stop_sequences = new[]
             {
-                new[] { 21978 },
-                // TODO: This is User: and " (this may not be the most efficient way to go)
-                new[] { 49287 },
-                new[] { 49264 }
+                // User:
+                new[] { 21978, 49287 },
+                // "
+                new[] { 49264 },
+                // \n
+                new[] { 85 }
             }
         };
     }
@@ -211,13 +214,8 @@ public class NovelAITextGenClient : ITextGenService
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var preamble = MakePreamble(chatSessionData.Character);
-        var messages = string.Join("\n", chatSessionData.GetMessages().Select(x => $"{x.User}: \"{x.Text}\""));
-        var input = $"""
-        {preamble}
-        {messages}
-        {chatSessionData.Character.Name}: "
-        """.ReplaceLineEndings("\n").Replace("\n\n", "\n");
+        var builder = new GenericPromptBuilder();
+        var input = builder.BuildReplyPrompt(chatSessionData, 4096);
         var body = new
         {
             model = _model,
@@ -246,9 +244,7 @@ public class NovelAITextGenClient : ITextGenService
             var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);
             if (json == null) break;
             // TODO: Determine which tokens are considered end tokens.
-            var token = json.token;
-            if (token.Contains('\n') || token.Contains('\"')) break;
-            sb.Append(token);
+            sb.Append(json.token);
             // TODO: Determine a rule of thumb for when to stop.
             // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
@@ -265,17 +261,7 @@ public class NovelAITextGenClient : ITextGenService
             Tokens = 0,
         };
     }
-
-    private static string MakePreamble(CharacterCard character)
-    {
-        return $"""
-            {character.SystemPrompt}
-            [ Description of {character.Name}: {character.Description} ]
-            [ Personality of {character.Name}: {character.Personality} ]
-            [ Circumstances and context of the dialogue: {character.Scenario} ]
-            """;
-    }
-
+    
     public int GetTokenCount(string message)
     {
         return 0;
