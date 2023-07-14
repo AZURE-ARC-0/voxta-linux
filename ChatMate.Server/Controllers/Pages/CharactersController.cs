@@ -56,13 +56,13 @@ public class CharactersController : Controller
                 MessageExamples = "",
                 SystemPrompt = "",
                 PostHistoryInstructions = "",
-                Services = new Character.ServicesMap
+                Services = new Character.CharacterServicesMap
                 {
-                    TextGen = new Character.ServiceMap
+                    TextGen = new ServiceMap
                     {
                         Service = OpenAIConstants.ServiceName,
                     },
-                    SpeechGen = new Character.VoiceServiceMap
+                    SpeechGen = new VoiceServiceMap
                     {
                         Service = NovelAIConstants.ServiceName,
                         Voice = "Naia",
@@ -174,13 +174,13 @@ public class CharactersController : Controller
             Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
             SystemPrompt = card.Data.SystemPrompt,
             ReadOnly = false,
-            Services = new Character.ServicesMap
+            Services = new Character.CharacterServicesMap
             {
-                TextGen = new Character.ServiceMap
+                TextGen = new ServiceMap
                 {
                     Service = NovelAIConstants.ServiceName
                 },
-                SpeechGen = new Character.VoiceServiceMap
+                SpeechGen = new VoiceServiceMap
                 {
                     Service = NovelAIConstants.ServiceName,
                     Voice = "Naia"

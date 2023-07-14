@@ -17,7 +17,7 @@ public partial class ChatSession
         var speechUrl = await speechTask;
         if (speechUrl != null)
         {
-            if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
+            if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StopMicrophoneTranscription();
             await _tunnel.SendAsync(new ServerSpeechMessage
             {
                 Url = speechUrl,

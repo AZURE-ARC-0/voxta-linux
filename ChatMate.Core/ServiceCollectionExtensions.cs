@@ -16,7 +16,13 @@ public static class ServiceCollectionExtensions
         
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<Sanitizer>();
-        services.AddSingleton<ExclusiveLocalInputManager>();
+    }
+    
+    public static ServiceRegistry<ISpeechToTextService> AddSpeechToTextRegistry(this IServiceCollection services)
+    {
+        var registry = new ServiceRegistry<ISpeechToTextService>();
+        services.AddScoped<IServiceFactory<ISpeechToTextService>>(sp => new ServiceFactory<ISpeechToTextService>(registry, sp));
+        return registry;
     }
 
     public static ServiceRegistry<ITextGenService> AddTextGenRegistry(this IServiceCollection services)
@@ -33,7 +39,7 @@ public static class ServiceCollectionExtensions
         return registry;
     }
     
-    public static ServiceRegistry<IActionInferenceService> AddAnimationServiceRegistry(this IServiceCollection services)
+    public static ServiceRegistry<IActionInferenceService> AddActionInferenceRegistry(this IServiceCollection services)
     {
         var registry = new ServiceRegistry<IActionInferenceService>();
         services.AddScoped<IServiceFactory<IActionInferenceService>>(sp => new ServiceFactory<IActionInferenceService>(registry, sp));

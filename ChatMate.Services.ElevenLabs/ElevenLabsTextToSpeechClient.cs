@@ -65,12 +65,11 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         request.Headers.TransferEncodingChunked = false;
         
         var response = await _httpClient.SendAsync(request, cancellationToken);
-
         
         if (!response.IsSuccessStatusCode)
         {
             var reason = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogError("Failed to generate speech: {Reason}", reason);
+            _logger.LogError("ElevenLabs failed to generate speech: {Reason}", reason);
             await tunnel.ErrorAsync(new ElevenLabsException($"Unable to generate speech: {reason}"), cancellationToken);
             return;
         }

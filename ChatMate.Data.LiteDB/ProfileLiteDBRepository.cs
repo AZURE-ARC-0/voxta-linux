@@ -13,7 +13,7 @@ public class ProfileLiteDBRepository : IProfileRepository
     {
         _profilesCollection = db.GetCollection<ProfileSettings>();
     }
-    
+
     public Task<ProfileSettings?> GetProfileAsync(CancellationToken cancellationToken)
     {
         var profile = _profilesCollection.FindOne(x => x.Id == ProfileSettings.SharedId);

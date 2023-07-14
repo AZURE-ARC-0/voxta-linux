@@ -1,22 +1,21 @@
 ﻿using System.Text.Json;
 using ChatMate.Abstractions.Services;
 using ChatMate.Services.Vosk.Model;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using NAudio.Wave;
 using Vosk;
 
 namespace ChatMate.Services.Vosk;
 
-public class VoskSpeechRecognition : ISpeechRecognitionService
+public class VoskSpeechToText : ISpeechToTextService
 {
+    private static readonly SemaphoreSlim Semaphore = new(1, 1);
+    
     private static readonly JsonSerializerOptions SerializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
     
     private readonly IVoskModelDownloader _modelDownloader;
-    private readonly IOptions<VoskOptions> _options;
     private const int SampleRate = 16000;
     
     private VoskRecognizer? _recognizer;
@@ -24,19 +23,19 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
     private bool _recording;
     private bool _speaking;
     
-    public event EventHandler? SpeechStart;
-    public event EventHandler<string>? SpeechEnd;
+    public event EventHandler? SpeechRecognitionStarted;
+    public event EventHandler<string>? SpeechRecognitionFinished;
 
-    public VoskSpeechRecognition(IVoskModelDownloader modelDownloader, IOptions<VoskOptions> options)
+    public VoskSpeechToText(IVoskModelDownloader modelDownloader)
     {
         _modelDownloader = modelDownloader;
-        _options = options;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        var model = await _modelDownloader.AcquireModelAsync();
-        global::Vosk.Vosk.SetLogLevel(_options.Value.LogLevel);
+        await Semaphore.WaitAsync(cancellationToken);
+        var model = await _modelDownloader.AcquireModelAsync(cancellationToken);
+        global::Vosk.Vosk.SetLogLevel(-1);
         _recognizer = new VoskRecognizer(model, SampleRate);
         _recognizer.SetWords(true);
         _waveIn = new WaveInEvent();
@@ -52,7 +51,7 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
                 var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
                 if (json?.Result == null || string.IsNullOrEmpty(json.Text)) return;
                 if (json.Result is [{ Conf: < 0.9 }]) return;
-                SpeechEnd?.Invoke(this, json.Text);
+                SpeechRecognitionFinished?.Invoke(this, json.Text);
             }
             else
             {
@@ -61,7 +60,7 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
                 if (string.IsNullOrEmpty(json?.Partial)) return;
                 if (_speaking) return;
                 _speaking = true;
-                SpeechStart?.Invoke(this, EventArgs.Empty);
+                SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
             }
         };
     }
@@ -85,5 +84,6 @@ public class VoskSpeechRecognition : ISpeechRecognitionService
         StopMicrophoneTranscription();
         _waveIn?.Dispose();
         _recognizer?.Dispose();
+        Semaphore.Release();
     }
 }

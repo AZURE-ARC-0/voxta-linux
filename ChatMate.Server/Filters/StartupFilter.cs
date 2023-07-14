@@ -1,14 +1,17 @@
 ﻿using ChatMate.Abstractions.Repositories;
+using ChatMate.Data.LiteDB;
 using ChatMate.Server.Samples;
 
 namespace ChatMate.Server.Filters;
 
 public class AutoRequestServicesStartupFilter : IStartupFilter
 {
+    private readonly LiteDBMigrations _migrations;
     private readonly ICharacterRepository _charactersRepository;
 
-    public AutoRequestServicesStartupFilter(ICharacterRepository charactersRepository)
+    public AutoRequestServicesStartupFilter(LiteDBMigrations migrations, ICharacterRepository charactersRepository)
     {
+        _migrations = migrations;
         _charactersRepository = charactersRepository;
     }
     
@@ -16,6 +19,8 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
     {
         Task.Run(async () =>
         {
+            await _migrations.MigrateAsync();
+            
             await _charactersRepository.SaveCharacterAsync(Kally.Create());
             await _charactersRepository.SaveCharacterAsync(Melly.Create());
             await _charactersRepository.SaveCharacterAsync(Kate.Create());

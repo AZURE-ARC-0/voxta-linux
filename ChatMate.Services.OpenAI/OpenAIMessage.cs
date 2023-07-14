@@ -1,8 +1,11 @@
-﻿namespace ChatMate.Services.OpenAI;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace ChatMate.Services.OpenAI;
 
 [Serializable]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public class OpenAIMessage
 {
-    public string role { get; set; }
-    public string content { get; set; }
+    public required string role { get; set; }
+    public required string content { get; set; }
 }

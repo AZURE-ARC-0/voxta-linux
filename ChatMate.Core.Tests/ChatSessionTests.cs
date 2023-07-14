@@ -47,9 +47,18 @@ public class ChatSessionTests
             Description = "User Description",
             EnableSpeechRecognition = true,
             PauseSpeechRecognitionDuringPlayback = false,
+            Services = new ProfileSettings.ProfileServicesMap
+            {
+                ActionInference = new ServiceMap
+                {
+                    Service = ""
+                },
+                SpeechToText = new SpeechToTextServiceMap
+                {
+                    Service = ""
+                }
+            }
         };
-        var inputManager = new ExclusiveLocalInputManager();
-        var inputHandle = new ExclusiveLocalInputHandle(inputManager);
         var chatSessionState = new ChatSessionState();
         _speechGenerator = new Mock<ISpeechGenerator>();
 
@@ -61,9 +70,9 @@ public class ChatSessionTests
             _chatSessionData,
             chatTextProcessor.Object,
             profile,
-            inputHandle,
             chatSessionState,
             _speechGenerator.Object,
+            null,
             null
         );
 

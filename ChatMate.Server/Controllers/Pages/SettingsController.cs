@@ -7,6 +7,7 @@ using ChatMate.Services.ElevenLabs;
 using ChatMate.Services.NovelAI;
 using ChatMate.Services.Oobabooga;
 using ChatMate.Services.OpenAI;
+using ChatMate.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatMate.Server.Controllers.Pages;
@@ -51,13 +52,25 @@ public class SettingsController : Controller
             {
               ApiKey  = string.IsNullOrEmpty(elevenlabs?.ApiKey) ? null : Crypto.DecryptString(elevenlabs.ApiKey),
             },
-            Profile = new ProfileSettings
+            Profile = profile ?? new ProfileSettings
             {
-                Name = profile?.Name ?? "User",
-                Description = profile?.Description ?? "",
-                EnableSpeechRecognition = profile?.EnableSpeechRecognition ?? true,
-                PauseSpeechRecognitionDuringPlayback = profile?.PauseSpeechRecognitionDuringPlayback ?? true,
-                AnimationSelectionService = profile != null ? profile.AnimationSelectionService : OpenAIConstants.ServiceName,
+                Name = "User",
+                Description = "",
+                EnableSpeechRecognition = true,
+                PauseSpeechRecognitionDuringPlayback = true,
+                Services = new ProfileSettings.ProfileServicesMap
+                {
+                    ActionInference =  new ServiceMap
+                    {
+                        Service = OpenAIConstants.ServiceName,
+                    },
+                    SpeechToText = new SpeechToTextServiceMap
+                    {
+                        Service = VoskConstants.ServiceName,
+                        Model = "vosk-model-small-en-us-0.15",
+                        Hash = "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498",
+                    }
+                }
             }
         };
         
@@ -100,7 +113,7 @@ public class SettingsController : Controller
             Description = model.Profile.Description?.Trim(),
             EnableSpeechRecognition = model.Profile.EnableSpeechRecognition,
             PauseSpeechRecognitionDuringPlayback = model.Profile.PauseSpeechRecognitionDuringPlayback,
-            AnimationSelectionService = model.Profile.AnimationSelectionService,
+            Services = model.Profile.Services
         });
         
         return RedirectToAction("Settings");

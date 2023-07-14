@@ -23,10 +23,10 @@ public sealed partial class ChatSession : IChatSession
     private readonly IChatTextProcessor _chatTextProcessor;
     private readonly bool _pauseSpeechRecognitionDuringPlayback;
     private readonly ILogger<UserConnection> _logger;
-    private readonly ExclusiveLocalInputHandle? _inputHandle;
     private readonly ChatSessionState _chatSessionState;
     private readonly ISpeechGenerator _speechGenerator;
     private readonly IActionInferenceService? _animationSelection;
+    private readonly ISpeechToTextService? _speechToText;
 
     public ChatSession(IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,
@@ -35,10 +35,11 @@ public sealed partial class ChatSession : IChatSession
         ChatSessionData chatSessionData,
         IChatTextProcessor chatTextProcessor,
         ProfileSettings profile,
-        ExclusiveLocalInputHandle? inputHandle,
         ChatSessionState chatSessionState,
         ISpeechGenerator speechGenerator,
-        IActionInferenceService? animationSelection)
+        IActionInferenceService? animationSelection,
+        ISpeechToTextService? speechToText
+        )
     {
         _tunnel = tunnel;
         _performanceMetrics = performanceMetrics;
@@ -47,15 +48,15 @@ public sealed partial class ChatSession : IChatSession
         _chatTextProcessor = chatTextProcessor;
         _pauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback;
         _logger = loggerFactory.CreateLogger<UserConnection>();
-        _inputHandle = inputHandle;
         _chatSessionState = chatSessionState;
         _speechGenerator = speechGenerator;
         _animationSelection = animationSelection;
+        _speechToText = speechToText;
 
-        if (_inputHandle != null)
+        if (speechToText != null)
         {
-            _inputHandle.SpeechRecognitionStarted += OnSpeechRecognitionStarted;
-            _inputHandle.SpeechRecognitionFinished += OnSpeechRecognitionFinished;
+            speechToText.SpeechRecognitionStarted += OnSpeechRecognitionStarted;
+            speechToText.SpeechRecognitionFinished += OnSpeechRecognitionFinished;
         }
 
         _messageQueueProcessTask = Task.Run(() => ProcessQueueAsync(_messageQueueCancellationTokenSource.Token), _messageQueueCancellationTokenSource.Token);
@@ -69,7 +70,7 @@ public sealed partial class ChatSession : IChatSession
     public void HandleSpeechPlaybackComplete()
     {
         _chatSessionState.StopSpeechAudio();
-        _inputHandle?.RequestResumeSpeechRecognition();
+        _speechToText?.StartMicrophoneTranscription();
     }
 
     private void OnSpeechRecognitionStarted(object? sender, EventArgs e)
@@ -85,7 +86,7 @@ public sealed partial class ChatSession : IChatSession
     private void OnSpeechRecognitionFinished(object? sender, string e)
     {
         _logger.LogInformation("Speech recognition finished: {Text}", e);
-        if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestPauseSpeechRecognition();
+        if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StopMicrophoneTranscription();
         Enqueue(async ct =>
         {
             await _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage
@@ -97,11 +98,11 @@ public sealed partial class ChatSession : IChatSession
 
     public async ValueTask DisposeAsync()
     {
-        if (_inputHandle != null)
+        if (_speechToText != null)
         {
-            _inputHandle.SpeechRecognitionStarted -= OnSpeechRecognitionStarted;
-            _inputHandle.SpeechRecognitionFinished -= OnSpeechRecognitionFinished;
-            _inputHandle.Dispose();
+            _speechToText.SpeechRecognitionStarted -= OnSpeechRecognitionStarted;
+            _speechToText.SpeechRecognitionFinished -= OnSpeechRecognitionFinished;
+            _speechToText.Dispose();
         }
 
         await StopProcessingQueue();

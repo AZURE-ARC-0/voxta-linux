@@ -78,7 +78,7 @@ public partial class ChatSession
             }
             catch
             {
-                if (_pauseSpeechRecognitionDuringPlayback) _inputHandle?.RequestResumeSpeechRecognition();
+                if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StartMicrophoneTranscription();
                 throw;
             }
 

@@ -14,31 +14,31 @@ public class ChatSessionFactory
     private readonly ILoggerFactory _loggerFactory;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IProfileRepository _profileRepository;
-    private readonly ExclusiveLocalInputManager _localInputManager;
     private readonly SpeechGeneratorFactory _speechGeneratorFactory;
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
+    private readonly IServiceFactory<ISpeechToTextService> _speechToTextServiceFactory;
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
         IPerformanceMetrics performanceMetrics,
         IProfileRepository profileRepository,
-        ExclusiveLocalInputManager localInputManager,
         SpeechGeneratorFactory speechGeneratorFactory,
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
-        IServiceFactory<IActionInferenceService> animationSelectionFactory
+        IServiceFactory<IActionInferenceService> animationSelectionFactory,
+        IServiceFactory<ISpeechToTextService> speechToTextServiceFactory
         )
     {
         _loggerFactory = loggerFactory;
         _performanceMetrics = performanceMetrics;
         _profileRepository = profileRepository;
-        _localInputManager = localInputManager;
         _speechGeneratorFactory = speechGeneratorFactory;
         _textGenFactory = textGenFactory;
         _textToSpeechFactory = textToSpeechFactory;
         _animationSelectionFactory = animationSelectionFactory;
+        _speechToTextServiceFactory = speechToTextServiceFactory;
         _profileRepository = profileRepository;
     }
 
@@ -48,14 +48,15 @@ public class ChatSessionFactory
         {
             Directory.CreateDirectory(startChatMessage.AudioPath);
         }
-        
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings { Name = "User", Description = "" };
+
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken);
+        if (profile == null) throw new InvalidOperationException("Cannot start chat, no profile is set.");
         var textProcessor = new ChatTextProcessor(profile, startChatMessage.Name);
 
         var textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService, cancellationToken);
-        var animationSelection = string.IsNullOrEmpty(profile.AnimationSelectionService)
+        var actionInference = string.IsNullOrEmpty(profile.Services.ActionInference.Service)
             ? null
-            : await _animationSelectionFactory.CreateAsync(profile.AnimationSelectionService, cancellationToken);
+            : await _animationSelectionFactory.CreateAsync(profile.Services.ActionInference.Service, cancellationToken);
         
         string[]? thinkingSpeech = null;
         if (startChatMessage is { TtsService: not null, TtsVoice: not null })
@@ -89,7 +90,9 @@ public class ChatSessionFactory
         // TODO: Optimize by pre-calculating tokens count
         
         var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && profile.EnableSpeechRecognition;
-
+        
+        var speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateAsync(profile.Services.SpeechToText.Service, cancellationToken) : null;
+        
         return new ChatSession(
             tunnel,
             _loggerFactory,
@@ -98,10 +101,10 @@ public class ChatSessionFactory
             chatData,
             textProcessor,
             profile,
-            useSpeechRecognition ? _localInputManager.Acquire() : null,
             new ChatSessionState(),
             speechGenerator,
-            animationSelection
+            actionInference,
+            speechToText
         );
     }
 }

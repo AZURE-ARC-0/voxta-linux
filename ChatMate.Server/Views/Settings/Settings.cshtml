@@ -1,5 +1,7 @@
 ﻿@using ChatMate.Services.OpenAI
 @using ChatMate.Services.Fakes
+@using ChatMate.Services.Vosk
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model SettingsViewModel
 @{
     Layout = "_Layout";
@@ -68,14 +70,39 @@
         </div>
 
         <h2>Services</h2>
+        <h3>Speech To Text</h3>
+        <p>This is the engine that listens to what you say and convert it to text.</p>
         <div class="form-group">
-            <label asp-for="Profile.AnimationSelectionService">Animation selection service</label>
-            <select asp-for="Profile.AnimationSelectionService" class="form-control">
+            <label asp-for="Profile.Services.SpeechToText.Service">Speech To Text Service</label>
+            <select asp-for="Profile.Services.SpeechToText.Service" class="form-control">
+                <option value="">None</option>
+                <option value="@VoskConstants.ServiceName">Vosk</option>
+            </select>
+            <span asp-validation-for="Profile.Services.SpeechToText.Service" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Profile.Services.SpeechToText.Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models">models list</a>, smaller is faster.</span></label>
+            <input asp-for="Profile.Services.SpeechToText.Model" class="form-control" />
+            <span asp-validation-for="Profile.Services.SpeechToText.Model" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Profile.Services.SpeechToText.Hash">Model Download Hash <span class="text-muted">Optional, increases security by checking if the file is the expected one.</span></label>
+            <input asp-for="Profile.Services.SpeechToText.Hash" class="form-control" />
+            <span asp-validation-for="Profile.Services.SpeechToText.Hash" class="text-danger"></span>
+        </div>
+        
+        <h3>Action Inference</h3>
+        <p>This is what allows the model to determine actions they can take after speaking.</p>
+        <div class="form-group">
+            <label asp-for="Profile.Services.ActionInference.Service">Action Inference Service</label>
+            <select asp-for="Profile.Services.ActionInference.Service" class="form-control">
                 <option value="">None</option>
                 <option value="@OpenAIConstants.ServiceName">OpenAI</option>
                 <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
             </select>
-            <span asp-validation-for="Profile.AnimationSelectionService" class="text-danger"></span>
+            <span asp-validation-for="Profile.Services.ActionInference.Service" class="text-danger"></span>
         </div>
 
         <h2>Options</h2>

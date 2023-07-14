@@ -36,9 +36,10 @@ public class Startup
             .ValidateDataAnnotations();
         services.AddLiteDBRepositories();
 
+        var speechToTextRegistry = services.AddSpeechToTextRegistry();
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
-        var actionInferenceRegistry = services.AddAnimationServiceRegistry();
+        var actionInferenceRegistry = services.AddActionInferenceRegistry();
 
         services.AddFakes();
         textGenRegistry.RegisterFakes();
@@ -63,8 +64,8 @@ public class Startup
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();
 
-        services.AddVosk(_configuration.GetSection("Vosk"));
-        services.AddHostedService<SpeechRecognitionBackgroundTask>();
+        services.AddVosk();
+        speechToTextRegistry.RegisterVosk();
         
         services.AddTransient<IStartupFilter, AutoRequestServicesStartupFilter>();
     }

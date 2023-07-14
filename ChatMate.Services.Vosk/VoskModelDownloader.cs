@@ -1,33 +1,51 @@
 ﻿using System.IO.Compression;
 using System.Security;
 using System.Security.Cryptography;
-using Microsoft.Extensions.DependencyInjection;
+using ChatMate.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ChatMate.Services.Vosk;
 
 public interface IVoskModelDownloader
 {
-    Task<global::Vosk.Model> AcquireModelAsync();
+    Task<global::Vosk.Model> AcquireModelAsync(CancellationToken cancellationToken);
 }
 
 public class VoskModelDownloader : IVoskModelDownloader
 {
+    private static readonly SemaphoreSlim Semaphore = new(1, 1);
+    
     private readonly ILogger<VoskModelDownloader> _logger;
-    private readonly IOptions<VoskOptions> _options;
+    private readonly IProfileRepository _profileRepository;
 
-    public VoskModelDownloader(ILogger<VoskModelDownloader> logger, IOptions<VoskOptions> options)
+    public VoskModelDownloader(ILogger<VoskModelDownloader> logger, IProfileRepository profileRepository)
     {
         _logger = logger;
-        _options = options;
+        _profileRepository = profileRepository;
     }
     
-    public async Task<global::Vosk.Model> AcquireModelAsync()
+    public async Task<global::Vosk.Model> AcquireModelAsync(CancellationToken cancellationToken)
     {
+        await Semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            return await AcquireModelInternalAsync(cancellationToken);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    private async Task<global::Vosk.Model> AcquireModelInternalAsync(CancellationToken cancellationToken)
+    {
+
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken);
+        if (profile == null || string.IsNullOrEmpty(profile.Services.SpeechToText.Model))
+            throw new NullReferenceException("There is no Vosk settings in the profile");
         var modelsPath = Path.GetFullPath("Models/Vosk");
-        var modelName = _options.Value.Model;
-        var modelZipHash = _options.Value.ModelZipHash;
+        var modelName = profile.Services.SpeechToText.Model;
+        var modelZipHash = profile.Services.SpeechToText.Hash;
         var modelPath = Path.Combine(modelsPath, modelName);
         
         if (Directory.Exists(modelPath))
@@ -40,7 +58,7 @@ public class VoskModelDownloader : IVoskModelDownloader
 
         _logger.LogInformation("Downloading Vosk model from {FileUrl}...", fileUrl);
         using var httpClient = new HttpClient();
-        var fileBytes = await httpClient.GetByteArrayAsync(fileUrl);
+        var fileBytes = await httpClient.GetByteArrayAsync(fileUrl, cancellationToken);
         var hashBytes = SHA256.HashData(fileBytes);
         var actualZipHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
         _logger.LogInformation("Downloaded Vosk model, hash is {ActualZipHash}", actualZipHash);

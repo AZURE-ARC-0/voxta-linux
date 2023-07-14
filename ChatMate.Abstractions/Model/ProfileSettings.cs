@@ -15,5 +15,12 @@ public class ProfileSettings
     public string? Description { get; init; }
     public bool EnableSpeechRecognition { get; init; } = true;
     public bool PauseSpeechRecognitionDuringPlayback { get; init; } = true;
-    public string? AnimationSelectionService { get; init; }
+    public required ProfileServicesMap Services { get; init; }
+    
+    [Serializable]
+    public class ProfileServicesMap
+    {
+        public required ServiceMap ActionInference { get; init; }
+        public required SpeechToTextServiceMap SpeechToText { get; init; }
+    }
 }

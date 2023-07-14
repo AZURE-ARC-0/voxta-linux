@@ -26,26 +26,14 @@ public class Character : CharacterCard
     [BsonId] public required string Id { get; set; }
     public bool ReadOnly { get; set; }
     
-    public required ServicesMap Services { get; init; }
+    public required CharacterServicesMap Services { get; init; }
     public CharacterOptions? Options { get; init; }
-    
+
     [Serializable]
-    public class ServicesMap
+    public class CharacterServicesMap
     {
         public required ServiceMap TextGen { get; init; }
         public required VoiceServiceMap SpeechGen { get; init; }
-    }
-
-    [Serializable]
-    public class ServiceMap
-    {
-        public required string Service { get; init; }
-    }
-    
-    [Serializable]
-    public class VoiceServiceMap : ServiceMap
-    {
-        public required string Voice { get; init; }
     }
     
     [Serializable]
