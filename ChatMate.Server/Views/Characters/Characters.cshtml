@@ -62,8 +62,8 @@
             <table class="table mb-0">
                 <tbody>
                     <tr>
-                        <td><span class="text-muted">Create a new character</span></td>
-                        <td>
+                        <td><span class="text-muted">Create a new blank character</span></td>
+                        <td class="text-end">
                             @* ReSharper disable Html.PathError *@
                             <a class="btn btn-primary" href="/characters/new">Create blank character</a>
                             @* ReSharper restore Html.PathError *@
@@ -72,7 +72,7 @@
 
                     <tr>
                         <td><span class="text-muted">Upload a Tavern V2 card</span></td>
-                        <td>
+                        <td class="text-end">
                             <form action="/characters/import" enctype="multipart/form-data" method="post">
                                 <div class="mb-3">
                                     <input type="file" class="form-control" name="files" accept="image/png" />
