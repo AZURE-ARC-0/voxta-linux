@@ -6,10 +6,10 @@ on:
       - v*
 
 jobs:
+
   server:
     name: Package Server
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Get the version
@@ -23,11 +23,11 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Restore
-      run: dotnet restore ChatMate.Server/ChatMate.Server.csproj
+      run: dotnet restore src/server/ChatMate.Server/ChatMate.Server.csproj
     - name: Build
-      run: dotnet build -c Release -p:Version=${{ steps.get_version.outputs.VERSION }} --no-restore ChatMate.Server/ChatMate.Server.csproj
+      run: dotnet build -c Release -p:Version=${{ steps.get_version.outputs.VERSION }} --no-restore src/server/ChatMate.Server/ChatMate.Server.csproj
     - name: Publish
-      run: dotnet publish -c Release --no-build --no-restore --output ./publish/server ChatMate.Server/ChatMate.Server.csproj
+      run: dotnet publish -c Release --no-build --no-restore --output ./publish/server src/server/ChatMate.Server/ChatMate.Server.csproj
     - name: Zip
       run: |
         cd publish/server
@@ -42,11 +42,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-
   var:
     name: Package Virt-A-Mate Plugin
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: Get the version
@@ -56,11 +54,11 @@ jobs:
         id: zip
         run: |
           mkdir -p publish/Custom/Scripts/AcidBubbles/ChatMate
-          cd ChatMate.VirtAMatePlugin
-          cp -r src ../publish/Custom/Scripts/AcidBubbles/ChatMate/
-          cp *.cslist ../publish/Custom/Scripts/AcidBubbles/ChatMate/
-          cp meta.json ../publish/
-          cd ../publish
+          cd virtamate/ChatMate.VirtAMatePlugin
+          cp -r src ../../publish/Custom/Scripts/AcidBubbles/ChatMate/
+          cp *.cslist ../../publish/Custom/Scripts/AcidBubbles/ChatMate/
+          cp meta.json ../../publish/
+          cd ../../publish
           sed -i 's/v0.0.0/v${{ steps.get_version.outputs.VERSION }}/' meta.json
           zip -r "AcidBubbles.ChatMate.${{ github.run_number }}.var" *
       - name: GitHub release

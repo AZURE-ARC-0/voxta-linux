@@ -1,6 +1,6 @@
 bin/
 obj/
 publish/
-ChatMate.Server/Data/*
-!ChatMate.Server/Data/README.txt
-ChatMate.Server/Models/*
+src/server/ChatMate.Server/Data/*
+!src/server/ChatMate.Server/Data/README.txt
+src/server/ChatMate.Server/Models/*
