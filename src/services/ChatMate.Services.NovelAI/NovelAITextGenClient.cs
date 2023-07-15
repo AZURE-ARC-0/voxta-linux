@@ -215,7 +215,7 @@ public class NovelAITextGenClient : ITextGenService
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder();
-        var input = builder.BuildReplyPrompt(chatSessionData, 4096);
+        var input = builder.BuildReplyPrompt(chatSessionData, includePostHistoryPrompt: false);
         var body = new
         {
             model = _model,
@@ -242,8 +242,13 @@ public class NovelAITextGenClient : ITextGenService
             if (line == null) break;
             if (!line.StartsWith("data:")) continue;
             var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);
-            if (json == null) break;
+            if (json == null || json.token.Length == 0) break;
             // TODO: Determine which tokens are considered end tokens.
+            if (json.token[^1] is '\"' or '\n')
+            {
+                sb.Append(json.token[..^1]);
+                break;
+            }
             sb.Append(json.token);
             // TODO: Determine a rule of thumb for when to stop.
             // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;

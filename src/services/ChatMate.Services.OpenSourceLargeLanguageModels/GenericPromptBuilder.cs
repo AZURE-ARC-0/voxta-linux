@@ -5,10 +5,10 @@ namespace ChatMate.Services.OpenAI;
 
 public class GenericPromptBuilder
 {
-    public string BuildReplyPrompt(IReadOnlyChatSessionData chatSessionData, int maxTokens)
+    public string BuildReplyPrompt(IReadOnlyChatSessionData chatSessionData, int maxTokens = 4096, bool includePostHistoryPrompt = true)
     {
         var systemPrompt = MakeSystemPrompt(chatSessionData.Character);
-        var postHistoryPrompt = MakePostHistoryPrompt(chatSessionData.Character, chatSessionData.Context, chatSessionData.Actions);
+        var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chatSessionData.Character, chatSessionData.Context, chatSessionData.Actions) : "";
         var sb = new StringBuilder();
         var chatMessages = chatSessionData.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
