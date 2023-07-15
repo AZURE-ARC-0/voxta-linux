@@ -41,26 +41,29 @@ public class OpenAIPromptBuilder
 
     public List<OpenAIMessage> BuildActionInferencePrompt(ChatSessionData chatSessionData)
     {
+        if (chatSessionData.Actions == null || chatSessionData.Actions.Length < 1)
+            throw new ArgumentException("No actions provided.", nameof(chatSessionData));
+        
+        var messages = new List<OpenAIMessage>
+        {
+            new() { role = "system", content = "You must select an action from the provided list. Only answer with a single valid action name. Example response: [smile]" },
+        };
+        
         var sb = new StringBuilder();
+        sb.AppendLineLinux("Conversation information:");
         sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
         sb.AppendLineLinux("Scenario: " + chatSessionData.Character.Scenario);
+        if (!string.IsNullOrEmpty(chatSessionData.Context))
+            sb.AppendLineLinux($"Context: {chatSessionData.Context}");
         sb.AppendLineLinux("Previous messages:");
-        foreach (var message in chatSessionData.Messages.TakeLast(4))
+        foreach (var message in chatSessionData.Messages.TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
+        sb.AppendLineLinux("---"); 
+        sb.AppendLineLinux($"Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}");
+        messages.Add(new OpenAIMessage { role = "user", content = sb.ToString().TrimExcess() });
 
-        sb.AppendLineLinux("---");
-        if (!string.IsNullOrEmpty(chatSessionData.Context))
-            sb.AppendLineLinux($"Context: {chatSessionData.Context}");
-        if (chatSessionData.Actions is { Length: > 1 })
-            sb.AppendLineLinux($"Available actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}");
-        sb.AppendLineLinux($"Write the action {chatSessionData.Character.Name} should play.");
-        var messages = new List<OpenAIMessage>
-        {
-            new() { role = "system", content = "You are a tool that selects the character animation for a Virtual Reality game. You will be presented with a chat, and must provide the animation to play from the provided list. Only answer with a single animation name. Example response: [smile]" },
-            new() { role = "user", content = sb.ToString().TrimExcess() }
-        };
         return messages;
     }
 

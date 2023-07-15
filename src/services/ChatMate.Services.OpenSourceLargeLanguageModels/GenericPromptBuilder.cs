@@ -33,11 +33,12 @@ public class GenericPromptBuilder
     public string BuildActionInferencePrompt(ChatSessionData chatSessionData)
     {
         var sb = new StringBuilder();
-        sb.AppendLineLinux("You are a tool that selects the character animation for a Virtual Reality game. You will be presented with a chat, and must provide the animation to play from the provided list. Only answer with a single animation name. Example response: [smile]");
+        sb.AppendLineLinux("You must select an action from the provided list. Only answer with a single valid action name. Example response: [smile]");
+        sb.AppendLineLinux("Conversation information:");
         sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
         sb.AppendLineLinux("Scenario: " + chatSessionData.Character.Scenario);
         sb.AppendLineLinux("Previous messages:");
-        foreach (var message in chatSessionData.Messages.TakeLast(4))
+        foreach (var message in chatSessionData.Messages.TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
