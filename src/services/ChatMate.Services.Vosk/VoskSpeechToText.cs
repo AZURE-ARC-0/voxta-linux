@@ -81,9 +81,16 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     
     public void Dispose()
     {
+        if(_disposed) return;
         _disposed = true;
         _recordingService.StopRecording();
         _recognizer?.Dispose();
-        if (_initialized) Semaphore.Release();
+        try
+        {
+            if (_initialized) Semaphore.Release();
+        }
+        catch (SemaphoreFullException)
+        {
+        }
     }
 }
