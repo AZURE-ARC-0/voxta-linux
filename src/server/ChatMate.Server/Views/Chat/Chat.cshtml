@@ -279,14 +279,14 @@
             };
             
             socket.onclose = function(event) {
-                notify('error', 'Connection lost. Reconnecting...');
+                notify('danger', 'Connection lost. Reconnecting...');
                  setTimeout(function() {
                     connect();
                 }, 5000);
             };
         
             socket.onerror = function(error) {
-                notify('error', 'A socket error occurred: ' + error.message);
+                notify('danger', 'A socket error occurred: ' + error.message);
             };
         };
     
