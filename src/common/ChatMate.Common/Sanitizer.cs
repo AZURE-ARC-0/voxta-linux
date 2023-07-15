@@ -14,6 +14,10 @@ public class Sanitizer
         if (result.StartsWith("- ")) result = result[2..];
         result = RemoveNonChat.Replace(result, "");
         result = SanitizeMessage.Replace(result, "");
-        return result.Trim('\"', '\'', ' ');
+        result = result.Trim('\"', '\'', ' ');
+        var lastDot = result.LastIndexOf('.');
+        if (lastDot == -1) return result + '.';
+        if(lastDot != result.Length -1) return result[..(lastDot + 1)];
+        return result;
     }
 }
