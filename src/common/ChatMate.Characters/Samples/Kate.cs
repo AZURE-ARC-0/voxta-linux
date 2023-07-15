@@ -1,7 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
-using ChatMate.Services.NovelAI;
 
-namespace ChatMate.Server.Samples;
+namespace ChatMate.Characters.Samples;
 
 public static class Kate
 {
@@ -30,11 +29,11 @@ public static class Kate
         {
             TextGen = new()
             {
-                Service = NovelAIConstants.ServiceName,
+                Service = "NovelAI",
             },
             SpeechGen = new()
             {
-                Service = NovelAIConstants.ServiceName,
+                Service = "NovelAI",
                 Voice = "Naia"
             }
         },

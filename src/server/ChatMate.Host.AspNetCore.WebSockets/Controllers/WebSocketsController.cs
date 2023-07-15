@@ -1,10 +1,10 @@
 ﻿using System.Net.Sockets;
 using System.Net.WebSockets;
 using ChatMate.Core;
-using ChatMate.Server.Chat;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Server.Controllers;
+namespace ChatMate.Host.AspNetCore.WebSockets;
 
 [ApiController]
 public class WebSocketsController : ControllerBase

@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 
-namespace ChatMate.Server.Chat;
+namespace ChatMate.Host.AspNetCore.WebSockets;
 
 public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
 {

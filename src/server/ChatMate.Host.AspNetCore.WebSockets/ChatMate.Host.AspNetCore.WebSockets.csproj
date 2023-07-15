@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\common\ChatMate.Abstractions\ChatMate.Abstractions.csproj" />
+        <ProjectReference Include="..\..\common\ChatMate.Core\ChatMate.Core.csproj" />
+        <ProjectReference Include="..\..\storage\ChatMate.Data.LiteDB\ChatMate.Data.LiteDB.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.ElevenLabs\ChatMate.Services.ElevenLabs.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.Fakes\ChatMate.Services.Fakes.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.KoboldAI\ChatMate.Services.KoboldAI.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.NAudio\ChatMate.Services.NAudio.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.NovelAI\ChatMate.Services.NovelAI.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.Oobabooga\ChatMate.Services.Oobabooga.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.OpenAI\ChatMate.Services.OpenAI.csproj" />
+        <ProjectReference Include="..\..\services\ChatMate.Services.Vosk\ChatMate.Services.Vosk.csproj" />
+    </ItemGroup>
+
+</Project>

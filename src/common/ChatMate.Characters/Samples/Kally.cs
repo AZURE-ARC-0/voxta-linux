@@ -1,8 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
-using ChatMate.Services.NovelAI;
-using ChatMate.Services.Oobabooga;
 
-namespace ChatMate.Server.Samples;
+namespace ChatMate.Characters.Samples;
 
 public static class Kally
 {
@@ -29,11 +27,11 @@ public static class Kally
         {
             TextGen = new()
             {
-                Service = OobaboogaConstants.ServiceName,
+                Service = "TextGenerationWebUI",
             },
             SpeechGen = new()
             {
-                Service = NovelAIConstants.ServiceName,
+                Service = "NovelAI",
                 Voice = "Claea"
             }
         },

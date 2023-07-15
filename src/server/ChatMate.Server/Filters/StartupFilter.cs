@@ -1,6 +1,6 @@
 ﻿using ChatMate.Abstractions.Repositories;
+using ChatMate.Characters.Samples;
 using ChatMate.Data.LiteDB;
-using ChatMate.Server.Samples;
 
 namespace ChatMate.Server.Filters;
 

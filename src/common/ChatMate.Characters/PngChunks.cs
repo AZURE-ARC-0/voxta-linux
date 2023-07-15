@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ChatMate.Server.Utils;
+namespace ChatMate.Characters;
 
 public class PngChunkReader
 {

@@ -1,6 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
 
-namespace ChatMate.Server.Samples;
+namespace ChatMate.Characters.Samples;
 
 public static class Test
 {

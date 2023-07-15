@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using ChatMate.Abstractions.Diagnostics;
 
-namespace ChatMate.Server.Chat;
+namespace ChatMate.Host.AspNetCore.WebSockets;
 
 public class StaticPerformanceMetrics : IPerformanceMetrics
 {

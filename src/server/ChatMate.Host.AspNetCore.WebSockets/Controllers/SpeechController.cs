@@ -4,10 +4,10 @@ using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
 using ChatMate.Abstractions.Services;
 using ChatMate.Core;
-using ChatMate.Server.Chat;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers;
+namespace ChatMate.Host.AspNetCore.WebSockets;
 
 [ApiController]
 public class SpeechController : ControllerBase

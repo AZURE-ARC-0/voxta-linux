@@ -1,10 +1,9 @@
 ﻿using ChatMate.Abstractions.DependencyInjection;
 using ChatMate.Abstractions.Services;
 using ChatMate.Common;
-using ChatMate.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Data.Yaml;
+namespace ChatMate.Core;
 
 public static class ServiceCollectionExtensions
 {

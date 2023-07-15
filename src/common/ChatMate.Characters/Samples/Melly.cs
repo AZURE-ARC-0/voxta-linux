@@ -1,8 +1,6 @@
 ﻿using ChatMate.Abstractions.Model;
-using ChatMate.Services.NovelAI;
-using ChatMate.Services.OpenAI;
 
-namespace ChatMate.Server.Samples;
+namespace ChatMate.Characters.Samples;
 
 public static class Melly
 {
@@ -37,11 +35,11 @@ public static class Melly
         {
             TextGen = new()
             {
-                Service = OpenAIConstants.ServiceName,
+                Service = "OpenAI",
             },
             SpeechGen = new()
             {
-                Service = NovelAIConstants.ServiceName,
+                Service = "NovelAI",
                 Voice = "Naia"
             }
         },

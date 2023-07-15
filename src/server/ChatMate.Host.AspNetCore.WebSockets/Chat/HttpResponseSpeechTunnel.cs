@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Network;
+using Microsoft.AspNetCore.Http;
 
-namespace ChatMate.Server.Chat;
+namespace ChatMate.Host.AspNetCore.WebSockets;
 
 public class HttpResponseSpeechTunnel : ISpeechTunnel
 {

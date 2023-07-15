@@ -2,8 +2,8 @@
 using ChatMate.Abstractions.Model;
 using ChatMate.Abstractions.Repositories;
 using ChatMate.Abstractions.Services;
+using ChatMate.Characters;
 using ChatMate.Common;
-using ChatMate.Server.Utils;
 using ChatMate.Server.ViewModels;
 using ChatMate.Services.KoboldAI;
 using ChatMate.Services.ElevenLabs;
@@ -13,7 +13,7 @@ using ChatMate.Services.Oobabooga;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers.Pages;
+namespace ChatMate.Server.Controllers;
 
 [Controller]
 public class CharactersController : Controller

@@ -2,7 +2,7 @@
 using ChatMate.Abstractions.Management;
 using Timer = System.Threading.Timer;
 
-namespace ChatMate.Server.Chat
+namespace ChatMate.Server.BackgroundServices
 {
     public class TemporaryFileCleanupService : BackgroundService, ITemporaryFileCleanup
     {

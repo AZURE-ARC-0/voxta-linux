@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers.Pages;
+namespace ChatMate.Server.Controllers;
 
 [Controller]
 public class ChatController : Controller

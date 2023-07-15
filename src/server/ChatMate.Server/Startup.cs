@@ -1,71 +1,22 @@
-﻿using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Management;
-using ChatMate.Abstractions.Model;
-using ChatMate.Data.LiteDB;
-using ChatMate.Data.Yaml;
-using ChatMate.Server.Chat;
+﻿using ChatMate.Abstractions.Management;
+using ChatMate.Host.AspNetCore.WebSockets;
+using ChatMate.Server.BackgroundServices;
 using ChatMate.Server.Filters;
-using Microsoft.AspNetCore.WebSockets;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
 namespace ChatMate.Server;
 
 public class Startup
 {
-    private readonly IConfiguration _configuration;
-
-    public Startup(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllersWithViews();
-        services.AddWebSockets(_ => { });
-        
-        services.AddHttpClient();
-        services.AddNAudio();
-        services.AddChatMate();
-        services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
+        services.AddControllersWithViews().PartManager.ApplicationParts.Add(new AssemblyPart(typeof(WebSocketsController).Assembly));
+        services.AddChatMateServer();
+
+        #warning Cleanup to allow using outside
         services.AddSingleton<TemporaryFileCleanupService>();
         services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
         services.AddHostedService(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
-        
-        services.AddOptions<ProfileSettings>()
-            .Bind(_configuration.GetSection("ChatMate.Profile"))
-            .ValidateDataAnnotations();
-        services.AddLiteDBRepositories();
-
-        var speechToTextRegistry = services.AddSpeechToTextRegistry();
-        var textGenRegistry = services.AddTextGenRegistry();
-        var textToSpeechRegistry = services.AddTextToSpeechRegistry();
-        var actionInferenceRegistry = services.AddActionInferenceRegistry();
-
-        services.AddFakes();
-        textGenRegistry.RegisterFakes();
-        textToSpeechRegistry.RegisterFakes();
-        actionInferenceRegistry.RegisterFakes();
-        
-        services.AddOpenAI();
-        textGenRegistry.RegisterOpenAI();
-        actionInferenceRegistry.RegisterOpenAI();
-
-        services.AddNovelAI();
-        textGenRegistry.RegisterNovelAI();
-        textToSpeechRegistry.RegisterNovelAI();
-        
-        services.AddKoboldAI();
-        textGenRegistry.RegisterKoboldAI();
-        
-        services.AddOobabooga();
-        textGenRegistry.RegisterOobabooga();
-        actionInferenceRegistry.RegisterOobabooga();
-        
-        services.AddElevenLabs();
-        textToSpeechRegistry.RegisterElevenLabs();
-
-        services.AddVosk();
-        speechToTextRegistry.RegisterVosk();
         
         services.AddTransient<IStartupFilter, AutoRequestServicesStartupFilter>();
     }

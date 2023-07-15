@@ -13,7 +13,7 @@ using ChatMate.Services.Oobabooga;
 using ChatMate.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers.Pages;
+namespace ChatMate.Server.Controllers;
 
 [Controller]
 public class DiagnosticsController : Controller
