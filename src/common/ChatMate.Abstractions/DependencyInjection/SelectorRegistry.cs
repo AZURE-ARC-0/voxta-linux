@@ -26,7 +26,6 @@ public interface IServiceFactory<TInterface> where TInterface : class
 
 public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInterface : class, IService
 {
-    private readonly Dictionary<string, TInterface> _instances = new();
     private readonly ServiceRegistry<TInterface> _registry;
     private readonly IServiceProvider _sp;
 
@@ -38,14 +37,10 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
 
     public async Task<TInterface> CreateAsync(string key, CancellationToken cancellationToken)
     {
-        if (_instances.TryGetValue(key, out var instance))
-            return instance;
-        
         if (!_registry.Types.TryGetValue(key, out var type))
             throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {key}");
         
-        instance = (TInterface)_sp.GetRequiredService(type);
-        _instances.Add(key, instance);
+        var instance = (TInterface)_sp.GetRequiredService(type);
         await instance.InitializeAsync(cancellationToken);
         
         return instance;

@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddOobabooga(this IServiceCollection services)
     {
-        services.AddScoped<OobaboogaTextGenClient>();
+        services.AddTransient<OobaboogaTextGenClient>();
     }
     
     public static void RegisterOobabooga(this IServiceRegistry<ITextGenService> registry)

@@ -20,28 +20,28 @@ public static class ServiceCollectionExtensions
     public static ServiceRegistry<ISpeechToTextService> AddSpeechToTextRegistry(this IServiceCollection services)
     {
         var registry = new ServiceRegistry<ISpeechToTextService>();
-        services.AddScoped<IServiceFactory<ISpeechToTextService>>(sp => new ServiceFactory<ISpeechToTextService>(registry, sp));
+        services.AddTransient<IServiceFactory<ISpeechToTextService>>(sp => new ServiceFactory<ISpeechToTextService>(registry, sp));
         return registry;
     }
 
     public static ServiceRegistry<ITextGenService> AddTextGenRegistry(this IServiceCollection services)
     {
         var registry = new ServiceRegistry<ITextGenService>();
-        services.AddScoped<IServiceFactory<ITextGenService>>(sp => new ServiceFactory<ITextGenService>(registry, sp));
+        services.AddTransient<IServiceFactory<ITextGenService>>(sp => new ServiceFactory<ITextGenService>(registry, sp));
         return registry;
     }
     
     public static ServiceRegistry<ITextToSpeechService> AddTextToSpeechRegistry(this IServiceCollection services)
     {
         var registry = new ServiceRegistry<ITextToSpeechService>();
-        services.AddScoped<IServiceFactory<ITextToSpeechService>>(sp => new ServiceFactory<ITextToSpeechService>(registry, sp));
+        services.AddTransient<IServiceFactory<ITextToSpeechService>>(sp => new ServiceFactory<ITextToSpeechService>(registry, sp));
         return registry;
     }
     
     public static ServiceRegistry<IActionInferenceService> AddActionInferenceRegistry(this IServiceCollection services)
     {
         var registry = new ServiceRegistry<IActionInferenceService>();
-        services.AddScoped<IServiceFactory<IActionInferenceService>>(sp => new ServiceFactory<IActionInferenceService>(registry, sp));
+        services.AddTransient<IServiceFactory<IActionInferenceService>>(sp => new ServiceFactory<IActionInferenceService>(registry, sp));
         return registry;
     }
 }

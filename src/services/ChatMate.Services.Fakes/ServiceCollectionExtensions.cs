@@ -8,8 +8,8 @@ public static class ServiceCollectionExtensions
 {
     public static void AddFakes(this IServiceCollection services)
     {
-        services.AddScoped<FakesTextGenClient>();
-        services.AddScoped<FakesTextToSpeechClient>();
+        services.AddTransient<FakesTextGenClient>();
+        services.AddTransient<FakesTextToSpeechClient>();
     }
     
     public static void RegisterFakes(this IServiceRegistry<ITextGenService> registry)

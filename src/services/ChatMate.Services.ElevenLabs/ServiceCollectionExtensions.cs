@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddElevenLabs(this IServiceCollection services)
     {
-        services.AddScoped<ElevenLabsTextToSpeechClient>();
+        services.AddTransient<ElevenLabsTextToSpeechClient>();
     }
     
     public static void RegisterElevenLabs(this IServiceRegistry<ITextToSpeechService> registry)

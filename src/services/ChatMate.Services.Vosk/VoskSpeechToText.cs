@@ -1,12 +1,11 @@
 ﻿using System.Text.Json;
 using ChatMate.Abstractions.Services;
 using ChatMate.Services.Vosk.Model;
-using NAudio.Wave;
 using Vosk;
 
 namespace ChatMate.Services.Vosk;
 
-public class VoskSpeechToText : ISpeechToTextService
+public sealed class VoskSpeechToText : ISpeechToTextService
 {
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
     
@@ -16,45 +15,45 @@ public class VoskSpeechToText : ISpeechToTextService
     };
     
     private readonly IVoskModelDownloader _modelDownloader;
+    private readonly IRecordingService _recordingService;
     private const int SampleRate = 16000;
     
     private VoskRecognizer? _recognizer;
-    private WaveInEvent? _waveIn;
-    private bool _recording;
-    private bool _speaking;
     private bool _disposed;
+    private bool _initialized;
     
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionFinished;
 
-    public VoskSpeechToText(IVoskModelDownloader modelDownloader)
+    public VoskSpeechToText(IVoskModelDownloader modelDownloader, IRecordingService recordingService)
     {
         _modelDownloader = modelDownloader;
+        _recordingService = recordingService;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
+        if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
+        if (_initialized) return;
+        _initialized = true;
         await Semaphore.WaitAsync(cancellationToken);
+        if (_disposed) return;
         var model = await _modelDownloader.AcquireModelAsync(cancellationToken);
         global::Vosk.Vosk.SetLogLevel(-1);
         _recognizer = new VoskRecognizer(model, SampleRate);
         _recognizer.SetWords(true);
-        _waveIn = new WaveInEvent();
-        _waveIn.WaveFormat = new WaveFormat(SampleRate, 1);
-        #warning Add perf measure for this too... somehow
-        _waveIn.DataAvailable += (_, e) =>
+        _recordingService.DataAvailable += (_, e) =>
         {
             if (_disposed) return;
-            if (e.BytesRecorded <= 0) return;
             if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
             {
-                _speaking = false;
                 var result = _recognizer.Result();
                 var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
                 if (json?.Result == null || string.IsNullOrEmpty(json.Text)) return;
                 if (json.Result is [{ Conf: < 0.9 }]) return;
                 SpeechRecognitionFinished?.Invoke(this, json.Text);
             }
+            #if(VOSK_PARTIAL)
             else
             {
                 var result = _recognizer.PartialResult();
@@ -64,29 +63,25 @@ public class VoskSpeechToText : ISpeechToTextService
                 _speaking = true;
                 SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
             }
+            #endif
         };
     }
     
     public void StartMicrophoneTranscription()
     {
-        if (_recording) return;
-        _recording = true;
-        _waveIn?.StartRecording();
+        _recordingService.StartRecording();
     }
     
     public void StopMicrophoneTranscription()
     {
-        if (!_recording) return;
-        _recording = false;
-        _waveIn?.StopRecording();
+        _recordingService.StopRecording();
     }
     
     public void Dispose()
     {
         _disposed = true;
-        StopMicrophoneTranscription();
+        _recordingService.StopRecording();
         _recognizer?.Dispose();
-        _waveIn?.Dispose();
-        Semaphore.Release();
+        if (_initialized) Semaphore.Release();
     }
 }

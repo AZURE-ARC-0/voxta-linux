@@ -8,8 +8,8 @@ public static class ServiceCollectionExtensions
 {
     public static void AddNovelAI(this IServiceCollection services)
     {
-        services.AddScoped<NovelAITextGenClient>();
-        services.AddScoped<NovelAITextToSpeechClient>();
+        services.AddTransient<NovelAITextGenClient>();
+        services.AddTransient<NovelAITextToSpeechClient>();
     }
     
     public static void RegisterNovelAI(this IServiceRegistry<ITextGenService> registry)

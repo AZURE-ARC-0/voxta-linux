@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddKoboldAI(this IServiceCollection services)
     {
-        services.AddScoped<KoboldAITextGenClient>();
+        services.AddTransient<KoboldAITextGenClient>();
     }
     
     public static void RegisterKoboldAI(this IServiceRegistry<ITextGenService> registry)
