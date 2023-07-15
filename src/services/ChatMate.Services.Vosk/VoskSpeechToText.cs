@@ -50,7 +50,9 @@ public sealed class VoskSpeechToText : ISpeechToTextService
                 var result = _recognizer.Result();
                 var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
                 if (json?.Result == null || string.IsNullOrEmpty(json.Text)) return;
-                if (json.Result is [{ Conf: < 0.9 }]) return;
+                if (json.Result is [{ Conf: < 0.99 }]) return;
+                #warning This might change for different languages
+                if (json.Result.Length == 1 && json.Text is "the" or "huh") return;
                 SpeechRecognitionFinished?.Invoke(this, json.Text);
             }
             #if(VOSK_PARTIAL)
