@@ -101,7 +101,7 @@ namespace ChatMate.Server.Tests
 
             result = await _wsConnection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             Assert.That(result.CloseStatus, Is.Null, result.CloseStatusDescription);
-            var animation = (ServerAnimationMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
+            var animation = (ServerActionMessage?)JsonSerializer.Deserialize<ServerMessage>(buffer.AsMemory(0, result.Count).Span, _serializerOptions);
             Assert.Multiple(() =>
             {
                 Assert.That(animation, Is.Not.Null);            

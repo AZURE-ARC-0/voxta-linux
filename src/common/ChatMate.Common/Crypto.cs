@@ -24,4 +24,10 @@ public static class Crypto
         byte[] decryptedBytes = ProtectedData.Unprotect(encryptedBytes, null, DataProtectionScope.CurrentUser);
         return System.Text.Encoding.UTF8.GetString(decryptedBytes);
     }
+
+    public static string CreateSha1Hash(string value)
+    {
+        var hash = SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(value));
+        return Convert.ToBase64String(hash);
+    }
 }

@@ -49,7 +49,8 @@
 <script type="module">
     import { createSignal, onMount, onCleanup, For, Switch, Match } from "https://cdn.skypack.dev/solid-js";
     import { render } from "https://cdn.skypack.dev/solid-js/web";
-    import html from "https://cdn.skypack.dev/solid-js/html";
+    import html from "https://cdn.skypack.dev/solid-js/html"; 
+    import {ChatMateClient} from "/scripts/chatmate-client.js";
     
     let currentAudio;
     
@@ -224,104 +225,66 @@
             }
         }
         
-        const onEvent = (event) => {
-            console.log('ws', event.data)
-            const data = JSON.parse(event.data);
-            switch(data.$type){
-                case 'reply':
-                    addMessage({ user: 'bot', text: data.text });
-                    break;
-                case 'speech':
-                    playAudio(
-                        data.url,
-                         (duration) => socket.send(JSON.stringify({ $type: "speechPlaybackStart", duration: duration })),
-                         () => socket.send(JSON.stringify({ $type: "speechPlaybackComplete" }))
-                     );
-                    break;
-                case 'speechRecognitionStart':
-                    if (currentAudio) currentAudio.pause();
-                    break;
-                case 'speechRecognitionEnd':
-                    onSend(data.text);
-                    break;
-                case 'error':
-                    addMessage({ user: 'error', text: data.message });
-                    break;
-                case 'animation':
-                    setAnimation(data.value);
-                    break;
-                case 'ready':
-                    thinkingSpeechUrls = data.thinkingSpeechUrls || [];
-                    setReady(true);
-                    break;
-                case 'welcome':
-                    setCharactersList(data.characters);
-                    break;
-                case 'characterLoaded':
-                    onCharacterLoaded(data);
-                    break;
-                default:
-                    console.error('unknown message type', data)
-            }
-        };
-    
-        const wsUrl = 'ws://127.0.0.1:5384/ws';
-        let socket;
+        const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
         
-        const connect = () => {
-            socket = new WebSocket(wsUrl);
-    
-            socket.onmessage = onEvent;
-            
-            socket.onopen = function(event) {
-                setMessages([]);
-                notify('success', 'Connected to the server.');
-            };
-            
-            socket.onclose = function(event) {
-                notify('danger', 'Connection lost. Reconnecting...');
-                 setTimeout(function() {
-                    connect();
-                }, 5000);
-            };
         
-            socket.onerror = function(error) {
-                notify('danger', 'A socket error occurred: ' + error.message);
-            };
-        };
-    
+        chatMateClient.addEventListener('onopen', (evt) => {
+            setMessages([]);
+            notify('success', 'Connected to the server.');
+        });
+        chatMateClient.addEventListener('onclose', (evt) => {
+            notify('danger', 'Connection lost. Reconnecting...');
+        });
+        chatMateClient.addEventListener('onerror', (evt) => {
+            notify('danger', 'A socket error occurred: ' + evt.error.message)
+        });
+            
+        chatMateClient.addEventListener('welcome', (evt) => {
+            console.log(evt);
+            setCharactersList(evt.detail.characters);
+        });
+        chatMateClient.addEventListener('characterLoaded', (evt) => {
+            setMessages([]);
+            chatMateClient.startChat(evt.detail.character);
+        });
+        chatMateClient.addEventListener('ready', (evt) => {
+            thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
+            setReady(true);
+        });
+        chatMateClient.addEventListener('reply', (evt) => {
+            addMessage({ user: 'bot', text: evt.detail.text });
+        });
+        chatMateClient.addEventListener('speech', (evt) => {
+            playAudio(
+                evt.detail.url,
+                 (duration) => chatMateClient.speechPlaybackStart(duration),
+                 () => chatMateClient.speechPlaybackComplete()
+             );
+        });
+        chatMateClient.addEventListener('action', (evt) => {
+            setAnimation(evt.detail.value);
+        });
+        chatMateClient.addEventListener('speechRecognitionStart', (evt) => {
+            if (currentAudio) currentAudio.pause();
+        });
+        chatMateClient.addEventListener('speechRecognitionEnd', (evt) => {
+            onSend(evt.detail.text);
+        });
+        chatMateClient.addEventListener('error', (evt) => {
+            addMessage({ user: 'error', text: evt.detail.message });
+        });
+                    
         onMount(() => {
-            connect();
+            chatMateClient.connect();
         });
         
         function onCharacterSelect(characterId) {
             setMessages([]);
-            const msg = JSON.stringify({
-                $type: "loadCharacter",
-                characterId
-            });
-            socket.send(msg);
-        }
-        
-        function onCharacterLoaded(template) {
-            setMessages([]);
-            const msg = JSON.stringify({
-                ...template, 
-                $type: "startChat",
-                useServerSpeechRecognition: useServerSpeechRecognition(),
-                acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
-            });
-            socket.send(msg);
+            chatMateClient.loadCharacter(characterId);
         }
     
         function onSend(content) {
-            const msg = JSON.stringify({
-              $type: "send",
-              text: content,
-              context: "Chatting with speech and no webcam.",
-              actions: ['idle', 'smile', 'frown', 'angry', 'sad', 'surprised', 'thinking']
-            });
-            socket.send(msg);
+            chatMateClient.send(content);
             setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
             playThinkingSpeech();
         }

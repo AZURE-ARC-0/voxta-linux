@@ -5,9 +5,9 @@ namespace ChatMate.Core;
 
 public partial class ChatSession
 {
-    private async Task SendReplyWithSpeechAsync(ChatMessageData reply, string prefix, CancellationToken cancellationToken)
+    private async Task SendReplyWithSpeechAsync(ChatMessageData reply, string speechId, CancellationToken cancellationToken)
     {
-        var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(reply.Text, $"{prefix}_{_chatSessionData.ChatId.ToString()}_{reply.Id}", false, cancellationToken), cancellationToken);
+        var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(reply.Text, speechId, false, cancellationToken), cancellationToken);
 
         await _tunnel.SendAsync(new ServerReplyMessage
         {
@@ -33,7 +33,7 @@ public partial class ChatSession
                 animation = _chatSessionData.Actions.MinBy(x => incorrect.GetLevenshteinDistance(x)) ?? "idle";
             }
             _logger.LogInformation("Selected animation: {Animation}", animation);
-            await _tunnel.SendAsync(new ServerAnimationMessage { Value = animation }, cancellationToken);
+            await _tunnel.SendAsync(new ServerActionMessage { Value = animation }, cancellationToken);
         }
     }
 }

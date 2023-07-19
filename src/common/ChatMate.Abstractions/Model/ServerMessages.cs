@@ -10,7 +10,7 @@ namespace ChatMate.Abstractions.Model;
 [JsonDerivedType(typeof(ServerSpeechRecognitionStartMessage), typeDiscriminator: "speechRecognitionStart")]
 [JsonDerivedType(typeof(ServerSpeechRecognitionEndMessage), typeDiscriminator: "speechRecognitionEnd")]
 [JsonDerivedType(typeof(ServerSpeechMessage), typeDiscriminator: "speech")]
-[JsonDerivedType(typeof(ServerAnimationMessage), typeDiscriminator: "animation")]
+[JsonDerivedType(typeof(ServerActionMessage), typeDiscriminator: "action")]
 [JsonDerivedType(typeof(ServerErrorMessage), typeDiscriminator: "error")]
 public abstract class ServerMessage
 {
@@ -81,7 +81,7 @@ public class ServerSpeechMessage : ServerMessage
 }
 
 [Serializable]
-public class ServerAnimationMessage : ServerMessage
+public class ServerActionMessage : ServerMessage
 {
     public required string Value { get; set; }
 }

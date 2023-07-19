@@ -86,8 +86,9 @@ public partial class ChatSession
             
             // TODO: Save into some storage
             _chatSessionData.Messages.Add(reply);
-            
-            await SendReplyWithSpeechAsync(reply, "speech", queueCancellationToken);
+
+            var speechId = $"speech_{_chatSessionData.ChatId.ToString()}_{reply.Id}";
+            await SendReplyWithSpeechAsync(reply, speechId, queueCancellationToken);
         }
         finally
         {
