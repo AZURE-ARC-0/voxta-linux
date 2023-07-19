@@ -44,24 +44,20 @@
     </style>
 }
 
+<canvas id="audioVisualizer"></canvas>
 <div id="app" class="flex-grow-1"></div>
 
 <script type="module">
     import { createSignal, onMount, onCleanup, For, Switch, Match } from "https://cdn.skypack.dev/solid-js";
     import { render } from "https://cdn.skypack.dev/solid-js/web";
     import html from "https://cdn.skypack.dev/solid-js/html"; 
-    import {ChatMateClient} from "/scripts/chatmate-client.js";
+    import {ChatMateClient} from "/scripts/chatmate-client.js"; 
+    import {AudioVisualizer} from "/scripts/audio-visualizer.js";
     
-    let currentAudio;
+    const audioVisualizer = new AudioVisualizer(document.getElementById('audioVisualizer'));
     
     const playAudio = (url, onStart, onComplete) => {
-        if (currentAudio) {
-            currentAudio.pause();
-        }
-        currentAudio = new Audio(url);
-        if (onStart) currentAudio.addEventListener('playing', () => onStart(currentAudio.duration));
-        if (onComplete) currentAudio.addEventListener('ended', onComplete);
-        currentAudio.play();
+        audioVisualizer.play(url,  onStart, onComplete);
     }
     
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
