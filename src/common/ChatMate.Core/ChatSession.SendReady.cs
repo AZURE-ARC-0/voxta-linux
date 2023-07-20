@@ -18,7 +18,8 @@ public partial class ChatSession
         {
             foreach (var thinkingSpeech in _chatSessionData.ThinkingSpeech)
             {
-                var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, $"think_{Crypto.CreateCryptographicallySecureGuid()}", true, cancellationToken);
+                var thinkingSpeechId = Crypto.CreateSha1Hash($"{_chatSessionData.TtsVoice}::{thinkingSpeech}");
+                var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, thinkingSpeechId, true, cancellationToken);
                 if (thinkingSpeechUrl != null)
                     thinkingSpeechUrls.Add(thinkingSpeechUrl);
             }
@@ -44,8 +45,23 @@ public partial class ChatSession
             _chatSessionData.Messages.Add(reply);
             _logger.LogInformation("Sending first message: {Message}", reply.Text);
             // generate sha1 hash from text and voice name to avoid duplicate speech generation
-            var hash = Crypto.CreateSha1Hash($"{_chatSessionData.TtsVoice}::{reply.Text}");
-            await SendReplyWithSpeechAsync(reply, $"greet_{hash}", cancellationToken);
+            var speechId = Crypto.CreateSha1Hash($"{_chatSessionData.TtsVoice}::{reply.Text}");
+            var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(reply.Text, speechId, true, cancellationToken), cancellationToken);
+
+            await _tunnel.SendAsync(new ServerReplyMessage
+            {
+                Text = reply.Text,
+            }, cancellationToken);
+
+            var speechUrl = await speechTask;
+            if (speechUrl != null)
+            {
+                if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StopMicrophoneTranscription();
+                await _tunnel.SendAsync(new ServerSpeechMessage
+                {
+                    Url = speechUrl,
+                }, cancellationToken);
+            }
         }
     }
 }

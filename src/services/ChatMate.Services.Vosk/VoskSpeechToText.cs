@@ -45,7 +45,18 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         _recordingService.DataAvailable += (_, e) =>
         {
             if (_disposed) return;
-            if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
+            bool accepted;
+            try
+            {
+                accepted = _recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded);
+            }
+            catch (AccessViolationException)
+            {
+                #warning Log
+                return;
+            }
+
+            if (accepted)
             {
                 var result = _recognizer.Result();
                 var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);

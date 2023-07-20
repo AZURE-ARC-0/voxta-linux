@@ -5,7 +5,7 @@ namespace ChatMate.Core;
 
 public partial class ChatSession
 {
-    private async Task SendReplyWithSpeechAsync(ChatMessageData reply, string speechId, CancellationToken cancellationToken)
+    private async Task SendReplyWithSpeechAsync(TextData reply, string speechId, CancellationToken cancellationToken)
     {
         var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(reply.Text, speechId, false, cancellationToken), cancellationToken);
 

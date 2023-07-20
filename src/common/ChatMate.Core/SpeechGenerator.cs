@@ -69,7 +69,8 @@ public class LocalSpeechGenerator : ISpeechGenerator
         var speechUrl = Path.Combine(_audioPath, $"{id}.{AudioData.GetExtension(_audioConverter.ContentType)}");
         var speechTunnel = new ConversionSpeechTunnel(new FileSpeechTunnel(speechUrl), _audioConverter);
         if (File.Exists(speechUrl)) return speechUrl;
-        _temporaryFileCleanup.MarkForDeletion(speechUrl, reusable);
+        if (!reusable)
+            _temporaryFileCleanup.MarkForDeletion(speechUrl, false);
         await _textToSpeechService.GenerateSpeechAsync(new SpeechRequest
             {
                 Service = _textToSpeechService.ServiceName,

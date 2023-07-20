@@ -7,7 +7,7 @@ using ChatMate.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Host.AspNetCore.WebSockets;
+namespace ChatMate.Host.AspNetCore.WebSockets.Controllers;
 
 [ApiController]
 public class SpeechController : ControllerBase
@@ -33,10 +33,24 @@ public class SpeechController : ControllerBase
 
         var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, cancellationToken);
         audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
-        var speechTunnel = new ConversionSpeechTunnel(new HttpResponseSpeechTunnel(Response), audioConverter);
-        await textToSpeech.GenerateSpeechAsync(speechRequest, speechTunnel, cancellationToken);
+        if (speechRequest.Reusable)
+        {
+            // Get the local low user directory
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var file = Path.Combine(path, $"{id}.{AudioData.GetExtension(audioConverter.ContentType)}");
+            if (!System.IO.File.Exists(file))
+            {
+                var fileTunnel = new ConversionSpeechTunnel(new FileSpeechTunnel(file), audioConverter);
+                await textToSpeech.GenerateSpeechAsync(speechRequest, fileTunnel, cancellationToken);
+            }
+            await Response.SendFileAsync(file, cancellationToken: cancellationToken);
+        }
+        else
+        {
+            ISpeechTunnel speechTunnel = new ConversionSpeechTunnel(new HttpResponseSpeechTunnel(Response), audioConverter);
+            await textToSpeech.GenerateSpeechAsync(speechRequest, speechTunnel, cancellationToken);
+        }
     }
-    
 
     [HttpGet("/tts/services/{service}/voices")]
     public async Task<VoiceInfo[]> GetSpeech(
