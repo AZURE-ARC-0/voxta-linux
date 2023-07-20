@@ -102,12 +102,12 @@
         this.socket.send(msg);
     }
 
-    send(content) {
+    send(text, context, actions) {
         const msg = JSON.stringify({
             $type: "send",
-            text: content,
-            context: "Chatting with speech and no webcam.",
-            actions: ['idle', 'smile', 'frown', 'angry', 'sad', 'surprised', 'thinking']
+            text: text,
+            context: context,
+            actions: actions
         });
         this.socket.send(msg);
     }
