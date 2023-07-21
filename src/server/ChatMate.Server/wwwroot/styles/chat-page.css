@@ -35,11 +35,31 @@ canvas {
     color: white;
     font-size: 20px;
     font-family: sans-serif;
-    margin-top: 20%;
+    bottom: 20%;
     max-width: 70%;
     text-align: center;
     opacity: 0;
     transition: 0.5s;
+}
+
+.prompt-box {
+    position: fixed;
+    bottom: 20px;
+    width: 70%;
+    z-index: 4;
+}
+
+.prompt-box input {
+    border-radius: 10px;
+    width: 100%;
+    background-color: #2a2b2e;
+    border: 1px solid #2a2b2e;
+    color: #959dad;
+    text-align: center;
+}
+
+.prompt-box:disabled {
+    background-color: #151517;
 }
 
 #notification {

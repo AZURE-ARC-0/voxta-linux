@@ -6,7 +6,9 @@ const canvas = document.getElementById('audioVisualizer');
 const audioVisualizer = new AudioVisualizer(canvas);
 const characterButtons = document.getElementById('characterButtons');
 const messageBox = document.getElementById('message');
+const prompt = document.getElementById('prompt');
 const notifications = new Notifications(document.getElementById('notification'));
+const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
 
 let thinkingSpeechUrls = [];
 const playThinkingSpeech = () => {
@@ -18,7 +20,16 @@ const playThinkingSpeech = () => {
     }
 }
 
-const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
+const sendMessage = (text) => {
+    playThinkingSpeech();
+    audioVisualizer.think();
+    prompt.disabled = true;
+    chatMateClient.send(
+        text,
+        "Chatting with speech and no webcam.",
+        ['happy', 'sad', 'angry', 'confused']
+    );
+}
 
 chatMateClient.addEventListener('onopen', (evt) => {
     notifications.notify('Connected', 'success');
@@ -66,6 +77,7 @@ chatMateClient.addEventListener('ready', (evt) => {
 chatMateClient.addEventListener('reply', (evt) => {
     messageBox.style.opacity = '1';
     messageBox.innerText = evt.detail.text;
+    prompt.disabled = false;
 });
 chatMateClient.addEventListener('speech', (evt) => {
     audioVisualizer.play(
@@ -82,20 +94,25 @@ chatMateClient.addEventListener('speechRecognitionStart', (evt) => {
     audioVisualizer.listen();
 });
 chatMateClient.addEventListener('speechRecognitionPartial', (evt) => {
-    messageBox.innerText = evt.detail.text;
+    prompt.value = evt.detail.text;
 });
 chatMateClient.addEventListener('speechRecognitionEnd', (evt) => {
-    playThinkingSpeech();
-    messageBox.innerText = evt.detail.text;
-    audioVisualizer.think();
-    chatMateClient.send(
-        evt.detail.text,
-        "Chatting with speech and no webcam.",
-        ['happy', 'sad', 'angry', 'confused']
-    );
+    sendMessage(evt.detail.text);
+    prompt.value = evt.detail.text;
+    prompt.disabled = true;
 });
 chatMateClient.addEventListener('error', (evt) => {
     notifications.notify('Server error: ' + evt.detail.message, 'danger');
 });
 
 chatMateClient.connect();
+
+prompt.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Enter') {
+        evt.preventDefault();
+        if(!prompt.disabled) {
+            sendMessage(prompt.value);
+            prompt.value = '';
+        }
+    }
+});

@@ -78,8 +78,9 @@
         }
         fetch(url)
             .then(response => response.arrayBuffer())
-            .then(buffer => this.audioContext.decodeAudioData(buffer))
+            .then(buffer => this.audioContext.decodeAudioData(buffer), error => this.handleError(error))
             .then(audioBuffer => {
+                if(!audioBuffer) return;
                 const source = this.audioContext.createBufferSource();
                 source.buffer = audioBuffer;
                 source.connect(this.analyser);
@@ -91,7 +92,7 @@
                     if(onComplete) onComplete();
                 };
                 source.start(0);
-            });
+            }, error => this.handleError(error));
     }
 
     drawFrame() {
@@ -178,5 +179,10 @@
         if(this.active) return;
         this.active = true;
         this.drawFrame();
+    }
+    
+    handleError(error) {
+        console.error(error);
+        this.idle();
     }
 }
