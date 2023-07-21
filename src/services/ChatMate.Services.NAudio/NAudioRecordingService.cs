@@ -5,11 +5,11 @@ namespace ChatMate.Services.NAudio;
 
 public class NAudioRecordingService : IRecordingService
 {
+    private const int SampleRate = 16000;
+    
     private readonly WaveInEvent _waveIn;
     private bool _recording;
     private bool _disposed;
-
-    private const int SampleRate = 16000;
 
     public event EventHandler<RecordingDataEventArgs>? DataAvailable;
 

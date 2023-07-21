@@ -223,7 +223,6 @@
         
         const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
         
-        
         chatMateClient.addEventListener('onopen', (evt) => {
             setMessages([]);
             notify('success', 'Connected to the server.');
@@ -259,11 +258,15 @@
         });
         chatMateClient.addEventListener('action', (evt) => {
             setAnimation(evt.detail.value);
+            onAction(evt.detail.value);
         });
         chatMateClient.addEventListener('speechRecognitionStart', (evt) => {
-            if (currentAudio) currentAudio.pause();
+            audioVisualizer.pause();
+            audioVisualizer.listen();
         });
         chatMateClient.addEventListener('speechRecognitionEnd', (evt) => {
+            audioVisualizer.think();
+            chatMateClient.send(evt.detail.text);
             onSend(evt.detail.text);
         });
         chatMateClient.addEventListener('error', (evt) => {
@@ -280,9 +283,24 @@
         }
     
         function onSend(content) {
-            chatMateClient.send(content);
+            chatMateClient.send(
+                content,
+                "Chatting with speech and no webcam.",
+                ['happy', 'sad', 'angry', 'confused']
+            );
             setMessages(oldMessages => [...oldMessages, { user: "user", text: content }]);
             playThinkingSpeech();
+        }
+        
+        function onAction(action) {
+            switch (action) {
+                case 'angry':
+                    audioVisualizer.setColor('rgb(180,97,97)');
+                    break;
+                default:
+                    audioVisualizer.idle('rgb(222,215,234)');
+                    break;
+            }
         }
         
         return () => html`
