@@ -9,8 +9,8 @@ public class PartialResult
 [Serializable]
 public class FinalResult
 {
-    public ResultInfo[]? Result { get; init; }
     public required string Text { get; init; }
+    public ResultInfo[]? Result { get; init; }
 }
 
 [Serializable]

@@ -81,6 +81,9 @@ chatMateClient.addEventListener('speechRecognitionStart', (evt) => {
     audioVisualizer.stop();
     audioVisualizer.listen();
 });
+chatMateClient.addEventListener('speechRecognitionPartial', (evt) => {
+    messageBox.innerText = evt.detail.text;
+});
 chatMateClient.addEventListener('speechRecognitionEnd', (evt) => {
     playThinkingSpeech();
     messageBox.innerText = evt.detail.text;

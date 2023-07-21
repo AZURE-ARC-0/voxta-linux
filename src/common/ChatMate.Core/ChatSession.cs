@@ -56,6 +56,7 @@ public sealed partial class ChatSession : IChatSession
         if (speechToText != null)
         {
             speechToText.SpeechRecognitionStarted += OnSpeechRecognitionStarted;
+            speechToText.SpeechRecognitionPartial += OnSpeechRecognitionPartial;
             speechToText.SpeechRecognitionFinished += OnSpeechRecognitionFinished;
         }
 
@@ -82,6 +83,17 @@ public sealed partial class ChatSession : IChatSession
             await _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), ct);
         });
     }
+    
+    private void OnSpeechRecognitionPartial(object? sender, string e)
+    {
+        Enqueue(async ct =>
+        {
+            await _tunnel.SendAsync(new ServerSpeechRecognitionPartialMessage
+            {
+                Text = e
+            }, ct);
+        });
+    }
 
     private void OnSpeechRecognitionFinished(object? sender, string e)
     {
@@ -101,6 +113,7 @@ public sealed partial class ChatSession : IChatSession
         if (_speechToText != null)
         {
             _speechToText.SpeechRecognitionStarted -= OnSpeechRecognitionStarted;
+            _speechToText.SpeechRecognitionPartial -= OnSpeechRecognitionPartial;
             _speechToText.SpeechRecognitionFinished -= OnSpeechRecognitionFinished;
             _speechToText.Dispose();
         }

@@ -8,6 +8,7 @@ namespace ChatMate.Abstractions.Model;
 [JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
 [JsonDerivedType(typeof(ServerSpeechRecognitionStartMessage), typeDiscriminator: "speechRecognitionStart")]
+[JsonDerivedType(typeof(ServerSpeechRecognitionPartialMessage), typeDiscriminator: "speechRecognitionPartial")]
 [JsonDerivedType(typeof(ServerSpeechRecognitionEndMessage), typeDiscriminator: "speechRecognitionEnd")]
 [JsonDerivedType(typeof(ServerSpeechMessage), typeDiscriminator: "speech")]
 [JsonDerivedType(typeof(ServerActionMessage), typeDiscriminator: "action")]
@@ -66,6 +67,12 @@ public class ServerReplyMessage : ServerMessage
 [Serializable]
 public class ServerSpeechRecognitionStartMessage : ServerMessage
 {
+}
+
+[Serializable]
+public class ServerSpeechRecognitionPartialMessage : ServerMessage
+{
+    public required string Text { get; set; }
 }
 
 [Serializable]

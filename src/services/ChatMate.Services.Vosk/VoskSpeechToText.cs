@@ -21,8 +21,10 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
-    
+    private bool _speaking;
+
     public event EventHandler? SpeechRecognitionStarted;
+    public event EventHandler<string>? SpeechRecognitionPartial;
     public event EventHandler<string>? SpeechRecognitionFinished;
 
     public VoskSpeechToText(IVoskModelDownloader modelDownloader, IRecordingService recordingService)
@@ -58,28 +60,37 @@ public sealed class VoskSpeechToText : ISpeechToTextService
 
             if (accepted)
             {
+                _speaking = false;
                 var result = _recognizer.Result();
                 var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
-                if (json?.Result == null || string.IsNullOrEmpty(json.Text)) return;
+                if (json == null || string.IsNullOrEmpty(json.Text)) return; 
+                if (json.Result == null) return;
                 if (json.Result is [{ Conf: < 0.99 }]) return;
-                #warning This might change for different languages
-                if (json.Result.Length == 1 && json.Text is "the" or "huh") return;
+                if (json.Result.Length == 1 && IsNoise(json.Text)) return;
                 SpeechRecognitionFinished?.Invoke(this, json.Text);
             }
-            #if(VOSK_PARTIAL)
             else
             {
                 var result = _recognizer.PartialResult();
                 var json = JsonSerializer.Deserialize<PartialResult>(result, SerializeOptions);
-                if (string.IsNullOrEmpty(json?.Partial)) return;
-                if (_speaking) return;
-                _speaking = true;
-                SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
+                if (json == null || string.IsNullOrEmpty(json.Partial)) return;
+                if (IsNoise(json.Partial)) return;
+                if (!_speaking)
+                {
+                    _speaking = true;
+                    SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
+                }
+                SpeechRecognitionPartial?.Invoke(this, json.Partial);
             }
-            #endif
         };
     }
-    
+
+    private static bool IsNoise(string text)
+    {
+        #warning This might change for different languages
+        return text is "the" or "huh";
+    }
+
     public void StartMicrophoneTranscription()
     {
         _recordingService.StartRecording();
@@ -88,6 +99,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     public void StopMicrophoneTranscription()
     {
         _recordingService.StopRecording();
+        _speaking = false;
     }
     
     public void Dispose()

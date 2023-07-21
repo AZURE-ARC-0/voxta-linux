@@ -64,6 +64,11 @@
             case 'speechRecognitionStart':
                 this.dispatchEvent(new CustomEvent('speechRecognitionStart'));
                 break;
+            case 'speechRecognitionPartial':
+                this.dispatchEvent(new CustomEvent('speechRecognitionPartial', {
+                    detail: {text: data.text}
+                }));
+                break;
             case 'speechRecognitionEnd':
                 this.dispatchEvent(new CustomEvent('speechRecognitionEnd', {
                     detail: {text: data.text}
