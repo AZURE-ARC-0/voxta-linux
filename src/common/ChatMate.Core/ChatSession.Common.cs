@@ -26,14 +26,18 @@ public partial class ChatSession
 
         if (_animationSelection != null && _chatSessionData.Actions is { Length: > 0 })
         {
-            var animation = await _animationSelection.SelectActionAsync(_chatSessionData, cancellationToken);
-            if (!_chatSessionData.Actions.Contains(animation))
+            var action = await _animationSelection.SelectActionAsync(_chatSessionData, cancellationToken);
+            if (!_chatSessionData.Actions.Contains(action))
             {
-                var incorrect = animation;
-                animation = _chatSessionData.Actions.MinBy(x => incorrect.GetLevenshteinDistance(x)) ?? "idle";
+                var incorrect = action;
+                action = _chatSessionData.Actions
+                    .Select(x => (distance: incorrect.GetLevenshteinDistance(x), value: x))
+                    .Where(x => x.distance <= 3)
+                    .MinBy(x => x.distance)
+                    .value ?? "idle";
             }
-            _logger.LogInformation("Selected animation: {Animation}", animation);
-            await _tunnel.SendAsync(new ServerActionMessage { Value = animation }, cancellationToken);
+            _logger.LogInformation("Selected action: {Animation}", action);
+            await _tunnel.SendAsync(new ServerActionMessage { Value = action }, cancellationToken);
         }
     }
 }
