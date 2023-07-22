@@ -34,7 +34,7 @@
         }
     }
     
-    pause() {
+    stop() {
         if (this.currentAudio) {
             this.currentAudio.pause();
             this.currentAudio = null;

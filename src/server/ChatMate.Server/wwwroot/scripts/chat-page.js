@@ -10,8 +10,10 @@ const prompt = document.getElementById('prompt');
 const notifications = new Notifications(document.getElementById('notification'));
 const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
 
+let character = { name: '', enableThinkingSpeech: false };
 let thinkingSpeechUrls = [];
 const playThinkingSpeech = () => {
+    if (!character.enableThinkingSpeech) return;
     if (thinkingSpeechUrls.length) {
         const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
         audioVisualizer.play(audioUrl, () => {
@@ -31,11 +33,22 @@ const sendMessage = (text) => {
     );
 }
 
+const reset  = () => {
+    messageBox.innerText = '';
+    messageBox.style.opacity = '0';
+    prompt.value = '';
+    prompt.disabled = true;
+    prompt.style.opacity = '0';
+    audioVisualizer.idle();
+    canvas.style.opacity = '0';
+}
+
 chatMateClient.addEventListener('onopen', (evt) => {
     notifications.notify('Connected', 'success');
 });
 chatMateClient.addEventListener('onclose', (evt) => {
     notifications.notify('Disconnected', 'danger');
+    reset();
 });
 chatMateClient.addEventListener('onerror', (evt) => {
     notifications.notify('Error: ' + evt.detail.message, 'danger');
@@ -67,12 +80,14 @@ chatMateClient.addEventListener('welcome', (evt) => {
     }, 100);
 });
 chatMateClient.addEventListener('characterLoaded', (evt) => {
+    character = evt.detail.character;
     chatMateClient.startChat(evt.detail.character);
 });
 chatMateClient.addEventListener('ready', (evt) => {
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
     audioVisualizer.idle();
     canvas.style.opacity = '1';
+    prompt.style.opacity = '1';
 });
 chatMateClient.addEventListener('reply', (evt) => {
     messageBox.style.opacity = '1';
