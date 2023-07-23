@@ -48,5 +48,8 @@ public static class ServiceCollectionExtensions
 
         services.AddVosk();
         speechToTextRegistry.RegisterVosk();
+
+        services.AddAzureSpeechService();
+        speechToTextRegistry.RegisterAzureSpeechService();
     }
 }

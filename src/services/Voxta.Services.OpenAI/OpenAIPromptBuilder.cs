@@ -50,6 +50,8 @@ public class OpenAIPromptBuilder
         };
         
         var sb = new StringBuilder();
+        sb.AppendLineLinux("Given the following information, select the most appropriate action.");
+        sb.AppendLineLinux("---");
         sb.AppendLineLinux("Conversation information:");
         sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
         sb.AppendLineLinux("Scenario: " + chatSessionData.Character.Scenario);
@@ -60,8 +62,9 @@ public class OpenAIPromptBuilder
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
-        sb.AppendLineLinux("---"); 
-        sb.AppendLineLinux($"Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}");
+        sb.AppendLineLinux("---");
+        sb.AppendLineLinux("You must select one of the following actions. Only reply with the action. Example: [idle]"); 
+        sb.AppendLineLinux($"Available actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}");
         messages.Add(new OpenAIMessage { role = "user", content = sb.ToString().TrimExcess() });
 
         return messages;

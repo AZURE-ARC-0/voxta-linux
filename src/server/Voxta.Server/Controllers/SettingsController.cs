@@ -26,6 +26,7 @@ public class SettingsController : Controller
         var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
         var oobabooga = await settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken);
         var elevenlabs = await settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
+        var azurespeechservice = await settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
 
         var vm = new SettingsViewModel
@@ -51,6 +52,11 @@ public class SettingsController : Controller
             ElevenLabs = new ElevenLabsSettings
             {
               ApiKey  = string.IsNullOrEmpty(elevenlabs?.ApiKey) ? null : Crypto.DecryptString(elevenlabs.ApiKey),
+            },
+            AzureSpeechService = new AzureSpeechServiceSettings
+            {
+                SubscriptionKey = string.IsNullOrEmpty(azurespeechservice?.SubscriptionKey) ? null : Crypto.DecryptString(azurespeechservice.SubscriptionKey),
+                Region = ""
             },
             Profile = profile ?? new ProfileSettings
             {
@@ -105,6 +111,11 @@ public class SettingsController : Controller
         await settingsRepository.SaveAsync(new ElevenLabsSettings
         {
             ApiKey = string.IsNullOrEmpty(model.ElevenLabs.ApiKey) ? null : Crypto.EncryptString(model.ElevenLabs.ApiKey.Trim('"', ' ')),
+        });
+        await settingsRepository.SaveAsync(new AzureSpeechServiceSettings
+        {
+            SubscriptionKey = string.IsNullOrEmpty(model.AzureSpeechService.SubscriptionKey) ? null : Crypto.EncryptString(model.AzureSpeechService.SubscriptionKey.Trim('"', ' ')),
+            Region = model.AzureSpeechService.Region?.Trim() ?? "",
         });
         await profileRepository.SaveProfileAsync(new ProfileSettings
         {

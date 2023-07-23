@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Host.AspNetCore.WebSo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Characters", "src\common\Voxta.Characters\Voxta.Characters.csproj", "{BDD9D840-C2DE-4E0C-8870-5406516EFD51}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.Azure.SpeechService", "src\services\Voxta.Services.Azure.SpeechService\Voxta.Services.Azure.SpeechService.csproj", "{58DF030C-EB9C-48E3-A1C2-7466D5AEC431}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -170,6 +172,10 @@ Global
 		{BDD9D840-C2DE-4E0C-8870-5406516EFD51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDD9D840-C2DE-4E0C-8870-5406516EFD51}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDD9D840-C2DE-4E0C-8870-5406516EFD51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58DF030C-EB9C-48E3-A1C2-7466D5AEC431}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58DF030C-EB9C-48E3-A1C2-7466D5AEC431}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58DF030C-EB9C-48E3-A1C2-7466D5AEC431}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58DF030C-EB9C-48E3-A1C2-7466D5AEC431}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6A1407C5-B5D2-4651-ADE0-36CAE2C4F66E} = {6AB181C5-92BE-45CB-890F-EF6B60BBA7C0}
@@ -201,5 +207,6 @@ Global
 		{3CEDB705-285B-4ADF-AD98-CEC2831683EA} = {25A82547-1D1F-4416-8782-AEED31D97038}
 		{F90E0F15-EC70-40D6-B906-804F0CCA473D} = {98CA1DD8-3351-4E7F-9D2A-3BECEBEC95C6}
 		{BDD9D840-C2DE-4E0C-8870-5406516EFD51} = {6A1407C5-B5D2-4651-ADE0-36CAE2C4F66E}
+		{58DF030C-EB9C-48E3-A1C2-7466D5AEC431} = {35AF5316-3D66-4671-8BDE-3451123AE7EA}
 	EndGlobalSection
 EndGlobal

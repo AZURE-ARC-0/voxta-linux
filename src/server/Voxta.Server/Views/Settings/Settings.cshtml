@@ -92,6 +92,18 @@
                     <input asp-for="Profile.Services.SpeechToText.Hash" class="form-control" />
                     <span asp-validation-for="Profile.Services.SpeechToText.Hash" class="text-danger"></span>
                 </div>
+                
+                <h3>Azure Speech Service</h3>
+                <div class="form-group">
+                    <label asp-for="AzureSpeechService.SubscriptionKey">Subscription Key</label>
+                    <input asp-for="AzureSpeechService.SubscriptionKey" class="form-control" />
+                    <span asp-validation-for="AzureSpeechService.SubscriptionKey" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AzureSpeechService.Region">Region</label>
+                    <input asp-for="AzureSpeechService.Region" class="form-control" />
+                    <span asp-validation-for="AzureSpeechService.Region" class="text-danger"></span>
+                </div>
             </div>
         </div>
 
@@ -107,6 +119,7 @@
                     <select asp-for="Profile.Services.SpeechToText.Service" class="form-control">
                         <option value="">None</option>
                         <option value="@VoskConstants.ServiceName">Vosk</option>
+                        <option value="@AzureSpeechServiceConstants.ServiceName">Azure Speech Service</option>
                     </select>
                     <span asp-validation-for="Profile.Services.SpeechToText.Service" class="text-danger"></span>
                 </div>

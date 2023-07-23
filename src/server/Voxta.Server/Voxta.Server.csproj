@@ -37,6 +37,7 @@
     <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
     <ProjectReference Include="..\..\common\Voxta.Characters\Voxta.Characters.csproj" />
     <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.Azure.SpeechService\Voxta.Services.Azure.SpeechService.csproj" />
     <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj" />

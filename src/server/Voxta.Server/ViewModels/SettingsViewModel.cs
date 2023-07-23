@@ -14,5 +14,6 @@ public class SettingsViewModel
     public required KoboldAISettings KoboldAI { get; set; }
     public required OobaboogaSettings Oobabooga { get; set; }
     public required ElevenLabsSettings ElevenLabs { get; set; }
+    public required AzureSpeechServiceSettings AzureSpeechService { get; set; }
     public required ProfileSettings Profile { get; set; }
 }
