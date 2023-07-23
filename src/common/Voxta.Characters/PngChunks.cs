@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ChatMate.Characters;
+namespace Voxta.Characters;
 
 public static class PngChunkReader
 {

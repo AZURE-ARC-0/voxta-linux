@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Repositories;
 
-namespace ChatMate.Services.KoboldAI;
+namespace Voxta.Services.KoboldAI;
 
 [Serializable]
 public class KoboldAISettings : SettingsBase

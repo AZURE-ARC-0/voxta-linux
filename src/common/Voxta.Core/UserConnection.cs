@@ -1,9 +1,9 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public sealed class UserConnection : IAsyncDisposable
 {

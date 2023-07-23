@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>ChatMate.Common</RootNamespace>
+        <RootNamespace>Voxta.Common</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

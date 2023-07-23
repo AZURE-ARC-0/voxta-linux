@@ -2,14 +2,14 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Repositories;
-using ChatMate.Abstractions.Services;
-using ChatMate.Common;
-using ChatMate.Services.OpenAI;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
+using Voxta.Common;
+using Voxta.Services.OpenAI;
 
-namespace ChatMate.Services.KoboldAI;
+namespace Voxta.Services.KoboldAI;
 
 public class KoboldAITextGenClient : ITextGenService
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ChatMate.Abstractions.Model;
+namespace Voxta.Abstractions.Model;
 
 [Serializable]
 [JsonDerivedType(typeof(ClientLoadCharacterMessage), typeDiscriminator: "loadCharacter")]

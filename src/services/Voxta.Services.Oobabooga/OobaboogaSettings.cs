@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Repositories;
 
-namespace ChatMate.Services.Oobabooga;
+namespace Voxta.Services.Oobabooga;
 
 [Serializable]
 public class OobaboogaSettings : SettingsBase

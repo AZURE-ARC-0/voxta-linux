@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Repositories;
 
-namespace ChatMate.Services.NovelAI;
+namespace Voxta.Services.NovelAI;
 
 [Serializable]
 public class NovelAISettings : SettingsBase

@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Services;
+﻿using Voxta.Abstractions.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Abstractions.DependencyInjection;
+namespace Voxta.Abstractions.DependencyInjection;
 
 public interface IServiceRegistry<in TInterface> where TInterface : class
 {

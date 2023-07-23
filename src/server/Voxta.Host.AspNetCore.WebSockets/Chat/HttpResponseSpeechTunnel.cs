@@ -1,9 +1,9 @@
 ﻿using System.Net;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
 using Microsoft.AspNetCore.Http;
 
-namespace ChatMate.Host.AspNetCore.WebSockets;
+namespace Voxta.Host.AspNetCore.WebSockets;
 
 public class HttpResponseSpeechTunnel : ISpeechTunnel
 {

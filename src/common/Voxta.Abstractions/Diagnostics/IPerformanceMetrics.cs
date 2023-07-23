@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Abstractions.Diagnostics;
+﻿namespace Voxta.Abstractions.Diagnostics;
 
 public interface IPerformanceMetrics
 {

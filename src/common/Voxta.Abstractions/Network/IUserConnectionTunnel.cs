@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 
-namespace ChatMate.Abstractions.Network;
+namespace Voxta.Abstractions.Network;
 
 public interface IUserConnectionTunnel
 {

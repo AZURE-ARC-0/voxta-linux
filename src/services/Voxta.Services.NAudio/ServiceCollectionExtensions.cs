@@ -1,5 +1,5 @@
-﻿using ChatMate.Abstractions.Services;
-using ChatMate.Services.NAudio;
+﻿using Voxta.Abstractions.Services;
+using Voxta.Services.NAudio;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

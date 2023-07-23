@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.KoboldAI;
+﻿namespace Voxta.Services.KoboldAI;
 
 public static class KoboldAIConstants
 {

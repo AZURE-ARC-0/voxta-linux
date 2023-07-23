@@ -1,19 +1,19 @@
 ﻿using System.Runtime.ExceptionServices;
-using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Repositories;
-using ChatMate.Abstractions.Services;
-using ChatMate.Server.ViewModels;
-using ChatMate.Services.ElevenLabs;
-using ChatMate.Services.KoboldAI;
-using ChatMate.Services.NovelAI;
-using ChatMate.Services.Oobabooga;
-using ChatMate.Services.OpenAI;
+using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
+using Voxta.Server.ViewModels;
+using Voxta.Services.ElevenLabs;
+using Voxta.Services.KoboldAI;
+using Voxta.Services.NovelAI;
+using Voxta.Services.Oobabooga;
+using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers;
+namespace Voxta.Server.Controllers;
 
 [Controller]
 public class DiagnosticsController : Controller
@@ -97,7 +97,7 @@ public class DiagnosticsController : Controller
             {
                 IsReady = true,
                 IsHealthy = !string.IsNullOrEmpty(profile?.Name),
-                Name = "ChatMate Profile",
+                Name = "Voxta Profile",
                 Status = profile?.Name ?? "No profile",
             }
         };

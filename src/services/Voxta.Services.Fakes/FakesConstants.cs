@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.Fakes;
+﻿namespace Voxta.Services.Fakes;
 
 public static class FakesConstants
 {

@@ -3,15 +3,15 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Repositories;
-using ChatMate.Abstractions.Services;
-using ChatMate.Common;
-using ChatMate.Services.OpenAI;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
+using Voxta.Common;
+using Voxta.Services.OpenAI;
 using NAudio.MediaFoundation;
 
-namespace ChatMate.Services.NovelAI;
+namespace Voxta.Services.NovelAI;
 
 public class NovelAITextGenClient : ITextGenService
 {

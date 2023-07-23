@@ -7,7 +7,7 @@
     <PublishIISAssets>false</PublishIISAssets>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
-    <RootNamespace>ChatMate.Server</RootNamespace>
+    <RootNamespace>Voxta.Server</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -40,7 +40,7 @@
     <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
     <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
-    <ProjectReference Include="..\..\services\ChatMate.Services.Fakes\ChatMate.Services.Fakes.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />

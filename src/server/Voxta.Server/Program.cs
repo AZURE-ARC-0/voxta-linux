@@ -1,4 +1,4 @@
-using ChatMate.Server;
+using Voxta.Server;
 using Serilog;
 using Serilog.Events;
 

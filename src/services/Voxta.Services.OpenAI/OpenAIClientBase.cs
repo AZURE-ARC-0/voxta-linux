@@ -3,9 +3,9 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
-using ChatMate.Common;
+using Voxta.Common;
 
-namespace ChatMate.Services.OpenAI;
+namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase
 {

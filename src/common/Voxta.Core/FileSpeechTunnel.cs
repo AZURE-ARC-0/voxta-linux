@@ -1,8 +1,8 @@
 ﻿using System.Runtime.ExceptionServices;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public class FileSpeechTunnel : ISpeechTunnel
 {

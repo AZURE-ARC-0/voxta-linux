@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.NovelAI;
+﻿namespace Voxta.Services.NovelAI;
 
 public class NovelAIException : Exception
 {

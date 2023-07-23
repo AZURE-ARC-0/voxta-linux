@@ -1,13 +1,13 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Services;
-using ChatMate.Common;
+﻿using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Services;
+using Voxta.Common;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddChatMate(this IServiceCollection services)
+    public static void AddVoxta(this IServiceCollection services)
     {
         services.AddScoped<UserConnectionFactory>();
         services.AddScoped<ChatSessionFactory>();

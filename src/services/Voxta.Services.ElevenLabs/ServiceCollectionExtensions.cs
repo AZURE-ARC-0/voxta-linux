@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Services;
-using ChatMate.Services.ElevenLabs;
+﻿using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Services;
+using Voxta.Services.ElevenLabs;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Abstractions.Services;
+﻿namespace Voxta.Abstractions.Services;
 
 public interface IService
 {

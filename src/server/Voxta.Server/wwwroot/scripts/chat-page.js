@@ -1,4 +1,4 @@
-﻿import {ChatMateClient} from "/scripts/chatmate-client.js";
+﻿import {VoxtaClient} from "/scripts/voxta-client.js";
 import {AudioVisualizer} from "/scripts/audio-visualizer.js";
 import {Notifications} from "/scripts/notifications.js";
 
@@ -8,7 +8,7 @@ const characterButtons = document.getElementById('characterButtons');
 const messageBox = document.getElementById('message');
 const prompt = document.getElementById('prompt');
 const notifications = new Notifications(document.getElementById('notification'));
-const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
+const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
 
 let character = { name: '', enableThinkingSpeech: false };
 let thinkingSpeechUrls = [];
@@ -26,7 +26,7 @@ const sendMessage = (text) => {
     playThinkingSpeech();
     audioVisualizer.think();
     prompt.disabled = true;
-    chatMateClient.send(
+    voxtaClient.send(
         text,
         "Chatting with speech and no webcam.",
         ['happy', 'sad', 'angry', 'confused']
@@ -43,18 +43,18 @@ const reset  = () => {
     canvas.style.opacity = '0';
 }
 
-chatMateClient.addEventListener('onopen', (evt) => {
+voxtaClient.addEventListener('onopen', (evt) => {
     notifications.notify('Connected', 'success');
 });
-chatMateClient.addEventListener('onclose', (evt) => {
+voxtaClient.addEventListener('onclose', (evt) => {
     notifications.notify('Disconnected', 'danger');
     reset();
 });
-chatMateClient.addEventListener('onerror', (evt) => {
+voxtaClient.addEventListener('onerror', (evt) => {
     notifications.notify('Error: ' + evt.detail.message, 'danger');
 });
 
-chatMateClient.addEventListener('welcome', (evt) => {
+voxtaClient.addEventListener('welcome', (evt) => {
     while (characterButtons.firstChild) {
         characterButtons.removeChild(characterButtons.firstChild);
     }
@@ -69,7 +69,7 @@ chatMateClient.addEventListener('welcome', (evt) => {
         charDesc.textContent = character.description;
         button.appendChild(charDesc);
         button.onclick = () => {
-            chatMateClient.loadCharacter(character.id);
+            voxtaClient.loadCharacter(character.id);
             characterButtons.style.opacity = '0';
         };
         characterButtons.appendChild(button);
@@ -79,48 +79,48 @@ chatMateClient.addEventListener('welcome', (evt) => {
         characterButtons.style.opacity = '1';
     }, 100);
 });
-chatMateClient.addEventListener('characterLoaded', (evt) => {
+voxtaClient.addEventListener('characterLoaded', (evt) => {
     character = evt.detail.character;
-    chatMateClient.startChat(evt.detail.character);
+    voxtaClient.startChat(evt.detail.character);
 });
-chatMateClient.addEventListener('ready', (evt) => {
+voxtaClient.addEventListener('ready', (evt) => {
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
     audioVisualizer.idle();
     canvas.style.opacity = '1';
     prompt.style.opacity = '1';
 });
-chatMateClient.addEventListener('reply', (evt) => {
+voxtaClient.addEventListener('reply', (evt) => {
     messageBox.style.opacity = '1';
     messageBox.innerText = evt.detail.text;
     prompt.disabled = false;
 });
-chatMateClient.addEventListener('speech', (evt) => {
+voxtaClient.addEventListener('speech', (evt) => {
     audioVisualizer.play(
         evt.detail.url,
-        (duration) => chatMateClient.speechPlaybackStart(duration),
-        () => chatMateClient.speechPlaybackComplete()
+        (duration) => voxtaClient.speechPlaybackStart(duration),
+        () => voxtaClient.speechPlaybackComplete()
     );
 });
-chatMateClient.addEventListener('action', (evt) => {
+voxtaClient.addEventListener('action', (evt) => {
     // TODO: Change color (evt.detail.value);
 });
-chatMateClient.addEventListener('speechRecognitionStart', (evt) => {
+voxtaClient.addEventListener('speechRecognitionStart', (evt) => {
     audioVisualizer.stop();
     audioVisualizer.listen();
 });
-chatMateClient.addEventListener('speechRecognitionPartial', (evt) => {
+voxtaClient.addEventListener('speechRecognitionPartial', (evt) => {
     prompt.value = evt.detail.text;
 });
-chatMateClient.addEventListener('speechRecognitionEnd', (evt) => {
+voxtaClient.addEventListener('speechRecognitionEnd', (evt) => {
     sendMessage(evt.detail.text);
     prompt.value = evt.detail.text;
     prompt.disabled = true;
 });
-chatMateClient.addEventListener('error', (evt) => {
+voxtaClient.addEventListener('error', (evt) => {
     notifications.notify('Server error: ' + evt.detail.message, 'danger');
 });
 
-chatMateClient.connect();
+voxtaClient.connect();
 
 prompt.addEventListener('keydown', (evt) => {
     if (evt.key === 'Enter') {

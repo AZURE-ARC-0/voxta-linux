@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-        <RootNamespace>ChatMate.Host.AspNetCore.WebSockets</RootNamespace>
+        <RootNamespace>Voxta.Host.AspNetCore.WebSockets</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,7 +21,7 @@
         <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
         <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
-        <ProjectReference Include="..\..\services\ChatMate.Services.Fakes\ChatMate.Services.Fakes.csproj" />
+        <ProjectReference Include="..\..\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />

@@ -1,7 +1,7 @@
 ﻿#pragma warning disable CA1416
 using System.Security.Cryptography;
 
-namespace ChatMate.Common;
+namespace Voxta.Common;
 
 public static class Crypto
 {

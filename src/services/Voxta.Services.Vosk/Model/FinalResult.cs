@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.Vosk.Model;
+﻿namespace Voxta.Services.Vosk.Model;
 
 [Serializable]
 public class PartialResult

@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Server.ViewModels;
+﻿namespace Voxta.Server.ViewModels;
 
 public class DiagnosticsViewModel
 {

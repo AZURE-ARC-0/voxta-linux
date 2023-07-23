@@ -1,10 +1,10 @@
 ﻿using System.Net.Sockets;
 using System.Net.WebSockets;
-using ChatMate.Core;
+using Voxta.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Host.AspNetCore.WebSockets;
+namespace Voxta.Host.AspNetCore.WebSockets;
 
 [ApiController]
 public class WebSocketsController : ControllerBase

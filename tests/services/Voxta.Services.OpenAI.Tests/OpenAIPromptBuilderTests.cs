@@ -1,8 +1,8 @@
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 using Microsoft.DeepDev;
 using Moq;
 
-namespace ChatMate.Services.OpenAI.Tests;
+namespace Voxta.Services.OpenAI.Tests;
 
 public class OpenAIPromptBuilderTests
 {

@@ -51,7 +51,7 @@
     import { createSignal, onMount, onCleanup, For, Switch, Match } from "https://cdn.skypack.dev/solid-js";
     import { render } from "https://cdn.skypack.dev/solid-js/web";
     import html from "https://cdn.skypack.dev/solid-js/html"; 
-    import {ChatMateClient} from "/scripts/chatmate-client.js"; 
+    import {VoxtaClient} from "/scripts/voxta-client.js"; 
     import {AudioVisualizer} from "/scripts/audio-visualizer.js";
     
     const audioVisualizer = new AudioVisualizer(document.getElementById('audioVisualizer'));
@@ -221,69 +221,69 @@
             }
         }
         
-        const chatMateClient = new ChatMateClient('ws://127.0.0.1:5384/ws');
+        const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
         
-        chatMateClient.addEventListener('onopen', (evt) => {
+        voxtaClient.addEventListener('onopen', (evt) => {
             setMessages([]);
             notify('success', 'Connected to the server.');
         });
-        chatMateClient.addEventListener('onclose', (evt) => {
+        voxtaClient.addEventListener('onclose', (evt) => {
             notify('danger', 'Connection lost. Reconnecting...');
         });
-        chatMateClient.addEventListener('onerror', (evt) => {
+        voxtaClient.addEventListener('onerror', (evt) => {
             notify('danger', 'A socket error occurred: ' + evt.error.message)
         });
             
-        chatMateClient.addEventListener('welcome', (evt) => {
+        voxtaClient.addEventListener('welcome', (evt) => {
             console.log(evt);
             setCharactersList(evt.detail.characters);
         });
-        chatMateClient.addEventListener('characterLoaded', (evt) => {
+        voxtaClient.addEventListener('characterLoaded', (evt) => {
             setMessages([]);
-            chatMateClient.startChat(evt.detail.character);
+            voxtaClient.startChat(evt.detail.character);
         });
-        chatMateClient.addEventListener('ready', (evt) => {
+        voxtaClient.addEventListener('ready', (evt) => {
             thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
             setReady(true);
         });
-        chatMateClient.addEventListener('reply', (evt) => {
+        voxtaClient.addEventListener('reply', (evt) => {
             addMessage({ user: 'bot', text: evt.detail.text });
         });
-        chatMateClient.addEventListener('speech', (evt) => {
+        voxtaClient.addEventListener('speech', (evt) => {
             playAudio(
                 evt.detail.url,
-                 (duration) => chatMateClient.speechPlaybackStart(duration),
-                 () => chatMateClient.speechPlaybackComplete()
+                 (duration) => voxtaClient.speechPlaybackStart(duration),
+                 () => voxtaClient.speechPlaybackComplete()
              );
         });
-        chatMateClient.addEventListener('action', (evt) => {
+        voxtaClient.addEventListener('action', (evt) => {
             setAnimation(evt.detail.value);
             onAction(evt.detail.value);
         });
-        chatMateClient.addEventListener('speechRecognitionStart', (evt) => {
+        voxtaClient.addEventListener('speechRecognitionStart', (evt) => {
             audioVisualizer.pause();
             audioVisualizer.listen();
         });
-        chatMateClient.addEventListener('speechRecognitionEnd', (evt) => {
+        voxtaClient.addEventListener('speechRecognitionEnd', (evt) => {
             audioVisualizer.think();
-            chatMateClient.send(evt.detail.text);
+            voxtaClient.send(evt.detail.text);
             onSend(evt.detail.text);
         });
-        chatMateClient.addEventListener('error', (evt) => {
+        voxtaClient.addEventListener('error', (evt) => {
             addMessage({ user: 'error', text: evt.detail.message });
         });
                     
         onMount(() => {
-            chatMateClient.connect();
+            voxtaClient.connect();
         });
         
         function onCharacterSelect(characterId) {
             setMessages([]);
-            chatMateClient.loadCharacter(characterId);
+            voxtaClient.loadCharacter(characterId);
         }
     
         function onSend(content) {
-            chatMateClient.send(
+            voxtaClient.send(
                 content,
                 "Chatting with speech and no webcam.",
                 ['happy', 'sad', 'angry', 'confused']

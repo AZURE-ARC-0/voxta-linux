@@ -1,16 +1,16 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Repositories;
-using ChatMate.Common;
-using ChatMate.Server.ViewModels;
-using ChatMate.Services.KoboldAI;
-using ChatMate.Services.ElevenLabs;
-using ChatMate.Services.NovelAI;
-using ChatMate.Services.Oobabooga;
-using ChatMate.Services.OpenAI;
-using ChatMate.Services.Vosk;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Repositories;
+using Voxta.Common;
+using Voxta.Server.ViewModels;
+using Voxta.Services.KoboldAI;
+using Voxta.Services.ElevenLabs;
+using Voxta.Services.NovelAI;
+using Voxta.Services.Oobabooga;
+using Voxta.Services.OpenAI;
+using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers;
+namespace Voxta.Server.Controllers;
 
 [Controller]
 public class SettingsController : Controller

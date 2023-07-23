@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Repositories;
 
-namespace ChatMate.Services.ElevenLabs;
+namespace Voxta.Services.ElevenLabs;
 
 [Serializable]
 public class ElevenLabsSettings : SettingsBase

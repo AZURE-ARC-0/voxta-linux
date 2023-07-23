@@ -1,10 +1,10 @@
 ﻿using System.IO.Compression;
 using System.Security;
 using System.Security.Cryptography;
-using ChatMate.Abstractions.Repositories;
+using Voxta.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Services.Vosk;
+namespace Voxta.Services.Vosk;
 
 public interface IVoskModelDownloader
 {

@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Services;
-using ChatMate.Services.OpenAI;
+﻿using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Services;
+using Voxta.Services.OpenAI;
 using Microsoft.DeepDev;
 
 namespace Microsoft.Extensions.DependencyInjection;

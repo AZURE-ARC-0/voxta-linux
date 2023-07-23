@@ -1,13 +1,13 @@
 ﻿using System.Net;
-using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Services;
-using ChatMate.Core;
+using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Services;
+using Voxta.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Host.AspNetCore.WebSockets.Controllers;
+namespace Voxta.Host.AspNetCore.WebSockets.Controllers;
 
 [ApiController]
 public class SpeechController : ControllerBase

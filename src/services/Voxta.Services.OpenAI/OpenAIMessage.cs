@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace ChatMate.Services.OpenAI;
+namespace Voxta.Services.OpenAI;
 
 [Serializable]
 [SuppressMessage("ReSharper", "InconsistentNaming")]

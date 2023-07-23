@@ -1,8 +1,8 @@
-﻿using ChatMate.Abstractions.Repositories;
-using ChatMate.Characters.Samples;
-using ChatMate.Data.LiteDB;
+﻿using Voxta.Abstractions.Repositories;
+using Voxta.Characters.Samples;
+using Voxta.Data.LiteDB;
 
-namespace ChatMate.Server.Filters;
+namespace Voxta.Server.Filters;
 
 public class AutoRequestServicesStartupFilter : IStartupFilter
 {

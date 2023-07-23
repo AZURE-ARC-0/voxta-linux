@@ -7,7 +7,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <RootNamespace>ChatMate.Common.Tests</RootNamespace>
+        <RootNamespace>Voxta.Common.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

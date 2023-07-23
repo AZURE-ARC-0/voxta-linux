@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
 
-namespace ChatMate.Abstractions.Services;
+namespace Voxta.Abstractions.Services;
 
 public interface ITextToSpeechService : IService
 {

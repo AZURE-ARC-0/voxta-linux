@@ -1,1 +1,1 @@
-﻿namespace ChatMate.Abstractions.Model;
+﻿namespace Voxta.Abstractions.Model;

@@ -1,17 +1,17 @@
-﻿using ChatMate.Abstractions.Management;
-using ChatMate.Host.AspNetCore.WebSockets;
-using ChatMate.Server.BackgroundServices;
-using ChatMate.Server.Filters;
+﻿using Voxta.Abstractions.Management;
+using Voxta.Host.AspNetCore.WebSockets;
+using Voxta.Server.BackgroundServices;
+using Voxta.Server.Filters;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
-namespace ChatMate.Server;
+namespace Voxta.Server;
 
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllersWithViews().PartManager.ApplicationParts.Add(new AssemblyPart(typeof(WebSocketsController).Assembly));
-        services.AddChatMateServer();
+        services.AddVoxtaServer();
 
         #warning Cleanup to allow using outside
         services.AddSingleton<TemporaryFileCleanupService>();

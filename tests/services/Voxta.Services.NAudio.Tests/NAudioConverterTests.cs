@@ -1,8 +1,8 @@
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
 using Moq;
 
-namespace ChatMate.Services.NAudio.Tests;
+namespace Voxta.Services.NAudio.Tests;
 
 public class NAudioConverterTests
 {

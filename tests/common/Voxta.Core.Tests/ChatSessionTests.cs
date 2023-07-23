@@ -1,11 +1,11 @@
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Services;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace ChatMate.Core.Tests;
+namespace Voxta.Core.Tests;
 
 public class ChatSessionTests
 {

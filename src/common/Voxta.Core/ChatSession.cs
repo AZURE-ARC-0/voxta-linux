@@ -1,10 +1,10 @@
-﻿using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Services;
+﻿using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public interface IChatSession : IAsyncDisposable
 {

@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 
-namespace ChatMate.Abstractions.Network;
+namespace Voxta.Abstractions.Network;
 
 public class ConversionSpeechTunnel : ISpeechTunnel
 {

@@ -2,13 +2,13 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 
-namespace ChatMate.Server.Tests
+namespace Voxta.Server.Tests
 {
     [TestFixture]
     public class WebSocketTest

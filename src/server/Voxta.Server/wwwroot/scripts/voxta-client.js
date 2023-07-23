@@ -1,4 +1,4 @@
-﻿export class ChatMateClient extends EventTarget {
+﻿export class VoxtaClient extends EventTarget {
     wsUrl;
     socket;
 

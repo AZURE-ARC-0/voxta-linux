@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>ChatMate.Services.Oobabooga</RootNamespace>
+        <RootNamespace>Voxta.Services.Oobabooga</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

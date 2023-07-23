@@ -1,6 +1,6 @@
 ﻿using LiteDB;
 
-namespace ChatMate.Abstractions.Repositories;
+namespace Voxta.Abstractions.Repositories;
 
 public interface ISettingsRepository
 {

@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public class ChatSessionState
 {

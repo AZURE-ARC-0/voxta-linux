@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using ChatMate.Abstractions.Diagnostics;
+using Voxta.Abstractions.Diagnostics;
 
-namespace ChatMate.Host.AspNetCore.WebSockets;
+namespace Voxta.Host.AspNetCore.WebSockets;
 
 public class StaticPerformanceMetrics : IPerformanceMetrics
 {

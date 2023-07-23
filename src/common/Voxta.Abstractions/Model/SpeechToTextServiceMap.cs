@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Abstractions.Model;
+﻿namespace Voxta.Abstractions.Model;
 
 [Serializable]
 public class SpeechToTextServiceMap : ServiceMap

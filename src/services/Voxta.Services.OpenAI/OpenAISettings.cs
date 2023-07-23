@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Repositories;
 
-namespace ChatMate.Services.OpenAI;
+namespace Voxta.Services.OpenAI;
 
 [Serializable]
 public class OpenAISettings : SettingsBase

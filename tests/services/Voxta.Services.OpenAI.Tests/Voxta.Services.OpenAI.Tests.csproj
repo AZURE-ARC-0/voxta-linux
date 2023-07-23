@@ -7,7 +7,7 @@
 
         <IsPackable>false</IsPackable>
 
-        <RootNamespace>ChatMate.Services.OpenAI.Tests</RootNamespace>
+        <RootNamespace>Voxta.Services.OpenAI.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

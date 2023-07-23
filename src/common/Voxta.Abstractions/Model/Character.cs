@@ -1,6 +1,6 @@
 using LiteDB;
 
-namespace ChatMate.Abstractions.Model;
+namespace Voxta.Abstractions.Model;
 
 /// <summary>
 /// See https://github.com/malfoyslastname/character-card-spec-v2 

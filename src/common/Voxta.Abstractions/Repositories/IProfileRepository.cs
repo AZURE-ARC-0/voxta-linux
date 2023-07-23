@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 
-namespace ChatMate.Abstractions.Repositories;
+namespace Voxta.Abstractions.Repositories;
 
 public interface IProfileRepository
 {

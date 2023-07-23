@@ -1,7 +1,7 @@
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 using NUnit.Framework;
 
-namespace ChatMate.Services.OpenAI.Tests;
+namespace Voxta.Services.OpenAI.Tests;
 
 public class GenericPromptBuilderTests
 {

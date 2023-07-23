@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 
-namespace ChatMate.Services.Fakes;
+namespace Voxta.Services.Fakes;
 
 public class FakesTextGenClient : ITextGenService
 {

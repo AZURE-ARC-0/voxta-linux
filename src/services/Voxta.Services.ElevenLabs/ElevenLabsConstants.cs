@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.ElevenLabs;
+﻿namespace Voxta.Services.ElevenLabs;
 
 public static class ElevenLabsConstants
 {

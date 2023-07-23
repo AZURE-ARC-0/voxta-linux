@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Services;
-using ChatMate.Services.Vosk;
+﻿using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Services;
+using Voxta.Services.Vosk;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

@@ -1,15 +1,15 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
-using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Repositories;
-using ChatMate.Abstractions.Services;
-using ChatMate.Common;
+using Voxta.Abstractions.Diagnostics;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
+using Voxta.Common;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Services.NovelAI;
+namespace Voxta.Services.NovelAI;
 
 public class NovelAITextToSpeechClient : ITextToSpeechService
 {

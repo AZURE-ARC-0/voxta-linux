@@ -1,11 +1,11 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Services.KoboldAI;
-using ChatMate.Services.ElevenLabs;
-using ChatMate.Services.NovelAI;
-using ChatMate.Services.Oobabooga;
-using ChatMate.Services.OpenAI;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Services.KoboldAI;
+using Voxta.Services.ElevenLabs;
+using Voxta.Services.NovelAI;
+using Voxta.Services.Oobabooga;
+using Voxta.Services.OpenAI;
 
-namespace ChatMate.Server.ViewModels;
+namespace Voxta.Server.ViewModels;
 
 public class SettingsViewModel
 {

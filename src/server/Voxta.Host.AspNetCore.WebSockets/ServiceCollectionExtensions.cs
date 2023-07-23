@@ -1,20 +1,20 @@
-﻿using ChatMate.Abstractions.Diagnostics;
-using ChatMate.Core;
-using ChatMate.Data.LiteDB;
+﻿using Voxta.Abstractions.Diagnostics;
+using Voxta.Core;
+using Voxta.Data.LiteDB;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Host.AspNetCore.WebSockets;
+namespace Voxta.Host.AspNetCore.WebSockets;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddChatMateServer(this IServiceCollection services)
+    public static void AddVoxtaServer(this IServiceCollection services)
     {
         services.AddWebSockets(_ => { });
         
         services.AddHttpClient();
         services.AddNAudio();
-        services.AddChatMate();
+        services.AddVoxta();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddLiteDBRepositories();
 

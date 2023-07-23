@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public interface IChatTextProcessor
 {

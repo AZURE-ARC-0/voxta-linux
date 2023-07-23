@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.OpenAI;
+﻿namespace Voxta.Services.OpenAI;
 
 public class OpenAIException : Exception
 {

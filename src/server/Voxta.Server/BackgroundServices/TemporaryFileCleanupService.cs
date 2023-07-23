@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using ChatMate.Abstractions.Management;
+using Voxta.Abstractions.Management;
 using Timer = System.Threading.Timer;
 
-namespace ChatMate.Server.BackgroundServices
+namespace Voxta.Server.BackgroundServices
 {
     public class TemporaryFileCleanupService : BackgroundService, ITemporaryFileCleanup
     {

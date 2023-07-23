@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.Vosk;
+﻿namespace Voxta.Services.Vosk;
 
 public static class VoskConstants
 {

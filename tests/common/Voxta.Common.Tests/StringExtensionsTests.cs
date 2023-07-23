@@ -1,4 +1,4 @@
-namespace ChatMate.Common.Tests;
+namespace Voxta.Common.Tests;
 
 public class StringExtensionsTests
 {

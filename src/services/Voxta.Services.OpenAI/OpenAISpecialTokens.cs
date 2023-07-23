@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.OpenAI;
+﻿namespace Voxta.Services.OpenAI;
 
 public static class OpenAISpecialTokens
 {

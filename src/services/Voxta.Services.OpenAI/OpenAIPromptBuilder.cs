@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 using Microsoft.DeepDev;
 
-namespace ChatMate.Services.OpenAI;
+namespace Voxta.Services.OpenAI;
 
 public class OpenAIPromptBuilder
 {

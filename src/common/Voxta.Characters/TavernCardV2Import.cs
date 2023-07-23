@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 
-namespace ChatMate.Characters;
+namespace Voxta.Characters;
 
 public static class TavernCardV2Import
 {

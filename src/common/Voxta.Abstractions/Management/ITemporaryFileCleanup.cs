@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Abstractions.Management;
+﻿namespace Voxta.Abstractions.Management;
 
 public interface ITemporaryFileCleanup
 {

@@ -7,7 +7,7 @@
     <IsPackable>false</IsPackable>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
-    <RootNamespace>ChatMate.Server.Tests</RootNamespace>
+    <RootNamespace>Voxta.Server.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

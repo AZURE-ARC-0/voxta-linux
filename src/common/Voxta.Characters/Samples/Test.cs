@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 
-namespace ChatMate.Characters.Samples;
+namespace Voxta.Characters.Samples;
 
 public static class Test
 {

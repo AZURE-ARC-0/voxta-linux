@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ChatMate.Characters;
+namespace Voxta.Characters;
 
 [Serializable]
 public class TavernCardV2

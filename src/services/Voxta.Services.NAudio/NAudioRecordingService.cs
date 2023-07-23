@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Services;
+﻿using Voxta.Abstractions.Services;
 using NAudio.Wave;
 
-namespace ChatMate.Services.NAudio;
+namespace Voxta.Services.NAudio;
 
 public class NAudioRecordingService : IRecordingService
 {

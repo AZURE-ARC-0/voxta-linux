@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace ChatMate.Common;
+namespace Voxta.Common;
 
 public class Sanitizer
 {

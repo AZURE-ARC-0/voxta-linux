@@ -1,10 +1,10 @@
-﻿using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Services;
 using NAudio.Utils;
 using NAudio.Wave;
 
-namespace ChatMate.Services.Fakes;
+namespace Voxta.Services.Fakes;
 
 public class FakesTextToSpeechClient : ITextToSpeechService
 {

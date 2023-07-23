@@ -1,4 +1,4 @@
-﻿namespace ChatMate.Services.Oobabooga;
+﻿namespace Voxta.Services.Oobabooga;
 
 public static class OobaboogaConstants
 {

@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public partial class ChatSession
 {

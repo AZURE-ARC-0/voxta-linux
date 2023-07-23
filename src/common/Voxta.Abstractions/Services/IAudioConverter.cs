@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 
-namespace ChatMate.Abstractions.Services;
+namespace Voxta.Abstractions.Services;
 
 public interface IAudioConverter
 {

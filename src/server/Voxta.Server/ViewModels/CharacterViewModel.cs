@@ -1,6 +1,6 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 
-namespace ChatMate.Server.ViewModels;
+namespace Voxta.Server.ViewModels;
 
 public class CharacterViewModel
 {

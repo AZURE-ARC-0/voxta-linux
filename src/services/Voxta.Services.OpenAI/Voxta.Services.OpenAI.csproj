@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>ChatMate.Services.OpenAI</RootNamespace>
+        <RootNamespace>Voxta.Services.OpenAI</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

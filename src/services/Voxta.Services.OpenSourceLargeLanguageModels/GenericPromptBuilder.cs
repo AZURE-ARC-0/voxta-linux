@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 
-namespace ChatMate.Services.OpenAI;
+namespace Voxta.Services.OpenAI;
 
 public class GenericPromptBuilder
 {

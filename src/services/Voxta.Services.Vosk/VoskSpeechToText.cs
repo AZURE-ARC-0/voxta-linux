@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using ChatMate.Abstractions.Services;
-using ChatMate.Services.Vosk.Model;
+using Voxta.Abstractions.Services;
+using Voxta.Services.Vosk.Model;
 using Vosk;
 
-namespace ChatMate.Services.Vosk;
+namespace Voxta.Services.Vosk;
 
 public sealed class VoskSpeechToText : ISpeechToTextService
 {

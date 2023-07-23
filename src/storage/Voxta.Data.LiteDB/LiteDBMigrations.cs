@@ -1,7 +1,7 @@
-﻿using ChatMate.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 using LiteDB;
 
-namespace ChatMate.Data.LiteDB;
+namespace Voxta.Data.LiteDB;
 
 public class LiteDBMigrations
 {

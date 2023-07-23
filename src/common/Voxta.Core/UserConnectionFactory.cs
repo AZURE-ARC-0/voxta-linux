@@ -1,9 +1,9 @@
-﻿using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public class UserConnectionFactory
 {

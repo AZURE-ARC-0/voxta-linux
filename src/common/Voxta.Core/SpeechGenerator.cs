@@ -1,12 +1,12 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Management;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
-using ChatMate.Abstractions.Services;
-using ChatMate.Common;
+﻿using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Management;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
+using Voxta.Abstractions.Services;
+using Voxta.Common;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public interface ISpeechGenerator
 {

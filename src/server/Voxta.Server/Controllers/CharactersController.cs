@@ -1,19 +1,19 @@
-﻿using ChatMate.Abstractions.DependencyInjection;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Repositories;
-using ChatMate.Abstractions.Services;
-using ChatMate.Characters;
-using ChatMate.Common;
-using ChatMate.Server.ViewModels;
-using ChatMate.Services.KoboldAI;
-using ChatMate.Services.ElevenLabs;
-using ChatMate.Services.Fakes;
-using ChatMate.Services.NovelAI;
-using ChatMate.Services.Oobabooga;
-using ChatMate.Services.OpenAI;
+﻿using Voxta.Abstractions.DependencyInjection;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
+using Voxta.Characters;
+using Voxta.Common;
+using Voxta.Server.ViewModels;
+using Voxta.Services.KoboldAI;
+using Voxta.Services.ElevenLabs;
+using Voxta.Services.Fakes;
+using Voxta.Services.NovelAI;
+using Voxta.Services.Oobabooga;
+using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers;
+namespace Voxta.Server.Controllers;
 
 [Controller]
 public class CharactersController : Controller

@@ -2,10 +2,10 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ChatMate.Abstractions.Model;
-using ChatMate.Abstractions.Network;
+using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Network;
 
-namespace ChatMate.Host.AspNetCore.WebSockets;
+namespace Voxta.Host.AspNetCore.WebSockets;
 
 public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
 {

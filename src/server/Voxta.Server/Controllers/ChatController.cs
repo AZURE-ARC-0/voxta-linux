@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ChatMate.Server.Controllers;
+namespace Voxta.Server.Controllers;
 
 [Controller]
 public class ChatController : Controller

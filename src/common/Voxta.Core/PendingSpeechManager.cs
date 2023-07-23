@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using ChatMate.Abstractions.Model;
+using Voxta.Abstractions.Model;
 
-namespace ChatMate.Core;
+namespace Voxta.Core;
 
 public class PendingSpeechManager
 {

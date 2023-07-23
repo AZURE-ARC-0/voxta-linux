@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using LiteDB;
 
-namespace ChatMate.Abstractions.Model;
+namespace Voxta.Abstractions.Model;
 
 [Serializable]
 public class ProfileSettings
