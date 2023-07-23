@@ -1,6 +1,7 @@
 ﻿namespace Voxta.Abstractions.Services;
 
-public interface IService
+#warning Call Dispose, maybe use DisposeAsync instead
+public interface IService : IDisposable
 {
     Task InitializeAsync(CancellationToken cancellationToken);
 }

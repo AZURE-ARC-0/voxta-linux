@@ -78,4 +78,8 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService, IActionInf
         var animation = await SendChatRequestAsync(messages, cancellationToken);
         return animation.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
     }
+
+    public void Dispose()
+    {
+    }
 }

@@ -43,6 +43,9 @@ public class SpeechController : ControllerBase
                 var fileTunnel = new ConversionSpeechTunnel(new FileSpeechTunnel(file), audioConverter);
                 await textToSpeech.GenerateSpeechAsync(speechRequest, fileTunnel, cancellationToken);
             }
+
+            Response.StatusCode = (int)HttpStatusCode.OK;
+            Response.ContentType = audioConverter.ContentType;
             await Response.SendFileAsync(file, cancellationToken: cancellationToken);
         }
         else

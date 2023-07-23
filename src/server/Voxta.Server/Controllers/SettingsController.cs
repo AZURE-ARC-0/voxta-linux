@@ -9,6 +9,7 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Services.AzureSpeechService;
 
 namespace Voxta.Server.Controllers;
 
@@ -56,7 +57,7 @@ public class SettingsController : Controller
             AzureSpeechService = new AzureSpeechServiceSettings
             {
                 SubscriptionKey = string.IsNullOrEmpty(azurespeechservice?.SubscriptionKey) ? null : Crypto.DecryptString(azurespeechservice.SubscriptionKey),
-                Region = ""
+                Region = azurespeechservice?.Region ?? null,
             },
             Profile = profile ?? new ProfileSettings
             {

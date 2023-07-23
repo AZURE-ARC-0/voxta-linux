@@ -4,7 +4,7 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
-using Voxta.Services.OpenAI;
+using Voxta.Services.AzureSpeechService;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -33,6 +33,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
         if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
+        config.SpeechRecognitionLanguage = "en-US";
         
         _pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1));
         var audioInput = AudioConfig.FromStreamInput(_pushStream);

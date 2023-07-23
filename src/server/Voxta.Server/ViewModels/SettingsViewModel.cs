@@ -1,4 +1,5 @@
 ﻿using Voxta.Abstractions.Model;
+using Voxta.Services.AzureSpeechService;
 using Voxta.Services.KoboldAI;
 using Voxta.Services.ElevenLabs;
 using Voxta.Services.NovelAI;

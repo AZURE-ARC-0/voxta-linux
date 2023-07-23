@@ -12,6 +12,7 @@ using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Services.AzureSpeechService;
 
 namespace Voxta.Server.Controllers;
 
@@ -138,6 +139,7 @@ public class CharactersController : Controller
             {
                 NovelAIConstants.ServiceName,
                 ElevenLabsConstants.ServiceName,
+                AzureSpeechServiceConstants.ServiceName,
                 FakesConstants.ServiceName,
             },
         };

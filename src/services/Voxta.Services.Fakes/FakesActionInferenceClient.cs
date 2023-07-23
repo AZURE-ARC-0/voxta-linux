@@ -17,4 +17,8 @@ public class FakesActionInferenceClient : IActionInferenceService
         var action = chatSessionData.Actions[Random.Shared.Next(chatSessionData.Actions.Length)];
         return ValueTask.FromResult(action);
     }
+
+    public void Dispose()
+    {
+    }
 }

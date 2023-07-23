@@ -25,7 +25,6 @@ public class HttpResponseSpeechTunnel : ISpeechTunnel
     {
         _response.StatusCode = (int)HttpStatusCode.OK;
         _response.ContentType = audioData.ContentType;
-        _response.Headers.ContentDisposition = "attachment";
         audioData.Stream.Seek(0, SeekOrigin.Begin);
         _response.ContentLength = audioData.Stream.Length - audioData.Stream.Position;
         await audioData.Stream.CopyToAsync(_response.Body, cancellationToken);

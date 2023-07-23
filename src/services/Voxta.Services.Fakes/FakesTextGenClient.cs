@@ -23,4 +23,8 @@ public class FakesTextGenClient : ITextGenService
     {
         return 0;
     }
+
+    public void Dispose()
+    {
+    }
 }

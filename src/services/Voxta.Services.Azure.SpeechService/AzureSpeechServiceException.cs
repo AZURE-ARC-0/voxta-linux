@@ -1,4 +1,4 @@
-﻿namespace Voxta.Services.OpenAI;
+﻿namespace Voxta.Services.AzureSpeechService;
 
 public class AzureSpeechServiceException : Exception
 {

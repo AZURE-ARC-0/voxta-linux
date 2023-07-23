@@ -78,10 +78,13 @@
         }
         fetch(url)
             .then(response => response.arrayBuffer())
-            .then(buffer => this.audioContext.decodeAudioData(buffer), error => this.handleError(error))
+            .then(buffer => {
+                return this.audioContext.decodeAudioData(buffer);
+            }, error => this.handleError(error))
             .then(audioBuffer => {
                 if(!audioBuffer) return;
                 const source = this.audioContext.createBufferSource();
+                this.currentSource = source;
                 source.buffer = audioBuffer;
                 source.connect(this.analyser);
                 this.analyser.connect(this.audioContext.destination);

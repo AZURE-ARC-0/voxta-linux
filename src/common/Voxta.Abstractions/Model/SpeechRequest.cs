@@ -7,4 +7,5 @@ public class SpeechRequest
     public required string Voice { get; init; }
     public required string ContentType { get; init; }
     public bool Reusable { get; set; }
+    public string Culture { get; set; } = "en-US";
 }

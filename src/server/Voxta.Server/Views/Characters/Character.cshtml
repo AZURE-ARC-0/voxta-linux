@@ -127,11 +127,18 @@
     <script type="text/javascript">
         document.getElementById("Character_Services_SpeechGen_Service").onchange = function() {
             const selectedService = this.value;
+            const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
+            voicesSelect.innerHTML = ""; // Clear existing options
+            {
+                const option = document.createElement("option");
+                option.value = '';
+                option.text = 'Loading...';
+                voicesSelect.appendChild(option);
+            }
 
             fetch('/tts/services/' + selectedService + '/voices')
                 .then(response => response.json())
                 .then(data => {
-                    const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
                     voicesSelect.innerHTML = ""; // Clear existing options
 
                     data.forEach(function(voice) {
@@ -141,7 +148,14 @@
                         voicesSelect.appendChild(option);
                     });
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    voicesSelect.innerHTML = ""; // Clear existing options
+                    const option = document.createElement("option");
+                    option.value = '';
+                    option.text = 'Error (see console)';
+                    voicesSelect.appendChild(option);
+                });
         };
     </script>
 </div>

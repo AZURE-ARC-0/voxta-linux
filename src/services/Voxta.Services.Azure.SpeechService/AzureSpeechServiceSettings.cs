@@ -1,6 +1,6 @@
 ﻿using Voxta.Abstractions.Repositories;
 
-namespace Voxta.Services.OpenAI;
+namespace Voxta.Services.AzureSpeechService;
 
 [Serializable]
 public class AzureSpeechServiceSettings : SettingsBase

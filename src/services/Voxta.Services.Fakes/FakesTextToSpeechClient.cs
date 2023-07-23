@@ -42,4 +42,8 @@ public class FakesTextToSpeechClient : ITextToSpeechService
         ms.Seek(0, SeekOrigin.Begin);
         await tunnel.SendAsync(new AudioData(ms, ContentType), cancellationToken);
     }
+
+    public void Dispose()
+    {
+    }
 }

@@ -129,4 +129,8 @@ public class OobaboogaTextGenClient : ITextGenService, IActionInferenceService
     {
         public string? text { get; init; }
     }
+
+    public void Dispose()
+    {
+    }
 }

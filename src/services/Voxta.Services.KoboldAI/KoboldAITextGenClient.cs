@@ -113,4 +113,8 @@ public class KoboldAITextGenClient : ITextGenService
         public int ptr { get; init; }
         public string? error { get; init; }
     }
+
+    public void Dispose()
+    {
+    }
 }

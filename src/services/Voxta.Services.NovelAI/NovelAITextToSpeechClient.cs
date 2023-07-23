@@ -105,4 +105,8 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();
     }
+
+    public void Dispose()
+    {
+    }
 }

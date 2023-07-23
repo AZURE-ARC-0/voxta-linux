@@ -100,4 +100,8 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         public required string voice_id { get; init; }
         public required string name { get; init; }
     }
+
+    public void Dispose()
+    {
+    }
 }
