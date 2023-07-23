@@ -30,13 +30,19 @@ public partial class ChatSession
             if (!_chatSessionData.Actions.Contains(action))
             {
                 var incorrect = action;
-                action = _chatSessionData.Actions
+                var replaced = _chatSessionData.Actions
                     .Select(x => (distance: incorrect.GetLevenshteinDistance(x), value: x))
                     .Where(x => x.distance <= 3)
                     .MinBy(x => x.distance)
                     .value ?? "idle";
+                _logger.LogInformation("Selected action: {GuessedAction} based on approximation from {Action}", replaced, action);
+                action = replaced;
             }
-            _logger.LogInformation("Selected action: {Animation}", action);
+            else
+            {
+                _logger.LogInformation("Selected action: {Action}", action);
+            }
+
             await _tunnel.SendAsync(new ServerActionMessage { Value = action }, cancellationToken);
         }
     }
