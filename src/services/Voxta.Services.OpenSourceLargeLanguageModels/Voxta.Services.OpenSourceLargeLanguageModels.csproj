@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>ChatMate.Services.OpenSourceLargeLanguageModels</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
+      <ProjectReference Include="..\..\common\Voxta.Common\Voxta.Common.csproj" />
+    </ItemGroup>
+
+</Project>

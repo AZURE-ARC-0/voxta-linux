@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>ChatMate.Data.LiteDB</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="LiteDB" Version="5.0.16" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
+    </ItemGroup>
+
+</Project>

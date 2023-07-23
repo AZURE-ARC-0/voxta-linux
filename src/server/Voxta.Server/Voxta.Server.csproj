@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PublishIISAssets>false</PublishIISAssets>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <RootNamespace>ChatMate.Server</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />
+    <PackageReference Include="Serilog" Version="3.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+  </ItemGroup>
+
+  <Target Name="CopyFiles" AfterTargets="Build">
+    <Copy SourceFiles="@(AvailableFiles)" DestinationFolder="$(OutputPath)" />
+  </Target>
+
+  <ItemGroup>
+    <None Remove="Data\README.txt" />
+    <Content Include="Data\README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
+    <ProjectReference Include="..\..\common\Voxta.Characters\Voxta.Characters.csproj" />
+    <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
+    <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
+    <ProjectReference Include="..\..\services\ChatMate.Services.Fakes\ChatMate.Services.Fakes.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.Oobabooga\Voxta.Services.Oobabooga.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.OpenAI\Voxta.Services.OpenAI.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.Vosk\Voxta.Services.Vosk.csproj" />
+    <ProjectReference Include="..\Voxta.Host.AspNetCore.WebSockets\Voxta.Host.AspNetCore.WebSockets.csproj" />
+  </ItemGroup>
+
+</Project>

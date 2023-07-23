@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>ChatMate.Services.Oobabooga</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
+      <ProjectReference Include="..\..\common\Voxta.Common\Voxta.Common.csproj" />
+      <ProjectReference Include="..\Voxta.Services.OpenSourceLargeLanguageModels\Voxta.Services.OpenSourceLargeLanguageModels.csproj" />
+    </ItemGroup>
+
+</Project>

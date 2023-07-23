@@ -1,6 +1,7 @@
 bin/
 obj/
 publish/
-src/server/ChatMate.Server/Data/*
-!src/server/ChatMate.Server/Data/README.txt
-src/server/ChatMate.Server/Models/*
+src/server/Voxta.Server/Data/*
+!src/server/Voxta.Server/Data/README.txt
+src/server/Voxta.Server/Models/*
+*.db

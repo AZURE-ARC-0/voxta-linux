@@ -29,49 +29,49 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "server", "server", "{E8AB80
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{25A82547-1D1F-4416-8782-AEED31D97038}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Core.Tests", "tests\common\ChatMate.Core.Tests\ChatMate.Core.Tests.csproj", "{92BBD2EE-6FF3-42AA-BCCE-6736C8EB6B9D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Core.Tests", "tests\common\Voxta.Core.Tests\Voxta.Core.Tests.csproj", "{92BBD2EE-6FF3-42AA-BCCE-6736C8EB6B9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Common.Tests", "tests\common\ChatMate.Common.Tests\ChatMate.Common.Tests.csproj", "{22171292-BBAB-4219-87DB-A5EDE7E58706}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Common.Tests", "tests\common\Voxta.Common.Tests\Voxta.Common.Tests.csproj", "{22171292-BBAB-4219-87DB-A5EDE7E58706}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Abstractions", "src\common\ChatMate.Abstractions\ChatMate.Abstractions.csproj", "{C6DD9D88-237E-48DD-8834-FC38C316E5B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Abstractions", "src\common\Voxta.Abstractions\Voxta.Abstractions.csproj", "{C6DD9D88-237E-48DD-8834-FC38C316E5B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Common", "src\common\ChatMate.Common\ChatMate.Common.csproj", "{C8F2DE85-E053-4B2C-9EEA-EB51C31B63FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Common", "src\common\Voxta.Common\Voxta.Common.csproj", "{C8F2DE85-E053-4B2C-9EEA-EB51C31B63FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Core", "src\common\ChatMate.Core\ChatMate.Core.csproj", "{481BD059-B89F-4613-9ED5-0A4159D720A1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Core", "src\common\Voxta.Core\Voxta.Core.csproj", "{481BD059-B89F-4613-9ED5-0A4159D720A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Server", "src\server\ChatMate.Server\ChatMate.Server.csproj", "{3EAAB79D-4A60-408E-A86D-80B4341133FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Server", "src\server\Voxta.Server\Voxta.Server.csproj", "{3EAAB79D-4A60-408E-A86D-80B4341133FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.ElevenLabs", "src\services\ChatMate.Services.ElevenLabs\ChatMate.Services.ElevenLabs.csproj", "{984AC35B-527F-435B-8C0B-C1F78BA7CEDB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.ElevenLabs", "src\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj", "{984AC35B-527F-435B-8C0B-C1F78BA7CEDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.Fakes", "src\services\ChatMate.Services.Fakes\ChatMate.Services.Fakes.csproj", "{D18C6462-8196-408B-9032-5B142DAB51D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.Fakes", "src\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj", "{D18C6462-8196-408B-9032-5B142DAB51D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.KoboldAI", "src\services\ChatMate.Services.KoboldAI\ChatMate.Services.KoboldAI.csproj", "{6FC0F360-FCE1-41AD-8087-6555D518964B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.KoboldAI", "src\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj", "{6FC0F360-FCE1-41AD-8087-6555D518964B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.NAudio", "src\services\ChatMate.Services.NAudio\ChatMate.Services.NAudio.csproj", "{A335C3C5-6F71-45A5-8F8F-A7C72F8B117A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.NAudio", "src\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj", "{A335C3C5-6F71-45A5-8F8F-A7C72F8B117A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.NovelAI", "src\services\ChatMate.Services.NovelAI\ChatMate.Services.NovelAI.csproj", "{AB460B26-A7E5-48D2-B09A-1F0436F672BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.NovelAI", "src\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj", "{AB460B26-A7E5-48D2-B09A-1F0436F672BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.Oobabooga", "src\services\ChatMate.Services.Oobabooga\ChatMate.Services.Oobabooga.csproj", "{02F50778-D2B9-4FBE-992E-AEF85BA20CFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.Oobabooga", "src\services\Voxta.Services.Oobabooga\Voxta.Services.Oobabooga.csproj", "{02F50778-D2B9-4FBE-992E-AEF85BA20CFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.OpenAI", "src\services\ChatMate.Services.OpenAI\ChatMate.Services.OpenAI.csproj", "{702A913C-80EE-4DC8-AAAF-BA9AB5C17003}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.OpenAI", "src\services\Voxta.Services.OpenAI\Voxta.Services.OpenAI.csproj", "{702A913C-80EE-4DC8-AAAF-BA9AB5C17003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.OpenSourceLargeLanguageModels", "src\services\ChatMate.Services.OpenSourceLargeLanguageModels\ChatMate.Services.OpenSourceLargeLanguageModels.csproj", "{C40F6F6B-C74A-4C39-B2EB-58E7AFABB794}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.OpenSourceLargeLanguageModels", "src\services\Voxta.Services.OpenSourceLargeLanguageModels\Voxta.Services.OpenSourceLargeLanguageModels.csproj", "{C40F6F6B-C74A-4C39-B2EB-58E7AFABB794}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.Vosk", "src\services\ChatMate.Services.Vosk\ChatMate.Services.Vosk.csproj", "{F7CCAE74-1905-4B23-85CF-B5EC34D9D1A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.Vosk", "src\services\Voxta.Services.Vosk\Voxta.Services.Vosk.csproj", "{F7CCAE74-1905-4B23-85CF-B5EC34D9D1A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Data.LiteDB", "src\storage\ChatMate.Data.LiteDB\ChatMate.Data.LiteDB.csproj", "{347F0F8B-3E49-4D65-84C3-70C16D27BCBA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Data.LiteDB", "src\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj", "{347F0F8B-3E49-4D65-84C3-70C16D27BCBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Server.Tests", "tests\server\ChatMate.Server.Tests\ChatMate.Server.Tests.csproj", "{FD6B6245-3ECC-4AC7-9F5E-CB7C5948AB9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Server.Tests", "tests\server\Voxta.Server.Tests\Voxta.Server.Tests.csproj", "{FD6B6245-3ECC-4AC7-9F5E-CB7C5948AB9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.NAudio.Tests", "tests\services\ChatMate.Services.NAudio.Tests\ChatMate.Services.NAudio.Tests.csproj", "{8C666CBD-3D57-4F44-9E05-C58E263A063B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.NAudio.Tests", "tests\services\Voxta.Services.NAudio.Tests\Voxta.Services.NAudio.Tests.csproj", "{8C666CBD-3D57-4F44-9E05-C58E263A063B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.OpenAI.Tests", "tests\services\ChatMate.Services.OpenAI.Tests\ChatMate.Services.OpenAI.Tests.csproj", "{69208DAB-D08C-4ED0-8ADC-A0D77935319F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.OpenAI.Tests", "tests\services\Voxta.Services.OpenAI.Tests\Voxta.Services.OpenAI.Tests.csproj", "{69208DAB-D08C-4ED0-8ADC-A0D77935319F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Services.OpenSourceLargeLanguageModels.Tests", "tests\services\ChatMate.Services.OpenSourceLargeLanguageModels.Tests\ChatMate.Services.OpenSourceLargeLanguageModels.Tests.csproj", "{3CEDB705-285B-4ADF-AD98-CEC2831683EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.OpenSourceLargeLanguageModels.Tests", "tests\services\Voxta.Services.OpenSourceLargeLanguageModels.Tests\Voxta.Services.OpenSourceLargeLanguageModels.Tests.csproj", "{3CEDB705-285B-4ADF-AD98-CEC2831683EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Host.AspNetCore.WebSockets", "src\server\ChatMate.Host.AspNetCore.WebSockets\ChatMate.Host.AspNetCore.WebSockets.csproj", "{F90E0F15-EC70-40D6-B906-804F0CCA473D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Host.AspNetCore.WebSockets", "src\server\Voxta.Host.AspNetCore.WebSockets\Voxta.Host.AspNetCore.WebSockets.csproj", "{F90E0F15-EC70-40D6-B906-804F0CCA473D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMate.Characters", "src\common\ChatMate.Characters\ChatMate.Characters.csproj", "{BDD9D840-C2DE-4E0C-8870-5406516EFD51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Characters", "src\common\Voxta.Characters\Voxta.Characters.csproj", "{BDD9D840-C2DE-4E0C-8870-5406516EFD51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
