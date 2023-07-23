@@ -7,7 +7,6 @@
     <IsPackable>false</IsPackable>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
-    <RootNamespace>Voxta.Server.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

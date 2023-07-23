@@ -7,7 +7,6 @@
     <PublishIISAssets>false</PublishIISAssets>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
-    <RootNamespace>Voxta.Server</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

@@ -5,7 +5,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-        <RootNamespace>Voxta.Host.AspNetCore.WebSockets</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
