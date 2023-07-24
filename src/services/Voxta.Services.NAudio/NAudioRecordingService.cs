@@ -6,7 +6,9 @@ namespace Voxta.Services.NAudio;
 public class NAudioRecordingService : IRecordingService
 {
     private const int _sampleRate = 16000;
-    private const double _silenceThreshold = 1400;
+    #if(SKIP_EMPTY_AUDIO)
+    private const double _silenceThreshold = 1200;
+    #endif
     
     private readonly WaveInEvent _waveIn;
     private bool _recording;
@@ -23,16 +25,16 @@ public class NAudioRecordingService : IRecordingService
         {
             if (_disposed) return;
             if (e.BytesRecorded <= 0) return;
+            #if(SKIP_EMPTY_AUDIO)
             if (!Speaking)
             {
                 var rms = CalculateRms(e.Buffer, e.BytesRecorded);
                 if (rms < _silenceThreshold)
                 {
-                    Console.WriteLine("Silence detected");
                     return;
                 }
-                Console.WriteLine($"RMS: {rms}");
             }
+            #endif
             DataAvailable?.Invoke(s, new RecordingDataEventArgs(e.Buffer, e.BytesRecorded));
         };
     }

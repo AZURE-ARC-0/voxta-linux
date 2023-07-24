@@ -29,7 +29,7 @@ const sendMessage = (text) => {
     voxtaClient.send(
         text,
         "Chatting with speech and no webcam.",
-        ['happy', 'sad', 'angry', 'confused']
+        ['normal', 'happy', 'sad', 'angry', 'confused']
     );
 }
 
@@ -102,7 +102,30 @@ voxtaClient.addEventListener('speech', (evt) => {
     );
 });
 voxtaClient.addEventListener('action', (evt) => {
-    // TODO: Change color (evt.detail.value);
+    switch (evt.detail.action) {
+        case 'normal':
+            audioVisualizer.setColor('rgb(222,215,234)');
+            break;
+        case 'happy':
+            // pink
+            audioVisualizer.setColor('#e91e63');
+            break;
+        case 'sad':
+            // blue
+            audioVisualizer.setColor('#2196f3');
+            break;
+        case 'angry':
+            // red
+            audioVisualizer.setColor('#f44336');
+            break;
+        case 'confused':
+            // yellow
+            audioVisualizer.setColor('#ffeb3b');
+            break;
+        default:
+            audioVisualizer.setColor('#2196f3');
+            break;
+    }
 });
 voxtaClient.addEventListener('speechRecognitionStart', (evt) => {
     audioVisualizer.stop();
