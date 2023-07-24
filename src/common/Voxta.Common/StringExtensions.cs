@@ -7,6 +7,11 @@ public static class StringExtensions
         return value.Trim(' ', '\r', '\n');
     }
 
+    public static string TrimCopyPasteArtefacts(this string value)
+    {
+        return value.Trim('"', ' ');
+    }
+
     // https://gist.github.com/Davidblkx/e12ab0bb2aff7fd8072632b396538560
     public static int GetLevenshteinDistance(this string source, string value)
     {

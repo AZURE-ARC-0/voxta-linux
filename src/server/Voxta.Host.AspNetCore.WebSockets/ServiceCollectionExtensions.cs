@@ -3,6 +3,7 @@ using Voxta.Core;
 using Voxta.Data.LiteDB;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
+using Voxta.Host.AspNetCore.WebSockets.Utils;
 
 namespace Voxta.Host.AspNetCore.WebSockets;
 
@@ -17,7 +18,13 @@ public static class ServiceCollectionExtensions
         services.AddVoxta();
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddLiteDBRepositories();
+        services.AddTransient<DiagnosticsUtil>();
 
+        AddAllServices(services);
+    }
+
+    private static void AddAllServices(IServiceCollection services)
+    {
         var speechToTextRegistry = services.AddSpeechToTextRegistry();
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
@@ -27,7 +34,7 @@ public static class ServiceCollectionExtensions
         textGenRegistry.RegisterFakes();
         textToSpeechRegistry.RegisterFakes();
         actionInferenceRegistry.RegisterFakes();
-        
+
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
         actionInferenceRegistry.RegisterOpenAI();
@@ -35,14 +42,14 @@ public static class ServiceCollectionExtensions
         services.AddNovelAI();
         textGenRegistry.RegisterNovelAI();
         textToSpeechRegistry.RegisterNovelAI();
-        
+
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();
-        
+
         services.AddOobabooga();
         textGenRegistry.RegisterOobabooga();
         actionInferenceRegistry.RegisterOobabooga();
-        
+
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();
 

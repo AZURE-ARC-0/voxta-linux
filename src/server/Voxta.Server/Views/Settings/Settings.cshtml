@@ -1,9 +1,4 @@
-﻿@using Voxta.Services.OpenAI
-@using Voxta.Services.Fakes
-@using Voxta.Services.Oobabooga
-@using Voxta.Services.Vosk
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using Voxta.Services.AzureSpeechService
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model SettingsViewModel
 @{
     Layout = "_Layout";
@@ -13,144 +8,59 @@
 <div class="container">
     <h1>Settings</h1>
     
-    <form method="post" asp-action="settings">
-        <div class="card mb-3">
-            <div class="card-header">
-                <h2>Profile</h2>
-            </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Services</h2>
+        </div>
+        @if (Model.Services != null)
+        {
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="Profile.Name">Profile name:</label>
-                    <input asp-for="Profile.Name" class="form-control"/>
-                    <span asp-validation-for="Profile.Name" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Profile.Description">Profile description:</label>
-                    <input asp-for="Profile.Description" class="form-control"/>
-                    <span asp-validation-for="Profile.Description" class="text-danger"></span>
-                </div>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">Status</th>
+                        <th scope="col">Service</th>
+                        <th scope="col">Message</th>
+                        <th scope="col">Configuration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var s in Model.Services)
+                    {
+                        <tr>
+                            <td>
+                                @if (!s.IsReady)
+                                {
+                                    <i class="bi bi-dash-circle-fill text-secondary"></i>
+                                }
+                                else if (s.IsHealthy)
+                                {
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                                }
+                            </td>
+                            <td>@s.Label</td>
+                            <td><code><pre>@s.Status</pre></code></td>
+                            <td>
+                                <a class="btn btn-sm btn-secondary" href="/settings/@s.ServiceName.ToLower()">Configure</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        <div class="card-footer">
+            <div class="d-flex justify-content-center text-center">
+                <form action="/settings/test" method="post">
+                    <input type="hidden" name="test" value="true"/>
+                    <p class="text-muted pl-2">Click once and wait for the results, it may take some time.</p>
+                    <p><button type="submit" class="btn btn-primary">Test Now</button></p>
+                </form>
             </div>
         </div>
-            
-        <div class="card mb-3">
-            <div class="card-header">
-                <h2>Services</h2>
-            </div>
-            <div class="card-body">
-                <h3>OpenAI</h3>
-                <div class="form-group">
-                    <label asp-for="OpenAI.ApiKey">OpenAI key:</label>
-                    <input asp-for="OpenAI.ApiKey" class="form-control"/>
-                    <span asp-validation-for="OpenAI.ApiKey" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="OpenAI.Model">OpenAI model:</label>
-                    <input asp-for="OpenAI.Model" class="form-control"/>
-                    <span asp-validation-for="OpenAI.Model" class="text-danger"></span>
-                </div>
-
-                <h3>NovelAI</h3>
-                <div class="form-group">
-                    <label asp-for="NovelAI.Token">NovelAI token:</label>
-                    <input asp-for="NovelAI.Token" class="form-control"/>
-                    <span asp-validation-for="NovelAI.Token" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="NovelAI.Model">NovelAI model:</label>
-                    <input asp-for="NovelAI.Model" class="form-control"/>
-                    <span asp-validation-for="NovelAI.Model" class="text-danger"></span>
-                </div>
-
-                <h3>KoboldAI</h3>
-                <div class="form-group">
-                    <label asp-for="KoboldAI.Uri">KoboldAI URI: <span class="text-muted">Example: http://127.0.0.1:5001</span></label>
-                    <input asp-for="KoboldAI.Uri" class="form-control"/>
-                    <span asp-validation-for="KoboldAI.Uri" class="text-danger"></span>
-                </div>
-
-                <h3>Text generation web UI</h3>
-                <div class="form-group">
-                    <label asp-for="Oobabooga.Uri">Text generation web UI URI: <span class="text-muted">Example: http://127.0.0.1:5000</span></label>
-                    <input asp-for="Oobabooga.Uri" class="form-control"/>
-                    <span asp-validation-for="Oobabooga.Uri" class="text-danger"></span>
-                </div>
-
-                <h3>ElevenLabs</h3>
-                <div class="form-group">
-                    <label asp-for="ElevenLabs.ApiKey">ElevenLabs API key:</label>
-                    <input asp-for="ElevenLabs.ApiKey" class="form-control"/>
-                    <span asp-validation-for="ElevenLabs.ApiKey" class="text-danger"></span>
-                </div>
-                
-                <h3>Vosk</h3>
-                <div class="form-group">
-                    <label asp-for="Profile.Services.SpeechToText.Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models" target="_blank">models list</a>, smaller is faster.</span></label>
-                    <input asp-for="Profile.Services.SpeechToText.Model" class="form-control" />
-                    <span asp-validation-for="Profile.Services.SpeechToText.Model" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Profile.Services.SpeechToText.Hash">Model Download Hash <span class="text-muted">Optional, increases security by checking if the file is the expected one.</span></label>
-                    <input asp-for="Profile.Services.SpeechToText.Hash" class="form-control" />
-                    <span asp-validation-for="Profile.Services.SpeechToText.Hash" class="text-danger"></span>
-                </div>
-                
-                <h3>Azure Speech Service</h3>
-                <div class="form-group">
-                    <label asp-for="AzureSpeechService.SubscriptionKey">Subscription Key</label>
-                    <input asp-for="AzureSpeechService.SubscriptionKey" class="form-control" />
-                    <span asp-validation-for="AzureSpeechService.SubscriptionKey" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="AzureSpeechService.Region">Region</label>
-                    <input asp-for="AzureSpeechService.Region" class="form-control" />
-                    <span asp-validation-for="AzureSpeechService.Region" class="text-danger"></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-header">
-                <h2>Default Services</h2>
-            </div>
-            <div class="card-body">
-                <h3>Speech To Text</h3>
-                <p>This is the engine that listens to what you say and convert it to text.</p>
-                <div class="form-group">
-                    <label asp-for="Profile.Services.SpeechToText.Service">Speech To Text Service</label>
-                    <select asp-for="Profile.Services.SpeechToText.Service" class="form-control">
-                        <option value="">None</option>
-                        <option value="@VoskConstants.ServiceName">Vosk</option>
-                        <option value="@AzureSpeechServiceConstants.ServiceName">Azure Speech Service</option>
-                    </select>
-                    <span asp-validation-for="Profile.Services.SpeechToText.Service" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Profile.PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback: <span class="text-muted">Turn off to allow interruptions, requires a headset</span></label>
-                    <input asp-for="Profile.PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
-                    <span asp-validation-for="Profile.PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
-                </div>
-
-                <h3>Action Inference</h3>
-                <p>This is what allows the model to determine actions they can take after speaking.</p>
-                <div class="form-group">
-                    <label asp-for="Profile.Services.ActionInference.Service">Action Inference Service</label>
-                    <select asp-for="Profile.Services.ActionInference.Service" class="form-control">
-                        <option value="">None</option>
-                        <option value="@OpenAIConstants.ServiceName">OpenAI</option>
-                        <option value="@OobaboogaConstants.ServiceName">Text Generation Web UI</option>
-                        <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
-                    </select>
-                    <span asp-validation-for="Profile.Services.ActionInference.Service" class="text-danger"></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-end mt-3">
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-
-        <div class="text-danger mt-3">
-            @Html.ValidationSummary(false)
-        </div>
-    </form>
+    </div>
 </div>

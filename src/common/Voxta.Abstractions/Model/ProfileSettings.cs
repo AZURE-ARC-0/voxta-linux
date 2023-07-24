@@ -20,6 +20,6 @@ public class ProfileSettings
     public class ProfileServicesMap
     {
         public required ServiceMap ActionInference { get; init; }
-        public required SpeechToTextServiceMap SpeechToText { get; init; }
+        public required ServiceMap SpeechToText { get; init; }
     }
 }

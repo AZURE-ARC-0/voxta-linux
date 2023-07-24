@@ -52,7 +52,7 @@ public class ChatSessionTests
                 {
                     Service = ""
                 },
-                SpeechToText = new SpeechToTextServiceMap
+                SpeechToText = new ServiceMap
                 {
                     Service = ""
                 }

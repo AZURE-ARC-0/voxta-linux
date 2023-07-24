@@ -16,12 +16,12 @@ public class VoskModelDownloader : IVoskModelDownloader
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
     
     private readonly ILogger<VoskModelDownloader> _logger;
-    private readonly IProfileRepository _profileRepository;
+    private readonly ISettingsRepository _settingsRepository;
 
-    public VoskModelDownloader(ILogger<VoskModelDownloader> logger, IProfileRepository profileRepository)
+    public VoskModelDownloader(ILogger<VoskModelDownloader> logger, ISettingsRepository settingsRepository)
     {
         _logger = logger;
-        _profileRepository = profileRepository;
+        _settingsRepository = settingsRepository;
     }
     
     public async Task<global::Vosk.Model> AcquireModelAsync(CancellationToken cancellationToken)
@@ -39,13 +39,12 @@ public class VoskModelDownloader : IVoskModelDownloader
 
     private async Task<global::Vosk.Model> AcquireModelInternalAsync(CancellationToken cancellationToken)
     {
-
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken);
-        if (profile == null || string.IsNullOrEmpty(profile.Services.SpeechToText.Model))
+        var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
+        if (settings == null || string.IsNullOrEmpty(settings.Model))
             throw new NullReferenceException("There is no Vosk settings in the profile");
         var modelsPath = Path.GetFullPath("Models/Vosk");
-        var modelName = profile.Services.SpeechToText.Model;
-        var modelZipHash = profile.Services.SpeechToText.Hash;
+        var modelName = settings.Model;
+        var modelZipHash = settings.ModelHash;
         var modelPath = Path.Combine(modelsPath, modelName);
         
         if (Directory.Exists(modelPath))

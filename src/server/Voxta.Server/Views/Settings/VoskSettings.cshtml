@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Voxta.Services.Vosk.VoskSettings
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Settings";
+}
+
+<div class="container">
+    <h1>Settings</h1>
+    
+    <form method="post" asp-action="PostVoskSettings">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Services</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vosk</h3>
+                <div class="form-group">
+                    <label asp-for="Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models" target="_blank">models list</a>, smaller is faster.</span></label>
+                    <input asp-for="Model" class="form-control" />
+                    <span asp-validation-for="Model" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ModelHash">Model Download Hash <span class="text-muted">Optional, increases security by checking if the file is the expected one.</span></label>
+                    <input asp-for="ModelHash" class="form-control" />
+                    <span asp-validation-for="ModelHash" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+        <div class="text-danger mt-3">
+            @Html.ValidationSummary(false)
+        </div>
+    </form>
+</div>

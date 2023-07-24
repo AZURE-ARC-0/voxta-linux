@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Voxta.Services.AzureSpeechService.AzureSpeechServiceSettings
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Settings";
+}
+
+<div class="container">
+    <h1>Settings</h1>
+    
+    <form method="post" asp-action="PostAzureSpeechServiceSettings">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Services</h2>
+            </div>
+            <div class="card-body">
+                <h3>Azure Speech Service</h3>
+                <div class="form-group">
+                    <label asp-for="SubscriptionKey">Subscription Key</label>
+                    <input asp-for="SubscriptionKey" class="form-control" />
+                    <span asp-validation-for="SubscriptionKey" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Region">Region</label>
+                    <input asp-for="Region" class="form-control" />
+                    <span asp-validation-for="Region" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+        <div class="text-danger mt-3">
+            @Html.ValidationSummary(false)
+        </div>
+    </form>
+</div>

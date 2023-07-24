@@ -9,121 +9,321 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.Fakes;
 
 namespace Voxta.Server.Controllers;
 
 [Controller]
 public class SettingsController : Controller
 {
-    [HttpGet("/settings")]
-    public async Task<IActionResult> Settings(
-        [FromServices] ISettingsRepository settingsRepository,
-        [FromServices] IProfileRepository profileRepository,
-        CancellationToken cancellationToken)
-    {
-        var openai = await settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
-        var novelai = await settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
-        var koboldai = await settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
-        var oobabooga = await settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken);
-        var elevenlabs = await settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
-        var azurespeechservice = await settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
-        var profile = await profileRepository.GetProfileAsync(cancellationToken);
+    private readonly ISettingsRepository _settingsRepository;
+    private readonly IProfileRepository _profileRepository;
+    private readonly DiagnosticsUtil _diagnosticsUtil;
 
+    public SettingsController(ISettingsRepository settingsRepository, IProfileRepository profileRepository, DiagnosticsUtil diagnosticsUtil)
+    {
+        _settingsRepository = settingsRepository;
+        _profileRepository = profileRepository;
+        _diagnosticsUtil = diagnosticsUtil;
+    }
+    
+    [HttpGet("/settings")]
+    public async Task<IActionResult> Settings(CancellationToken cancellationToken)
+    {
         var vm = new SettingsViewModel
         {
-            OpenAI = new OpenAISettings
-            {
-                ApiKey = string.IsNullOrEmpty(openai?.ApiKey) ? null : Crypto.DecryptString(openai.ApiKey),
-                Model = openai?.Model ?? OpenAISettings.DefaultModel,
-            },
-            NovelAI = new NovelAISettings
-            {
-                Token = string.IsNullOrEmpty(novelai?.Token) ? null : Crypto.DecryptString(novelai.Token),
-                Model = novelai?.Model ?? NovelAISettings.DefaultModel,
-            },
-            KoboldAI = new KoboldAISettings
-            {
-                Uri = koboldai?.Uri,
-            },
-            Oobabooga = new OobaboogaSettings
-            {
-                Uri = oobabooga?.Uri,
-            },
-            ElevenLabs = new ElevenLabsSettings
-            {
-              ApiKey  = string.IsNullOrEmpty(elevenlabs?.ApiKey) ? null : Crypto.DecryptString(elevenlabs.ApiKey),
-            },
-            AzureSpeechService = new AzureSpeechServiceSettings
-            {
-                SubscriptionKey = string.IsNullOrEmpty(azurespeechservice?.SubscriptionKey) ? null : Crypto.DecryptString(azurespeechservice.SubscriptionKey),
-                Region = azurespeechservice?.Region ?? null,
-            },
-            Profile = profile ?? new ProfileSettings
+            Profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
             {
                 Name = "User",
-                Description = "",
-                PauseSpeechRecognitionDuringPlayback = true,
                 Services = new ProfileSettings.ProfileServicesMap
                 {
-                    ActionInference =  new ServiceMap
-                    {
-                        Service = OpenAIConstants.ServiceName,
-                    },
-                    SpeechToText = new SpeechToTextServiceMap
-                    {
-                        Service = VoskConstants.ServiceName,
-                        Model = "vosk-model-small-en-us-0.15",
-                        Hash = "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498",
-                    }
+                    SpeechToText = new ServiceMap { Service = FakesConstants.ServiceName },
+                    ActionInference = new ServiceMap { Service = FakesConstants.ServiceName }
                 }
-            }
+            },
+            Services = (await _diagnosticsUtil.GetAllServicesAsync(cancellationToken)).Services,
         };
         
         return View(vm);
     }
     
-    [HttpPost("/settings")]
-    public async Task<IActionResult> PostSettings([FromForm] SettingsViewModel model, [FromServices] ISettingsRepository settingsRepository, [FromServices] IProfileRepository profileRepository)
+    [HttpPost("/settings/test")]
+    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
+    public async Task<IActionResult> TestAllSettings([FromForm] bool test, CancellationToken cancellationToken)
+    {
+        if (!test) throw new InvalidOperationException("Unexpected settings test without test flag.");
+        
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
+        {
+            Name = "User",
+            Services = new ProfileSettings.ProfileServicesMap
+            {
+                SpeechToText = new ServiceMap { Service = FakesConstants.ServiceName },
+                ActionInference = new ServiceMap { Service = FakesConstants.ServiceName }
+            }
+        };
+
+        SettingsViewModel vm;
+        try
+        {
+            vm = new SettingsViewModel
+            {
+                Profile = profile,
+                Services = (await _diagnosticsUtil.GetAllServicesAsync(cancellationToken)).Services,
+            };
+        }
+        catch (Exception exc)
+        {
+            vm = new SettingsViewModel
+            {
+                Services = new List<ServiceDiagnosticsResult>
+                {
+                    new()
+                    {
+                        ServiceName = "",
+                        Label = $"Diagnostics Error: {exc.Message}",
+                        IsHealthy = false,
+                        IsReady = false,
+                        Status = exc.ToString()
+                    }
+                }
+            };
+        }
+
+        return View("Settings", vm);
+    }
+    
+    [HttpGet("/settings/profile")]
+    public async Task<IActionResult> ProfileSettings(CancellationToken cancellationToken)
+    {
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
+        {
+            Name = "User",
+            Description = "",
+            PauseSpeechRecognitionDuringPlayback = true,
+            Services = new ProfileSettings.ProfileServicesMap
+            {
+                ActionInference = new ServiceMap
+                {
+                    Service = OpenAIConstants.ServiceName,
+                },
+                SpeechToText = new ServiceMap
+                {
+                    Service = VoskConstants.ServiceName,
+                }
+            }
+        };
+        return View(profile);
+    }
+    
+    [HttpPost("/settings/profile")]
+    public async Task<IActionResult> PostProfileSettings([FromForm] ProfileSettings value)
     {
         if (!ModelState.IsValid)
         {
-            return View("Settings", model);
+            return View("ProfileSettings", value);
         }
         
-        await settingsRepository.SaveAsync(new OpenAISettings
+        await _profileRepository.SaveProfileAsync(new ProfileSettings
         {
-            ApiKey = string.IsNullOrEmpty(model.OpenAI.ApiKey) ? null : Crypto.EncryptString(model.OpenAI.ApiKey.Trim('"', ' ')),
-            Model = model.OpenAI.Model.Trim(),
+            Name = value.Name.TrimCopyPasteArtefacts(),
+            Description = value.Description?.TrimCopyPasteArtefacts(),
+            PauseSpeechRecognitionDuringPlayback = value.PauseSpeechRecognitionDuringPlayback,
+            Services = value.Services
         });
-        await settingsRepository.SaveAsync(new NovelAISettings
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/azurespeechservice")]
+    public async Task<IActionResult> AzureSpeechServiceSettings(CancellationToken cancellationToken)
+    {
+        var azurespeechservice = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken) ?? new AzureSpeechServiceSettings
         {
-            Token = string.IsNullOrEmpty(model.NovelAI.Token) ? null : Crypto.EncryptString(model.NovelAI.Token.Trim('"', ' ')),
-            Model = model.NovelAI.Model.Trim(),
+            SubscriptionKey = "",
+            Region = "",
+        };
+        if (!string.IsNullOrEmpty(azurespeechservice.SubscriptionKey)) azurespeechservice.SubscriptionKey = Crypto.DecryptString(azurespeechservice.SubscriptionKey);  
+        return View(azurespeechservice);
+    }
+    
+    [HttpPost("/settings/azurespeechservice")]
+    public async Task<IActionResult> PostAzureSpeechServiceSettings([FromForm] AzureSpeechServiceSettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("AzureSpeechServiceSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
+        {
+            SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? null : Crypto.EncryptString(value.SubscriptionKey.TrimCopyPasteArtefacts()),
+            Region = value.Region?.TrimCopyPasteArtefacts() ?? "",
         });
-        await settingsRepository.SaveAsync(new KoboldAISettings
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/vosk")]
+    public async Task<IActionResult> VoskSettings(CancellationToken cancellationToken)
+    {
+        var vosk = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken) ?? new VoskSettings
         {
-            Uri = model.KoboldAI.Uri,
+            Model = "vosk-model-small-en-us-0.15",
+            ModelHash = "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498",
+        };
+        return View(vosk);
+    }
+    
+    [HttpPost("/settings/vosk")]
+    public async Task<IActionResult> PostVoskSettings([FromForm] VoskSettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("VoskSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new VoskSettings
+        {
+            Model = value.Model?.TrimCopyPasteArtefacts() ?? "",
+            ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
         });
-        await settingsRepository.SaveAsync(new OobaboogaSettings
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/elevenlabs")]
+    public async Task<IActionResult> ElevenLabsSettings(CancellationToken cancellationToken)
+    {
+        var elevenlabs = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken) ?? new ElevenLabsSettings
         {
-            Uri = model.Oobabooga.Uri,
+            ApiKey = "",
+        };
+        if (!string.IsNullOrEmpty(elevenlabs.ApiKey)) elevenlabs.ApiKey = Crypto.DecryptString(elevenlabs.ApiKey);  
+        return View(elevenlabs);
+    }
+    
+    [HttpPost("/settings/elevenlabs")]
+    public async Task<IActionResult> PostElevenLabsSettings([FromForm] ElevenLabsSettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("ElevenLabsSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new ElevenLabsSettings
+        {
+            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? null : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
         });
-        await settingsRepository.SaveAsync(new ElevenLabsSettings
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/oobabooga")]
+    public async Task<IActionResult> OobaboogaSettings(CancellationToken cancellationToken)
+    {
+        var oobabooga = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken) ?? new OobaboogaSettings
         {
-            ApiKey = string.IsNullOrEmpty(model.ElevenLabs.ApiKey) ? null : Crypto.EncryptString(model.ElevenLabs.ApiKey.Trim('"', ' ')),
+            Uri = "http://127.0.0.1:5000",
+        };
+        return View(oobabooga);
+    }
+    
+    [HttpPost("/settings/oobabooga")]
+    public async Task<IActionResult> PostOobaboogaSettings([FromForm] OobaboogaSettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("OobaboogaSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new OobaboogaSettings
+        {
+            Uri = value.Uri?.TrimCopyPasteArtefacts() ?? "",
         });
-        await settingsRepository.SaveAsync(new AzureSpeechServiceSettings
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/koboldai")]
+    public async Task<IActionResult> KoboldAISettings(CancellationToken cancellationToken)
+    {
+        var koboldai = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken) ?? new KoboldAISettings
         {
-            SubscriptionKey = string.IsNullOrEmpty(model.AzureSpeechService.SubscriptionKey) ? null : Crypto.EncryptString(model.AzureSpeechService.SubscriptionKey.Trim('"', ' ')),
-            Region = model.AzureSpeechService.Region?.Trim() ?? "",
+            Uri = "",
+        };
+        return View(koboldai);
+    }
+    
+    [HttpPost("/settings/koboldai")]
+    public async Task<IActionResult> PostKoboldAISettings([FromForm] KoboldAISettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("KoboldAISettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new KoboldAISettings
+        {
+            Uri = value.Uri?.TrimCopyPasteArtefacts() ?? "",
         });
-        await profileRepository.SaveProfileAsync(new ProfileSettings
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/novelai")]
+    public async Task<IActionResult> NovelAISettings(CancellationToken cancellationToken)
+    {
+        var novelai = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken) ?? new NovelAISettings
         {
-            Name = model.Profile.Name.Trim(),
-            Description = model.Profile.Description?.Trim(),
-            PauseSpeechRecognitionDuringPlayback = model.Profile.PauseSpeechRecognitionDuringPlayback,
-            Services = model.Profile.Services
+            Token = "",
+        };
+        if (!string.IsNullOrEmpty(novelai.Token)) novelai.Token = Crypto.DecryptString(novelai.Token);  
+        return View(novelai);
+    }
+    
+    [HttpPost("/settings/novelai")]
+    public async Task<IActionResult> PostNovelAISettings([FromForm] NovelAISettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("NovelAISettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new NovelAISettings
+        {
+            Token = string.IsNullOrEmpty(value.Token) ? null : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
+            Model = value.Model.TrimCopyPasteArtefacts(),
+        });
+        
+        return RedirectToAction("Settings");
+    }
+    
+    [HttpGet("/settings/openai")]
+    public async Task<IActionResult> OpenAISettings(CancellationToken cancellationToken)
+    {
+        var openai = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken) ?? new OpenAISettings
+        {
+            ApiKey = "",
+        };
+        if (!string.IsNullOrEmpty(openai.ApiKey)) openai.ApiKey = Crypto.DecryptString(openai.ApiKey);  
+        return View(openai);
+    }
+    
+    [HttpPost("/settings/openai")]
+    public async Task<IActionResult> PostOpenAISettings([FromForm] OpenAISettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("OpenAISettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new OpenAISettings
+        {
+            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? null : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
+            Model = value.Model.TrimCopyPasteArtefacts(),
         });
         
         return RedirectToAction("Settings");

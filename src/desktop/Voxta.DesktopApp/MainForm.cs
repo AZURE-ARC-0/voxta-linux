@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Text.Json;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace Voxta.DesktopApp;
@@ -25,7 +27,7 @@ public partial class MainForm : Form
         WebView = new WebView2
         {
             Dock = DockStyle.Fill,
-            Visible = false
+            Visible = false,
         };
         Controls.Add(WebView);
 
@@ -41,7 +43,9 @@ public partial class MainForm : Form
         KeyPreview = true;
         KeyDown += MainForm_KeyDown;
 
+        #pragma warning disable CS4014
         InitializeAsync();
+        #pragma warning restore CS4014
     }
 
     private async Task InitializeAsync()
@@ -49,6 +53,7 @@ public partial class MainForm : Form
         try
         {
             await WebView.EnsureCoreWebView2Async(null);
+            WebView.CoreWebView2.WebMessageReceived += WebView_CoreWebView2_WebMessageReceived;
             await WaitForServerReady("http://127.0.0.1:5384/ping");
             SwitchToWebView();
             WebView.CoreWebView2.Navigate("http://127.0.0.1:5384/newchat");
@@ -58,6 +63,23 @@ public partial class MainForm : Form
             // Handle the exception, e.g. show a message box
             MessageBox.Show(exc.ToString() ?? "Undefined exception");
         }
+    }
+
+    private void WebView_CoreWebView2_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+    {
+        var str = e.TryGetWebMessageAsString();
+        var json = JsonSerializer.Deserialize<MyMessage>(str, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        });
+        if(json?.Command == "switchToTerminal")
+            Invoke(SwitchToTerminal);
+    }
+    
+    [Serializable]
+    public class MyMessage
+    {
+        public string? Command { get; set; }
     }
 
     private void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
