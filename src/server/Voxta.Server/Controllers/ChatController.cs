@@ -10,10 +10,4 @@ public class ChatController : Controller
     {
         return View();
     }
-    
-    [HttpGet("/newchat")]
-    public IActionResult NewChat()
-    {
-        return View();
-    }
 }

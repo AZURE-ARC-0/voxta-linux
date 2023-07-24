@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Server.Controllers;
 
@@ -6,7 +7,16 @@ namespace Voxta.Server.Controllers;
 public class HomeController : Controller
 {
     [HttpGet("/")]
-    public ActionResult Index()
+    public async Task<ActionResult> Index([FromServices] IProfileRepository profileRepository, CancellationToken cancellationToken)
+    {
+        var profile = await profileRepository.GetProfileAsync(cancellationToken);
+        return profile == null
+            ? RedirectToAction("Settings", "Settings")
+            : RedirectToAction("Chat", "Chat");
+    }
+    
+    [HttpGet("/support")]
+    public ActionResult Support()
     {
         return View();
     }

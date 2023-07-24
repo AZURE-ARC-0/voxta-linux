@@ -17,7 +17,7 @@ public class DiagnosticsController : Controller
     }
 
     [HttpGet("/diagnostics")]
-    public Task<IActionResult> Diagnostics(CancellationToken cancellationToken)
+    public IActionResult Performance()
     {
         var vm = new DiagnosticsViewModel
         {
@@ -26,6 +26,6 @@ public class DiagnosticsController : Controller
                 .Select(k => new DiagnosticsViewModel.PerformanceMetricsViewModel { Key = k, Avg = _performanceMetrics.GetAverage(k) })
                 .ToArray()
         };
-        return Task.FromResult<IActionResult>(View(vm));
+        return View(vm);
     }
 }
