@@ -2,11 +2,14 @@
 using Voxta.Abstractions.Services;
 using Voxta.Services.Vosk.Model;
 using Vosk;
+using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Services.Vosk;
 
 public sealed class VoskSpeechToText : ISpeechToTextService
 {
+    private const int _sampleRate = 16000;
+    
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
     
     private static readonly JsonSerializerOptions SerializeOptions = new()
@@ -16,8 +19,8 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     
     private readonly IVoskModelDownloader _modelDownloader;
     private readonly IRecordingService _recordingService;
-    private const int SampleRate = 16000;
-    
+    private readonly ISettingsRepository _settingsRepository;
+
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
@@ -27,62 +30,71 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     public event EventHandler<string>? SpeechRecognitionPartial;
     public event EventHandler<string>? SpeechRecognitionFinished;
 
-    public VoskSpeechToText(IVoskModelDownloader modelDownloader, IRecordingService recordingService)
+    public VoskSpeechToText(IVoskModelDownloader modelDownloader, IRecordingService recordingService, ISettingsRepository settingsRepository)
     {
         _modelDownloader = modelDownloader;
         _recordingService = recordingService;
+        _settingsRepository = settingsRepository;
+    }
+
+    static VoskSpeechToText()
+    {
+        global::Vosk.Vosk.SetLogLevel(-1);
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         if (_initialized) return;
         _initialized = true;
+        var settings = _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
+        if (settings == null) throw new VoskException("Vosk is not configured.");
+        if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         await Semaphore.WaitAsync(cancellationToken);
         if (_disposed) return;
         var model = await _modelDownloader.AcquireModelAsync(cancellationToken);
-        global::Vosk.Vosk.SetLogLevel(-1);
-        _recognizer = new VoskRecognizer(model, SampleRate);
+        _recognizer = new VoskRecognizer(model, _sampleRate);
         _recognizer.SetWords(true);
-        _recordingService.DataAvailable += (_, e) =>
+        _recordingService.DataAvailable += DataAvailable;
+    }
+
+    private void DataAvailable(object? sender, RecordingDataEventArgs e)
+    {
+        if (_disposed || _recognizer == null) return;
+        bool accepted;
+        try
         {
-            if (_disposed) return;
-            bool accepted;
-            try
+            accepted = _recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded);
+        }
+        catch (AccessViolationException)
+        {
+            return;
+        }
+
+        if (accepted)
+        {
+            _speaking = false;
+            var result = _recognizer.Result();
+            var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
+            if (json == null || string.IsNullOrEmpty(json.Text)) return;
+            if (json.Result == null) return;
+            if (json.Result is [{ Conf: < 0.99 }]) return;
+            if (json.Result.Length == 1 && IsNoise(json.Text)) return;
+            SpeechRecognitionFinished?.Invoke(this, json.Text);
+        }
+        else
+        {
+            var result = _recognizer.PartialResult();
+            var json = JsonSerializer.Deserialize<PartialResult>(result, SerializeOptions);
+            if (json == null || string.IsNullOrEmpty(json.Partial)) return;
+            if (IsNoise(json.Partial)) return;
+            if (!_speaking)
             {
-                accepted = _recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded);
-            }
-            catch (AccessViolationException)
-            {
-                #warning Log
-                return;
+                _speaking = true;
+                SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
             }
 
-            if (accepted)
-            {
-                _speaking = false;
-                var result = _recognizer.Result();
-                var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
-                if (json == null || string.IsNullOrEmpty(json.Text)) return; 
-                if (json.Result == null) return;
-                if (json.Result is [{ Conf: < 0.99 }]) return;
-                if (json.Result.Length == 1 && IsNoise(json.Text)) return;
-                SpeechRecognitionFinished?.Invoke(this, json.Text);
-            }
-            else
-            {
-                var result = _recognizer.PartialResult();
-                var json = JsonSerializer.Deserialize<PartialResult>(result, SerializeOptions);
-                if (json == null || string.IsNullOrEmpty(json.Partial)) return;
-                if (IsNoise(json.Partial)) return;
-                if (!_speaking)
-                {
-                    _speaking = true;
-                    SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
-                }
-                SpeechRecognitionPartial?.Invoke(this, json.Partial);
-            }
-        };
+            SpeechRecognitionPartial?.Invoke(this, json.Partial);
+        }
     }
 
     private static bool IsNoise(string text)
@@ -107,6 +119,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         if(_disposed) return;
         _disposed = true;
         _recordingService.StopRecording();
+        _recordingService.DataAvailable -= DataAvailable;
         _recognizer?.Dispose();
         try
         {

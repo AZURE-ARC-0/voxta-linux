@@ -40,8 +40,8 @@ public class VoskModelDownloader : IVoskModelDownloader
     private async Task<global::Vosk.Model> AcquireModelInternalAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
-        if (settings == null || string.IsNullOrEmpty(settings.Model))
-            throw new NullReferenceException("There is no Vosk settings in the profile");
+        if (settings == null)
+            throw new VoskException("There is no Vosk settings in the profile");
         var modelsPath = Path.GetFullPath("Models/Vosk");
         var modelName = settings.Model;
         var modelZipHash = settings.ModelHash;

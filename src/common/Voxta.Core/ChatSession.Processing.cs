@@ -22,12 +22,6 @@ public partial class ChatSession
         }
     }
 
-    private async Task StopProcessingQueue()
-    {
-        _messageQueueCancellationTokenSource.Cancel();
-        await _messageQueueProcessTask;
-    }
-
     private async Task ProcessQueueAsync(CancellationToken cancellationToken)
     {
         try

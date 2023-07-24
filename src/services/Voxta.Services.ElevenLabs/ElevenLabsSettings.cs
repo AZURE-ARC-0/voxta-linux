@@ -5,5 +5,5 @@ namespace Voxta.Services.ElevenLabs;
 [Serializable]
 public class ElevenLabsSettings : SettingsBase
 {
-    public string? ApiKey { get; set; }
+    public required string ApiKey { get; set; }
 }

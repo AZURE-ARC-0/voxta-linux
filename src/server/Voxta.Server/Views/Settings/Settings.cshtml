@@ -5,6 +5,43 @@
     ViewBag.Title = "Settings";
 }
 
+
+@section styles {
+    <style>
+        .tooltip2 {
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+          border-bottom: 1px dotted black; /*optional, to indicate a tooltip is available */
+        }
+        
+        .tooltip2 .tooltip-text {
+          visibility: hidden;
+          width: 60vw;
+          background-color: #555;
+          color: #fff;
+          text-align: left;
+          padding: 5px;
+          border-radius: 6px;
+          
+          /* Positioning */
+          position: absolute;
+          z-index: 1;
+          bottom: 100%; 
+          left: -50%;
+        
+          /* Fade-in effect */
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+        
+        .tooltip2:hover .tooltip-text {
+          visibility: visible;
+          opacity: 1;
+        }
+    </style>
+}
+
 <div class="container">
     <h1>Settings</h1>
     
@@ -43,7 +80,26 @@
                                 }
                             </td>
                             <td>@s.Label</td>
-                            <td><code><pre>@s.Status</pre></code></td>
+                            <td>
+                                @if (s.IsTested || s is { IsReady: true,IsHealthy: false })
+                                {
+                                    <code class="tooltip2">
+                                        @s.Status
+                                        @if (!string.IsNullOrEmpty(s.Details))
+                                        {
+                                            <span class="tooltip-text"><pre>@s.Details.Trim()</pre></span>
+                                        }
+                                    </code>
+                                }
+                                else if (!s.IsReady)
+                                {
+                                    <span class="text-muted">Not configured</span>
+                                }
+                                else
+                                {
+                                    <span>Ready</span>
+                                }
+                            </td>
                             <td>
                                 <a class="btn btn-sm btn-secondary" href="/settings/@s.ServiceName.ToLower()">Configure</a>
                             </td>
@@ -55,7 +111,7 @@
         }
         <div class="card-footer">
             <div class="d-flex justify-content-center text-center">
-                <form action="/settings/test" method="post">
+                <form asp-action="TestAllSettings">
                     <input type="hidden" name="test" value="true"/>
                     <p class="text-muted pl-2">Click once and wait for the results, it may take some time.</p>
                     <p><button type="submit" class="btn btn-primary">Test Now</button></p>

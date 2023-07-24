@@ -3,24 +3,32 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
+using Voxta.Abstractions.Repositories;
 using Voxta.Common;
 
 namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase
 {
+    private readonly ISettingsRepository _settingsRepository;
     private readonly HttpClient _httpClient;
     private string _model = "gpt-3.5-turbo";
+    private bool _initialized;
 
-    protected OpenAIClientBase(IHttpClientFactory httpClientFactory)
+    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
     {
+        _settingsRepository = settingsRepository;
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
-    protected void InitializeClient([NotNull] OpenAISettings? settings)
+    public async Task InitializeAsync(CancellationToken cancellationToken)
     {
+        if (_initialized) return;
+        _initialized = true;
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
+        if (settings == null) throw new OpenAIException("OpenAI is not configured.");
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
+        if (string.IsNullOrEmpty(settings.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
         _model = settings.Model;
     }

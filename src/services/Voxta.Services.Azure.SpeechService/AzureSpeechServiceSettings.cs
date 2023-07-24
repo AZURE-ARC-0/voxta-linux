@@ -5,6 +5,6 @@ namespace Voxta.Services.AzureSpeechService;
 [Serializable]
 public class AzureSpeechServiceSettings : SettingsBase
 {
-    public string? SubscriptionKey { get; set; }
-    public string? Region { get; set; }
+    public required string SubscriptionKey { get; set; }
+    public required string Region { get; set; }
 }

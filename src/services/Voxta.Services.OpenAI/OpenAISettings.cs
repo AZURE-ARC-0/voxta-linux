@@ -7,6 +7,6 @@ public class OpenAISettings : SettingsBase
 {
     public const string DefaultModel = "gpt-3.5-turbo";
 
-    public string? ApiKey { get; set; }
+    public required string ApiKey { get; set; }
     public string Model { get; set; } = DefaultModel;
 }

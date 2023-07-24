@@ -29,7 +29,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
-        if (settings == null) throw new AuthenticationException("Azure Speech Service is not configured.");
+        if (settings == null) throw new AzureSpeechServiceException("Azure Speech Service is not configured.");
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
         if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);

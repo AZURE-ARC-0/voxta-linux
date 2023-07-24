@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Voxta.Core;
 
-public interface ISpeechGenerator
+public interface ISpeechGenerator : IDisposable
 {
     Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken);
 }
@@ -44,6 +44,10 @@ public class NoSpeechGenerator : ISpeechGenerator
     public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
     {
         return Task.FromResult<string?>(null);
+    }
+
+    public void Dispose()
+    {
     }
 }
 
@@ -83,6 +87,11 @@ public class LocalSpeechGenerator : ISpeechGenerator
         );
         return speechUrl;
     }
+
+    public void Dispose()
+    {
+        _textToSpeechService.Dispose();
+    }
 }
 
 public class RemoteSpeechGenerator : ISpeechGenerator
@@ -117,5 +126,9 @@ public class RemoteSpeechGenerator : ISpeechGenerator
         });
         var speechUrl = $"/tts/gens/{id}.{AudioData.GetExtension(_contentType)}";
         return speechUrl;
+    }
+
+    public void Dispose()
+    {
     }
 }

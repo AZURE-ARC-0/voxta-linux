@@ -9,28 +9,17 @@ namespace Voxta.Services.OpenAI;
 
 public class OpenAITextGenClient : OpenAIClientBase, ITextGenService, IActionInferenceService
 {
-    private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
-    private bool _initialized;
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
-        : base(httpClientFactory)
+        : base(httpClientFactory, settingsRepository)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
-        _settingsRepository = settingsRepository;
         _tokenizer = tokenizer;
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
-    }
-
-    public async Task InitializeAsync(CancellationToken cancellationToken)
-    {
-        if (_initialized) return;
-        _initialized = true;
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
-        InitializeClient(settings);
     }
 
     public int GetTokenCount(string message)

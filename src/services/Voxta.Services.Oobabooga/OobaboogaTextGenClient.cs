@@ -32,8 +32,9 @@ public class OobaboogaTextGenClient : ITextGenService, IActionInferenceService
         if (_initialized) return;
         _initialized = true;
         var settings = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken);
+        if (settings == null) throw new OobaboogaException("Text Generation Web UI is not configured.");
         var uri = settings?.Uri;
-        if (string.IsNullOrEmpty(uri)) throw new OobaboogaException("Missing uri in settings");
+        if (string.IsNullOrEmpty(uri)) throw new OobaboogaException("Missing uri in settings.");
         _httpClient.BaseAddress = new Uri(uri);
     }
 

@@ -24,9 +24,9 @@ public partial class ChatSession
             }, cancellationToken);
         }
 
-        if (_animationSelection != null && _chatSessionData.Actions is { Length: > 0 })
+        if (_actionInference != null && _chatSessionData.Actions is { Length: > 0 })
         {
-            var action = await _animationSelection.SelectActionAsync(_chatSessionData, cancellationToken);
+            var action = await _actionInference.SelectActionAsync(_chatSessionData, cancellationToken);
             if (!_chatSessionData.Actions.Contains(action))
             {
                 var incorrect = action;

@@ -68,10 +68,11 @@ public class SettingsController : Controller
         SettingsViewModel vm;
         try
         {
+            var result = await _diagnosticsUtil.TestAllServicesAsync(cancellationToken);
             vm = new SettingsViewModel
             {
                 Profile = profile,
-                Services = (await _diagnosticsUtil.GetAllServicesAsync(cancellationToken)).Services,
+                Services = result.Services,
             };
         }
         catch (Exception exc)
@@ -159,8 +160,8 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
         {
-            SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? null : Crypto.EncryptString(value.SubscriptionKey.TrimCopyPasteArtefacts()),
-            Region = value.Region?.TrimCopyPasteArtefacts() ?? "",
+            SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? "" : Crypto.EncryptString(value.SubscriptionKey.TrimCopyPasteArtefacts()),
+            Region = value.Region.TrimCopyPasteArtefacts(),
         });
         
         return RedirectToAction("Settings");
@@ -187,7 +188,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new VoskSettings
         {
-            Model = value.Model?.TrimCopyPasteArtefacts() ?? "",
+            Model = value.Model.TrimCopyPasteArtefacts(),
             ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
         });
         
@@ -215,7 +216,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new ElevenLabsSettings
         {
-            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? null : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
+            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
         });
         
         return RedirectToAction("Settings");
@@ -241,7 +242,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new OobaboogaSettings
         {
-            Uri = value.Uri?.TrimCopyPasteArtefacts() ?? "",
+            Uri = value.Uri.TrimCopyPasteArtefacts(),
         });
         
         return RedirectToAction("Settings");
@@ -267,7 +268,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new KoboldAISettings
         {
-            Uri = value.Uri?.TrimCopyPasteArtefacts() ?? "",
+            Uri = value.Uri.TrimCopyPasteArtefacts(),
         });
         
         return RedirectToAction("Settings");
@@ -294,7 +295,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new NovelAISettings
         {
-            Token = string.IsNullOrEmpty(value.Token) ? null : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
+            Token = string.IsNullOrEmpty(value.Token) ? "" : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
         });
         
@@ -322,7 +323,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new OpenAISettings
         {
-            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? null : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
+            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
         });
         

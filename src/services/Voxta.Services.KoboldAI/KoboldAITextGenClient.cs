@@ -29,9 +29,9 @@ public class KoboldAITextGenClient : ITextGenService
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
-        var uri = settings?.Uri;
-        if (string.IsNullOrEmpty(uri)) throw new KoboldAIException("Missing uri in settings");
-        _httpClient.BaseAddress = new Uri(uri);
+        if (settings == null) throw new KoboldAIException("KoboldAI is not configured.");
+        if (string.IsNullOrEmpty(settings.Uri)) throw new KoboldAIException("Missing uri in settings");
+        _httpClient.BaseAddress = new Uri(settings.Uri);
     }
 
     public int GetTokenCount(string message)

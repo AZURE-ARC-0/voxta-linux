@@ -25,7 +25,7 @@ public sealed partial class ChatSession : IChatSession
     private readonly ILogger<UserConnection> _logger;
     private readonly ChatSessionState _chatSessionState;
     private readonly ISpeechGenerator _speechGenerator;
-    private readonly IActionInferenceService? _animationSelection;
+    private readonly IActionInferenceService? _actionInference;
     private readonly ISpeechToTextService? _speechToText;
 
     public ChatSession(IUserConnectionTunnel tunnel,
@@ -37,7 +37,7 @@ public sealed partial class ChatSession : IChatSession
         ProfileSettings profile,
         ChatSessionState chatSessionState,
         ISpeechGenerator speechGenerator,
-        IActionInferenceService? animationSelection,
+        IActionInferenceService? actionInference,
         ISpeechToTextService? speechToText
         )
     {
@@ -50,7 +50,7 @@ public sealed partial class ChatSession : IChatSession
         _logger = loggerFactory.CreateLogger<UserConnection>();
         _chatSessionState = chatSessionState;
         _speechGenerator = speechGenerator;
-        _animationSelection = animationSelection;
+        _actionInference = actionInference;
         _speechToText = speechToText;
 
         if (speechToText != null)
@@ -110,14 +110,21 @@ public sealed partial class ChatSession : IChatSession
 
     public async ValueTask DisposeAsync()
     {
+        _messageQueueCancellationTokenSource.Cancel();
+        await _messageQueueProcessTask;
+        
         if (_speechToText != null)
         {
             _speechToText.SpeechRecognitionStarted -= OnSpeechRecognitionStarted;
             _speechToText.SpeechRecognitionPartial -= OnSpeechRecognitionPartial;
             _speechToText.SpeechRecognitionFinished -= OnSpeechRecognitionFinished;
-            _speechToText.Dispose();
         }
 
-        await StopProcessingQueue();
+        _speechToText?.Dispose();
+        _textGen.Dispose();
+        _speechGenerator.Dispose();
+        _actionInference?.Dispose();
+        _processingSemaphore.Dispose();
+        _messageQueueCancellationTokenSource.Dispose();
     }
 }
