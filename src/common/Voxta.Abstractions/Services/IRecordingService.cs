@@ -2,6 +2,8 @@
 
 public interface IRecordingService : IDisposable
 {
+    bool Speaking { get; set; }
+    
     event EventHandler<RecordingDataEventArgs>? DataAvailable;
     void StartRecording();
     void StopRecording();

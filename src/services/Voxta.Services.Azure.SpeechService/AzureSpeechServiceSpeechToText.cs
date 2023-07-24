@@ -16,7 +16,6 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     private readonly ILogger<AzureSpeechServiceSpeechToText> _logger;
     private SpeechRecognizer? _recognizer;
     private PushAudioInputStream? _pushStream;
-    private bool _speaking;
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
@@ -46,9 +45,9 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         {
             if (e.Result.Reason != ResultReason.RecognizingSpeech) return;
             _logger.LogDebug("Speech recognizing");
-            if (!_speaking)
+            if (!_recordingService.Speaking)
             {
-                _speaking = true;
+                _recordingService.Speaking = true;
                 SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
             }
             SpeechRecognitionPartial?.Invoke(this, e.Result.Text);
@@ -58,13 +57,13 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         {
             if (e.Result.Reason != ResultReason.RecognizedSpeech) return;
             _logger.LogDebug("Speech recognized");
-            _speaking = false;
+            _recordingService.Speaking = false;
             if (!string.IsNullOrEmpty(e.Result.Text))
                 SpeechRecognitionFinished?.Invoke(this, e.Result.Text);
         };
 
         _recognizer.Canceled += (s, e) => {
-            _speaking = false;
+            _recordingService.Speaking = false;
             _logger.LogDebug("Session canceled event");
         };
 
@@ -88,7 +87,6 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     public void StopMicrophoneTranscription()
     {
         _recordingService.StopRecording();
-        _speaking = false;
     }
     
     public void Dispose()

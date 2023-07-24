@@ -24,7 +24,6 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
-    private bool _speaking;
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
@@ -72,7 +71,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
 
         if (accepted)
         {
-            _speaking = false;
+            _recordingService.Speaking = false;
             var result = _recognizer.Result();
             var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
             if (json == null || string.IsNullOrEmpty(json.Text)) return;
@@ -87,9 +86,9 @@ public sealed class VoskSpeechToText : ISpeechToTextService
             var json = JsonSerializer.Deserialize<PartialResult>(result, SerializeOptions);
             if (json == null || string.IsNullOrEmpty(json.Partial)) return;
             if (IsNoise(json.Partial)) return;
-            if (!_speaking)
+            if (!_recordingService.Speaking)
             {
-                _speaking = true;
+                _recordingService.Speaking = true;
                 SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
             }
 
@@ -111,7 +110,6 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     public void StopMicrophoneTranscription()
     {
         _recordingService.StopRecording();
-        _speaking = false;
     }
     
     public void Dispose()
