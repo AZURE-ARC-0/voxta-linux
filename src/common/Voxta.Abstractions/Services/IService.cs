@@ -3,5 +3,5 @@
 #warning Call Dispose, maybe use DisposeAsync instead
 public interface IService : IDisposable
 {
-    Task InitializeAsync(CancellationToken cancellationToken);
+    Task InitializeAsync(string culture, CancellationToken cancellationToken);
 }

@@ -26,7 +26,7 @@ public class KoboldAITextGenClient : ITextGenService
         _performanceMetrics = performanceMetrics;
     }
     
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
         if (settings == null) throw new KoboldAIException("KoboldAI is not configured.");

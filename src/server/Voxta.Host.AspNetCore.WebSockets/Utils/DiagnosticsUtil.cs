@@ -118,16 +118,16 @@ public class DiagnosticsUtil
         return result;
     }
 
-    private async Task<ServiceDiagnosticsResult> TryTextGenAsync(string key, bool runTests, CancellationToken cancellationToken)
+    private async Task<ServiceDiagnosticsResult> TryTextGenAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{key} (Text Gen)";
+        var name = $"{serviceName} (Text Gen)";
         
         ITextGenService? service = null;
         try
         {
             try
             {
-                service = await _textGenFactory.CreateAsync(key, cancellationToken);
+                service = await _textGenFactory.CreateAsync(serviceName, "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -136,7 +136,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -148,7 +148,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString()
@@ -162,7 +162,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = true,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Configured"
                 };
@@ -187,7 +187,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = true,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Response: " + result.Text
                 };
@@ -199,7 +199,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = false,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -211,7 +211,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = false,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Name}: {exc.Message}",
                     Details = exc.ToString()
@@ -224,16 +224,16 @@ public class DiagnosticsUtil
         }
     }
     
-    private async Task<ServiceDiagnosticsResult> TryTextToSpeechAsync(string key, bool runTests, CancellationToken cancellationToken)
+    private async Task<ServiceDiagnosticsResult> TryTextToSpeechAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{key} (TTS)";
+        var name = $"{serviceName} (TTS)";
         
         ITextToSpeechService? service = null;
         try
         {
             try
             {
-                service = await _textToSpeechFactory.CreateAsync(key, cancellationToken);
+                service = await _textToSpeechFactory.CreateAsync(serviceName, "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -242,7 +242,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -254,7 +254,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString(),
@@ -268,7 +268,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = true,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Configured"
                 };
@@ -280,7 +280,7 @@ public class DiagnosticsUtil
                 var tunnel = new DeadSpeechTunnel();
                 await service.GenerateSpeechAsync(new SpeechRequest
                 {
-                    Service = key,
+                    Service = serviceName,
                     Text = "Hi",
                     Voice = voices.FirstOrDefault()?.Id ?? "default",
                     ContentType = service.ContentType,
@@ -290,7 +290,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = tunnel.Result != null,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = tunnel.Result ?? "No result"
                 };
@@ -302,7 +302,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = false,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -314,7 +314,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = false,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString(),
@@ -344,16 +344,16 @@ public class DiagnosticsUtil
         }
     }
     
-    private async Task<ServiceDiagnosticsResult> TryAnimSelect(string key, bool runTests, CancellationToken cancellationToken)
+    private async Task<ServiceDiagnosticsResult> TryAnimSelect(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{key} (Animation Selector)";
+        var name = $"{serviceName} (Animation Selector)";
         
         IActionInferenceService? service = null;
         try
         {
             try
             {
-                service = await _animationSelectionFactory.CreateAsync(key, cancellationToken);
+                service = await _animationSelectionFactory.CreateAsync(serviceName, "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -362,7 +362,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -374,7 +374,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString(),
@@ -388,7 +388,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = true,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Configured"
                 };
@@ -414,7 +414,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = true,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Response: " + result
                 };
@@ -426,7 +426,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = false,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -438,7 +438,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = false,
                     IsTested = true,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString()
@@ -451,16 +451,16 @@ public class DiagnosticsUtil
         }
     }
     
-    private async Task<ServiceDiagnosticsResult> TrySpeechToText(string key, bool runTests, CancellationToken cancellationToken)
+    private async Task<ServiceDiagnosticsResult> TrySpeechToText(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{key} (Speech To Text)";
+        var name = $"{serviceName} (Speech To Text)";
 
         ISpeechToTextService? service = null;
         try
         {
             try
             {
-                service = await _speechToTextFactory.CreateAsync(key, cancellationToken);
+                service = await _speechToTextFactory.CreateAsync(serviceName, "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -469,7 +469,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Canceled"
                 };
@@ -481,7 +481,7 @@ public class DiagnosticsUtil
                     IsReady = false,
                     IsHealthy = false,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString(),
@@ -495,7 +495,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = true,
                     IsTested = false,
-                    ServiceName = key,
+                    ServiceName = serviceName,
                     Label = name,
                     Status = "Configured"
                 };
@@ -506,7 +506,7 @@ public class DiagnosticsUtil
                 IsReady = true,
                 IsHealthy = true,
                 IsTested = true,
-                ServiceName = key,
+                ServiceName = serviceName,
                 Label = name,
                 Status = "Cannot be tested automatically"
             };

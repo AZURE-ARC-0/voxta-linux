@@ -25,7 +25,7 @@
         };
 
         this.socket.onerror = (error) => {
-            this.dispatchEvent(new CustomEvent('onerror', error));
+            this.dispatchEvent(new CustomEvent('onerror', {detail: error}));
         };
     }
 

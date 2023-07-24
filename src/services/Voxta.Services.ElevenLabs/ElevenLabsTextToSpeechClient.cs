@@ -20,6 +20,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly HttpClient _httpClient;
+    private string _culture = "en-US";
 
     public ElevenLabsTextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
     {
@@ -29,13 +30,14 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
     {
         _httpClient.BaseAddress = new Uri("https://api.elevenlabs.io");
         var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
         if (settings == null) throw new ElevenLabsException("ElevenLabs is not configured.");
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("ElevenLabs token is missing.");
         _httpClient.DefaultRequestHeaders.Add("xi-api-key", Crypto.DecryptString(settings.ApiKey));
+        _culture = culture;
     }
 
     public string ContentType => "audio/mpeg";
@@ -50,7 +52,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         var body = new
         {
             text = speechRequest.Text,
-            model_id = "eleven_multilingual_v1",
+            model_id = _culture == "en-US" ? "eleven_monolingual_v1" : "eleven_multilingual_v1",
             voice_settings = new
             {
                 stability = 0.45,

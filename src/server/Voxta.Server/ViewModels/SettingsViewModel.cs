@@ -5,6 +5,6 @@ namespace Voxta.Server.ViewModels;
 
 public class SettingsViewModel
 {
-    public ProfileSettings Profile { get; init; }
+    public required ProfileSettings Profile { get; init; }
     public List<ServiceDiagnosticsResult>? Services { get; init; }
 }

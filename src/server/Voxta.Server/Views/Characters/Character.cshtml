@@ -76,6 +76,19 @@
                 </p>
             </div>
         </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Services</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label asp-for="Character.Culture">Culture: <span class="text-muted">Affects which LLM, STT and TTS will be used for this character.</span></label>
+                    <input asp-for="Character.Culture" class="form-control"/>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Culture)</small>
+                </div>
+            </div>
+        </div>
 
         <div class="card mb-3">
             <div class="card-header">
@@ -125,9 +138,12 @@
     </form>
     
     <script type="text/javascript">
-        document.getElementById("Character_Services_SpeechGen_Service").onchange = function() {
+        const speechGenSelect = document.getElementById("Character_Services_SpeechGen_Service");
+        const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
+        const cultureInput = document.getElementById("Character_Culture");
+        
+        speechGenSelect.onchange = function() {
             const selectedService = this.value;
-            const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
             voicesSelect.innerHTML = ""; // Clear existing options
             {
                 const option = document.createElement("option");
@@ -136,7 +152,7 @@
                 voicesSelect.appendChild(option);
             }
 
-            fetch('/tts/services/' + selectedService + '/voices')
+            fetch('/tts/services/' + selectedService + '/voices?culture=' + cultureInput.value)
                 .then(response => response.json())
                 .then(data => {
                     voicesSelect.innerHTML = ""; // Clear existing options

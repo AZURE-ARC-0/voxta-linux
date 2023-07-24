@@ -79,6 +79,7 @@ public class SettingsController : Controller
         {
             vm = new SettingsViewModel
             {
+                Profile = profile,
                 Services = new List<ServiceDiagnosticsResult>
                 {
                     new()

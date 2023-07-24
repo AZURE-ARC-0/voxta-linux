@@ -27,7 +27,7 @@ public class OobaboogaTextGenClient : ITextGenService, IActionInferenceService
         _performanceMetrics = performanceMetrics;
     }
     
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
     {
         if (_initialized) return;
         _initialized = true;

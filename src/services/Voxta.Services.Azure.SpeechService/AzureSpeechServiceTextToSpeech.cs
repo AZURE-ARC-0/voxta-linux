@@ -18,7 +18,8 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
     private readonly ILogger<AzureSpeechServiceTextToSpeech> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
-    private SpeechSynthesizer? _speechSynthetizer;
+    private SpeechSynthesizer? _speechSynthesizer;
+    private string _culture = "en-US";
 
     public AzureSpeechServiceTextToSpeech(ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
     {
@@ -27,14 +28,15 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceTextToSpeech>();
     }
     
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
         if (settings == null) throw new AzureSpeechServiceException("Azure Speech Service is not configured.");
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
         if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
-        _speechSynthetizer = new SpeechSynthesizer(config, null);
+        _speechSynthesizer = new SpeechSynthesizer(config, null);
+        _culture = culture;
     }
 
     public string ContentType => "audio/x-wav";
@@ -46,14 +48,14 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
     {
-        if (_speechSynthetizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
+        if (_speechSynthesizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
         var ttsPerf = _performanceMetrics.Start("AzureSpeechService.TextToSpeech");
         var ssml = $"""
             <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{speechRequest.Culture}">
                 <voice name="{speechRequest.Voice}">{speechRequest.Text}</voice>
             </speak>
             """;
-        var result = await _speechSynthetizer.SpeakSsmlAsync(ssml);
+        var result = await _speechSynthesizer.SpeakSsmlAsync(ssml);
 
         if (result.Reason != ResultReason.SynthesizingAudioCompleted)
         {
@@ -70,14 +72,14 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
 
     public async Task<VoiceInfo[]> GetVoicesAsync(CancellationToken cancellationToken)
     {
-        if (_speechSynthetizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
-        var response = await _speechSynthetizer.GetVoicesAsync("en-US");
+        if (_speechSynthesizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
+        var response = await _speechSynthesizer.GetVoicesAsync(_culture);
         if (response == null) throw new NullReferenceException("No voices returned");
-        return response.Voices.Select(v => new VoiceInfo { Id = v.Name, Label = $"{v.ShortName} ({v.Gender}, {v.LocalName})" }).ToArray();
+        return response.Voices.Select(v => new VoiceInfo { Id = v.Name, Label = $"{v.ShortName} ({v.Gender})" }).ToArray();
     }
 
     public void Dispose()
     {
-        _speechSynthetizer?.Dispose();
+        _speechSynthesizer?.Dispose();
     }
 }

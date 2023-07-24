@@ -146,7 +146,7 @@ public class CharactersController : Controller
 
         if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
         {
-            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, cancellationToken);
+            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, character.Culture, cancellationToken);
             vm.Voices = await ttsService.GetVoicesAsync(cancellationToken);
         }
 

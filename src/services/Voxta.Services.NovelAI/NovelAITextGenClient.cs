@@ -202,7 +202,7 @@ public class NovelAITextGenClient : ITextGenService
         };
     }
     
-    public async Task InitializeAsync(CancellationToken cancellationToken)
+    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
         if (settings == null) throw new NovelAIException("NovelAI is not configured.");

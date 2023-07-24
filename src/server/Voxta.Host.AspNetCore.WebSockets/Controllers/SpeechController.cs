@@ -31,7 +31,7 @@ public class SpeechController : ControllerBase
             return;
         }
 
-        var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, cancellationToken);
+        var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, speechRequest.Culture, cancellationToken);
         audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
         if (speechRequest.Reusable)
         {
@@ -58,11 +58,12 @@ public class SpeechController : ControllerBase
     [HttpGet("/tts/services/{service}/voices")]
     public async Task<VoiceInfo[]> GetSpeech(
         [FromRoute] string service,
+        [FromQuery] string culture,
         [FromServices] IServiceFactory<ITextToSpeechService> speechGenFactory,
         CancellationToken cancellationToken
     )
     {
-        var textToSpeech = await speechGenFactory.CreateAsync(service, cancellationToken);
+        var textToSpeech = await speechGenFactory.CreateAsync(service, culture, cancellationToken);
         return await textToSpeech.GetVoicesAsync(cancellationToken);
     }
 }
