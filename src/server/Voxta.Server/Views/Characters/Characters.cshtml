@@ -38,22 +38,22 @@
                             <td>
                                 @if (character.ReadOnly)
                                 {
-                                    <a class="btn btn-secondary" href="/characters/@character.Id?edit=false">View</a>
+                                    <a class="btn btn-secondary" href="/characters/@character.Id?edit=false" title="View"><i class="bi bi-eye"></i></a>
                                 }
                                 else
                                 {
-                                    <a class="btn btn-primary" href="/characters/@character.Id?edit=true">Edit</a>
+                                    <a class="btn btn-primary" href="/characters/@character.Id?edit=true"><i class="bi bi-pencil"></i></a>
                                 }
                             </td>
                             <td>
-                                <a class="btn btn-secondary" href="/characters/new?from=@character.Id">Clone</a>
+                                <a class="btn btn-secondary" href="/characters/new?from=@character.Id" title="Clone"><i class="bi bi-file-plus"></i></a>
                             </td>
                             <td>
                                 @if (!character.ReadOnly)
                                 {
                                     <form action="/characters/delete" method="post">
                                         <input type="hidden" name="charId" value="@character.Id"/>
-                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                        <button type="submit" class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                     </form>
                                 }
                             </td>
@@ -75,7 +75,7 @@
                         <td><span class="text-muted">Create a new blank character</span></td>
                         <td class="text-end">
                             @* ReSharper disable Html.PathError *@
-                            <a class="btn btn-primary" href="/characters/new">Create blank character</a>
+                            <a class="btn btn-primary" href="/characters/new"><i class="bi bi-plus"></i> Create blank character</a>
                             @* ReSharper restore Html.PathError *@
                         </td>
                     </tr>
@@ -87,7 +87,7 @@
                                 <div class="mb-3">
                                     <input type="file" class="form-control" name="files" accept="image/png,application/json" />
                                 </div>
-                                <button type="submit" class="btn btn-primary">Upload and import</button>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up"></i> Upload and import</button>
                             </form>
                         </td>
                     </tr>

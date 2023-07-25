@@ -38,6 +38,14 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         config.SpeechRecognitionLanguage = culture;
         config.SetProfanity(ProfanityOption.Raw);
         
+        if (!string.IsNullOrEmpty(settings.LogFilename))
+        {
+            var directory = Path.GetDirectoryName(settings.LogFilename) ?? throw new AzureSpeechServiceException($"Invalid log filename: {settings.LogFilename}");
+            Directory.CreateDirectory(directory);
+            var filename = DateTimeOffset.Now.ToString("yy-MM-dd") + "_stt_" + Path.GetFileName(settings.LogFilename);
+            config.SetProperty(PropertyId.Speech_LogFilename, Path.Combine(directory, filename));
+        }
+        
         _pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1));
         var audioInput = AudioConfig.FromStreamInput(_pushStream);
         _recognizer = new SpeechRecognizer(config, audioInput);

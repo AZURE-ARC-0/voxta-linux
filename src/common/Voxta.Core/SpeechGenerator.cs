@@ -33,9 +33,9 @@ public class SpeechGeneratorFactory
         audioConverter.SelectOutputContentType(acceptContentTypes, textToSpeech.ContentType);
 
         if (audioPath == null)
-            return new RemoteSpeechGenerator(ttsService, ttsVoice, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
+            return new RemoteSpeechGenerator(ttsService, ttsVoice, culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
 
-        return new LocalSpeechGenerator(textToSpeech, ttsVoice, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
+        return new LocalSpeechGenerator(textToSpeech, ttsVoice, culture, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
     }
 }
 
@@ -58,11 +58,13 @@ public class LocalSpeechGenerator : ISpeechGenerator
     private readonly ITemporaryFileCleanup _temporaryFileCleanup;
     private readonly string _audioPath;
     private readonly IAudioConverter _audioConverter;
+    private readonly string _culture;
 
-    public LocalSpeechGenerator(ITextToSpeechService textToSpeechService, string ttsVoice, ITemporaryFileCleanup temporaryFileCleanup, string audioPath, IAudioConverter audioConverter)
+    public LocalSpeechGenerator(ITextToSpeechService textToSpeechService, string ttsVoice, string culture, ITemporaryFileCleanup temporaryFileCleanup, string audioPath, IAudioConverter audioConverter)
     {
         _textToSpeechService = textToSpeechService;
         _ttsVoice = ttsVoice;
+        _culture = culture;
         _temporaryFileCleanup = temporaryFileCleanup;
         _audioPath = audioPath;
         _audioConverter = audioConverter;
@@ -80,6 +82,7 @@ public class LocalSpeechGenerator : ISpeechGenerator
                 Service = _textToSpeechService.ServiceName,
                 Text = text,
                 Voice = _ttsVoice,
+                Culture = _culture,
                 ContentType = _audioConverter.ContentType,
             },
             speechTunnel,
@@ -100,11 +103,13 @@ public class RemoteSpeechGenerator : ISpeechGenerator
     private readonly string _ttsVoice;
     private readonly PendingSpeechManager _pendingSpeech;
     private readonly string _contentType;
+    private readonly string _culture;
 
-    public RemoteSpeechGenerator(string ttsService, string ttsVoice, PendingSpeechManager pendingSpeech, string contentType)
+    public RemoteSpeechGenerator(string ttsService, string ttsVoice, string culture, PendingSpeechManager pendingSpeech, string contentType)
     {
         _ttsService = ttsService;
         _ttsVoice = ttsVoice;
+        _culture = culture;
         _pendingSpeech = pendingSpeech;
         _contentType = contentType;
     }
@@ -121,6 +126,7 @@ public class RemoteSpeechGenerator : ISpeechGenerator
             Service = ttsService,
             Text = text,
             Voice = ttsVoice,
+            Culture = _culture,
             ContentType = _contentType,
             Reusable = reusable,
         });

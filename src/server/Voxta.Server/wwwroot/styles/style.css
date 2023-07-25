@@ -12,6 +12,12 @@ h1 {
     margin: 20px 0;
 }
 
+.logo {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+}
+
 .menu {
     position: fixed;
     top: 10px;

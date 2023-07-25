@@ -33,6 +33,11 @@
                     <input asp-for="Region" class="form-control" />
                     <span asp-validation-for="Region" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="LogFilename">Log Filename <span class="text-muted">Only enable this if you have problems with the service. Enter a full path.</span></label>
+                    <input asp-for="LogFilename" class="form-control" />
+                    <span asp-validation-for="LogFilename" class="text-danger"></span>
+                </div>
             </div>
         </div>
 

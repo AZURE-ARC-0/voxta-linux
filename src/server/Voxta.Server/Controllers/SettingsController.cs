@@ -163,6 +163,7 @@ public class SettingsController : Controller
         {
             SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? "" : Crypto.EncryptString(value.SubscriptionKey.TrimCopyPasteArtefacts()),
             Region = value.Region.TrimCopyPasteArtefacts(),
+            LogFilename = value.LogFilename?.TrimCopyPasteArtefacts(),
         });
         
         return RedirectToAction("Settings");

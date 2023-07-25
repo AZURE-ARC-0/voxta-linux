@@ -283,6 +283,7 @@ public class DiagnosticsUtil
                     Service = serviceName,
                     Text = "Hi",
                     Voice = voices.FirstOrDefault()?.Id ?? "default",
+                    Culture = "en-US",
                     ContentType = service.ContentType,
                 }, tunnel, cancellationToken);
                 return new ServiceDiagnosticsResult

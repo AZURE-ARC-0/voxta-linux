@@ -137,9 +137,15 @@
                 <form asp-action="TestAllSettings">
                     <input type="hidden" name="test" value="true"/>
                     <p class="text-muted pl-2">Click once and wait for the results, it may take some time.</p>
-                    <p><button type="submit" class="btn btn-primary">Test Now</button></p>
+                    <p><button id="testBtn" type="submit" class="btn btn-primary"><i class="bi bi-journal-check"></i> Test Now</button></p>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+  document.getElementById('testBtn').addEventListener('click', function() {
+    this.disabled = true;
+  });
+</script>

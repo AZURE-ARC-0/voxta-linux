@@ -34,8 +34,18 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         if (settings == null) throw new AzureSpeechServiceException("Azure Speech Service is not configured.");
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
         if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
+        
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
         config.SetProfanity(ProfanityOption.Raw);
+        
+        if (!string.IsNullOrEmpty(settings.LogFilename))
+        {
+            var directory = Path.GetDirectoryName(settings.LogFilename) ?? throw new AzureSpeechServiceException($"Invalid log filename: {settings.LogFilename}");
+            Directory.CreateDirectory(directory);
+            var filename = DateTimeOffset.Now.ToString("yy-MM-dd") + "_tts_" + Path.GetFileName(settings.LogFilename);
+            config.SetProperty(PropertyId.Speech_LogFilename, Path.Combine(directory, filename));
+        }
+        
         _speechSynthesizer = new SpeechSynthesizer(config, null);
         _culture = culture;
     }

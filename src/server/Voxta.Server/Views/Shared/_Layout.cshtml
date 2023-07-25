@@ -15,24 +15,27 @@
 
 <div class="menu">
     <div class="dropdown">
-        <a class="btn btn-dark dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="logo user-select-none">
+            Voxta
+        </div>
+        <a class="btn btn-dark dropdown-toggle menu" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
             Menu
         </a>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
             <li>
-                <a class="dropdown-item" href="@Url.Action("Chat", "Chat")">Chat</a>
+                <a class="dropdown-item" href="@Url.Action("Chat", "Chat")"><i class="bi bi-chat"></i> Chat</a>
             </li>
             <li>
-                <a class="dropdown-item" href="@Url.Action("Settings", "Settings")">Settings</a>
+                <a class="dropdown-item" href="@Url.Action("Settings", "Settings")"><i class="bi bi-gear"></i> Settings</a>
             </li>
             <li>
-                <a class="dropdown-item" href="@Url.Action("Characters", "Characters")">Characters</a>
+                <a class="dropdown-item" href="@Url.Action("Characters", "Characters")"><i class="bi bi-people"></i> Characters</a>
             </li>
             <li>
-                <a class="dropdown-item" href="@Url.Action("Performance", "Diagnostics")">Diagnostics</a>
+                <a class="dropdown-item" href="@Url.Action("Performance", "Diagnostics")"><i class="bi bi-stopwatch"></i> Performance</a>
             </li>
             <li>
-                <a class="dropdown-item" href="@Url.Action("Support", "Home")">Support the project</a>
+                <a class="dropdown-item" href="@Url.Action("Support", "Home")"><i class="bi bi-heart"></i> Support the project</a>
             </li>
         </ul>
     </div>
