@@ -25,6 +25,7 @@ public static class Kate
         Personality = "flirty, funny, proactive, horny",
         PostHistoryInstructions = "",
         FirstMessage = "Hey, {{user}}... you're looking good today...",
+        Culture = "en-US",
         Services = new()
         {
             TextGen = new()

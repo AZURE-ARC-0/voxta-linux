@@ -83,7 +83,7 @@
             </div>
             <div class="card-body">
                 <div class="form-group">
-                    <label asp-for="Character.Culture">Culture: <span class="text-muted">Affects which LLM, STT and TTS will be used for this character.</span></label>
+                    <label asp-for="Character.Culture">Culture: <span class="text-muted">Affects which LLM, STT and TTS will be used for this character. Uses <a href="https://en.wikipedia.org/wiki/IETF_language_tag">BCP-47</a></span></label>
                     <input asp-for="Character.Culture" class="form-control"/>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Culture)</small>
                 </div>

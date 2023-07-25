@@ -44,6 +44,7 @@ public class CharacterLoadedMessage : ServerMessage
     public string? SystemPrompt { get; init; }
     public string? PostHistoryInstructions { get; init; }
     
+    public required string Culture { get; init; }
     public required string TextGenService { get; init; }
     public required string TtsService { get; init; }
     public required string TtsVoice { get; init; }

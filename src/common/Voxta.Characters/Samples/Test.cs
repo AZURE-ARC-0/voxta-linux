@@ -25,6 +25,7 @@ public static class Test
             Post history instructions of {{char}}. Current date and time: {{Now}}.
             """,
         FirstMessage = "Hello {{user}}! I'm {{char}}, a test character.",
+        Culture = "en-US",
         Services = new()
         {
             TextGen = new()

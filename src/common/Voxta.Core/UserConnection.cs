@@ -102,6 +102,7 @@ public sealed class UserConnection : IAsyncDisposable
             MessageExamples = character.MessageExamples ?? "",
             SystemPrompt = character.SystemPrompt,
             PostHistoryInstructions = character.PostHistoryInstructions,
+            Culture = character.Culture,
             TextGenService = character.Services.TextGen.Service,
             TtsService = character.Services.SpeechGen.Service,
             TtsVoice = character.Services.SpeechGen.Voice,

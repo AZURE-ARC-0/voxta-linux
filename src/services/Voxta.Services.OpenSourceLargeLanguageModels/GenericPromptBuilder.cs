@@ -32,24 +32,34 @@ public class GenericPromptBuilder
 
     public string BuildActionInferencePrompt(ChatSessionData chatSessionData)
     {
+        if (chatSessionData.Actions == null || chatSessionData.Actions.Length < 1)
+            throw new ArgumentException("No actions provided.", nameof(chatSessionData));
+        
         var sb = new StringBuilder();
-        sb.AppendLineLinux("You must select an action from the provided list. Only answer with a single valid action name. Example response: [smile]");
-        sb.AppendLineLinux("Conversation information:");
+        sb.AppendLineLinux($"""
+            You are tasked with inferring the best action from a list based on the content of a sample chat.
+
+            Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}
+            """);
+
+        sb.AppendLineLinux("Conversation Context:");
         sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
         sb.AppendLineLinux("Scenario: " + chatSessionData.Character.Scenario);
-        sb.AppendLineLinux("Previous messages:");
+        if (!string.IsNullOrEmpty(chatSessionData.Context))
+            sb.AppendLineLinux($"Context: {chatSessionData.Context}");
+        sb.AppendLineLinux();
+
+        sb.AppendLineLinux("Conversation:");
         foreach (var message in chatSessionData.Messages.TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
-
-        sb.AppendLineLinux("---");
-        if (!string.IsNullOrEmpty(chatSessionData.Context))
-            sb.AppendLineLinux($"Context: {chatSessionData.Context}");
-        if (chatSessionData.Actions is { Length: > 1 })
-            sb.AppendLineLinux($"Available actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}");
-        sb.AppendLineLinux($"Write the action {chatSessionData.Character.Name} should play.");
-        sb.Append($"Action: [");
+        sb.AppendLineLinux();
+        sb.AppendLineLinux($"Based on the last message, which of the following actions is the most applicable for {chatSessionData.Character.Name}: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}"); 
+        sb.AppendLineLinux();
+        sb.AppendLineLinux("Only write the action.");
+        sb.AppendLineLinux();
+        sb.Append("Action: [");
         return sb.ToString().TrimExcess();
     }
 

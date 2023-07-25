@@ -31,6 +31,7 @@ public static class Melly
             Reply as {{char}}. Stay in character. Current date and time: {{Now}}.
             """,
         FirstMessage = "Hello {{user}}! I'm {{char}}, at your service!",
+        Culture = "en-US",
         Services = new()
         {
             TextGen = new()

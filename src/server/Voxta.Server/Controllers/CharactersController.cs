@@ -172,6 +172,7 @@ public class CharactersController : Controller
 
         var character = new Character
         {
+            Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
             Name = card.Data.Name,
             Description = card.Data.Description ?? "",
             Personality = card.Data.Personality ?? "",
@@ -180,19 +181,19 @@ public class CharactersController : Controller
             FirstMessage = card.Data.FirstMes,
             PostHistoryInstructions = card.Data.PostHistoryInstructions,
             CreatorNotes = card.Data.CreatorNotes,
-            Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
             SystemPrompt = card.Data.SystemPrompt,
+            Culture = card.Data.Extensions.TryGetValue("voxta/culture", out var culture) && !string.IsNullOrEmpty(culture) ? culture : "en-US",
             ReadOnly = false,
             Services = new Character.CharacterServicesMap
             {
                 TextGen = new ServiceMap
                 {
-                    Service = card.Data.Extensions.TryGetValue("voxta/textgen/service", out var textGen) ? textGen ?? throw new NullReferenceException() : NovelAIConstants.ServiceName
+                    Service = card.Data.Extensions.TryGetValue("voxta/textgen/service", out var textGen) && !string.IsNullOrEmpty(textGen) ? textGen : NovelAIConstants.ServiceName
                 },
                 SpeechGen = new VoiceServiceMap
                 {
-                    Service = card.Data.Extensions.TryGetValue("voxta/tts/service", out var ttsService) ? ttsService ?? throw new NullReferenceException() : NovelAIConstants.ServiceName,
-                    Voice = card.Data.Extensions.TryGetValue("voxta/tts/voice", out var ttsVoice) ? ttsVoice ?? throw new NullReferenceException() : "Naia"
+                    Service = card.Data.Extensions.TryGetValue("voxta/tts/service", out var ttsService) && !string.IsNullOrEmpty(ttsService) ? ttsService : NovelAIConstants.ServiceName,
+                    Voice = card.Data.Extensions.TryGetValue("voxta/tts/voice", out var ttsVoice) && !string.IsNullOrEmpty(ttsVoice) ? ttsVoice : "Naia"
                 },
             },
             Options = new()

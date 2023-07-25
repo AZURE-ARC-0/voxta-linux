@@ -7,13 +7,13 @@ using Microsoft.DeepDev;
 
 namespace Voxta.Services.OpenAI;
 
-public class OpenAITextGenClient : OpenAIClientBase, ITextGenService, IActionInferenceService
+public class OpenAIClient : OpenAIClientBase, ITextGenService, IActionInferenceService
 {
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
+    public OpenAIClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
         : base(httpClientFactory, settingsRepository)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");

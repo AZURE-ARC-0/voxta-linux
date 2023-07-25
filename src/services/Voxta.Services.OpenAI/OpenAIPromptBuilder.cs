@@ -46,25 +46,34 @@ public class OpenAIPromptBuilder
         
         var messages = new List<OpenAIMessage>
         {
-            new() { role = "system", content = "You must select an action from the provided list. Only answer with a single valid action name. Example response: [smile]" },
+            new() {
+                role = "system",
+                content = $"""
+                    You are tasked with inferring the best action from a list based on the content of a sample chat.
+
+                    Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}
+                    """
+            },
         };
         
         var sb = new StringBuilder();
-        sb.AppendLineLinux("Given the following information, select the most appropriate action.");
-        sb.AppendLineLinux("---");
-        sb.AppendLineLinux("Conversation information:");
+        sb.AppendLineLinux("Conversation Context:");
         sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
         sb.AppendLineLinux("Scenario: " + chatSessionData.Character.Scenario);
         if (!string.IsNullOrEmpty(chatSessionData.Context))
             sb.AppendLineLinux($"Context: {chatSessionData.Context}");
-        sb.AppendLineLinux("Previous messages:");
+        sb.AppendLineLinux();
+
+        sb.AppendLineLinux("Conversation:");
         foreach (var message in chatSessionData.Messages.TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
-        sb.AppendLineLinux("---");
-        sb.AppendLineLinux("You must select one of the following actions. Only reply with the action. Example: [idle]"); 
-        sb.AppendLineLinux($"Available actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}");
+        sb.AppendLineLinux();
+        sb.AppendLineLinux($"Based on the last message, which of the following actions is the most applicable for {chatSessionData.Character.Name}: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}"); 
+        sb.AppendLineLinux();
+        sb.AppendLineLinux("Only write the action.");
+        
         messages.Add(new OpenAIMessage { role = "user", content = sb.ToString().TrimExcess() });
 
         return messages;

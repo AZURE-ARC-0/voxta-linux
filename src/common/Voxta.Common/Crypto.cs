@@ -28,6 +28,6 @@ public static class Crypto
     public static string CreateSha1Hash(string value)
     {
         var hash = SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(value));
-        return Convert.ToBase64String(hash);
+        return BitConverter.ToString(hash).Replace("-", "").ToLower();
     }
 }

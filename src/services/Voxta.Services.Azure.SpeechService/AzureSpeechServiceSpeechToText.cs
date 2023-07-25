@@ -65,7 +65,10 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
 
         _recognizer.Canceled += (s, e) => {
             _recordingService.Speaking = false;
-            _logger.LogDebug("Session canceled event");
+            if (e.Reason == CancellationReason.Error)
+                _logger.LogError("Error in Azure Speech Service: {ErrorCode} {ErrorDetails}", e.ErrorCode, e.ErrorDetails);
+            else
+                _logger.LogDebug("Session canceled: {Reason}", e.Reason);
         };
 
         _recognizer.SessionStopped += (_, _) => {
