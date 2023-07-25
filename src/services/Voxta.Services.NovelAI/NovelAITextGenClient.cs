@@ -16,7 +16,7 @@ namespace Voxta.Services.NovelAI;
 public class NovelAITextGenClient : ITextGenService
 {
     private readonly HttpClient _httpClient;
-    private readonly object _parameters;
+    private NovelAIParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
@@ -33,175 +33,6 @@ public class NovelAITextGenClient : ITextGenService
         _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextGen");
-        _parameters = new
-        {
-            temperature = 1.5,
-            max_length = 40,
-            min_length = 1,
-            top_k = 10,
-            top_p = 0.75,
-            top_a = 0.08,
-            typical_p = 0.975,
-            tail_free_sampling = 0.967,
-            repetition_penalty = 2.25,
-            repetition_penalty_frequency = 0,
-            repetition_penalty_presence = 0.005,
-            repetition_penalty_range = 8192,
-            repetition_penalty_slope = 0.09,
-            generate_until_sentence = true,
-            use_cache = false,
-            use_string = true,
-            return_full_text = false,
-            phrase_rep_pen = "very_light",
-            prefix = "vanilla",
-            order = new[] { 1, 5, 0, 2, 3, 4 },
-            repetition_penalty_whitelist = new[]
-            {
-                49256,
-                49264,
-                49231,
-                49287,
-                85,
-                380,
-                49216,
-                49211,
-                49215,
-                49220,
-                372,
-                335,
-                49223,
-                49255,
-                49399,
-                49262,
-                336,
-                333,
-                432,
-                363,
-                468,
-                492,
-                745,
-                401,
-                426,
-                623,
-                794,
-                1096,
-                2919,
-                2072,
-                7379,
-                1259,
-                2110,
-                620,
-                526,
-                487,
-                16562,
-                603,
-                805,
-                761,
-                2681,
-                942,
-                8917,
-                653,
-                3513,
-                506,
-                5301,
-                562,
-                5010,
-                614,
-                10942,
-                539,
-                2976,
-                462,
-                5189,
-                567,
-                2032,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13,
-                588,
-                803,
-                1040,
-                49209
-            },
-            bad_words_ids = new[]
-            {
-                new[]
-                {
-                    3
-                },
-                new[]
-                {
-                    49356
-                },
-                new[]
-                {
-                    1431
-                },
-                new[]
-                {
-                    31715
-                },
-                new[]
-                {
-                    34387
-                },
-                new[]
-                {
-                    20765
-                },
-                new[]
-                {
-                    30702
-                },
-                new[]
-                {
-                    10691
-                },
-                new[]
-                {
-                    49333
-                },
-                new[]
-                {
-                    1266
-                },
-                new[]
-                {
-                    19438
-                },
-                new[]
-                {
-                    43145
-                },
-                new[]
-                {
-                    26523
-                },
-                new[]
-                {
-                    41471
-                },
-                new[]
-                {
-                    2936
-                }
-            },
-            stop_sequences = new[]
-            {
-                // User:
-                new[] { 21978, 49287 },
-                // "
-                new[] { 49264 },
-                // \n
-                new[] { 85 }
-            }
-        };
     }
     
     public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
@@ -212,6 +43,7 @@ public class NovelAITextGenClient : ITextGenService
         if (string.IsNullOrEmpty(settings.Token)) throw new AuthenticationException("NovelAI token is missing.");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         _model = settings.Model;
+        _parameters = settings.Parameters ?? new NovelAIParameters();
     }
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)

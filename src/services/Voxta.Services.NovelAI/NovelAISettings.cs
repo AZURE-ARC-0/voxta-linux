@@ -9,4 +9,5 @@ public class NovelAISettings : SettingsBase
 
     public required string Token { get; set; }
     public string Model { get; set; } = DefaultModel;
+    public NovelAIParameters? Parameters { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Model;
+﻿using System.Text.Json;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Common;
 using Voxta.Server.ViewModels;
@@ -284,12 +285,18 @@ public class SettingsController : Controller
         {
             Token = "",
         };
-        if (!string.IsNullOrEmpty(novelai.Token)) novelai.Token = Crypto.DecryptString(novelai.Token);  
-        return View(novelai);
+        var vm = new NovelAISettingsViewModel
+        {
+            Model = novelai.Model,
+            Parameters = JsonSerializer.Serialize(novelai.Parameters ?? new NovelAIParameters()),
+            UseDefaults = novelai.Parameters == null,
+            Token = !string.IsNullOrEmpty(novelai.Token) ? Crypto.DecryptString(novelai.Token) : ""
+        };   
+        return View(vm);
     }
     
     [HttpPost("/settings/novelai")]
-    public async Task<IActionResult> PostNovelAISettings([FromForm] NovelAISettings value)
+    public async Task<IActionResult> PostNovelAISettings([FromForm] NovelAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -300,6 +307,7 @@ public class SettingsController : Controller
         {
             Token = string.IsNullOrEmpty(value.Token) ? "" : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? new NovelAIParameters()
         });
         
         return RedirectToAction("Settings");
