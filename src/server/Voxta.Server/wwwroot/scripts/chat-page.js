@@ -29,7 +29,7 @@ const sendMessage = (text) => {
     voxtaClient.send(
         text,
         "Chatting with speech and no webcam.",
-        ['normal', 'happy', 'sad', 'angry', 'confused']
+        ['happy', 'intense_love', 'sad', 'angry', 'confused']
     );
 }
 
@@ -103,11 +103,11 @@ voxtaClient.addEventListener('speech', (evt) => {
 });
 voxtaClient.addEventListener('action', (evt) => {
     switch (evt.detail.value) {
-        case 'normal':
+        case 'happy':
             audioVisualizer.setColor('rgb(222,215,234)');
             break;
-        case 'happy':
-            // light pink
+        case 'intense_love':
+            // pink
             audioVisualizer.setColor('#e91e63');
             break;
         case 'sad':
