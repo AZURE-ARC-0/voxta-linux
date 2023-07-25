@@ -35,6 +35,7 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
         if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
+        config.SetProfanity(ProfanityOption.Raw);
         _speechSynthesizer = new SpeechSynthesizer(config, null);
         _culture = culture;
     }

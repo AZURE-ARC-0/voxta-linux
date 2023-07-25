@@ -102,7 +102,7 @@ voxtaClient.addEventListener('speech', (evt) => {
     );
 });
 voxtaClient.addEventListener('action', (evt) => {
-    switch (evt.detail.action) {
+    switch (evt.detail.value) {
         case 'normal':
             audioVisualizer.setColor('rgb(222,215,234)');
             break;
