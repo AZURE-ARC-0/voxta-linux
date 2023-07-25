@@ -86,7 +86,7 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         if (_speechSynthesizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
         var response = await _speechSynthesizer.GetVoicesAsync(_culture);
         if (response == null) throw new NullReferenceException("No voices returned");
-        return response.Voices.Select(v => new VoiceInfo { Id = v.Name, Label = $"{v.ShortName} ({v.Gender})" }).ToArray();
+        return response.Voices.Select(v => new VoiceInfo { Id = v.ShortName, Label = $"{v.ShortName} ({v.Gender})" }).ToArray();
     }
 
     public void Dispose()
