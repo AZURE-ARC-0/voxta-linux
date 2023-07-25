@@ -115,7 +115,7 @@
 
                 <div class="form-group">
                     <label asp-for="Character.Options!.EnableThinkingSpeech">Enable Thinking Speech: <span class="text-muted">Makes sounds when hearing speech, while a response is being generated.</span></label>
-                    <input asp-for="Character.Options!.EnableThinkingSpeech" type="checkbox"/>
+                    <input asp-for="Character.Options!.EnableThinkingSpeech" type="checkbox" class="form-check-input"/>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Options!.EnableThinkingSpeech)</small>
                 </div>
             </div>

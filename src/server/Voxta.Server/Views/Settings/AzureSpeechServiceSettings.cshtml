@@ -38,6 +38,11 @@
                     <input asp-for="LogFilename" class="form-control" />
                     <span asp-validation-for="LogFilename" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="FilterProfanity">Filter Profanity <span class="text-muted">Whether to remove profanity from tts and stt.</span></label>
+                    <input type="checkbox" asp-for="FilterProfanity" class="form-check-input"/>
+                    <span asp-validation-for="FilterProfanity" class="text-danger"></span>
+                </div>
             </div>
         </div>
 

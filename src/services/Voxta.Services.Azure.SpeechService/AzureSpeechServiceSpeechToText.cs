@@ -36,7 +36,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
         config.SpeechRecognitionLanguage = culture;
-        config.SetProfanity(ProfanityOption.Raw);
+        config.SetProfanity(settings.FilterProfanity ? ProfanityOption.Removed : ProfanityOption.Raw);
         
         if (!string.IsNullOrEmpty(settings.LogFilename))
         {
