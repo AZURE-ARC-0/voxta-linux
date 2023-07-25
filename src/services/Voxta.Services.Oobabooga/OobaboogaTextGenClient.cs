@@ -107,7 +107,10 @@ public class OobaboogaTextGenClient : ITextGenService, IActionInferenceService
         using var response = await _httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw new OobaboogaException(await response.Content.ReadAsStringAsync(cancellationToken));
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new OobaboogaException(string.IsNullOrEmpty(errorBody) ? $"Status {response.StatusCode}" : errorBody);
+        }
 
         var json = await response.Content.ReadFromJsonAsync<TextGenResponse>(cancellationToken: cancellationToken);
 

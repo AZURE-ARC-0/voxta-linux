@@ -90,6 +90,7 @@ public class OpenAIPromptBuilder
             sb.AppendLineLinux($"Personality of {character.Name}: {character.Personality}");
         if (!string.IsNullOrEmpty(character.Scenario))
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
+        sb.AppendLineLinux($"Only write a single reply from {character.Name} for natural speech.");
         return sb.ToString().TrimExcess();
     }
 
