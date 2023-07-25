@@ -66,7 +66,7 @@ public sealed class UserConnection : IAsyncDisposable
                         break;
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 _logger.LogInformation("Disconnected by cancellation");
             }
