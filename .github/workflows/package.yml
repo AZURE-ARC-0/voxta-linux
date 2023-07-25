@@ -33,13 +33,13 @@ jobs:
     - name: Zip
       run: |
         cd publish/server
-        Compress-Archive -Path .\* -DestinationPath ".\Voxta.Server.${{ steps.get_version.outputs.VERSION }}.zip"
+        Compress-Archive -Path .\* -DestinationPath ".\Voxta.Server.v${{ steps.get_version.outputs.VERSION }}.zip"
     - name: GitHub release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         draft: true
         files: |
-          publish/server/Voxta.Server.${{ steps.get_version.outputs.VERSION }}.zip
+          publish/server/Voxta.Server.v${{ steps.get_version.outputs.VERSION }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
