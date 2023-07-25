@@ -30,7 +30,9 @@ public static class TavernCardV2Import
         try
         {
             var result = JsonSerializer.Deserialize<TavernCardV2>(utf8String);
-            return result ?? throw new InvalidOperationException("Invalid character card: " + utf8String);
+            if (result == null) throw new InvalidOperationException("Invalid character card: " + utf8String);
+            if (result.Spec != "chara_card_v2") throw new InvalidOperationException("Invalid character card spec: " + utf8String);
+            return result;
         }
         catch (Exception ex)
         {

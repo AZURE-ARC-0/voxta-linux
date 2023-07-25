@@ -1,4 +1,6 @@
-﻿using Voxta.Abstractions.DependencyInjection;
+﻿using System.Text;
+using System.Text.Json;
+using Voxta.Abstractions.DependencyInjection;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
@@ -160,8 +162,13 @@ public class CharactersController : Controller
 
         var file = files[0];
         await using var stream = file.OpenReadStream();
-        var card = await TavernCardV2Import.ExtractCardDataAsync(stream);
-        if (card.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
+        var card = Path.GetExtension(file.FileName).ToLowerInvariant() switch
+        {
+            ".json" => JsonSerializer.Deserialize<TavernCardV2>(stream),
+            ".png" => await TavernCardV2Import.ExtractCardDataAsync(stream),
+            _ => throw new NotSupportedException($"Unsupported file type: {Path.GetExtension(file.FileName)}"),
+        };
+        if (card?.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
 
         var character = new Character
         {
@@ -180,22 +187,39 @@ public class CharactersController : Controller
             {
                 TextGen = new ServiceMap
                 {
-                    Service = NovelAIConstants.ServiceName
+                    Service = card.Data.Extensions.TryGetValue("voxta/textgen/service", out var textGen) ? textGen ?? throw new NullReferenceException() : NovelAIConstants.ServiceName
                 },
                 SpeechGen = new VoiceServiceMap
                 {
-                    Service = NovelAIConstants.ServiceName,
-                    Voice = "Naia"
+                    Service = card.Data.Extensions.TryGetValue("voxta/tts/service", out var ttsService) ? ttsService ?? throw new NullReferenceException() : NovelAIConstants.ServiceName,
+                    Voice = card.Data.Extensions.TryGetValue("voxta/tts/voice", out var ttsVoice) ? ttsVoice ?? throw new NullReferenceException() : "Naia"
                 },
             },
             Options = new()
             {
-                EnableThinkingSpeech = false,
+                EnableThinkingSpeech = card.Data.Extensions.TryGetValue("voxta/options/enable_thinking_speech", out var enableThinkingSpeech) && enableThinkingSpeech == "true"
             },
         };
 
         await _characterRepository.SaveCharacterAsync(character);
         
         return RedirectToAction("Character", new { charId = character.Id });
+    }
+
+
+
+    [HttpGet("/characters/{charId}/download")]
+    public async Task<IActionResult> Download([FromRoute] string charId, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.GetCharacterAsync(charId, cancellationToken);
+        if (character == null) return NotFound();
+        var card = TavernCardV2Export.ConvertCharacterToCard(character);
+        // Serialize card to string and download as a json file attachment
+        var json = JsonSerializer.Serialize(card, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+        });
+        var bytes = Encoding.UTF8.GetBytes(json);
+        return File(bytes, "application/json", $"{character.Name}.json");
     }
 }

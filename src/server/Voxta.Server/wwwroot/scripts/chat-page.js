@@ -107,7 +107,7 @@ voxtaClient.addEventListener('action', (evt) => {
             audioVisualizer.setColor('rgb(222,215,234)');
             break;
         case 'happy':
-            // pink
+            // light pink
             audioVisualizer.setColor('#e91e63');
             break;
         case 'sad':
@@ -119,8 +119,8 @@ voxtaClient.addEventListener('action', (evt) => {
             audioVisualizer.setColor('#f44336');
             break;
         case 'confused':
-            // yellow
-            audioVisualizer.setColor('#ffeb3b');
+            // purple
+            audioVisualizer.setColor('#9c27b0');
             break;
         default:
             audioVisualizer.setColor('#2196f3');

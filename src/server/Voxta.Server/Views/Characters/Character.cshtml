@@ -122,9 +122,10 @@
         </div>
 
         <div class="d-flex justify-content-end mt-3">
+            <a class="btn btn-primary me-2" href="/characters/@Model.Character.Id/download" target="_blank">Download</a>
             @if (Model.Character.ReadOnly)
             {
-                <p class="text-muted">This character is non editable. You can make a clone to edit it.</p>
+                <input type="button" value="Save (Read Only)" class="btn btn-secondary" disabled="disabled" />
             }
             else
             {

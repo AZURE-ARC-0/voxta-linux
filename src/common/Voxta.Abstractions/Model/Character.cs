@@ -18,7 +18,9 @@ public class CharacterCard
     public string? SystemPrompt { get; init; }
     public string? PostHistoryInstructions { get; init; }
     
+    public string? Creator { get; init; }
     public string? CreatorNotes { get; init; }
+    public List<string>? Tags { get; set; }
 }
 
 [Serializable]
@@ -31,6 +33,7 @@ public class Character : CharacterCard
     
     public required CharacterServicesMap Services { get; init; }
     public CharacterOptions? Options { get; init; }
+    
 
     [Serializable]
     public class CharacterServicesMap
