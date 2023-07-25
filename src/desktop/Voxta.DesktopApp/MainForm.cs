@@ -32,16 +32,26 @@ public partial class MainForm : Form
         Controls.Add(WebView);
 
         // Start the web server process
-        var webServerWorkingDirectoryPath = Path.GetFullPath(@"..\..\..\..\..\server\Voxta.Server");
-        var webServerPath = Path.GetFullPath(@"..\..\..\..\..\server\Voxta.Server\bin\Debug\net7.0\win-x64\Voxta.Server.exe");
-        if (!File.Exists(webServerPath)) throw new FileNotFoundException(webServerPath);
-        var processStartInfo = new ProcessStartInfo(webServerPath);
-        processStartInfo.WorkingDirectory = webServerWorkingDirectoryPath;
+        
+        var webServerPath = "Voxta.Server.exe";
+        var webServerWorkingDirectoryPath = "";
+        if (!File.Exists(webServerPath))
+        {
+            webServerWorkingDirectoryPath = Path.GetFullPath(@"..\..\..\..\..\server\Voxta.Server");
+            webServerPath = Path.GetFullPath(@"..\..\..\..\..\server\Voxta.Server\bin\Debug\net7.0\win-x64\Voxta.Server.exe");
+            if (!File.Exists(webServerPath)) throw new FileNotFoundException(webServerPath);
+        }
+        var processStartInfo = new ProcessStartInfo(webServerPath)
+        {
+            WorkingDirectory = webServerWorkingDirectoryPath
+        };
         ConsoleControl.StartProcess(processStartInfo);
-        ConsoleControl.ProcessInterface.Process.Exited += WebServer_Exited;
+        var process = ConsoleControl.ProcessInterface.Process;
+        if (process != null)
+            process.Exited += WebServer_Exited;
 
         KeyPreview = true;
-        KeyDown += MainForm_KeyDown;
+        KeyUp += MainForm_KeyUp;
 
         #pragma warning disable CS4014
         InitializeAsync();
@@ -56,7 +66,7 @@ public partial class MainForm : Form
             WebView.CoreWebView2.WebMessageReceived += WebView_CoreWebView2_WebMessageReceived;
             await WaitForServerReady("http://127.0.0.1:5384/ping");
             SwitchToWebView();
-            WebView.CoreWebView2.Navigate("http://127.0.0.1:5384/newchat");
+            WebView.CoreWebView2.Navigate("http://127.0.0.1:5384");
         }
         catch (Exception exc)
         {
@@ -90,10 +100,16 @@ public partial class MainForm : Form
 
     private void WebServer_Exited(object? sender, EventArgs e)
     {
-        Invoke(SwitchToTerminal);
+        try
+        {
+            Invoke(SwitchToTerminal);
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 
-    private void MainForm_KeyDown(object? sender, KeyEventArgs e)
+    private void MainForm_KeyUp(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode == Keys.F2)
         {

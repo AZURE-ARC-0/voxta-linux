@@ -10,6 +10,7 @@
     
     <ItemGroup>
         <ProjectReference Include="..\..\server\Voxta.Server\Voxta.Server.csproj">
+            <Private>false</Private>
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
         </ProjectReference>
     </ItemGroup>
