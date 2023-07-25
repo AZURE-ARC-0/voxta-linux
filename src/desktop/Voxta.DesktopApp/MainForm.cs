@@ -94,8 +94,9 @@ public partial class MainForm : Form
 
     private void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
     {
+        var process = ConsoleControl.ProcessInterface.Process;
         ConsoleControl.StopProcess();
-        ConsoleControl.ProcessInterface.Process.WaitForExit();
+        process.WaitForExit();
     }
 
     private void WebServer_Exited(object? sender, EventArgs e)

@@ -25,11 +25,16 @@ jobs:
     - name: Restore
       run: |
         dotnet restore --runtime win-x64 src/server/Voxta.Server/Voxta.Server.csproj
+        dotnet restore --runtime win-x64 src/desktop/Voxta.DesktopApp/Voxta.DesktopApp.csproj
     - name: Build
       run: |
         dotnet build -c Release -p:Version=${{ steps.get_version.outputs.VERSION }} --no-restore src/server/Voxta.Server/Voxta.Server.csproj
+        dotnet build -c Release -p:Version=${{ steps.get_version.outputs.VERSION }} --no-restore src/desktop/Voxta.DesktopApp/Voxta.DesktopApp.csproj
     - name: Publish
       run: dotnet publish -c Release --no-build --no-restore --output ./publish/server src/server/Voxta.Server/Voxta.Server.csproj
+    - name: Package Desktop Executable
+      run: |
+        robocopy src/desktop/Voxta.DesktopApp/bin/Release/net7.0-windows/ publish/server /E /XC /XN /XO
     - name: Zip
       run: |
         cd publish/server
