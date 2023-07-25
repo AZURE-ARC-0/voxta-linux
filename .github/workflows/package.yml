@@ -23,9 +23,11 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Restore
-      run: dotnet restore src/server/Voxta.Server/Voxta.Server.csproj
+      run: |
+        dotnet restore --runtime win-x64 src/server/Voxta.Server/Voxta.Server.csproj
     - name: Build
-      run: dotnet build -c Release -p:Version=${{ steps.get_version.outputs.VERSION }} --no-restore src/server/Voxta.Server/Voxta.Server.csproj
+      run: |
+        dotnet build -c Release -p:Version=${{ steps.get_version.outputs.VERSION }} --no-restore src/server/Voxta.Server/Voxta.Server.csproj
     - name: Publish
       run: dotnet publish -c Release --no-build --no-restore --output ./publish/server src/server/Voxta.Server/Voxta.Server.csproj
     - name: Zip
