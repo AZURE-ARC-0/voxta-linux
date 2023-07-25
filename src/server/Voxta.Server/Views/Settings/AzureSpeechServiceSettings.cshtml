@@ -2,19 +2,27 @@
 @model Voxta.Services.AzureSpeechService.AzureSpeechServiceSettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - Azure Speech Service";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>Azure Speech Service Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Go to <a href="https://portal.azure.com" target="_blank">portal.azure.com</a>, find your Speech Service and go to <code>Keys and Endpoint</code>. There you will find the Keys and Region.</p>
+        </div>
+    </div>
     
     <form method="post" asp-action="PostAzureSpeechServiceSettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Services</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <h3>Azure Speech Service</h3>
                 <div class="form-group">
                     <label asp-for="SubscriptionKey">Subscription Key</label>
                     <input asp-for="SubscriptionKey" class="form-control" />

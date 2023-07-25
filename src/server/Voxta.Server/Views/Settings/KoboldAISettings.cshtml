@@ -2,19 +2,27 @@
 @model Voxta.Services.KoboldAI.KoboldAISettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - KoboldAI";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>KoboldAI Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Download and run <a href="https://github.com/LostRuins/koboldcpp" target="_blank">koboldcpp</a> (or Kobold if you prefer), enable stream mode and make sure to select <code>CLBlast</code> so you can run it on your GPU. Then load a GGML model.</p>
+        </div>
+    </div>
     
     <form method="post" asp-action="PostKoboldAISettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Services</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <h3>KoboldAI</h3>
                 <div class="form-group">
                     <label asp-for="Uri">KoboldAI URI: <span class="text-muted">Example: http://127.0.0.1:5001</span></label>
                     <input asp-for="Uri" class="form-control"/>

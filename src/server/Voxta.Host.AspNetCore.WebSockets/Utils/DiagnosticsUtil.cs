@@ -96,7 +96,7 @@ public class DiagnosticsUtil
                     IsReady = true,
                     IsHealthy = !string.IsNullOrEmpty(profile?.Name),
                     ServiceName = "Profile",
-                    Label = "Profile",
+                    Label = "Profile and Default Services",
                     Status = profile?.Name ?? "No profile",
                 }
             }

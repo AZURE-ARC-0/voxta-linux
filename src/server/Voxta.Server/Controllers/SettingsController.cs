@@ -223,8 +223,8 @@ public class SettingsController : Controller
         return RedirectToAction("Settings");
     }
     
-    [HttpGet("/settings/oobabooga")]
-    public async Task<IActionResult> OobaboogaSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/textgenerationwebui")]
+    public async Task<IActionResult> TextGenerationWebUISettings(CancellationToken cancellationToken)
     {
         var oobabooga = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken) ?? new OobaboogaSettings
         {
@@ -233,12 +233,12 @@ public class SettingsController : Controller
         return View(oobabooga);
     }
     
-    [HttpPost("/settings/oobabooga")]
-    public async Task<IActionResult> PostOobaboogaSettings([FromForm] OobaboogaSettings value)
+    [HttpPost("/settings/textgenerationwebui")]
+    public async Task<IActionResult> PostTextGenerationWebUISettings([FromForm] OobaboogaSettings value)
     {
         if (!ModelState.IsValid)
         {
-            return View("OobaboogaSettings", value);
+            return View("TextGenerationWebUISettings", value);
         }
 
         await _settingsRepository.SaveAsync(new OobaboogaSettings
@@ -254,7 +254,7 @@ public class SettingsController : Controller
     {
         var koboldai = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken) ?? new KoboldAISettings
         {
-            Uri = "",
+            Uri = "http://127.0.0.1:5001",
         };
         return View(koboldai);
     }

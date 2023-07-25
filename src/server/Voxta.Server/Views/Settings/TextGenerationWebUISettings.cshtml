@@ -2,19 +2,27 @@
 @model Voxta.Services.Oobabooga.OobaboogaSettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - Text Generation Web UI";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>Text Generation Web UI Settings</h1>
     
-    <form method="post" asp-action="PostOobaboogaSettings">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Install <a href="https://github.com/oobabooga/text-generation-webui" target="_blank">github.com/oobabooga/text-generation-webui</a> and make sure it runs correctly and that you launched it with <code>--api</code>.</p>
+        </div>
+    </div>
+    
+    <form method="post" asp-action="PostTextGenerationWebUISettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Services</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <h3>Text generation web UI</h3>
                 <div class="form-group">
                     <label asp-for="Uri">Text generation web UI URI: <span class="text-muted">Example: http://127.0.0.1:5000</span></label>
                     <input asp-for="Uri" class="form-control"/>

@@ -7,16 +7,25 @@
 @model Voxta.Abstractions.Model.ProfileSettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - Profile";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>Profile Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Your profile is what the AI will call you, and how it will "see" you.</p>
+        </div>
+    </div>
     
     <form method="post" asp-action="PostProfileSettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Profile</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
                 <div class="form-group">

@@ -2,19 +2,27 @@
 @model Voxta.Services.Vosk.VoskSettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - Vosk";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>Vosk Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Vosk should automatically download an english model. You can also download more at <a href="https://alphacephei.com/vosk/models" target="_blank">alphacephei.com</a> and download it to the Models/Vosk directory.</p>
+        </div>
+    </div>
     
     <form method="post" asp-action="PostVoskSettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Services</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <h3>Vosk</h3>
                 <div class="form-group">
                     <label asp-for="Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models" target="_blank">models list</a>, smaller is faster.</span></label>
                     <input asp-for="Model" class="form-control" />

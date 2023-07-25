@@ -2,19 +2,27 @@
 @model Voxta.Services.OpenAI.OpenAISettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - OpenAI";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>OpenAI Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Login to <a href="https://platform.openai.com/account/api-keys" target="_blank">platform.openai.com</a> (not chatgpt), and create a new secret key in the API Keys page.</p>
+        </div>
+    </div>
     
     <form method="post" asp-action="PostOpenAISettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Services</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <h3>OpenAI</h3>
                 <div class="form-group">
                     <label asp-for="ApiKey">OpenAI key:</label>
                     <input asp-for="ApiKey" class="form-control"/>

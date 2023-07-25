@@ -2,19 +2,27 @@
 @model Voxta.Services.NovelAI.NovelAISettings
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings";
+    ViewBag.Title = "Settings - NovelAI";
 }
 
 <div class="container">
-    <h1>Settings</h1>
+    <h1>NovelAI Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Login to <a href="https://novelai.net/" target="_blank">novelai.net</a>, and open the Developer Console (F12 or CTRL+Shift+I). Then open the Console tab and paste <code>console.log(JSON.parse(localStorage.getItem('session')).auth_token)</code>. A code should show up starting with `ey...`. This is your Token.</p>
+        </div>
+    </div>
     
     <form method="post" asp-action="PostNovelAISettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Services</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <h3>NovelAI</h3>
                 <div class="form-group">
                     <label asp-for="Token">NovelAI token:</label>
                     <input asp-for="Token" class="form-control"/>
