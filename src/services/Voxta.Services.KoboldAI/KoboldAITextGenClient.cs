@@ -13,12 +13,13 @@ namespace Voxta.Services.KoboldAI;
 
 public class KoboldAITextGenClient : ITextGenService
 {
+    public string ServiceName => KoboldAIConstants.ServiceName;
+    public string[] Features => new[] { ServiceFeatures.NSFW };
+    
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
-    
-    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public KoboldAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {

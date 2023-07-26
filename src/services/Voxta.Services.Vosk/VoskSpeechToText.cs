@@ -12,11 +12,13 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private const int _sampleRate = 16000;
     
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
-    
     private static readonly JsonSerializerOptions SerializeOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
+    
+    public string ServiceName => VoskConstants.ServiceName;
+    public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IVoskModelDownloader _modelDownloader;
     private readonly IRecordingService _recordingService;
@@ -25,8 +27,6 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
-
-    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;

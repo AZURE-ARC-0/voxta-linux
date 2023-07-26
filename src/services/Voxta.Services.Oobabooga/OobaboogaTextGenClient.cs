@@ -9,10 +9,11 @@ namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaTextGenClient : OobaboogaClientBase, ITextGenService
 {
+    public string ServiceName => OobaboogaConstants.ServiceName;
+    public string[] Features => new[] { ServiceFeatures.NSFW };
+    
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
-    
-    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public OobaboogaTextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     :base(httpClientFactory, settingsRepository)

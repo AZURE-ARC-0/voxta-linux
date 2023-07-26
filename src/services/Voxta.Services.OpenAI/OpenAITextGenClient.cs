@@ -9,11 +9,12 @@ namespace Voxta.Services.OpenAI;
 
 public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 {
+    public string ServiceName => OpenAIConstants.ServiceName;
+    public string[] Features => Array.Empty<string>();
+    
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
-    
-    public string[] Features => Array.Empty<string>();
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
         : base(httpClientFactory, settingsRepository)

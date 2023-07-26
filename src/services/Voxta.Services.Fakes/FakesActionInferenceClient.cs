@@ -5,6 +5,7 @@ namespace Voxta.Services.Fakes;
 
 public class FakesActionInferenceClient : IActionInferenceService
 {
+    public string ServiceName => FakesConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)

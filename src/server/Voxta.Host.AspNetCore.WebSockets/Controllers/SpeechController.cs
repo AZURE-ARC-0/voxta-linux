@@ -66,7 +66,7 @@ public class SpeechController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrEmpty(service))
+        if (service == "None")
         {
             return new VoiceInfo[]
             {

@@ -151,7 +151,7 @@
         const cultureInput = document.getElementById("Character_Culture");
         
         speechGenSelect.onchange = function() {
-            const selectedService = this.value;
+            const selectedService = this.value || 'None';
             voicesSelect.innerHTML = "";
             
             {

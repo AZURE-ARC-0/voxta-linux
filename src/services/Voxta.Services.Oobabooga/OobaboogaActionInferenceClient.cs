@@ -8,9 +8,10 @@ namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaActionInferenceClient : OobaboogaClientBase, IActionInferenceService
 {
-    private readonly IPerformanceMetrics _performanceMetrics;
-    
+    public string ServiceName => OobaboogaConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
+    
+    private readonly IPerformanceMetrics _performanceMetrics;
 
     public OobaboogaActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
         :base(httpClientFactory, settingsRepository)

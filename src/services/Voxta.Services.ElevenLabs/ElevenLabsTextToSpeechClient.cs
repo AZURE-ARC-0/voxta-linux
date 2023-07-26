@@ -15,7 +15,6 @@ namespace Voxta.Services.ElevenLabs;
 public class ElevenLabsTextToSpeechClient : ITextToSpeechService
 {
     public string ServiceName => ElevenLabsConstants.ServiceName;
-    
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly ILogger<ElevenLabsTextToSpeechClient> _logger;

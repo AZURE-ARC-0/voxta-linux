@@ -9,6 +9,8 @@ namespace Voxta.Core;
 
 public interface ISpeechGenerator : IDisposable
 {
+    string ServiceName { get; }
+    string? Voice { get; }
     Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken);
 }
 
@@ -21,7 +23,7 @@ public class SpeechGeneratorFactory
         _sp = sp;
     }
     
-    public ISpeechGenerator Create(ITextToSpeechService? service, string? ttsVoice, string[] prerequisites, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
+    public ISpeechGenerator Create(ITextToSpeechService? service, string? ttsVoice, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
     {
         if (service == null || string.IsNullOrEmpty(ttsVoice))
             return new NoSpeechGenerator();
@@ -38,6 +40,9 @@ public class SpeechGeneratorFactory
 
 public class NoSpeechGenerator : ISpeechGenerator
 {
+    public string ServiceName => "None";
+    public string Voice => "None";
+    
     public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
     {
         return Task.FromResult<string?>(null);
@@ -50,6 +55,9 @@ public class NoSpeechGenerator : ISpeechGenerator
 
 public class LocalSpeechGenerator : ISpeechGenerator
 {
+    public string ServiceName => _textToSpeechService.ServiceName;
+    public string Voice => _ttsVoice;
+    
     private readonly ITextToSpeechService _textToSpeechService;
     private readonly string _ttsVoice;
     private readonly ITemporaryFileCleanup _temporaryFileCleanup;
@@ -96,6 +104,9 @@ public class LocalSpeechGenerator : ISpeechGenerator
 
 public class RemoteSpeechGenerator : ISpeechGenerator
 {
+    public string ServiceName => _ttsService;
+    public string Voice => _ttsVoice;
+    
     private readonly string _ttsService;
     private readonly string _ttsVoice;
     private readonly PendingSpeechManager _pendingSpeech;

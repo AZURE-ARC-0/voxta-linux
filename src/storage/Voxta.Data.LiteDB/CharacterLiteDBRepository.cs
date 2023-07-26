@@ -24,7 +24,7 @@ public class CharacterLiteDBRepository : ICharacterRepository
         {
             Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
             Name = b.Name,
-            Description = $"{b.CreatorNotes?[..Math.Min(50, b.CreatorNotes.Length)]} (Text: {b.Services.TextGen.Service}, TTS: {b.Services.SpeechGen.Service})",
+            Description = b.CreatorNotes?[..Math.Min(50, b.CreatorNotes.Length)],
             ReadOnly = b.ReadOnly,
             Culture = b.Culture,
             // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract

@@ -13,6 +13,12 @@ public partial class ChatSession
 
     private async ValueTask SendReadyAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Beginning chat with {CharacterName} with ID: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.ChatId);
+        _logger.LogInformation("Tex Gen: {ServiceName}", _textGen.ServiceName);
+        _logger.LogInformation("Text To Speech: {ServiceName} (voice: {Voice})", _speechGenerator.ServiceName, _speechGenerator.Voice);
+        _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.ServiceName ?? "None");
+        _logger.LogInformation("Speech To Text: {ServiceName}", _speechToText?.ServiceName ?? "None");
+        
         var thinkingSpeechUrls = new List<string>(_chatSessionData.ThinkingSpeech?.Length ?? 0);
         if (_chatSessionData.ThinkingSpeech != null)
         {

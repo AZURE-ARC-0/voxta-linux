@@ -15,6 +15,9 @@ namespace Voxta.Services.NovelAI;
 
 public class NovelAITextGenClient : ITextGenService
 {
+    public string ServiceName => NovelAIConstants.ServiceName;
+    public string[] Features => new[] { ServiceFeatures.NSFW };
+    
     private readonly HttpClient _httpClient;
     private NovelAIParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
@@ -22,8 +25,6 @@ public class NovelAITextGenClient : ITextGenService
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
     
-    public string[] Features => new[] { ServiceFeatures.NSFW };
-
     static NovelAITextGenClient()
     {
         MediaFoundationApi.Startup();

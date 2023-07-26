@@ -3,5 +3,5 @@
 [Serializable]
 public class VoiceServiceMap : ServiceMap
 {
-    public required string Voice { get; init; }
+    public string? Voice { get; init; }
 }

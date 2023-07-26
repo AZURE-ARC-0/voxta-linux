@@ -23,15 +23,17 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
 
     public async Task<TInterface> CreateAsync(ServicesList services, string preferredService, string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
-        #warning If the service is specified, ignore the prerequisites; if not, then go through the list and check the prerequisites.
-        
-        if (!_registry.Types.TryGetValue(preferredService, out var type))
-            throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {preferredService}");
-        
-        var instance = (TInterface)_sp.GetRequiredService(type);
-        var success = await instance.InitializeAsync(prerequisites, culture, cancellationToken);
-        if (!success) throw new ServiceDisabledException();
-        
-        return instance;
+        var options = string.IsNullOrEmpty(preferredService) ? services.Services : new[] { preferredService };
+        foreach (var option in options)
+        {
+            if (!_registry.Types.TryGetValue(option, out var type))
+                continue;
+
+            var instance = (TInterface)_sp.GetRequiredService(type);
+            var success = await instance.InitializeAsync(prerequisites, culture, cancellationToken);
+            if (success) return instance;
+            if (instance.ServiceName == preferredService) throw new ServiceDisabledException();
+        }
+        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {preferredService}");
     }
 }

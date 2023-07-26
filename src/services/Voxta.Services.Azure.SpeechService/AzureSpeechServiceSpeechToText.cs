@@ -11,13 +11,14 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public class AzureSpeechServiceSpeechToText : ISpeechToTextService
 {
+    public string ServiceName => AzureSpeechServiceConstants.ServiceName;
+    public string[] Features { get; private set; } = Array.Empty<string>();
+    
     private readonly IRecordingService _recordingService;
     private readonly ISettingsRepository _settingsRepository;
     private readonly ILogger<AzureSpeechServiceSpeechToText> _logger;
     private SpeechRecognizer? _recognizer;
     private PushAudioInputStream? _pushStream;
-    
-    public string[] Features { get; private set; } = Array.Empty<string>();
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;

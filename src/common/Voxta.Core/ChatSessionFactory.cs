@@ -72,7 +72,7 @@ public class ChatSessionFactory
             var textToSpeechGen = await _textToSpeechFactory.CreateAsync(profile.TextToSpeech, startChatMessage.TtsService ?? "", prerequisites, startChatMessage.Culture, cancellationToken);
             var thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
 
-            speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, startChatMessage.TtsVoice, prerequisites, startChatMessage.Culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
+            speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, startChatMessage.TtsVoice, startChatMessage.Culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
             // TODO: Use a real chat data store, reload using auth
             var chatData = new ChatSessionData

@@ -13,7 +13,6 @@ namespace Voxta.Services.NovelAI;
 public class NovelAITextToSpeechClient : ITextToSpeechService
 {
     public string ServiceName => NovelAIConstants.ServiceName;
-    
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly HttpClient _httpClient;
@@ -66,7 +65,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
             new() { Id = "Lim", Label = "Lim (Female)" },
             new() { Id = "Orae", Label = "Orae (Female)" },
             new() { Id = "Naia", Label = "Naia (Female)" },
-            new() { Id = "Olon", Label = "Olon (Male)" },
+            new() { Id = "Aulon", Label = "Aulon (Male)" },
             new() { Id = "Elei", Label = "Elei (Male)" },
             new() { Id = "Ogma", Label = "Ogma (Male)" },
             new() { Id = "Reid", Label = "Reid (Male)" },
@@ -117,9 +116,9 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         if (string.IsNullOrEmpty(speechRequest.Voice))
             return "Ligeia";
         if(speechRequest.Voice == SpecialVoices.Female)
-            return "Claea";
+            return "Aini";
         if (speechRequest.Voice == SpecialVoices.Male)
-            return "Olon";
+            return "Aulon";
         return speechRequest.Voice;
     }
 

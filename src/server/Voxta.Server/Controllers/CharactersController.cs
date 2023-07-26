@@ -141,7 +141,12 @@ public class CharactersController : Controller
         }
         else
         {
-            voices = Array.Empty<VoiceInfo>();
+            voices = new VoiceInfo[]
+            {
+                new() { Id = "", Label = "Unspecified" },
+                new() { Id = SpecialVoices.Male, Label = "Male" },
+                new() { Id = SpecialVoices.Female, Label = "Female" },
+            };
         }
 
         var vm = new CharacterViewModelWithOptions
