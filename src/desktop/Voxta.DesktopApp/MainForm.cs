@@ -16,6 +16,8 @@ public partial class MainForm : Form
     {
         InitializeComponent();
 
+        Icon = new Icon(GetType(), "Resources.voxta.ico");
+
         FormClosing += MainForm_FormClosing;
 
         ConsoleControl = new ConsoleControl.ConsoleControl();
@@ -35,12 +37,14 @@ public partial class MainForm : Form
         
         var webServerPath = "Voxta.Server.exe";
         var webServerWorkingDirectoryPath = "";
+        #if(DEBUG)
         if (!File.Exists(webServerPath))
         {
             webServerWorkingDirectoryPath = Path.GetFullPath(@"..\..\..\..\..\server\Voxta.Server");
             webServerPath = Path.GetFullPath(@"..\..\..\..\..\server\Voxta.Server\bin\Debug\net7.0\win-x64\Voxta.Server.exe");
-            if (!File.Exists(webServerPath)) throw new FileNotFoundException(webServerPath);
         }
+        #endif
+        if (!File.Exists(webServerPath)) throw new FileNotFoundException(webServerPath);
         var processStartInfo = new ProcessStartInfo(webServerPath)
         {
             WorkingDirectory = webServerWorkingDirectoryPath

@@ -1,5 +1,15 @@
+const isWebView = window.isWebView = window.chrome && window.chrome.webview;
+
+// When the document is loaded, hide the logo
+document.addEventListener('DOMContentLoaded', function () {
+    if(isWebView) {
+        const logo = document.getElementById('logo');
+        logo.style.display = 'none';
+    }
+});
+
 (function () {
-    if (window.chrome && window.chrome.webview) {
+    if (isWebView) {
         document.getRootNode().addEventListener('keyup', function (e) {
             if (e.key === 'F2') {
                 window.chrome.webview.postMessage(
