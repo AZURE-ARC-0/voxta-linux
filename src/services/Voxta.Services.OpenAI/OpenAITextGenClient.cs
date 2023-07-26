@@ -12,6 +12,8 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    
+    public string[] Features => Array.Empty<string>();
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
         : base(httpClientFactory, settingsRepository)
@@ -30,7 +32,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 
     public override Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
-        if (prerequisites.Contains(Prerequisites.NSFW)) return Task.FromResult(false);
+        if (prerequisites.Contains(ServiceFeatures.NSFW)) return Task.FromResult(false);
         return base.InitializeAsync(prerequisites, culture, cancellationToken);
     }
 

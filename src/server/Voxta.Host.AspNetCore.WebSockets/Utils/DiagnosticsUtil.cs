@@ -10,25 +10,33 @@ using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Abstractions.Exceptions;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.Vosk;
 
 namespace Voxta.Host.AspNetCore.WebSockets.Utils;
 
+[Serializable]
 public class DiagnosticsResult
 {
-    public required List<ServiceDiagnosticsResult>? Services { get; init; }
+    public required ServiceDiagnosticsResult Profile { get; init; }
+    public required ServiceDiagnosticsResult[] TextGenServices { get; init; }
+    public required ServiceDiagnosticsResult[] TextToSpeechServices { get; init; }
+    public required ServiceDiagnosticsResult[] ActionInferenceServices { get; init; }
+    public required ServiceDiagnosticsResult[] SpeechToTextServices { get; init; }
 }
 
+[Serializable]
 public class ServiceDiagnosticsResult
 {
-    public bool IsReady { get; init; }
-    public bool IsHealthy { get; init; }
-    public bool IsTested { get; init; }
+    public required bool IsReady { get; init; }
+    public required bool IsHealthy { get; init; }
+    public required bool IsTested { get; init; }
     public required string ServiceName { get; init; }
     public required string Label { get; init; }
     public required string Status { get; init; }
     public string? Details { get; init; }
+    public required string[] Features { get; init; }
 }
 
 public class DiagnosticsUtil
@@ -87,92 +95,65 @@ public class DiagnosticsUtil
     private async Task<DiagnosticsResult> TestAllServicesAsync(bool runTests, CancellationToken cancellationToken)
     {
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
-        var result = new DiagnosticsResult
+        var profileResult = new ServiceDiagnosticsResult()
         {
-            Services = new List<ServiceDiagnosticsResult>
-            {
-                new()
-                {
-                    IsReady = true,
-                    IsHealthy = !string.IsNullOrEmpty(profile?.Name),
-                    ServiceName = "Profile",
-                    Label = "Profile and Default Services",
-                    Status = profile?.Name ?? "No profile",
-                }
-            }
+            IsReady = true,
+            IsHealthy = !string.IsNullOrEmpty(profile?.Name),
+            ServiceName = "Profile",
+            Label = "Profile and Default Services",
+            Status = profile?.Name ?? "No profile",
+            IsTested = runTests,
+            Features = Array.Empty<string>()
         };
-        
-        #warning 
 
-        var services = await Task.WhenAll(
+        var textGen = new[]
+        {
             Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextGenAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextGenAsync(KoboldAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextGenAsync(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+        };
+        
+        var tts = new[]
+        {
             Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken)
-        );
-        #warning Sort by priority order; we might want to separate the services into different groups.
-        result.Services.AddRange(services.OrderBy(x => x.IsHealthy).ThenBy(x => x.IsReady).ThenBy(x => x.Label));
-        result.Services.Add(await TrySpeechToText(VoskConstants.ServiceName, runTests, cancellationToken));
-        result.Services.Add(await TrySpeechToText(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken));
+        };
+        
+        var actionInference = new[]
+        {
+            Task.Run(async () => await TryActionInference(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryActionInference(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken)
+        };
 
-        return result;
+        var stt = new ServiceDiagnosticsResult[2];
+        var sttTask = Task.Run(async () =>
+        {
+            stt[0] = await TrySpeechToText(VoskConstants.ServiceName, runTests, cancellationToken);
+            stt[1] = await TrySpeechToText(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken);
+        }, cancellationToken);
+
+        await Task.WhenAll(textGen.Concat(tts).Concat(actionInference).Concat(new[] { sttTask }));
+
+        return new DiagnosticsResult
+        {
+            Profile = profileResult,
+            TextGenServices = textGen.Select(t => t.Result).ToArray(),
+            TextToSpeechServices = tts.Select(t => t.Result).ToArray(),
+            ActionInferenceServices = actionInference.Select(t => t.Result).ToArray(),
+            SpeechToTextServices = stt,
+        };
     }
 
     private async Task<ServiceDiagnosticsResult> TryTextGenAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{serviceName} (Text Gen)";
-        
-        ITextGenService? service = null;
-        try
-        {
-            try
-            {
-                service = await _textGenFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = false,
-                    IsHealthy = false,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
-                };
-            }
-            catch (Exception exc)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = false,
-                    IsHealthy = false,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = $"{exc.GetType().Namespace}: {exc.Message}",
-                    Details = exc.ToString()
-                };
-            }
 
-            if (!runTests)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = true,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Configured"
-                };
-            }
-
-            try
+        return await TestServiceAsync(
+            serviceName,
+            runTests,
+            async () => await _textGenFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async service =>
             {
                 var result = await service.GenerateReplyAsync(new ChatSessionData
                 {
@@ -186,99 +167,18 @@ public class DiagnosticsUtil
                         Scenario = "This is a test",
                     }
                 }, cancellationToken);
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = true,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Response: " + result.Text
-                };
+                return "Response: " + result.Text;
             }
-            catch (OperationCanceledException)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = false,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
-                };
-            }
-            catch (Exception exc)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = false,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = $"{exc.GetType().Name}: {exc.Message}",
-                    Details = exc.ToString()
-                };
-            }
-        }
-        finally
-        {
-            service?.Dispose();
-        }
+        );
     }
     
     private async Task<ServiceDiagnosticsResult> TryTextToSpeechAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{serviceName} (TTS)";
-        
-        ITextToSpeechService? service = null;
-        try
-        {
-            try
-            {
-                service = await _textToSpeechFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = false,
-                    IsHealthy = false,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
-                };
-            }
-            catch (Exception exc)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = false,
-                    IsHealthy = false,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = $"{exc.GetType().Namespace}: {exc.Message}",
-                    Details = exc.ToString(),
-                };
-            }
-
-            if (!runTests)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = true,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Configured"
-                };
-            }
-
-            try
+        return await TestServiceAsync(
+            serviceName,
+            runTests,
+            async () => await _textToSpeechFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async service =>
             {
                 var voices = await service.GetVoicesAsync(cancellationToken);
                 var tunnel = new DeadSpeechTunnel();
@@ -290,46 +190,9 @@ public class DiagnosticsUtil
                     Culture = "en-US",
                     ContentType = service.ContentType,
                 }, tunnel, cancellationToken);
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = tunnel.Result != null,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = tunnel.Result ?? "No result"
-                };
+                return tunnel.Result ?? "No Result";
             }
-            catch (OperationCanceledException)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = false,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
-                };
-            }
-            catch (Exception exc)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = false,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = $"{exc.GetType().Namespace}: {exc.Message}",
-                    Details = exc.ToString(),
-                };
-            }
-        }
-        finally
-        {
-            service?.Dispose();
-        }
+        );
     }
 
     private class DeadSpeechTunnel : ISpeechTunnel
@@ -349,58 +212,15 @@ public class DiagnosticsUtil
         }
     }
     
-    private async Task<ServiceDiagnosticsResult> TryAnimSelect(string serviceName, bool runTests, CancellationToken cancellationToken)
+    private async Task<ServiceDiagnosticsResult> TryActionInference(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{serviceName} (Animation Selector)";
-        
-        IActionInferenceService? service = null;
-        try
-        {
-            try
+        return await TestServiceAsync(
+            serviceName,
+            runTests,
+            async () => await _animationSelectionFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async service =>
             {
-                service = await _animationSelectionFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = false,
-                    IsHealthy = false,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
-                };
-            }
-            catch (Exception exc)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = false,
-                    IsHealthy = false,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = $"{exc.GetType().Namespace}: {exc.Message}",
-                    Details = exc.ToString(),
-                };
-            }
-
-            if (!runTests)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = true,
-                    IsTested = false,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Configured"
-                };
-            }
-
-            try
-            {
+                var actions = new[] { "test_successful", "talk_to_user" };
                 var result = await service.SelectActionAsync(new ChatSessionData
                 {
                     UserName = "User",
@@ -412,60 +232,33 @@ public class DiagnosticsUtil
                         Personality = "",
                         Scenario = "This is a test",
                     },
-                    Actions = new[] { "test_successful", "talk_to_user" }
+                    Actions = actions
                 }, cancellationToken);
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = true,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Response: " + result
-                };
+                return "Action: " + result;
             }
-            catch (OperationCanceledException)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = false,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
-                };
-            }
-            catch (Exception exc)
-            {
-                return new ServiceDiagnosticsResult
-                {
-                    IsReady = true,
-                    IsHealthy = false,
-                    IsTested = true,
-                    ServiceName = serviceName,
-                    Label = name,
-                    Status = $"{exc.GetType().Namespace}: {exc.Message}",
-                    Details = exc.ToString()
-                };
-            }
-        }
-        finally
-        {
-            service?.Dispose();
-        }
+        );
     }
     
     private async Task<ServiceDiagnosticsResult> TrySpeechToText(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-        var name = $"{serviceName} (Speech To Text)";
-
-        ISpeechToTextService? service = null;
+        return await TestServiceAsync(
+            serviceName,
+            runTests,
+            async () => await _speechToTextFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            _ => Task.FromResult("Cannot be tested automatically")
+        );
+    }
+    
+    private static async Task<ServiceDiagnosticsResult> TestServiceAsync<TService>(string serviceName, bool runTests, Func<Task<TService>> createService, Func<TService, Task<string>> testService) where TService : IService
+    {
+        TService? service = default;
         try
         {
+            string[]? features;
             try
             {
-                service = await _speechToTextFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
+                service = await createService();
+                features = service.Features;
             }
             catch (OperationCanceledException)
             {
@@ -475,8 +268,22 @@ public class DiagnosticsUtil
                     IsHealthy = false,
                     IsTested = false,
                     ServiceName = serviceName,
-                    Label = name,
-                    Status = "Canceled"
+                    Label = serviceName,
+                    Status = "Canceled",
+                    Features = Array.Empty<string>()
+                };
+            }
+            catch (ServiceDisabledException)
+            {
+                return new ServiceDiagnosticsResult
+                {
+                    IsReady = false,
+                    IsHealthy = false,
+                    IsTested = false,
+                    ServiceName = serviceName,
+                    Label = serviceName,
+                    Status = "Disabled",
+                    Features = Array.Empty<string>()
                 };
             }
             catch (Exception exc)
@@ -487,9 +294,10 @@ public class DiagnosticsUtil
                     IsHealthy = false,
                     IsTested = false,
                     ServiceName = serviceName,
-                    Label = name,
+                    Label = serviceName,
                     Status = $"{exc.GetType().Namespace}: {exc.Message}",
                     Details = exc.ToString(),
+                    Features = Array.Empty<string>()
                 };
             }
 
@@ -501,20 +309,54 @@ public class DiagnosticsUtil
                     IsHealthy = true,
                     IsTested = false,
                     ServiceName = serviceName,
-                    Label = name,
-                    Status = "Configured"
+                    Label = serviceName,
+                    Status = "Configured",
+                    Features = features
                 };
             }
 
-            return new ServiceDiagnosticsResult
+            try
             {
-                IsReady = true,
-                IsHealthy = true,
-                IsTested = true,
-                ServiceName = serviceName,
-                Label = name,
-                Status = "Cannot be tested automatically"
-            };
+                var status = await testService(service);
+                
+                return new ServiceDiagnosticsResult
+                {
+                    IsReady = true,
+                    IsHealthy = true,
+                    IsTested = true,
+                    ServiceName = serviceName,
+                    Label = serviceName,
+                    Status = status,
+                    Features = features
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                return new ServiceDiagnosticsResult
+                {
+                    IsReady = true,
+                    IsHealthy = false,
+                    IsTested = true,
+                    ServiceName = serviceName,
+                    Label = serviceName,
+                    Status = "Canceled",
+                    Features = features
+                };
+            }
+            catch (Exception exc)
+            {
+                return new ServiceDiagnosticsResult
+                {
+                    IsReady = true,
+                    IsHealthy = false,
+                    IsTested = true,
+                    ServiceName = serviceName,
+                    Label = serviceName,
+                    Status = $"{exc.GetType().Name}: {exc.Message}",
+                    Details = exc.ToString(),
+                    Features = features
+                };
+            }
         }
         finally
         {

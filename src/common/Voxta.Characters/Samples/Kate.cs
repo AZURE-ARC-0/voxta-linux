@@ -25,7 +25,7 @@ public static class Kate
         Personality = "flirty, funny, proactive, horny",
         PostHistoryInstructions = "",
         FirstMessage = "Hey, {{user}}... you're looking good today...",
-        Prerequisites = new[] { Prerequisites.NSFW },
+        Prerequisites = new[] { ServiceFeatures.NSFW },
         Culture = "en-US",
         Services = new()
         {

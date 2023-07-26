@@ -10,6 +10,8 @@ public class FakesTextToSpeechClient : ITextToSpeechService
 {
     public string ServiceName => FakesConstants.ServiceName;
     public string ContentType => "audio/x-wav";
+    
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {

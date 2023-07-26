@@ -21,6 +21,8 @@ public class NovelAITextGenClient : ITextGenService
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
+    
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     static NovelAITextGenClient()
     {

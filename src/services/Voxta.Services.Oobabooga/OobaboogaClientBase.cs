@@ -24,8 +24,9 @@ public class OobaboogaClientBase
         _initialized = true;
         var settings = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken);
         if (settings == null) return false;
+        if (!settings.Enabled) return false;
         var uri = settings.Uri;
-        if (string.IsNullOrEmpty(uri)) throw new OobaboogaException("Missing uri in settings.");
+        if (string.IsNullOrEmpty(uri)) return false;
         _httpClient.BaseAddress = new Uri(uri);
         return true;
     }

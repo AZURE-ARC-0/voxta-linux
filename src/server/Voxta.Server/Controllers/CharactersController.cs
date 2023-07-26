@@ -120,7 +120,7 @@ public class CharactersController : Controller
             return BadRequest("Character ID mismatch");
 
         var prerequisites = new List<string>();
-        if (data.PrerequisiteNSFW) prerequisites.Add(Prerequisites.NSFW);
+        if (data.PrerequisiteNSFW) prerequisites.Add(ServiceFeatures.NSFW);
         if (prerequisites.Count > 0) data.Character.Prerequisites = prerequisites.ToArray();
         
         await _characterRepository.SaveCharacterAsync(data.Character);
@@ -145,7 +145,7 @@ public class CharactersController : Controller
         {
             IsNew = isNew,
             Character = character,
-            PrerequisiteNSFW = character.Prerequisites?.Contains(Prerequisites.NSFW) == true,
+            PrerequisiteNSFW = character.Prerequisites?.Contains(ServiceFeatures.NSFW) == true,
             TextGenServices = new[]
             {
                 OpenAIConstants.ServiceName,

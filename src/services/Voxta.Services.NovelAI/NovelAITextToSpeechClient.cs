@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -14,6 +13,8 @@ namespace Voxta.Services.NovelAI;
 public class NovelAITextToSpeechClient : ITextToSpeechService
 {
     public string ServiceName => NovelAIConstants.ServiceName;
+    
+    public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly HttpClient _httpClient;
     private readonly ILogger<NovelAITextToSpeechClient> _logger;

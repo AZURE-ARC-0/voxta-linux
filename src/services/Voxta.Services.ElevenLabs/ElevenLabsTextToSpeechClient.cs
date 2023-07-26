@@ -16,6 +16,8 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
 {
     public string ServiceName => ElevenLabsConstants.ServiceName;
     
+    public string[] Features => new[] { ServiceFeatures.NSFW };
+    
     private readonly ILogger<ElevenLabsTextToSpeechClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;

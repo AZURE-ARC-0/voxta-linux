@@ -17,6 +17,8 @@ public class KoboldAITextGenClient : ITextGenService
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public KoboldAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {

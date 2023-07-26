@@ -11,6 +11,8 @@ public class OobaboogaTextGenClient : OobaboogaClientBase, ITextGenService
 {
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public OobaboogaTextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     :base(httpClientFactory, settingsRepository)

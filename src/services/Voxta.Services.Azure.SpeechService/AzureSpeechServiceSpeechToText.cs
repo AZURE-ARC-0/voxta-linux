@@ -16,6 +16,8 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     private readonly ILogger<AzureSpeechServiceSpeechToText> _logger;
     private SpeechRecognizer? _recognizer;
     private PushAudioInputStream? _pushStream;
+    
+    public string[] Features { get; private set; } = Array.Empty<string>();
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
@@ -35,11 +37,19 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
-        if (prerequisites.Contains(Prerequisites.NSFW) && settings.FilterProfanity) return false;
+        if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
         
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
         config.SpeechRecognitionLanguage = culture;
-        config.SetProfanity(settings.FilterProfanity ? ProfanityOption.Removed : ProfanityOption.Raw);
+        if (settings.FilterProfanity)
+        {
+            config.SetProfanity(ProfanityOption.Removed);
+        }
+        else
+        {
+            config.SetProfanity(ProfanityOption.Raw);
+            Features = new[] { ServiceFeatures.NSFW };
+        }
         
         if (!string.IsNullOrEmpty(settings.LogFilename))
         {
@@ -53,7 +63,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         var audioInput = AudioConfig.FromStreamInput(_pushStream);
         _recognizer = new SpeechRecognizer(config, audioInput);
 
-        _recognizer.Recognizing += (s, e) =>
+        _recognizer.Recognizing += (_, e) =>
         {
             if (e.Result.Reason != ResultReason.RecognizingSpeech) return;
             _logger.LogDebug("Speech recognizing");
@@ -65,7 +75,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
             SpeechRecognitionPartial?.Invoke(this, e.Result.Text);
         };
 
-        _recognizer.Recognized += (s, e) =>
+        _recognizer.Recognized += (_, e) =>
         {
             if (e.Result.Reason != ResultReason.RecognizedSpeech) return;
             _logger.LogDebug("Speech recognized");
@@ -74,7 +84,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
                 SpeechRecognitionFinished?.Invoke(this, e.Result.Text);
         };
 
-        _recognizer.Canceled += (s, e) => {
+        _recognizer.Canceled += (_, e) => {
             _recordingService.Speaking = false;
             if (e.Reason == CancellationReason.Error)
                 _logger.LogError("Error in Azure Speech Service: {ErrorCode} {ErrorDetails}", e.ErrorCode, e.ErrorDetails);

@@ -14,6 +14,8 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
 {
     public string ServiceName => AzureSpeechServiceConstants.ServiceName;
     
+    public string[] Features { get; private set; } = Array.Empty<string>();
+
     private readonly ILogger<AzureSpeechServiceTextToSpeech> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
@@ -34,10 +36,18 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
-        if (prerequisites.Contains(Prerequisites.NSFW) && settings.FilterProfanity) return false;
+        if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
         
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
-        config.SetProfanity(settings.FilterProfanity ? ProfanityOption.Removed : ProfanityOption.Raw);
+        if (settings.FilterProfanity)
+        {
+            config.SetProfanity(ProfanityOption.Removed);
+        }
+        else
+        {
+            config.SetProfanity(ProfanityOption.Raw);
+            Features = new[] { ServiceFeatures.NSFW };
+        }
         
         if (!string.IsNullOrEmpty(settings.LogFilename))
         {

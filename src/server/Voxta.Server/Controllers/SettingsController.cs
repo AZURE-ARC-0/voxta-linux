@@ -33,29 +33,21 @@ public class SettingsController : Controller
     [HttpGet("/settings")]
     public async Task<IActionResult> Settings(CancellationToken cancellationToken)
     {
-        var vm = new SettingsViewModel
-        {
-            Profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
-            {
-                Name = "User",
-                Services = new ProfileSettings.ProfileServicesMap
-                {
-                    SpeechToText = new ServiceMap { Service = FakesConstants.ServiceName },
-                    ActionInference = new ServiceMap { Service = FakesConstants.ServiceName }
-                }
-            },
-            Services = (await _diagnosticsUtil.GetAllServicesAsync(cancellationToken)).Services,
-        };
-        
+        var vm = await GetSettingsViewModel(() => _diagnosticsUtil.GetAllServicesAsync(cancellationToken), cancellationToken);
         return View(vm);
     }
-    
+
     [HttpPost("/settings/test")]
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public async Task<IActionResult> TestAllSettings([FromForm] bool test, CancellationToken cancellationToken)
     {
         if (!test) throw new InvalidOperationException("Unexpected settings test without test flag.");
-        
+        var vm = await GetSettingsViewModel(() => _diagnosticsUtil.TestAllServicesAsync(cancellationToken), cancellationToken);
+        return View("Settings", vm);
+    }
+
+    private async Task<SettingsViewModel> GetSettingsViewModel(Func<Task<DiagnosticsResult>> getServices, CancellationToken cancellationToken)
+    {
         var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
         {
             Name = "User",
@@ -65,39 +57,22 @@ public class SettingsController : Controller
                 ActionInference = new ServiceMap { Service = FakesConstants.ServiceName }
             }
         };
-
-        SettingsViewModel vm;
-        try
+        var services = await getServices();
+        var vm = new SettingsViewModel
         {
-            var result = await _diagnosticsUtil.TestAllServicesAsync(cancellationToken);
-            vm = new SettingsViewModel
+            Profile = profile,
+            Services = new (string, ServiceDiagnosticsResult[])[]
             {
-                Profile = profile,
-                Services = result.Services,
-            };
-        }
-        catch (Exception exc)
-        {
-            vm = new SettingsViewModel
-            {
-                Profile = profile,
-                Services = new List<ServiceDiagnosticsResult>
-                {
-                    new()
-                    {
-                        ServiceName = "",
-                        Label = $"Diagnostics Error: {exc.Message}",
-                        IsHealthy = false,
-                        IsReady = false,
-                        Status = exc.ToString()
-                    }
-                }
-            };
-        }
-
-        return View("Settings", vm);
+                new("Profile and Configuration", new[] { services.Profile }),
+                new("Speech To Text Services", services.SpeechToTextServices),
+                new("Text Generation Services", services.TextGenServices),
+                new("Text To Speech Services", services.TextToSpeechServices),
+                new("Action Inference Services", services.ActionInferenceServices),
+            }
+        };
+        return vm;
     }
-    
+
     [HttpGet("/settings/profile")]
     public async Task<IActionResult> ProfileSettings(CancellationToken cancellationToken)
     {
@@ -162,6 +137,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
         {
+            Enabled = value.Enabled,
             SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? "" : Crypto.EncryptString(value.SubscriptionKey.TrimCopyPasteArtefacts()),
             Region = value.Region.TrimCopyPasteArtefacts(),
             LogFilename = value.LogFilename?.TrimCopyPasteArtefacts(),
@@ -192,6 +168,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new VoskSettings
         {
+            Enabled = value.Enabled,
             Model = value.Model.TrimCopyPasteArtefacts(),
             ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
         });
@@ -220,6 +197,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new ElevenLabsSettings
         {
+            Enabled = value.Enabled,
             ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
         });
         
@@ -246,6 +224,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new OobaboogaSettings
         {
+            Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
         });
         
@@ -272,6 +251,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new KoboldAISettings
         {
+            Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
         });
         
@@ -336,6 +316,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new OpenAISettings
         {
+            Enabled = value.Enabled,
             ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
         });

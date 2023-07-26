@@ -16,4 +16,6 @@ public abstract class SettingsBase
     [BsonId] public string Id { get; init; } = SharedId;
 
     public bool Enabled { get; set; } = true;
+    #warning COMPLETE THIS
+    public int Order { get; set; } = 0;
 }

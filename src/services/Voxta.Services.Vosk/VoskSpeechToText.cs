@@ -2,6 +2,7 @@
 using Voxta.Abstractions.Services;
 using Voxta.Services.Vosk.Model;
 using Vosk;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Services.Vosk;
@@ -24,6 +25,8 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
+
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;

@@ -10,6 +10,8 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
 {
     private readonly ITokenizer _tokenizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     public OpenAIActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics)
         : base(httpClientFactory, settingsRepository)

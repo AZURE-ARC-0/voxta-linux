@@ -1,5 +1,6 @@
 ﻿using Voxta.Abstractions.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Voxta.Abstractions.Exceptions;
 
 namespace Voxta.Abstractions.DependencyInjection;
 
@@ -43,7 +44,8 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
             throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {serviceName}");
         
         var instance = (TInterface)_sp.GetRequiredService(type);
-        await instance.InitializeAsync(prerequisites, culture, cancellationToken);
+        var success = await instance.InitializeAsync(prerequisites, culture, cancellationToken);
+        if (!success) throw new ServiceDisabledException();
         
         return instance;
     }
