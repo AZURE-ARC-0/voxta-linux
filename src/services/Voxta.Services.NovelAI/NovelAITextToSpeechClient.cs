@@ -48,8 +48,13 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
             "m",
             "uh",
             "..",
+            "...",
             "mmh",
             "hum",
+            "huh",
+            "!!",
+            "??",
+            "o",
         };
     }
 
