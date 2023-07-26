@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Voxta.Abstractions.Model;
 
 namespace Voxta.Characters;
 
@@ -38,5 +39,41 @@ public static class TavernCardV2Import
         {
             throw new Exception($"Failed parsing tavern data as JSON: {ex.Message}", ex);
         }
+    }
+
+    public static Character ConvertCardToCharacter(TavernCardData data)
+    {
+        return new Character
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = data.Name,
+            Description = data.Description ?? "",
+            Personality = data.Personality ?? "",
+            Scenario = data.Scenario ?? "",
+            MessageExamples = data.MesExample,
+            FirstMessage = data.FirstMes,
+            PostHistoryInstructions = data.PostHistoryInstructions,
+            CreatorNotes = data.CreatorNotes,
+            SystemPrompt = data.SystemPrompt,
+            Culture = data.Extensions.TryGetValue("voxta/culture", out var culture) && !string.IsNullOrEmpty(culture) ? culture : "en-US",
+            Prerequisites = data.Extensions.TryGetValue("voxta/prerequisites", out var prerequisites) && !string.IsNullOrEmpty(prerequisites) ? prerequisites.Split(',') : Array.Empty<string>(),
+            ReadOnly = false,
+            Services = new Character.CharacterServicesMap
+            {
+                TextGen = new ServiceMap
+                {
+                    Service = data.Extensions.TryGetValue("voxta/textgen/service", out var textGen) && !string.IsNullOrEmpty(textGen) ? textGen : ""
+                },
+                SpeechGen = new VoiceServiceMap
+                {
+                    Service = data.Extensions.TryGetValue("voxta/tts/service", out var ttsService) && !string.IsNullOrEmpty(ttsService) ? ttsService : "",
+                    Voice = data.Extensions.TryGetValue("voxta/tts/voice", out var ttsVoice) && !string.IsNullOrEmpty(ttsVoice) ? ttsVoice : "Naia"
+                },
+            },
+            Options = new()
+            {
+                EnableThinkingSpeech = data.Extensions.TryGetValue("voxta/options/enable_thinking_speech", out var enableThinkingSpeech) && enableThinkingSpeech == "true"
+            },
+        };
     }
 }

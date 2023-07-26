@@ -21,7 +21,7 @@ public class ServiceRegistry<TInterface> : IServiceRegistry<TInterface> where TI
 
 public interface IServiceFactory<TInterface> where TInterface : class
 {
-    Task<TInterface> CreateAsync(string serviceName, string culture, CancellationToken cancellationToken);
+    Task<TInterface> CreateAsync(string serviceName, string[] prerequisites, string culture, CancellationToken cancellationToken);
 }
 
 public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInterface : class, IService
@@ -35,13 +35,13 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         _sp = sp;
     }
 
-    public async Task<TInterface> CreateAsync(string serviceName, string culture, CancellationToken cancellationToken)
+    public async Task<TInterface> CreateAsync(string serviceName, string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         if (!_registry.Types.TryGetValue(serviceName, out var type))
             throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {serviceName}");
         
         var instance = (TInterface)_sp.GetRequiredService(type);
-        await instance.InitializeAsync(culture, cancellationToken);
+        await instance.InitializeAsync(prerequisites, culture, cancellationToken);
         
         return instance;
     }

@@ -5,7 +5,7 @@ namespace Voxta.Services.Fakes;
 
 public class FakesActionInferenceClient : IActionInferenceService
 {
-    public Task InitializeAsync(string culture, CancellationToken cancellationToken)
+    public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }

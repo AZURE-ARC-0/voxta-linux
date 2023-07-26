@@ -26,6 +26,7 @@ public static class TavernCardV2Export
                 Tags = character.Tags,
                 Extensions = new Dictionary<string, string>
                 {
+                    { "voxta/prerequisites", string.Join(",", character.Prerequisites) },
                     { "voxta/culture", character.Culture },
                     { "voxta/textgen/service", character.Services.TextGen.Service },
                     { "voxta/tts/service", character.Services.SpeechGen.Service },

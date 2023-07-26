@@ -28,7 +28,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
+    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
         if (settings == null) throw new NovelAIException("NovelAI is not configured.");

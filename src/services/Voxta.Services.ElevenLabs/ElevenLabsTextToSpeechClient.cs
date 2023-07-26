@@ -30,7 +30,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
+    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         _httpClient.BaseAddress = new Uri("https://api.elevenlabs.io");
         var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);

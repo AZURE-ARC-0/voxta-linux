@@ -148,7 +148,7 @@ public class CharactersController : Controller
 
         if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
         {
-            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, character.Culture, cancellationToken);
+            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, character.Prerequisites, character.Culture, cancellationToken);
             vm.Voices = await ttsService.GetVoicesAsync(cancellationToken);
         }
 
@@ -170,37 +170,8 @@ public class CharactersController : Controller
         };
         if (card?.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
 
-        var character = new Character
-        {
-            Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
-            Name = card.Data.Name,
-            Description = card.Data.Description ?? "",
-            Personality = card.Data.Personality ?? "",
-            Scenario = card.Data.Scenario ?? "",
-            MessageExamples = card.Data.MesExample,
-            FirstMessage = card.Data.FirstMes,
-            PostHistoryInstructions = card.Data.PostHistoryInstructions,
-            CreatorNotes = card.Data.CreatorNotes,
-            SystemPrompt = card.Data.SystemPrompt,
-            Culture = card.Data.Extensions.TryGetValue("voxta/culture", out var culture) && !string.IsNullOrEmpty(culture) ? culture : "en-US",
-            ReadOnly = false,
-            Services = new Character.CharacterServicesMap
-            {
-                TextGen = new ServiceMap
-                {
-                    Service = card.Data.Extensions.TryGetValue("voxta/textgen/service", out var textGen) && !string.IsNullOrEmpty(textGen) ? textGen : NovelAIConstants.ServiceName
-                },
-                SpeechGen = new VoiceServiceMap
-                {
-                    Service = card.Data.Extensions.TryGetValue("voxta/tts/service", out var ttsService) && !string.IsNullOrEmpty(ttsService) ? ttsService : NovelAIConstants.ServiceName,
-                    Voice = card.Data.Extensions.TryGetValue("voxta/tts/voice", out var ttsVoice) && !string.IsNullOrEmpty(ttsVoice) ? ttsVoice : "Naia"
-                },
-            },
-            Options = new()
-            {
-                EnableThinkingSpeech = card.Data.Extensions.TryGetValue("voxta/options/enable_thinking_speech", out var enableThinkingSpeech) && enableThinkingSpeech == "true"
-            },
-        };
+        var character = TavernCardV2Import.ConvertCardToCharacter(card.Data);
+        character.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
 
         await _characterRepository.SaveCharacterAsync(character);
         

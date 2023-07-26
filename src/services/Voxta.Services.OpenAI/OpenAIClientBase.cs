@@ -21,7 +21,7 @@ public abstract class OpenAIClientBase
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
-    public async Task InitializeAsync(string culture, CancellationToken cancellationToken)
+    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         if (_initialized) return;
         _initialized = true;

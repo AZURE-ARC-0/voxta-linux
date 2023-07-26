@@ -30,6 +30,8 @@ public class Character : CharacterCard
     public bool ReadOnly { get; set; }
     [RegularExpression(@"^[a-z]{2}-[A-Z]{2}$")]
     public string Culture { get; set; } = "en-US";
+
+    public string[] Prerequisites { get; set; } = Array.Empty<string>();
     
     public required CharacterServicesMap Services { get; init; }
     public CharacterOptions? Options { get; init; }

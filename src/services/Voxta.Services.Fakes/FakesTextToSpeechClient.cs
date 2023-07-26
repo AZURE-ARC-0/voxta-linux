@@ -11,7 +11,7 @@ public class FakesTextToSpeechClient : ITextToSpeechService
     public string ServiceName => FakesConstants.ServiceName;
     public string ContentType => "audio/x-wav";
 
-    public Task InitializeAsync(string culture, CancellationToken cancellationToken)
+    public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }
