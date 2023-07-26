@@ -32,6 +32,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
         if (settings == null) return false;
+        if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
         if (prerequisites.Contains(Prerequisites.NSFW) && settings.FilterProfanity) return false;

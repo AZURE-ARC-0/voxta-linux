@@ -1,6 +1,6 @@
 ﻿namespace Voxta.Abstractions.Services;
 
-public interface ISpeechToTextService : IService, IDisposable
+public interface ISpeechToTextService : IService
 {
     event EventHandler? SpeechRecognitionStarted;
     

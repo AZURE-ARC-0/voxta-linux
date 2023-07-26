@@ -9,10 +9,15 @@ public class SettingsViewModel
     public List<ServiceDiagnosticsResult>? Services { get; init; }
 }
 
-public class NovelAISettingsViewModel
+public class ServiceSettingsViewModel
+{
+    public required bool Enabled { get; set; }
+    public required bool UseDefaults { get; set; }
+    public required string Parameters { get; set; }
+}
+
+public class NovelAISettingsViewModel : ServiceSettingsViewModel
 {
     public required string Token { get; set; }
     public required string Model { get; set; }
-    public required bool UseDefaults { get; set; }
-    public required string Parameters { get; set; }
 }

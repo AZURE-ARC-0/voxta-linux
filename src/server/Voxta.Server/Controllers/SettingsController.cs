@@ -287,6 +287,7 @@ public class SettingsController : Controller
         };
         var vm = new NovelAISettingsViewModel
         {
+            Enabled = novelai.Enabled,
             Model = novelai.Model,
             Parameters = JsonSerializer.Serialize(novelai.Parameters ?? new NovelAIParameters()),
             UseDefaults = novelai.Parameters == null,
@@ -305,6 +306,7 @@ public class SettingsController : Controller
 
         await _settingsRepository.SaveAsync(new NovelAISettings
         {
+            Enabled = value.Enabled,
             Token = string.IsNullOrEmpty(value.Token) ? "" : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? new NovelAIParameters()

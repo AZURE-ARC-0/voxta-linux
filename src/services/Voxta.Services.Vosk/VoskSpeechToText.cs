@@ -47,6 +47,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         _initialized = true;
         var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
         if (settings == null) return false;
+        if (!settings.Enabled) return false;
         if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         await Semaphore.WaitAsync(cancellationToken);
         if (_disposed) return false;

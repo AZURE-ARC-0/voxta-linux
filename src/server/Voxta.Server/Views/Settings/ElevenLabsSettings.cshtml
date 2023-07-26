@@ -23,6 +23,12 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
+                <div class="form-check mb-3">
+                    <input type="checkbox" asp-for="Enabled" class="form-check-input"/>
+                    <label asp-for="Enabled">Enabled</label>
+                    <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
+                    <span asp-validation-for="Enabled" class="text-danger"></span>
+                </div>
                 <div>
                     <label asp-for="ApiKey">ElevenLabs API key</label>
                     <input asp-for="ApiKey" class="form-control"/>
