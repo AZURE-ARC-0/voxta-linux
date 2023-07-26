@@ -87,7 +87,7 @@ namespace Voxta.Server.BackgroundServices
                 if (!File.Exists(file)) return;
                 File.Delete(file);
                 _filesToDelete.TryRemove(file, out _);
-                _logger.LogInformation("Deleted file: {File}", file);
+                _logger.LogDebug("Deleted file: {File}", file);
             }
             catch (Exception ex)
             {

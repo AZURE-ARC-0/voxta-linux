@@ -42,12 +42,12 @@ public partial class ChatSession
                     { Length: > 1 } => potentialActions.MinBy(x => x.distance).value,
                     _ => throw new NotSupportedException($"Unexpected potential actions length {potentialActions.Length}")
                 };
-                _logger.LogInformation("Selected action: '{GuessedAction}' based on approximation from {Action} with list {Actions}", replaced, action, _chatSessionData.Actions);
+                _logger.LogInformation("Inferred action: '{GuessedAction}' (based on approximation from {Action} and list {Actions})", replaced, action, _chatSessionData.Actions);
                 action = replaced;
             }
             else
             {
-                _logger.LogInformation("Selected action: {Action}", action);
+                _logger.LogInformation("Inferred action: {Action} (from list {Actions})", action, _chatSessionData.Actions);
             }
 
             await _tunnel.SendAsync(new ServerActionMessage { Value = action }, cancellationToken);

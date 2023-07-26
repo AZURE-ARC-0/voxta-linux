@@ -49,7 +49,7 @@ public class VoskModelDownloader : IVoskModelDownloader
         
         if (Directory.Exists(modelPath))
         {
-            _logger.LogInformation("Vosk model already downloaded");
+            _logger.LogDebug("Vosk model already downloaded");
             return new global::Vosk.Model(modelPath);
         }
         

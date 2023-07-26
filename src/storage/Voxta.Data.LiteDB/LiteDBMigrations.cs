@@ -14,7 +14,7 @@ public class LiteDBMigrations
     
     public Task MigrateAsync()
     {
-        if (_db.UserVersion == 2)
+        if (_db.UserVersion == 3)
         {
             Migrate_2_To_3();
             _db.UserVersion = 3;
@@ -43,6 +43,11 @@ public class LiteDBMigrations
                 doc.ActionInference.Services = new[] { "OpenAI", "TextGenerationWebUI" };
                 profileSettings.Update(doc);
             }
+        }
+        var characters = _db.GetCollection<Character>();
+        foreach (var characterId in characters.Query().Where(x => x.ReadOnly).Select(x => x.Id).ToList())
+        {
+            characters.Delete(characterId);
         }
     }
 }
