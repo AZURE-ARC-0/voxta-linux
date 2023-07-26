@@ -139,10 +139,10 @@ public class DiagnosticsUtil
         return new DiagnosticsResult
         {
             Profile = profileResult,
-            TextGenServices = textGen.Select(t => t.Result).ToArray(),
-            TextToSpeechServices = tts.Select(t => t.Result).ToArray(),
-            ActionInferenceServices = actionInference.Select(t => t.Result).ToArray(),
-            SpeechToTextServices = stt,
+            TextGenServices = textGen.Select(t => t.Result).OrderBy(x => profile?.TextGen.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
+            TextToSpeechServices = tts.Select(t => t.Result).OrderBy(x => profile?.TextToSpeech.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
+            ActionInferenceServices = actionInference.Select(t => t.Result).OrderBy(x => profile?.ActionInference.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
+            SpeechToTextServices = stt.OrderBy(x => profile?.SpeechToText.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
         };
     }
 

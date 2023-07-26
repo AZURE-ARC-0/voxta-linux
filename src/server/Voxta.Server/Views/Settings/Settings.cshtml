@@ -61,6 +61,7 @@
                 <li><code>Action Inference</code> (the ability to "infer" actions the AI can do from the conversation)</li>
             </ul>
             <p>So, make sure to configure at least one of each.</p>
+            <p>Unless you specify a service, the first available AI that matches the requirements will be selected. You can reorder them if you have different preferences.</p>
         </div>
     </div>
     
@@ -83,7 +84,7 @@
                     <thead>
                     <tr>
                         <th scope="col" style="width: 80px;">Status</th>
-                        <th scope="col" style="width: 200px;">Service</th>
+                        <th scope="col" style="width: 250px;">Service</th>
                         <th scope="col">Message</th>
                         <th scope="col" style="width: 80px;"></th>
                     </tr>
@@ -106,7 +107,9 @@
                                     <i class="bi bi-exclamation-circle-fill text-danger"></i>
                                 }
                             </td>
-                            <td>@s.Label</td>
+                            <td>
+                                @s.Label
+                            </td>
                             <td>
                                 @if (s.IsTested || s is { IsReady: true,IsHealthy: false })
                                 {
@@ -127,8 +130,24 @@
                                     <span>Ready</span>
                                 }
                             </td>
-                            <td>
-                                <a class="btn btn-sm btn-secondary" href="/settings/@s.ServiceName.ToLower()">Configure</a>
+                            <td class="text-end">
+                                <div class="d-inline-flex">
+                                    @if (serviceType.Services[0] == s)
+                                    {
+                                        <input type="submit" value="Primary" class="btn btn-sm btn-dark me-2" disabled="disabled"/>
+                                    }
+                                    else
+                                    {
+                                        using (Html.BeginForm("Reorder", "Settings"))
+                                        {
+                                            <input type="hidden" name="direction" value="up"/>
+                                            <input type="hidden" name="type" value="@serviceType.Name"/>
+                                            <input type="hidden" name="name" value="@s.ServiceName"/>
+                                            <input type="submit" value="Move Up" class="btn btn-sm btn-dark me-2"/>
+                                        }
+                                    }
+                                    <a class="btn btn-sm btn-secondary" href="/settings/@s.ServiceName.ToLower()">Configure</a>
+                                </div>
                             </td>
                         </tr>
                     }

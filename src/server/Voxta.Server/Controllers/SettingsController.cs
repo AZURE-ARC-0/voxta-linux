@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Common;
@@ -47,10 +48,7 @@ public class SettingsController : Controller
 
     private async Task<SettingsViewModel> GetSettingsViewModel(Func<Task<DiagnosticsResult>> getServices, CancellationToken cancellationToken)
     {
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
-        {
-            Name = "User",
-        };
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? CreateDefaultProfile();
         var services = await getServices();
         var vm = new SettingsViewModel
         {
@@ -135,14 +133,73 @@ public class SettingsController : Controller
         return vm;
     }
 
+    private static ProfileSettings CreateDefaultProfile()
+    {
+        return new ProfileSettings
+        {
+            Name = "User",
+            TextGen =
+            {
+                Services = new[] { OobaboogaConstants.ServiceName, KoboldAIConstants.ServiceName, NovelAIConstants.ServiceName, OpenAIConstants.ServiceName }
+            },
+            SpeechToText =
+            {
+                Services = new[] { AzureSpeechServiceConstants.ServiceName, VoskConstants.ServiceName }
+            },
+            TextToSpeech =
+            {
+                Services = new[] { NovelAIConstants.ServiceName, ElevenLabsConstants.ServiceName, AzureSpeechServiceConstants.ServiceName }
+            },
+            ActionInference =
+            {
+                Services = new[] { OpenAIConstants.ServiceName, OobaboogaConstants.ServiceName }
+            }
+        };
+    }
+
+    [HttpPost("/settings/reorder")]
+    public async Task<ActionResult> Reorder([FromForm] string type, [FromForm] string name, [FromForm] string direction)
+    {
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        switch (type)
+        {
+            case "stt":
+                profile.SpeechToText = Reorder(profile.SpeechToText, name, direction);
+                break;
+            case "tts":
+                profile.TextToSpeech = Reorder(profile.TextToSpeech, name, direction);
+                break;
+            case "action_inference":
+                profile.ActionInference = Reorder(profile.ActionInference, name, direction);
+                break;
+            case "textgen":
+                profile.TextGen = Reorder(profile.TextGen, name, direction);
+                break;
+            default:
+                throw new NotSupportedException($"Cannot reorder {type}");
+        }
+
+        await _profileRepository.SaveProfileAsync(profile);
+        return RedirectToAction("Settings");
+    }
+
+    [SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
+    private static ServicesList Reorder(ServicesList services, string name, string direction)
+    {
+        if (direction != "up") throw new NotSupportedException("Only up is supported");
+        var index = Array.IndexOf(services.Services, name);
+        if (index <= 0) return services;
+        var list = new List<string>(services.Services);
+        list.RemoveAt(index);
+        list.Insert(index - 1, name);
+        services.Services = list.ToArray();
+        return services;
+    }
+
     [HttpGet("/settings/profile")]
     public async Task<IActionResult> ProfileSettings(CancellationToken cancellationToken)
     {
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
-        {
-            Name = "User",
-            PauseSpeechRecognitionDuringPlayback = true,
-        };
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? CreateDefaultProfile();
         var vm = new ProfileViewModel
         {
             Name = profile.Name,
@@ -160,7 +217,7 @@ public class SettingsController : Controller
             return View("ProfileSettings", value);
         }
         
-        var profile = await _profileRepository.GetProfileAsync(CancellationToken.None) ?? new ProfileSettings { Name = "" };
+        var profile = await _profileRepository.GetProfileAsync(CancellationToken.None) ?? CreateDefaultProfile();
 
         profile.Name = value.Name;
         profile.Description = value.Description;
