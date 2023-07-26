@@ -1,10 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@using Voxta.Services.AzureSpeechService
-@using Voxta.Services.Fakes
-@using Voxta.Services.Oobabooga
-@using Voxta.Services.OpenAI
-@using Voxta.Services.Vosk
-@model Voxta.Abstractions.Model.ProfileSettings
+@model ProfileViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - Profile";
@@ -46,35 +41,12 @@
                 <h2>Default Services</h2>
             </div>
             <div class="card-body">
-                <h3>Speech To Text</h3>
-                <p>This is the engine that listens to what you say and convert it to text.</p>
-                <div class="mb-3">
-                    <label asp-for="Services.SpeechToText.Service">Speech To Text Service</label>
-                    <select asp-for="Services.SpeechToText.Service" class="form-control">
-                        <option value="">None</option>
-                        <option value="@VoskConstants.ServiceName">Vosk</option>
-                        <option value="@AzureSpeechServiceConstants.ServiceName">Azure Speech Service</option>
-                    </select>
-                    <span asp-validation-for="Services.SpeechToText.Service" class="text-danger"></span>
-                </div>
+                <h3>Speech To Text Options</h3>
                 <div class="form-check mb-3">
                     <input asp-for="PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
                     <label asp-for="PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback</label>
                     <div class="form-text"><div class="form-text"></div></div>
                     <span asp-validation-for="PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
-                </div>
-
-                <h3>Action Inference</h3>
-                <p>This is what allows the model to determine actions they can take after speaking.</p>
-                <div>
-                    <label asp-for="Services.ActionInference.Service">Action Inference Service</label>
-                    <select asp-for="Services.ActionInference.Service" class="form-control">
-                        <option value="">None</option>
-                        <option value="@OpenAIConstants.ServiceName">OpenAI</option>
-                        <option value="@OobaboogaConstants.ServiceName">Text Generation Web UI</option>
-                        <option value="@FakesConstants.ServiceName">Fakes (for testing)</option>
-                    </select>
-                    <span asp-validation-for="Services.ActionInference.Service" class="text-danger"></span>
                 </div>
             </div>
         </div>

@@ -13,16 +13,22 @@ public class LiteDBMigrations
     
     public Task MigrateAsync()
     {
-        if (_db.UserVersion == 1)
+        if (_db.UserVersion == 2)
         {
-            Migrate_1_To_2();
-            _db.UserVersion = 2;
+            Migrate_2_To_3();
+            _db.UserVersion = 3;
         }
 
         return Task.CompletedTask;
     }
 
-    private void Migrate_1_To_2()
+    private void Migrate_2_To_3()
     {
+        var profileSettings = _db.GetCollection("ProfileSettings");
+        foreach (var doc in profileSettings.FindAll())
+        {
+            doc.Remove("Services");
+            profileSettings.Update(doc);
+        }
     }
 }

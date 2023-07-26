@@ -12,7 +12,6 @@ using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Services.AzureSpeechService;
-using Voxta.Services.Fakes;
 
 namespace Voxta.Server.Controllers;
 
@@ -51,23 +50,86 @@ public class SettingsController : Controller
         var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
         {
             Name = "User",
-            Services = new ProfileSettings.ProfileServicesMap
-            {
-                SpeechToText = new ServiceMap { Service = FakesConstants.ServiceName },
-                ActionInference = new ServiceMap { Service = FakesConstants.ServiceName }
-            }
         };
         var services = await getServices();
         var vm = new SettingsViewModel
         {
             Profile = profile,
-            Services = new (string, ServiceDiagnosticsResult[])[]
+            Services = new SettingsServiceViewModel[]
             {
-                new("Profile and Configuration", new[] { services.Profile }),
-                new("Speech To Text Services", services.SpeechToTextServices),
-                new("Text Generation Services", services.TextGenServices),
-                new("Text To Speech Services", services.TextToSpeechServices),
-                new("Action Inference Services", services.ActionInferenceServices),
+                new()
+                {
+                    Name = "profile",
+                    Title = "Profile",
+                    Services = new[] { services.Profile },
+                    Help = """
+                        <p>Your profile defines how the AI will see you and call you.</p>
+                        """
+                },
+                new()
+                {
+                    Name = "stt",
+                    Title = "Speech To Text Services",
+                    Services = services.SpeechToTextServices,
+                    Help = """
+                        <p>Azure Speech Service is highly recommended because it supports punctuation and works extremely well. It is also free up to a point. Otherwise, Vosk is free, fast and runs locally, despite being inferior to Azure.</p>
+                        """
+                },
+                new()
+                {
+                    Name = "textgen",
+                    Title = "Text Generation Services",
+                    Services = services.TextGenServices,
+                    Help = """
+                        <p>Some recommendations:</p>
+                        <ul>
+                            <li>
+                                <p><b>Easy, fast and unrestricted: NovelAI</b></p>
+                                <p>For fast and natural speech with minimal setup, use NovelAI for both Text Gen and TTS.</p>
+                            </li>
+                            <li>
+                                <p><b>Easy, fast, coherent but restricted: OpenAI</b></p>
+                                <p>For a helpful AI that knows things and can really help with questions, use OpenAI for Text Gen. GPT-4 is very good, but also much slower and more expensive.</p>
+                            </li>
+                            <li>
+                                <p><b>Unrestricted, but slower, requires a GPU and some efforts to setup: Text Generation Web UI or KoboldAI</b></p>
+                                <p>For unrestricted chat, use Text Generation Web UI or KoboldAI for TextGen. You need to host them yourself or on RunPod.io (or another host), and they are more complicated to setup, but they won't cost you anything and they can run completely locally.</p>
+                            </li>
+                        </ul>
+                        """
+                },
+                new()
+                {
+                    Name = "tts",
+                    Title = "Text To Speech Services",
+                    Services = services.TextToSpeechServices,
+                    Help = """
+                        <p>Some recommendations:</p>
+                        <ul>
+                            <li>
+                                <p><b>The best available option for english: NovelAI</b></p>
+                                <p>For fast and natural speech with minimal setup, use NovelAI for both Text Gen and TTS.</p>
+                            </li>
+                            <li>
+                                <p><b>Excellent quality, slightly slower and expensive but supports other languages: ElevenLabs</b></p>
+                                <p>ElevenLabs has an amazing quality with decent speed, but higher usage can get expensive.</p>
+                            </li>
+                            <li>
+                                <p><b>Fair quality: Azure Speech Service</b></p>
+                                <p>Azure Speech Service is fair, but not great. Still a good, free option for low use.</p>
+                            </li>
+                        </ul>
+                        """
+                },
+                new()
+                {
+                    Name = "action_inference",
+                    Title = "Action Inference Services",
+                    Services = services.ActionInferenceServices,
+                    Help = """
+                        <p>You should use OpenAI, even for NSFW, unless you want to experiment with other LLMs. Keep in mind, the LLM must be good to do action inference correctly.</p>
+                        """
+                },
             }
         };
         return vm;
@@ -79,38 +141,32 @@ public class SettingsController : Controller
         var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? new ProfileSettings
         {
             Name = "User",
-            Description = "",
             PauseSpeechRecognitionDuringPlayback = true,
-            Services = new ProfileSettings.ProfileServicesMap
-            {
-                ActionInference = new ServiceMap
-                {
-                    Service = OpenAIConstants.ServiceName,
-                },
-                SpeechToText = new ServiceMap
-                {
-                    Service = VoskConstants.ServiceName,
-                }
-            }
         };
-        return View(profile);
+        var vm = new ProfileViewModel
+        {
+            Name = profile.Name,
+            Description = profile.Description ?? "",
+            PauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback,
+        };
+        return View(vm);
     }
     
     [HttpPost("/settings/profile")]
-    public async Task<IActionResult> PostProfileSettings([FromForm] ProfileSettings value)
+    public async Task<IActionResult> PostProfileSettings([FromForm] ProfileViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("ProfileSettings", value);
         }
         
-        await _profileRepository.SaveProfileAsync(new ProfileSettings
-        {
-            Name = value.Name.TrimCopyPasteArtefacts(),
-            Description = value.Description?.TrimCopyPasteArtefacts(),
-            PauseSpeechRecognitionDuringPlayback = value.PauseSpeechRecognitionDuringPlayback,
-            Services = value.Services
-        });
+        var profile = await _profileRepository.GetProfileAsync(CancellationToken.None) ?? new ProfileSettings { Name = "" };
+
+        profile.Name = value.Name;
+        profile.Description = value.Description;
+        profile.PauseSpeechRecognitionDuringPlayback = value.PauseSpeechRecognitionDuringPlayback;
+
+        await _profileRepository.SaveProfileAsync(profile);
         
         return RedirectToAction("Settings");
     }

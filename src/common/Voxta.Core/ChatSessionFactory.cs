@@ -57,27 +57,22 @@ public class ChatSessionFactory
                 Directory.CreateDirectory(startChatMessage.AudioPath);
             }
             
-            var profile = await _profileRepository.GetProfileAsync(cancellationToken);
-            if (profile == null) throw new InvalidOperationException("Cannot start chat, no profile is set.");
-            var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && !string.IsNullOrEmpty(profile.Services.SpeechToText.Service);
+            var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
+            var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && profile.SpeechToText.Services.Any();
 
             var prerequisites = startChatMessage.Prerequisites ?? Array.Empty<string>();
-            textGen = await _textGenFactory.CreateAsync(startChatMessage.TextGenService, prerequisites, startChatMessage.Culture, cancellationToken);
-            speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateAsync(profile.Services.SpeechToText.Service, prerequisites, startChatMessage.Culture, cancellationToken) : null;
-            actionInference = string.IsNullOrEmpty(profile.Services.ActionInference.Service)
-                ? null
-                : await _animationSelectionFactory.CreateAsync(profile.Services.ActionInference.Service, prerequisites, startChatMessage.Culture, cancellationToken);
+            textGen = await _textGenFactory.CreateAsync(profile.TextGen, startChatMessage.TextGenService, prerequisites, startChatMessage.Culture, cancellationToken);
+            speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateAsync(profile.SpeechToText, startChatMessage.SttService ?? "", prerequisites, startChatMessage.Culture, cancellationToken) : null;
+            actionInference = profile.ActionInference.Services.Any()
+                ? await _animationSelectionFactory.CreateAsync(profile.ActionInference, startChatMessage.ActionInferenceService ?? "", prerequisites, startChatMessage.Culture, cancellationToken)
+                : null;
 
             var textProcessor = new ChatTextProcessor(profile, startChatMessage.Name);
             
-            string[]? thinkingSpeech = null;
-            if (startChatMessage is { TtsService: not null, TtsVoice: not null })
-            {
-                var textToSpeechGen = await _textToSpeechFactory.CreateAsync(startChatMessage.TtsService, prerequisites, startChatMessage.Culture, cancellationToken);
-                thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
-            }
+            var textToSpeechGen = await _textToSpeechFactory.CreateAsync(profile.TextToSpeech, startChatMessage.TtsService ?? "", prerequisites, startChatMessage.Culture, cancellationToken);
+            var thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
 
-            speechGenerator = await _speechGeneratorFactory.CreateAsync(startChatMessage.TtsService, startChatMessage.TtsVoice, prerequisites, startChatMessage.Culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
+            speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, startChatMessage.TtsVoice, prerequisites, startChatMessage.Culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
             // TODO: Use a real chat data store, reload using auth
             var chatData = new ChatSessionData

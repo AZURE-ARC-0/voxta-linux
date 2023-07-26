@@ -46,17 +46,6 @@ public class ChatSessionTests
             Name = "User",
             Description = "User Description",
             PauseSpeechRecognitionDuringPlayback = false,
-            Services = new ProfileSettings.ProfileServicesMap
-            {
-                ActionInference = new ServiceMap
-                {
-                    Service = ""
-                },
-                SpeechToText = new ServiceMap
-                {
-                    Service = ""
-                }
-            }
         };
         var chatSessionState = new ChatSessionState();
         _speechGenerator = new Mock<ISpeechGenerator>();

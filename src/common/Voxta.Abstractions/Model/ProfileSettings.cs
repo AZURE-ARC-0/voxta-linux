@@ -11,15 +11,22 @@ public class ProfileSettings
     [BsonId] public string Id { get; init; } = SharedId;
     
     [MinLength(1)]
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public bool PauseSpeechRecognitionDuringPlayback { get; init; } = true;
-    public required ProfileServicesMap Services { get; init; }
-    
-    [Serializable]
-    public class ProfileServicesMap
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public bool PauseSpeechRecognitionDuringPlayback { get; set; } = true;
+    public ServicesList ActionInference { get; set; } = new();
+    public ServicesList SpeechToText { get; set; } = new();
+    public ServicesList TextToSpeech { get; set; } = new();
+    public ServicesList TextGen { get; set; } = new();
+}
+
+[Serializable]
+public class ServicesList
+{
+    public static ServicesList For(string service)
     {
-        public required ServiceMap ActionInference { get; init; }
-        public required ServiceMap SpeechToText { get; init; }
+        return new ServicesList { Services = new[] { service } };
     }
+
+    public string[] Services { get; init; } = Array.Empty<string>();
 }

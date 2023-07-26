@@ -22,10 +22,12 @@ namespace Voxta.Server.Controllers;
 public class CharactersController : Controller
 {
     private readonly ICharacterRepository _characterRepository;
+    private readonly IProfileRepository _profileRepository;
 
-    public CharactersController(ICharacterRepository characterRepository)
+    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository)
     {
         _characterRepository = characterRepository;
+        _profileRepository = profileRepository;
     }
     
     [HttpGet("/characters")]
@@ -127,13 +129,14 @@ public class CharactersController : Controller
         return RedirectToAction("Character", new { characterId = data.Character.Id });
     }
 
-    private static async Task<CharacterViewModelWithOptions> GenerateCharacterViewModelAsync(IServiceFactory<ITextToSpeechService> ttsServiceFactory, Character character, bool isNew, CancellationToken cancellationToken)
+    private async Task<CharacterViewModelWithOptions> GenerateCharacterViewModelAsync(IServiceFactory<ITextToSpeechService> ttsServiceFactory, Character character, bool isNew, CancellationToken cancellationToken)
     {
         VoiceInfo[] voices; 
 
         if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
         {
-            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
+            var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
+            var ttsService = await ttsServiceFactory.CreateAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
             voices = await ttsService.GetVoicesAsync(cancellationToken);
         }
         else

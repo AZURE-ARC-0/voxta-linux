@@ -1,5 +1,4 @@
-﻿using Voxta.Abstractions.DependencyInjection;
-using Voxta.Abstractions.Management;
+﻿using Voxta.Abstractions.Management;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Services;
@@ -22,20 +21,18 @@ public class SpeechGeneratorFactory
         _sp = sp;
     }
     
-    public async Task<ISpeechGenerator> CreateAsync(string? ttsService, string? ttsVoice, string[] prerequisites, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
+    public ISpeechGenerator Create(ITextToSpeechService? service, string? ttsVoice, string[] prerequisites, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(ttsService) || string.IsNullOrEmpty(ttsVoice))
+        if (service == null || string.IsNullOrEmpty(ttsVoice))
             return new NoSpeechGenerator();
         
-        var textToSpeech = await _sp.GetRequiredService<IServiceFactory<ITextToSpeechService>>().CreateAsync(ttsService, prerequisites, culture, cancellationToken);
-        
         var audioConverter = _sp.GetRequiredService<IAudioConverter>();
-        audioConverter.SelectOutputContentType(acceptContentTypes, textToSpeech.ContentType);
+        audioConverter.SelectOutputContentType(acceptContentTypes, service.ContentType);
 
         if (audioPath == null)
-            return new RemoteSpeechGenerator(ttsService, ttsVoice, culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
+            return new RemoteSpeechGenerator(service.ServiceName, ttsVoice, culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
 
-        return new LocalSpeechGenerator(textToSpeech, ttsVoice, culture, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
+        return new LocalSpeechGenerator(service, ttsVoice, culture, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
     }
 }
 

@@ -46,42 +46,46 @@
     <h1>Settings</h1>
     
     <div class="card mb-3">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h2>Help</h2>
+            <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp" aria-expanded="false" aria-controls="collapseHelp">
+                <i class="bi bi-question-circle"></i> General help
+            </button>
         </div>
-        <div class="card-body">
+        <div class="card-body collapse" id="collapseHelp">
             <p>To talk with an AI, you need:</p>
             <ul>
                 <li><code>Text Gen</code> (the ability to "think" and generate a response)</li>
-                <li><code>Text To Speech</code>, or <code>TTS</code> (the ability to "speak" words)</li>
-                <li><code>Speech To Text</code>, or <code>STT</code> (the ability to "hear" what you say)</li>
+                <li><code>Text To Speech</code>, also known as <code>TTS</code> (the ability to "speak" words)</li>
+                <li><code>Speech To Text</code>, also known as <code>STT</code> (the ability to "hear" what you say)</li>
+                <li><code>Action Inference</code> (the ability to "infer" actions the AI can do from the conversation)</li>
             </ul>
             <p>So, make sure to configure at least one of each.</p>
-            <p>Some recommendations:</p>
-            <ul>
-                <li>For fast and natural speech, use NovelAI for both Text Gen and TTS.</li>
-                <li>For a helpful AI that knows things and can really help with questions, use OpenAI for Text Gen. GPT-4 is very good, but also much slower and more expensive.</li>
-                <li>For unrestricted chat, use Text Generation Web UI or KoboldAI for TextGen. You need to host them yourself or on RunPod.io (or another host), and they are more complicated to setup, but they won't cost you anything and they can run completely locally.</li>
-                <li>For better but slower audio, or for non-english speech, use ElevenLabs. Azure Speech Service is slightly faster but not as good.</li>
-                <li>For much better STT, use Azure Speech Service.</li>
-            </ul>
         </div>
     </div>
     
     @foreach (var serviceType in Model.Services)
     {
         <div class="card mb-4">
-            <div class="card-header">
-                <h2>@serviceType.Title</h2>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>
+                    @serviceType.Title
+                </h2>
+                <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_@serviceType.Name" aria-expanded="false" aria-controls="collapseHelp_@serviceType.Name">
+                    <i class="bi bi-question-circle"></i>
+                </button>
             </div>
             <div class="card-body">
+                <div class="collapse" id="collapseHelp_@serviceType.Name">
+                    @Html.Raw(serviceType.Help)
+                </div>
                 <table class="table table-striped">
                     <thead>
                     <tr>
                         <th scope="col" style="width: 80px;">Status</th>
-                        <th scope="col" style="width: 160px;">Service</th>
+                        <th scope="col" style="width: 200px;">Service</th>
                         <th scope="col">Message</th>
-                        <th scope="col" style="width: 80px;">Configuration</th>
+                        <th scope="col" style="width: 80px;"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -135,7 +139,7 @@
     }
     <div class="card mb-3">
         <div class="card-header">
-            <h2>Help</h2>
+            <h2>Test</h2>
         </div>
         <div class="card-body">
             <div class="d-flex justify-content-center text-center">

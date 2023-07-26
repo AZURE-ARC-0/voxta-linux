@@ -100,7 +100,7 @@ public class DiagnosticsUtil
             IsReady = true,
             IsHealthy = !string.IsNullOrEmpty(profile?.Name),
             ServiceName = "Profile",
-            Label = "Profile and Default Services",
+            Label = "Profile and options",
             Status = profile?.Name ?? "No profile",
             IsTested = runTests,
             Features = Array.Empty<string>()
@@ -152,7 +152,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _textGenFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _textGenFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
             async service =>
             {
                 var result = await service.GenerateReplyAsync(new ChatSessionData
@@ -177,7 +177,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _textToSpeechFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _textToSpeechFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
             async service =>
             {
                 var voices = await service.GetVoicesAsync(cancellationToken);
@@ -217,7 +217,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _animationSelectionFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _animationSelectionFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
             async service =>
             {
                 var actions = new[] { "test_successful", "talk_to_user" };
@@ -244,7 +244,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _speechToTextFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _speechToTextFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
             _ => Task.FromResult("Cannot be tested automatically")
         );
     }

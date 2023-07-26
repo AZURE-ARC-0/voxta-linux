@@ -49,6 +49,8 @@ public class ClientStartChatMessage : ClientMessage
     public string? TtsService { get; init; }
     public string? TtsVoice { get; init; }
     public string[] AcceptedAudioContentTypes { get; set; } = { "audio/x-wav", "audio/mpeg" };
+    public string? SttService { get; set; }
+    public string? ActionInferenceService { get; set; }
 }
 
 [Serializable]
