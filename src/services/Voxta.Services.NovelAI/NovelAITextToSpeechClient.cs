@@ -77,11 +77,12 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
     {
+        var voice = GetVoice(speechRequest);
         var querystring = new Dictionary<string, string>
         {
             ["text"] = speechRequest.Text,
             ["voice"] = "-1",
-            ["seed"] = speechRequest.Voice,
+            ["seed"] = voice,
             ["opus"] = "true",
             ["version"] = "v2"
         };
@@ -108,6 +109,18 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         await using var stream = await audioResponse.Content.ReadAsStreamAsync(cancellationToken);
         await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();
+    }
+
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    private string GetVoice(SpeechRequest speechRequest)
+    {
+        if (string.IsNullOrEmpty(speechRequest.Voice))
+            return "Ligeia";
+        if(speechRequest.Voice == SpecialVoices.Female)
+            return "Claea";
+        if (speechRequest.Voice == SpecialVoices.Male)
+            return "Olon";
+        return speechRequest.Voice;
     }
 
     public void Dispose()

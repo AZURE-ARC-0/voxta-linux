@@ -66,6 +66,15 @@ public class SpeechController : ControllerBase
         CancellationToken cancellationToken
     )
     {
+        if (string.IsNullOrEmpty(service))
+        {
+            return new VoiceInfo[]
+            {
+                new() { Id = "", Label = "Unspecified" },
+                new() { Id = SpecialVoices.Male, Label = "Male" },
+                new() { Id = SpecialVoices.Female, Label = "Female" },
+            };
+        }
         // NOTE: There is no voices list implementation that require any prerequisites.
         var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(service), service, Array.Empty<string>(), culture, cancellationToken);
         return await textToSpeech.GetVoicesAsync(cancellationToken);

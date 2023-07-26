@@ -11,7 +11,7 @@ public class CharacterViewModel
 public class CharacterViewModelWithOptions : CharacterViewModel
 {
     public required VoiceInfo[] Voices { get; set; } = Array.Empty<VoiceInfo>();
-    public required string[] TextGenServices { get; init; }
-    public required string[] TextToSpeechServices { get; init; }
+    public required OptionViewModel[] TextGenServices { get; init; }
+    public required OptionViewModel[] TextToSpeechServices { get; init; }
     public required bool IsNew { get; set; }
 }

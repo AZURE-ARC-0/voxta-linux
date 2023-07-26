@@ -53,6 +53,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
     {
+        var voice = GetVoice(speechRequest);
         var body = new
         {
             text = speechRequest.Text,
@@ -64,7 +65,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
             }
         };
         var ttsPerf = _performanceMetrics.Start("ElevenLabs.TextToSpeech");
-        var request = new HttpRequestMessage(HttpMethod.Post, $"/v1/text-to-speech/{speechRequest.Voice}")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/v1/text-to-speech/{voice}")
         {
             Content = JsonContent.Create(body)
         };
@@ -84,6 +85,15 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         await tunnel.SendAsync(new AudioData(stream, response.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();
+    }
+
+    private string GetVoice(SpeechRequest speechRequest)
+    {
+        if (string.IsNullOrEmpty(speechRequest.Voice) || speechRequest.Voice == SpecialVoices.Female)
+            return "EXAVITQu4vr4xnSDxMaL"; // Bella
+        if (speechRequest.Voice == SpecialVoices.Male)
+            return "pNInz6obpgDQGcFmaJgB"; // Adam
+        return speechRequest.Voice;
     }
 
     public async Task<VoiceInfo[]> GetVoicesAsync(CancellationToken cancellationToken)

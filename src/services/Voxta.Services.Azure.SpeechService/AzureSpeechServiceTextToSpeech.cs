@@ -73,9 +73,10 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
     {
         if (_speechSynthesizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
         var ttsPerf = _performanceMetrics.Start("AzureSpeechService.TextToSpeech");
+        var voice = GetVoice(speechRequest);
         var ssml = $"""
             <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{speechRequest.Culture}">
-                <voice name="{speechRequest.Voice}">{speechRequest.Text}</voice>
+                <voice name="{voice}">{speechRequest.Text}</voice>
             </speak>
             """;
         var result = await _speechSynthesizer.SpeakSsmlAsync(ssml);
@@ -91,6 +92,15 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         await using var stream = new MemoryStream(bytes);
         await tunnel.SendAsync(new AudioData(stream, "audio/x-wav"), cancellationToken);
         ttsPerf.Done();
+    }
+
+    private string GetVoice(SpeechRequest speechRequest)
+    {
+        if (string.IsNullOrEmpty(speechRequest.Voice) || speechRequest.Voice == SpecialVoices.Female)
+            return  _culture == "en-US" ? "en-US-JennyNeural" : "en-US-JennyMultilingualNeural";
+        if (speechRequest.Voice == SpecialVoices.Male)
+            return  "en-US-GuyNeural";
+        return speechRequest.Voice;
     }
 
     public async Task<VoiceInfo[]> GetVoicesAsync(CancellationToken cancellationToken)

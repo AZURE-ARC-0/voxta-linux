@@ -65,12 +65,12 @@ public class CharactersController : Controller
                 {
                     TextGen = new ServiceMap
                     {
-                        Service = OpenAIConstants.ServiceName,
+                        Service = "",
                     },
                     SpeechGen = new VoiceServiceMap
                     {
-                        Service = NovelAIConstants.ServiceName,
-                        Voice = "Naia",
+                        Service = "",
+                        Voice = "",
                     },
                 },
                 Options = new Character.CharacterOptions
@@ -151,18 +151,20 @@ public class CharactersController : Controller
             PrerequisiteNSFW = character.Prerequisites?.Contains(ServiceFeatures.NSFW) == true,
             TextGenServices = new[]
             {
-                OpenAIConstants.ServiceName,
-                NovelAIConstants.ServiceName,
-                KoboldAIConstants.ServiceName,
-                OobaboogaConstants.ServiceName,
-                FakesConstants.ServiceName,
+                new OptionViewModel { Name = "", Label = "Select automatically" },
+                OptionViewModel.Create(OpenAIConstants.ServiceName),
+                OptionViewModel.Create(NovelAIConstants.ServiceName),
+                OptionViewModel.Create(KoboldAIConstants.ServiceName),
+                OptionViewModel.Create(OobaboogaConstants.ServiceName),
+                OptionViewModel.Create(FakesConstants.ServiceName),
             },
             TextToSpeechServices = new[]
             {
-                NovelAIConstants.ServiceName,
-                ElevenLabsConstants.ServiceName,
-                AzureSpeechServiceConstants.ServiceName,
-                FakesConstants.ServiceName,
+                new OptionViewModel { Name = "", Label = "Select automatically" },
+                OptionViewModel.Create(NovelAIConstants.ServiceName),
+                OptionViewModel.Create(ElevenLabsConstants.ServiceName),
+                OptionViewModel.Create(AzureSpeechServiceConstants.ServiceName),
+                OptionViewModel.Create(FakesConstants.ServiceName),
             },
             Voices = voices,
         };

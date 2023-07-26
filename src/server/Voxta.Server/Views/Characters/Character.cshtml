@@ -104,13 +104,13 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label asp-for="Character.Services.TextGen.Service">Text Generation Service</label>
-                    <select asp-for="Character.Services.TextGen.Service" asp-items="@(new SelectList(Model.TextGenServices))" class="form-control"></select>
+                    <select asp-for="Character.Services.TextGen.Service" asp-items="@(new SelectList(Model.TextGenServices, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.TextGen.Service)</small>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Character.Services.SpeechGen.Service">Speech Generation Service</label>
-                    <select asp-for="Character.Services.SpeechGen.Service" asp-items="@(new SelectList(Model.TextToSpeechServices))" class="form-control"></select>
+                    <select asp-for="Character.Services.SpeechGen.Service" asp-items="@(new SelectList(Model.TextToSpeechServices, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Service)</small>
                 </div>
 
@@ -152,7 +152,8 @@
         
         speechGenSelect.onchange = function() {
             const selectedService = this.value;
-            voicesSelect.innerHTML = ""; // Clear existing options
+            voicesSelect.innerHTML = "";
+            
             {
                 const option = document.createElement("option");
                 option.value = '';
@@ -163,8 +164,7 @@
             fetch('/tts/services/' + selectedService + '/voices?culture=' + cultureInput.value)
                 .then(response => response.json())
                 .then(data => {
-                    voicesSelect.innerHTML = ""; // Clear existing options
-
+                    voicesSelect.innerHTML = "";
                     data.forEach(function(voice) {
                         const option = document.createElement("option");
                         option.value = voice.id;
@@ -174,7 +174,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    voicesSelect.innerHTML = ""; // Clear existing options
+                    voicesSelect.innerHTML = "";
                     const option = document.createElement("option");
                     option.value = '';
                     option.text = 'Error (see console)';
