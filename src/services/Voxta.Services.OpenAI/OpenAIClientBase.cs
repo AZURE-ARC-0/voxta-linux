@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
@@ -13,7 +12,6 @@ public abstract class OpenAIClientBase
     private readonly ISettingsRepository _settingsRepository;
     private readonly HttpClient _httpClient;
     private string _model = "gpt-3.5-turbo";
-    private bool _initialized;
 
     protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
     {
@@ -21,16 +19,15 @@ public abstract class OpenAIClientBase
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public virtual async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
-        if (_initialized) return;
-        _initialized = true;
         var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
         if (settings == null) throw new OpenAIException("OpenAI is not configured.");
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         if (string.IsNullOrEmpty(settings.ApiKey)) throw new AuthenticationException("OpenAI api key is missing.");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
         _model = settings.Model;
+        return true;
     }
     
     protected async Task<string> SendChatRequestAsync(List<OpenAIMessage> messages, CancellationToken cancellationToken)
@@ -54,5 +51,9 @@ public abstract class OpenAIClientBase
         if (apiResponse == null) throw new NullReferenceException("OpenAI API response was null");
 
         return apiResponse.Value.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
+    }
+
+    public void Dispose()
+    {
     }
 }

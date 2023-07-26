@@ -32,6 +32,7 @@ public class KoboldAITextGenClient : ITextGenService
         if (settings == null) throw new KoboldAIException("KoboldAI is not configured.");
         if (string.IsNullOrEmpty(settings.Uri)) throw new KoboldAIException("Missing uri in settings");
         _httpClient.BaseAddress = new Uri(settings.Uri);
+        return true;
     }
 
     public int GetTokenCount(string message)

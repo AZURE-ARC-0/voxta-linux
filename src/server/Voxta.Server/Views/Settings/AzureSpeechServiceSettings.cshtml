@@ -23,24 +23,26 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-group">
+                <div class="mb-3">
                     <label asp-for="SubscriptionKey">Subscription Key</label>
                     <input asp-for="SubscriptionKey" class="form-control" />
                     <span asp-validation-for="SubscriptionKey" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label asp-for="Region">Region</label>
                     <input asp-for="Region" class="form-control" />
                     <span asp-validation-for="Region" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="LogFilename">Log Filename <span class="text-muted">Only enable this if you have problems with the service. Enter a full path.</span></label>
+                <div class="mb-3">
+                    <label asp-for="LogFilename">Log Filename</label>
                     <input asp-for="LogFilename" class="form-control" />
+                    <div class="form-text">Only enable this if you have problems with the service. Enter a full path.</div>
                     <span asp-validation-for="LogFilename" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="FilterProfanity">Filter Profanity <span class="text-muted">Whether to remove profanity from tts and stt.</span></label>
+                <div class="form-check">
                     <input type="checkbox" asp-for="FilterProfanity" class="form-check-input"/>
+                    <label asp-for="FilterProfanity">Filter Profanity</label>
+                    <div class="form-text">Whether to remove profanity from tts and stt.</div>
                     <span asp-validation-for="FilterProfanity" class="text-danger"></span>
                 </div>
             </div>

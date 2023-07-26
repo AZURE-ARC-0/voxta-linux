@@ -5,12 +5,13 @@ namespace Voxta.Server.ViewModels;
 public class CharacterViewModel
 {
     public required Character Character { get; init; }
+    public required bool PrerequisiteNSFW { get; set; }
 }
 
 public class CharacterViewModelWithOptions : CharacterViewModel
 {
-    public VoiceInfo[] Voices { get; set; } = Array.Empty<VoiceInfo>();
+    public required VoiceInfo[] Voices { get; set; } = Array.Empty<VoiceInfo>();
     public required string[] TextGenServices { get; init; }
     public required string[] TextToSpeechServices { get; init; }
-    public bool IsNew { get; set; }
+    public required bool IsNew { get; set; }
 }

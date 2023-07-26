@@ -38,6 +38,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         if (string.IsNullOrEmpty(settings?.ApiKey)) throw new AuthenticationException("ElevenLabs token is missing.");
         _httpClient.DefaultRequestHeaders.Add("xi-api-key", Crypto.DecryptString(settings.ApiKey));
         _culture = culture;
+        return true;
     }
 
     public string ContentType => "audio/mpeg";

@@ -23,14 +23,16 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="Model">Vosk Model <span class="text-muted"><a href="https://alphacephei.com/vosk/models" target="_blank">models list</a>, smaller is faster.</span></label>
+                <div class="mb-3">
+                    <label asp-for="Model">Vosk Model</label>
                     <input asp-for="Model" class="form-control" />
+                    <div class="form-text">Download from the <a href="https://alphacephei.com/vosk/models" target="_blank">models list</a>. Smaller models are faster.</div>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="ModelHash">Model Download Hash <span class="text-muted">Optional, increases security by checking if the file is the expected one.</span></label>
+                <div>
+                    <label asp-for="ModelHash">Model Download Hash</label>
                     <input asp-for="ModelHash" class="form-control" />
+                    <div class="form-text">Optional, increases security by checking the downloaded zip file to ensure the file is the expected one. Only use automatic downloads for small models.</div>
                     <span asp-validation-for="ModelHash" class="text-danger"></span>
                 </div>
             </div>

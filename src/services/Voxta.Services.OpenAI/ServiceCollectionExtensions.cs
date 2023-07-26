@@ -11,16 +11,17 @@ public static class ServiceCollectionExtensions
     {
         var tokenizer = TokenizerBuilder.CreateByModelName("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
         services.AddSingleton<ITokenizer>(_ => tokenizer);
-        services.AddTransient<OpenAIClient>();
+        services.AddTransient<OpenAITextGenClient>();
+        services.AddTransient<OpenAIActionInferenceClient>();
     }
     
     public static void RegisterOpenAI(this IServiceRegistry<ITextGenService> registry)
     {
-        registry.Add<OpenAIClient>(OpenAIConstants.ServiceName);
+        registry.Add<OpenAITextGenClient>(OpenAIConstants.ServiceName);
     }
     
     public static void RegisterOpenAI(this IServiceRegistry<IActionInferenceService> registry)
     {
-        registry.Add<OpenAIClient>(OpenAIConstants.ServiceName);
+        registry.Add<OpenAIActionInferenceClient>(OpenAIConstants.ServiceName);
     }
 }

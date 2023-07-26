@@ -28,13 +28,13 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="Name">Profile name:</label>
+                <div class="mb-3">
+                    <label asp-for="Name">Profile name</label>
                     <input asp-for="Name" class="form-control"/>
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Description">Profile description:</label>
+                <div>
+                    <label asp-for="Description">Profile description</label>
                     <input asp-for="Description" class="form-control"/>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
@@ -48,7 +48,7 @@
             <div class="card-body">
                 <h3>Speech To Text</h3>
                 <p>This is the engine that listens to what you say and convert it to text.</p>
-                <div class="form-group">
+                <div class="mb-3">
                     <label asp-for="Services.SpeechToText.Service">Speech To Text Service</label>
                     <select asp-for="Services.SpeechToText.Service" class="form-control">
                         <option value="">None</option>
@@ -57,15 +57,16 @@
                     </select>
                     <span asp-validation-for="Services.SpeechToText.Service" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback: <span class="text-muted">Turn off to allow interruptions, requires a headset</span></label>
+                <div class="form-check mb-3">
                     <input asp-for="PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
+                    <label asp-for="PauseSpeechRecognitionDuringPlayback">Pause Speech Recognition During Playback</label>
+                    <div class="form-text"><div class="form-text"></div></div>
                     <span asp-validation-for="PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
                 </div>
 
                 <h3>Action Inference</h3>
                 <p>This is what allows the model to determine actions they can take after speaking.</p>
-                <div class="form-group">
+                <div>
                     <label asp-for="Services.ActionInference.Service">Action Inference Service</label>
                     <select asp-for="Services.ActionInference.Service" class="form-control">
                         <option value="">None</option>

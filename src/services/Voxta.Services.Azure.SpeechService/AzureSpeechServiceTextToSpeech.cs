@@ -1,5 +1,4 @@
-﻿using System.Security.Authentication;
-using Microsoft.CognitiveServices.Speech;
+﻿using Microsoft.CognitiveServices.Speech;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -31,9 +30,10 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
     public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
-        if (settings == null) throw new AzureSpeechServiceException("Azure Speech Service is not configured.");
-        if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
-        if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
+        if (settings == null) return false;
+        if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
+        if (string.IsNullOrEmpty(settings.Region)) return false;
+        if (prerequisites.Contains(Prerequisites.NSFW) && settings.FilterProfanity) return false;
         
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
         config.SetProfanity(settings.FilterProfanity ? ProfanityOption.Removed : ProfanityOption.Raw);
@@ -48,6 +48,7 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         
         _speechSynthesizer = new SpeechSynthesizer(config, null);
         _culture = culture;
+        return true;
     }
 
     public string ContentType => "audio/x-wav";

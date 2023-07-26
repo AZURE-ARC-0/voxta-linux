@@ -37,6 +37,8 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
 
     public async Task<TInterface> CreateAsync(string serviceName, string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
+        #warning If the service is specified, ignore the prerequisites; if not, then go through the list and check the prerequisites.
+        
         if (!_registry.Types.TryGetValue(serviceName, out var type))
             throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {serviceName}");
         

@@ -35,6 +35,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         if (string.IsNullOrEmpty(settings.Token)) throw new AuthenticationException("NovelAI token is missing.");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
+        return true;
     }
 
     public string ContentType => "audio/webm";

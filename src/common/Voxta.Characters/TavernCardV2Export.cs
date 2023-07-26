@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Voxta.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 
 namespace Voxta.Characters;
 
@@ -26,7 +25,7 @@ public static class TavernCardV2Export
                 Tags = character.Tags,
                 Extensions = new Dictionary<string, string>
                 {
-                    { "voxta/prerequisites", string.Join(",", character.Prerequisites) },
+                    { "voxta/prerequisites", character.Prerequisites != null ? string.Join(",", character.Prerequisites) : "" },
                     { "voxta/culture", character.Culture },
                     { "voxta/textgen/service", character.Services.TextGen.Service },
                     { "voxta/tts/service", character.Services.SpeechGen.Service },

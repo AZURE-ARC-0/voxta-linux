@@ -7,13 +7,13 @@ using Microsoft.DeepDev;
 
 namespace Voxta.Services.OpenAI;
 
-public class OpenAIClient : OpenAIClientBase, ITextGenService, IActionInferenceService
+public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 {
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OpenAIClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
+    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
         : base(httpClientFactory, settingsRepository)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
@@ -26,6 +26,12 @@ public class OpenAIClient : OpenAIClientBase, ITextGenService, IActionInferenceS
     {
         if (string.IsNullOrEmpty(message)) return 0;
         return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
+    }
+
+    public override Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    {
+        if (prerequisites.Contains(Prerequisites.NSFW)) return Task.FromResult(false);
+        return base.InitializeAsync(prerequisites, culture, cancellationToken);
     }
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
@@ -42,6 +48,7 @@ public class OpenAIClient : OpenAIClientBase, ITextGenService, IActionInferenceS
         var reply = await SendChatRequestAsync(messages, cancellationToken);
         textGenPerf.Done();
         
+        #warning Move out, since we run this on every request anyway; then encode outside of this.
         var sanitized = _sanitizer.Sanitize(reply);
         
         tokenizePerf.Resume();
@@ -53,22 +60,5 @@ public class OpenAIClient : OpenAIClientBase, ITextGenService, IActionInferenceS
             Text = sanitized,
             Tokens = tokens.Count
         };
-    }
-
-    public async ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
-    {
-        if(chatSessionData.Actions is null || chatSessionData.Actions.Length == 0)
-            return "idle";
-        if (chatSessionData.Actions.Length == 1) return chatSessionData.Actions[0];
-
-        var builder = new OpenAIPromptBuilder(null);
-        var messages = builder.BuildActionInferencePrompt(chatSessionData);
-        
-        var animation = await SendChatRequestAsync(messages, cancellationToken);
-        return animation.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
-    }
-
-    public void Dispose()
-    {
     }
 }

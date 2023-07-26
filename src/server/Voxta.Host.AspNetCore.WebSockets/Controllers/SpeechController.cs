@@ -31,7 +31,10 @@ public class SpeechController : ControllerBase
             return;
         }
 
-        var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, speechRequest.Culture, cancellationToken);
+        if (string.IsNullOrEmpty(speechRequest.Service)) throw new InvalidOperationException("TTS service must be resolved prior to adding to pending speech.");
+
+        // NOTE: Here we don't specify prerequisites because it's too late anyway.
+        var textToSpeech = await speechGenFactory.CreateAsync(speechRequest.Service, Array.Empty<string>(), speechRequest.Culture, cancellationToken);
         audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
         if (speechRequest.Reusable)
         {
@@ -63,7 +66,8 @@ public class SpeechController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var textToSpeech = await speechGenFactory.CreateAsync(service, culture, cancellationToken);
+        // NOTE: There is no voices list implementation that require any prerequisites.
+        var textToSpeech = await speechGenFactory.CreateAsync(service, Array.Empty<string>(), culture, cancellationToken);
         return await textToSpeech.GetVoicesAsync(cancellationToken);
     }
 }

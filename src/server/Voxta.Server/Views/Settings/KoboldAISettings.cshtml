@@ -23,9 +23,10 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="Uri">KoboldAI URI: <span class="text-muted">Example: http://127.0.0.1:5001</span></label>
+                <div>
+                    <label asp-for="Uri">KoboldAI URI</label>
                     <input asp-for="Uri" class="form-control"/>
+                    <div class="form-text">Example: http://127.0.0.1:5001</div>
                     <span asp-validation-for="Uri" class="text-danger"></span>
                 </div>
             </div>

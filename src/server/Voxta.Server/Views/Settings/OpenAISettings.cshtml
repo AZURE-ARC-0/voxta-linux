@@ -23,13 +23,13 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="ApiKey">OpenAI key:</label>
+                <div class="mb-3">
+                    <label asp-for="ApiKey">OpenAI key</label>
                     <input asp-for="ApiKey" class="form-control"/>
                     <span asp-validation-for="ApiKey" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Model">OpenAI model:</label>
+                <div>
+                    <label asp-for="Model">OpenAI model</label>
                     <input asp-for="Model" class="form-control"/>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>

@@ -22,12 +22,12 @@ public class SpeechGeneratorFactory
         _sp = sp;
     }
     
-    public async Task<ISpeechGenerator> CreateAsync(string? ttsService, string? ttsVoice, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
+    public async Task<ISpeechGenerator> CreateAsync(string? ttsService, string? ttsVoice, string[] prerequisites, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(ttsService) || string.IsNullOrEmpty(ttsVoice))
             return new NoSpeechGenerator();
         
-        var textToSpeech = await _sp.GetRequiredService<IServiceFactory<ITextToSpeechService>>().CreateAsync(ttsService, culture, cancellationToken);
+        var textToSpeech = await _sp.GetRequiredService<IServiceFactory<ITextToSpeechService>>().CreateAsync(ttsService, prerequisites, culture, cancellationToken);
         
         var audioConverter = _sp.GetRequiredService<IAudioConverter>();
         audioConverter.SelectOutputContentType(acceptContentTypes, textToSpeech.ContentType);

@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
 using Voxta.Abstractions.Model;
 using Microsoft.AspNetCore;

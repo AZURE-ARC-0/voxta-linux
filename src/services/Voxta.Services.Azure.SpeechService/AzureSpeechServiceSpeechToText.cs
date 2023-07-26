@@ -1,7 +1,7 @@
-﻿using System.Security.Authentication;
-using Microsoft.CognitiveServices.Speech;
+﻿using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
@@ -31,9 +31,11 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
-        if (settings == null) throw new AzureSpeechServiceException("Azure Speech Service is not configured.");
-        if (string.IsNullOrEmpty(settings.SubscriptionKey)) throw new AuthenticationException("Azure Speech Service subscription key is missing.");
-        if (string.IsNullOrEmpty(settings.Region)) throw new AuthenticationException("Azure Speech Service region is missing.");
+        if (settings == null) return false;
+        if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
+        if (string.IsNullOrEmpty(settings.Region)) return false;
+        if (prerequisites.Contains(Prerequisites.NSFW) && settings.FilterProfanity) return false;
+        
         var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
         config.SpeechRecognitionLanguage = culture;
         config.SetProfanity(settings.FilterProfanity ? ProfanityOption.Removed : ProfanityOption.Raw);
@@ -89,6 +91,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         };
         
         await _recognizer.StartContinuousRecognitionAsync();
+        return true;
     }
 
     public void StartMicrophoneTranscription()

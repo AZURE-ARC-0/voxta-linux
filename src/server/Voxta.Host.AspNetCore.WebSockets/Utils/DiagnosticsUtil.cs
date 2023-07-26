@@ -101,6 +101,8 @@ public class DiagnosticsUtil
                 }
             }
         };
+        
+        #warning 
 
         var services = await Task.WhenAll(
             Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
@@ -110,11 +112,13 @@ public class DiagnosticsUtil
             Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TrySpeechToText(VoskConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TrySpeechToText(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken), cancellationToken)
+            Task.Run(async () => await TryAnimSelect(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken)
         );
+        #warning Sort by priority order; we might want to separate the services into different groups.
         result.Services.AddRange(services.OrderBy(x => x.IsHealthy).ThenBy(x => x.IsReady).ThenBy(x => x.Label));
+        result.Services.Add(await TrySpeechToText(VoskConstants.ServiceName, runTests, cancellationToken));
+        result.Services.Add(await TrySpeechToText(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken));
+
         return result;
     }
 
@@ -127,7 +131,7 @@ public class DiagnosticsUtil
         {
             try
             {
-                service = await _textGenFactory.CreateAsync(serviceName, "en-US", cancellationToken);
+                service = await _textGenFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -233,7 +237,7 @@ public class DiagnosticsUtil
         {
             try
             {
-                service = await _textToSpeechFactory.CreateAsync(serviceName, "en-US", cancellationToken);
+                service = await _textToSpeechFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -354,7 +358,7 @@ public class DiagnosticsUtil
         {
             try
             {
-                service = await _animationSelectionFactory.CreateAsync(serviceName, "en-US", cancellationToken);
+                service = await _animationSelectionFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -461,7 +465,7 @@ public class DiagnosticsUtil
         {
             try
             {
-                service = await _speechToTextFactory.CreateAsync(serviceName, "en-US", cancellationToken);
+                service = await _speechToTextFactory.CreateAsync(serviceName, Array.Empty<string>(), "en-US", cancellationToken);
             }
             catch (OperationCanceledException)
             {

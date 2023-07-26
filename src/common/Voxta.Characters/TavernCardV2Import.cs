@@ -56,7 +56,7 @@ public static class TavernCardV2Import
             CreatorNotes = data.CreatorNotes,
             SystemPrompt = data.SystemPrompt,
             Culture = data.Extensions.TryGetValue("voxta/culture", out var culture) && !string.IsNullOrEmpty(culture) ? culture : "en-US",
-            Prerequisites = data.Extensions.TryGetValue("voxta/prerequisites", out var prerequisites) && !string.IsNullOrEmpty(prerequisites) ? prerequisites.Split(',') : Array.Empty<string>(),
+            Prerequisites = data.Extensions.TryGetValue("voxta/prerequisites", out var prerequisites) && !string.IsNullOrEmpty(prerequisites) ? prerequisites.Split(',') : null,
             ReadOnly = false,
             Services = new Character.CharacterServicesMap
             {

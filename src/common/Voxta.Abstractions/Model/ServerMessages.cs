@@ -27,8 +27,10 @@ public class ServerWelcomeMessage : ServerMessage
     {
         public required string Id { get; init; }
         public required string Name { get; init; }
-        public string? Description { get; set; }
-        public bool ReadOnly { get; init; }
+        public required string? Description { get; set; }
+        public required bool ReadOnly { get; init; }
+        public required string Culture { get; set; }
+        public required string[] Prerequisites { get; set; }
     }
 }
 

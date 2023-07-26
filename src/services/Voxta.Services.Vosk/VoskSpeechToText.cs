@@ -43,17 +43,18 @@ public sealed class VoskSpeechToText : ISpeechToTextService
 
     public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
-        if (_initialized) return;
+        if (_initialized) return true;
         _initialized = true;
-        var settings = _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
-        if (settings == null) throw new VoskException("Vosk is not configured.");
+        var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
+        if (settings == null) return false;
         if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         await Semaphore.WaitAsync(cancellationToken);
-        if (_disposed) return;
+        if (_disposed) return false;
         var model = await _modelDownloader.AcquireModelAsync(cancellationToken);
         _recognizer = new VoskRecognizer(model, _sampleRate);
         _recognizer.SetWords(true);
         _recordingService.DataAvailable += DataAvailable;
+        return true;
     }
 
     private void DataAvailable(object? sender, RecordingDataEventArgs e)

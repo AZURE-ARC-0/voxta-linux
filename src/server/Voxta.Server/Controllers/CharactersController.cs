@@ -88,7 +88,7 @@ public class CharactersController : Controller
                 character.ReadOnly = false;
             }
         }
-
+        
         var vm = await GenerateCharacterViewModelAsync(ttsServiceFactory, character, isNew, cancellationToken);
 
         return View(vm);
@@ -118,17 +118,34 @@ public class CharactersController : Controller
 
         if (charId != "new" && charId != data.Character.Id)
             return BadRequest("Character ID mismatch");
+
+        var prerequisites = new List<string>();
+        if (data.PrerequisiteNSFW) prerequisites.Add(Prerequisites.NSFW);
+        if (prerequisites.Count > 0) data.Character.Prerequisites = prerequisites.ToArray();
+        
         await _characterRepository.SaveCharacterAsync(data.Character);
         return RedirectToAction("Character", new { characterId = data.Character.Id });
     }
 
-    private static async Task<CharacterViewModelWithOptions> GenerateCharacterViewModelAsync(IServiceFactory<ITextToSpeechService> ttsServiceFactory, Character character, bool isNew,
-        CancellationToken cancellationToken)
+    private static async Task<CharacterViewModelWithOptions> GenerateCharacterViewModelAsync(IServiceFactory<ITextToSpeechService> ttsServiceFactory, Character character, bool isNew, CancellationToken cancellationToken)
     {
+        VoiceInfo[] voices; 
+
+        if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
+        {
+            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
+            voices = await ttsService.GetVoicesAsync(cancellationToken);
+        }
+        else
+        {
+            voices = Array.Empty<VoiceInfo>();
+        }
+
         var vm = new CharacterViewModelWithOptions
         {
             IsNew = isNew,
             Character = character,
+            PrerequisiteNSFW = character.Prerequisites?.Contains(Prerequisites.NSFW) == true,
             TextGenServices = new[]
             {
                 OpenAIConstants.ServiceName,
@@ -144,13 +161,8 @@ public class CharactersController : Controller
                 AzureSpeechServiceConstants.ServiceName,
                 FakesConstants.ServiceName,
             },
+            Voices = voices,
         };
-
-        if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
-        {
-            var ttsService = await ttsServiceFactory.CreateAsync(character.Services.SpeechGen.Service, character.Prerequisites, character.Culture, cancellationToken);
-            vm.Voices = await ttsService.GetVoicesAsync(cancellationToken);
-        }
 
         return vm;
     }

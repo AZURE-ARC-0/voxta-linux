@@ -13,7 +13,7 @@ public class FakesTextToSpeechClient : ITextToSpeechService
 
     public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     public string[] GetThinkingSpeech()

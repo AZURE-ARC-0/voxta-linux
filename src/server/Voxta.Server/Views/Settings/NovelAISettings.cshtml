@@ -29,24 +29,25 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-group">
-                    <label asp-for="Token">NovelAI token:</label>
+                <div class="mb-3">
+                    <label asp-for="Token">NovelAI token</label>
                     <input asp-for="Token" class="form-control"/>
                     <span asp-validation-for="Token" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Model">NovelAI model:</label>
+                <div class="mb-3">
+                    <label asp-for="Model">NovelAI model</label>
                     <input asp-for="Model" class="form-control"/>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Parameters">NovelAI text generation parameters:</label>
+                <div class="mb-3">
+                    <label asp-for="Parameters">NovelAI text generation parameters</label>
                     <input type="hidden" asp-for="Parameters" class="form-control"/>
                     <div id="jsoneditor" class="jsoneditor" style="width: 100%; height: 400px;"></div>
                 </div>
-                <div class="form-group">
-                    <label asp-for="UseDefaults">Use NovelAI defaults: <span class="text-muted">Will ignore any changes you make below.</span></label>
+                <div class="form-check">
                     <input asp-for="UseDefaults" type="checkbox" class="form-check-input"/>
+                    <label asp-for="UseDefaults">Use default parameters</label>
+                    <div class="form-text">Will ignore any changes you make on the parameters and use the default values instead.</div>
                     <span asp-validation-for="UseDefaults" class="text-danger"></span>
                 </div>
             </div>
