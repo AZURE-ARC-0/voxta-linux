@@ -3,22 +3,24 @@ const webView = window.chrome && window.chrome.webview;
 if (webView) {
     document.addEventListener('DOMContentLoaded', function () {
         const logo = document.getElementById('logo');
-        logo.style.display = 'none';
+        if(logo) {
+            logo.style.display = 'none';
+        }
     });
 
     document.getRootNode().addEventListener('keyup', function (e) {
-        if (e.key === 'F2') {
-            webView.postMessage(
-                JSON.stringify({
-                    command: 'switchToTerminal'
-                })
-            );
+        let msg;
+        if (e.key === 'F1') {
+            msg = { command: 'help' };
+        } else if (e.key === 'F2') {
+            msg = { command: 'switchToTerminal' };
         } else if (e.key === 'F11') {
-            webView.postMessage(
-                JSON.stringify({
-                    command: 'toggleFullScreen'
-                })
-            );
+            msg = { command: 'toggleFullScreen' };
+        }
+        
+        if(msg)
+        {
+            webView.postMessage(JSON.stringify(msg));
         }
     });
 }
