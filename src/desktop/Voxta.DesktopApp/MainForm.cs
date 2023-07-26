@@ -86,8 +86,15 @@ public partial class MainForm : Form
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         });
-        if(json?.Command == "switchToTerminal")
-            Invoke(SwitchToTerminal);
+        switch (json?.Command)
+        {
+            case "switchToTerminal":
+                Invoke(SwitchToTerminal);
+                break;
+            case "toggleFullScreen":
+                Invoke(ToggleFullScreen);
+                break;
+        }
     }
     
     [Serializable]
@@ -127,18 +134,41 @@ public partial class MainForm : Form
                 SwitchToWebView();
             }
         }
+        else if (e.KeyCode == Keys.F11)
+        {
+            ToggleFullScreen();
+        }
     }
 
     private void SwitchToWebView()
     {
         WebView.Visible = true;
         ConsoleControl.Visible = false;
+        WebView.Focus();
     }
 
     private void SwitchToTerminal()
     {
         WebView.Visible = false;
         ConsoleControl.Visible = true;
+        ConsoleControl.Focus();
+    }
+
+    private void ToggleFullScreen()
+    {
+        if (WindowState == FormWindowState.Maximized)
+        {
+            WindowState = FormWindowState.Normal;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            TopMost = false;
+        }
+        else
+        {
+            WindowState = FormWindowState.Maximized;
+            FormBorderStyle = FormBorderStyle.None;
+            this.Bounds = Screen.PrimaryScreen.Bounds;
+            TopMost = true;
+        }
     }
 
     private static async Task WaitForServerReady(string url, int millisecondsDelay = 500, int maxAttempts = 20)

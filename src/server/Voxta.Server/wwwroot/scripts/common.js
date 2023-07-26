@@ -1,30 +1,31 @@
-const isWebView = window.isWebView = window.chrome && window.chrome.webview;
+const webView = window.chrome && window.chrome.webview;
 
-// When the document is loaded, hide the logo
-document.addEventListener('DOMContentLoaded', function () {
-    if(isWebView) {
+if (webView) {
+    document.addEventListener('DOMContentLoaded', function () {
         const logo = document.getElementById('logo');
         logo.style.display = 'none';
-    }
-});
+    });
 
-(function () {
-    if (isWebView) {
-        document.getRootNode().addEventListener('keyup', function (e) {
-            if (e.key === 'F2') {
-                window.chrome.webview.postMessage(
-                    JSON.stringify({
-                        command: 'switchToTerminal'
-                    })
-                );
-            }
-        });
-    }
-})();
+    document.getRootNode().addEventListener('keyup', function (e) {
+        if (e.key === 'F2') {
+            webView.postMessage(
+                JSON.stringify({
+                    command: 'switchToTerminal'
+                })
+            );
+        } else if (e.key === 'F11') {
+            webView.postMessage(
+                JSON.stringify({
+                    command: 'toggleFullScreen'
+                })
+            );
+        }
+    });
+}
 
 window.initJsonEditor = (form, input, useDefaults) => {
-    if(!window.JSONEditor) return;
-    
+    if (!window.JSONEditor) return;
+
     // create the editor
     const container = document.getElementById("jsoneditor")
     const options = {
@@ -44,7 +45,7 @@ window.initJsonEditor = (form, input, useDefaults) => {
 
     editor.set(JSON.parse(input.value))
 
-    form.addEventListener("submit", function(e) {
+    form.addEventListener("submit", function (e) {
         e.preventDefault();
 
         const json = editor.get();
