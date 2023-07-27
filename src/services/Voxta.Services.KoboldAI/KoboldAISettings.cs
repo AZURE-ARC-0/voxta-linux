@@ -6,4 +6,5 @@ namespace Voxta.Services.KoboldAI;
 public class KoboldAISettings : SettingsBase
 {
     public required string Uri { get; set; }
+    public KoboldAIParameters? Parameters { get; set; }
 }

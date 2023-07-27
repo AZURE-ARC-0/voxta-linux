@@ -6,4 +6,5 @@ namespace Voxta.Services.Oobabooga;
 public class OobaboogaSettings : SettingsBase
 {
     public required string Uri { get; set; }
+    public OobaboogaParameters? Parameters { get; set; }
 }

@@ -2,14 +2,27 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaClientBase
 {
+    private static readonly IMapper Mapper;
+    
+    static OobaboogaClientBase()
+    {
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<OobaboogaParameters, OobaboogaRequestBody>();
+        });
+        Mapper = config.CreateMapper();
+    }
+    
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
+    private OobaboogaParameters? _parameters;
     private bool _initialized;
 
     protected OobaboogaClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
@@ -28,6 +41,7 @@ public class OobaboogaClientBase
         var uri = settings.Uri;
         if (string.IsNullOrEmpty(uri)) return false;
         _httpClient.BaseAddress = new Uri(uri);
+        _parameters = settings.Parameters ?? new OobaboogaParameters();
         return true;
     }
 
@@ -38,34 +52,10 @@ public class OobaboogaClientBase
 
     protected async Task<string> SendCompletionRequest(string prompt, string[] stoppingStrings, CancellationToken cancellationToken)
     {
-        var body = new
-        {
-            preset = "None",
-            max_new_tokens = 80,
-            do_sample = true,
-            temperature = 0.7,
-            top_p = 0.5,
-            typical_p = 1,
-            tfs = 1,
-            top_a = 0,
-            repetition_penalty = 1.18,
-            encoder_repetition_penalty = 1,
-            repetition_penalty_range = 0,
-            top_k = 40,
-            min_length = 1,
-            no_repeat_ngram_size = 0,
-            num_beams = 1,
-            penalty_alpha = 0,
-            length_penalty = 1,
-            early_stopping = true,
-            seed = -1,
-            add_bos_token = false,
-            truncation_length = 2048,
-            ban_eos_token = false,
-            skip_special_tokens = true,
-            stopping_strings = stoppingStrings,
-            prompt
-        };
+        var body = Mapper.Map<OobaboogaRequestBody>(_parameters);
+        body.Prompt = prompt;
+        body.StoppingStrings = stoppingStrings;
+        
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/generate");
@@ -80,7 +70,6 @@ public class OobaboogaClientBase
         }
 
         var json = await response.Content.ReadFromJsonAsync<TextGenResponse>(cancellationToken: cancellationToken);
-
 
         var text = json?.results?[0].text ?? throw new OobaboogaException("Missing text in response");
         return text;

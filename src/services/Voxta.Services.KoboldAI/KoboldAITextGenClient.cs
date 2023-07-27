@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
@@ -13,6 +14,17 @@ namespace Voxta.Services.KoboldAI;
 
 public class KoboldAITextGenClient : ITextGenService
 {
+    private static readonly IMapper Mapper;
+    
+    static KoboldAITextGenClient()
+    {
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<KoboldAIParameters, KoboldAIRequestBody>();
+        });
+        Mapper = config.CreateMapper();
+    }
+    
     public string ServiceName => KoboldAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
@@ -20,6 +32,7 @@ public class KoboldAITextGenClient : ITextGenService
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private KoboldAIParameters? _parameters;
 
     public KoboldAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
@@ -36,6 +49,7 @@ public class KoboldAITextGenClient : ITextGenService
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Uri)) return false;
         _httpClient.BaseAddress = new Uri(settings.Uri);
+        _parameters = settings.Parameters ?? new KoboldAIParameters();
         return true;
     }
 
@@ -49,23 +63,9 @@ public class KoboldAITextGenClient : ITextGenService
         var builder = new GenericPromptBuilder();
         // TODO: count tokens?
         var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
-        var body = new
-        {
-            use_story = false,
-            use_memory = false,
-            use_authors_note = false,
-            use_world_info = false,
-            max_length = 80,
-            rep_pen = 1.08,
-            rep_pen_range = 1024,
-            rep_pen_slope = 0.9,
-            tfs = 0.9,
-            temperature = 0.65,
-            top_p = 0.9,
-            sampler_order = new[] { 6, 0, 1, 2, 3, 4, 5 },
-            prompt,
-            stop_sequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" }
-        };
+        var body = Mapper.Map<KoboldAIRequestBody>(_parameters);
+        body.Prompt = prompt;
+        body.StopSequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");

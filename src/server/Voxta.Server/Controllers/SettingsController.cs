@@ -324,11 +324,18 @@ public class SettingsController : Controller
         {
             Uri = "http://127.0.0.1:5000",
         };
-        return View(oobabooga);
+        var vm = new OobaboogaSettingsViewModel
+        {
+            Enabled = oobabooga.Enabled,
+            Uri = oobabooga.Uri,
+            Parameters = JsonSerializer.Serialize(oobabooga.Parameters ?? new OobaboogaParameters()),
+            UseDefaults = oobabooga.Parameters == null,
+        };
+        return View(vm);
     }
     
     [HttpPost("/settings/textgenerationwebui")]
-    public async Task<IActionResult> PostTextGenerationWebUISettings([FromForm] OobaboogaSettings value)
+    public async Task<IActionResult> PostTextGenerationWebUISettings([FromForm] OobaboogaSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -339,6 +346,7 @@ public class SettingsController : Controller
         {
             Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OobaboogaParameters>(value.Parameters) ?? new OobaboogaParameters(),
         });
         
         return RedirectToAction("Settings");
@@ -351,11 +359,18 @@ public class SettingsController : Controller
         {
             Uri = "http://127.0.0.1:5001",
         };
-        return View(koboldai);
+        var vm = new KoboldAISettingsViewModel
+        {
+            Enabled = koboldai.Enabled,
+            Uri = koboldai.Uri,
+            Parameters = JsonSerializer.Serialize(koboldai.Parameters ?? new KoboldAIParameters()),
+            UseDefaults = koboldai.Parameters == null,
+        };
+        return View(vm);
     }
     
     [HttpPost("/settings/koboldai")]
-    public async Task<IActionResult> PostKoboldAISettings([FromForm] KoboldAISettings value)
+    public async Task<IActionResult> PostKoboldAISettings([FromForm] KoboldAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -366,6 +381,7 @@ public class SettingsController : Controller
         {
             Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<KoboldAIParameters>(value.Parameters) ?? new KoboldAIParameters(),
         });
         
         return RedirectToAction("Settings");
@@ -382,9 +398,9 @@ public class SettingsController : Controller
         {
             Enabled = novelai.Enabled,
             Model = novelai.Model,
+            Token = !string.IsNullOrEmpty(novelai.Token) ? Crypto.DecryptString(novelai.Token) : "",
             Parameters = JsonSerializer.Serialize(novelai.Parameters ?? new NovelAIParameters()),
             UseDefaults = novelai.Parameters == null,
-            Token = !string.IsNullOrEmpty(novelai.Token) ? Crypto.DecryptString(novelai.Token) : ""
         };   
         return View(vm);
     }
@@ -402,7 +418,7 @@ public class SettingsController : Controller
             Enabled = value.Enabled,
             Token = string.IsNullOrEmpty(value.Token) ? "" : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? new NovelAIParameters()
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? new NovelAIParameters(),
         });
         
         return RedirectToAction("Settings");
@@ -416,11 +432,19 @@ public class SettingsController : Controller
             ApiKey = "",
         };
         if (!string.IsNullOrEmpty(openai.ApiKey)) openai.ApiKey = Crypto.DecryptString(openai.ApiKey);  
-        return View(openai);
+        var vm = new OpenAISettingsViewModel
+        {
+            Enabled = openai.Enabled,
+            ApiKey = openai.ApiKey,
+            Model = openai.Model,
+            Parameters = JsonSerializer.Serialize(openai.Parameters ?? new OpenAIParameters()),
+            UseDefaults = openai.Parameters == null,
+        };
+        return View(vm);
     }
     
     [HttpPost("/settings/openai")]
-    public async Task<IActionResult> PostOpenAISettings([FromForm] OpenAISettings value)
+    public async Task<IActionResult> PostOpenAISettings([FromForm] OpenAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -432,6 +456,7 @@ public class SettingsController : Controller
             Enabled = value.Enabled,
             ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OpenAIParameters>(value.Parameters) ?? new OpenAIParameters(),
         });
         
         return RedirectToAction("Settings");

@@ -1,34 +1,39 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
-using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Voxta.Services.OpenAI;
-using NAudio.MediaFoundation;
 
 namespace Voxta.Services.NovelAI;
 
 public class NovelAITextGenClient : ITextGenService
 {
+    private static readonly IMapper Mapper;
+    
+    static NovelAITextGenClient()
+    {
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<NovelAIParameters, NovelAIRequestBodyParameters>();
+        });
+        Mapper = config.CreateMapper();
+    }
+    
     public string ServiceName => NovelAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly HttpClient _httpClient;
-    private NovelAIParameters? _parameters;
+    private NovelAIRequestBodyParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
-    
-    static NovelAITextGenClient()
-    {
-        MediaFoundationApi.Startup();
-    }
 
     public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
@@ -47,7 +52,7 @@ public class NovelAITextGenClient : ITextGenService
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         _model = settings.Model;
-        _parameters = settings.Parameters ?? new NovelAIParameters();
+        _parameters = Mapper.Map<NovelAIRequestBodyParameters>(settings.Parameters ?? new NovelAIParameters());
         return true;
     }
 

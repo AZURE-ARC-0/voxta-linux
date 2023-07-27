@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
-using System.Security.Authentication;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using Voxta.Abstractions.Repositories;
 using Voxta.Common;
 
@@ -9,8 +9,20 @@ namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase
 {
+    private static readonly IMapper Mapper;
+    
+    static OpenAIClientBase()
+    {
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<OpenAIParameters, OpenAIRequestBody>();
+        });
+        Mapper = config.CreateMapper();
+    }
+    
     private readonly ISettingsRepository _settingsRepository;
     private readonly HttpClient _httpClient;
+    private OpenAIParameters? _parameters;
     private string _model = "gpt-3.5-turbo";
 
     protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
@@ -28,17 +40,15 @@ public abstract class OpenAIClientBase
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
         _model = settings.Model;
+        _parameters = new OpenAIParameters();
         return true;
     }
     
     protected async Task<string> SendChatRequestAsync(List<OpenAIMessage> messages, CancellationToken cancellationToken)
     {
-        var body = new
-        {
-            model = _model,
-            messages,
-            max_tokens = 120,
-        };
+        var body = Mapper.Map<OpenAIRequestBody>(_parameters);
+        body.Messages = messages;
+        body.Model = _model;
 
         var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/v1/chat/completions", content, cancellationToken);

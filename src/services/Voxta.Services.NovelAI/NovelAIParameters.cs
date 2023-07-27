@@ -1,20 +1,23 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Voxta.Services.NovelAI;
 
+[Serializable]
+[SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
 public class NovelAIParameters
 {
     [JsonPropertyName("temperature")]
     public double Temperature { get; set; } = 1.5;
 
     [JsonPropertyName("max_length")]
-    public int MaxLength { get; set; } = 40;
+    public int MaxLength { get; set; } = 80;
 
     [JsonPropertyName("min_length")]
     public int MinLength { get; set; } = 1;
 
     [JsonPropertyName("top_k")]
-    public int TopK { get; set; } = 10;
+    public double TopK { get; set; } = 10;
 
     [JsonPropertyName("top_p")]
     public double TopP { get; set; } = 0.75;
@@ -32,7 +35,7 @@ public class NovelAIParameters
     public double RepetitionPenalty { get; set; } = 2.25;
 
     [JsonPropertyName("repetition_penalty_frequency")]
-    public int RepetitionPenaltyFrequency { get; set; } = 0;
+    public double RepetitionPenaltyFrequency { get; set; } = 0;
 
     [JsonPropertyName("repetition_penalty_presence")]
     public double RepetitionPenaltyPresence { get; set; } = 0.005;
@@ -43,30 +46,14 @@ public class NovelAIParameters
     [JsonPropertyName("repetition_penalty_slope")]
     public double RepetitionPenaltySlope { get; set; } = 0.09;
 
-    [JsonPropertyName("generate_until_sentence")]
-    public bool GenerateUntilSentence { get; set; } = true;
-
-    [JsonPropertyName("use_cache")]
-    public bool UseCache { get; set; } = false;
-
-    [JsonPropertyName("use_string")]
-    public bool UseString { get; set; } = true;
-
-    [JsonPropertyName("return_full_text")]
-    public bool ReturnFullText { get; set; } = false;
-
     [JsonPropertyName("phrase_rep_pen")]
     public string PhraseRepPen { get; set; } = "very_light";
 
-    [JsonPropertyName("prefix")]
-    public string Prefix { get; set; } = "vanilla";
-
     [JsonPropertyName("order")]
-    public int[] Order { get; set; } = new[] { 1, 5, 0, 2, 3, 4 };
+    public int[] Order { get; set; } = { 1, 5, 0, 2, 3, 4 };
 
     [JsonPropertyName("repetition_penalty_whitelist")]
-    public int[] RepetitionPenaltyWhitelist { get; set; } = new[]
-    {
+    public int[] RepetitionPenaltyWhitelist { get; set; } = {
         49256,
         49264,
         49231,
@@ -141,8 +128,7 @@ public class NovelAIParameters
     };
 
     [JsonPropertyName("bad_words_ids")]
-    public int[][] BadWordsIds { get; set; } = new[]
-    {
+    public int[][] BadWordsIds { get; set; } = {
 
         new[]
         {
@@ -205,10 +191,29 @@ public class NovelAIParameters
             2936
         }
     };
+}
+
+[Serializable]
+[SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
+public class NovelAIRequestBodyParameters : NovelAIParameters
+{
+    [JsonPropertyName("prefix")]
+    public string Prefix { get; set; } = "vanilla";
+    
+    [JsonPropertyName("generate_until_sentence")]
+    public bool GenerateUntilSentence { get; set; } = true;
+    
+    [JsonPropertyName("use_cache")]
+    public bool UseCache { get; set; } = false;
+
+    [JsonPropertyName("use_string")]
+    public bool UseString { get; set; } = true;
+
+    [JsonPropertyName("return_full_text")]
+    public bool ReturnFullText { get; set; } = false;
 
     [JsonPropertyName("stop_sequences")]
-    public int[][] StopSequences { get; set; } = new[]
-    {
+    public int[][] StopSequences { get; set; } = {
         // User:
         new[] { 21978, 49287 },
         // "
@@ -216,9 +221,4 @@ public class NovelAIParameters
         // \n
         new[] { 85 }
     };
-    
-    public NovelAIParameters ShallowClone()
-    {
-        return (NovelAIParameters) MemberwiseClone();
-    }
 }

@@ -17,7 +17,7 @@
         </div>
     </div>
     
-    <form method="post" asp-action="PostElevenLabsSettings">
+    <form id="configureForm" method="post" asp-action="PostElevenLabsSettings">
         <div class="card mb-3">
             <div class="card-header">
                 <h2>Configuration</h2>
@@ -30,7 +30,7 @@
                     <span asp-validation-for="Enabled" class="text-danger"></span>
                 </div>
                 <div>
-                    <label asp-for="ApiKey">ElevenLabs API key</label>
+                    <label asp-for="ApiKey">API key</label>
                     <input asp-for="ApiKey" class="form-control"/>
                     <span asp-validation-for="ApiKey" class="text-danger"></span>
                 </div>

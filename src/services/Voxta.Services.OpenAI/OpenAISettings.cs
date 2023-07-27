@@ -9,4 +9,5 @@ public class OpenAISettings : SettingsBase
 
     public required string ApiKey { get; set; }
     public string Model { get; set; } = DefaultModel;
+    public OpenAIParameters? Parameters { get; set; }
 }

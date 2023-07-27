@@ -26,10 +26,17 @@ if (webView) {
 }
 
 window.initJsonEditor = (form, input, useDefaults) => {
-    if (!window.JSONEditor) return;
-
-    // create the editor
     const container = document.getElementById("jsoneditor")
+    if(!container || !input || !form || !useDefaults) {
+        console.error("Missing form components");
+    }
+    
+    if (!window.JSONEditor) {
+        console.error("Missing json editor library");
+        container.innerText = `<div class=text-danger>Could not load the editor.</div>`;
+        return;
+    }
+
     const options = {
         mainMenuBar: false,
         navigationBar: false,
