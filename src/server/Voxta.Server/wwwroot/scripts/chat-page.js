@@ -4,8 +4,11 @@ import {Notifications} from "/scripts/notifications.js";
 
 const canvas = document.getElementById('audioVisualizer');
 const audioVisualizer = new AudioVisualizer(canvas);
+const splash = document.getElementById('splash');
+const selectCharacterButton = document.getElementById('selectCharacterButton');
 const characterButtons = document.getElementById('characterButtons');
 const messageBox = document.getElementById('message');
+const promptBox = document.getElementById('promptBox');
 const prompt = document.getElementById('prompt');
 const notifications = new Notifications(document.getElementById('notification'));
 const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
@@ -35,16 +38,17 @@ const sendMessage = (text) => {
 
 const reset  = () => {
     messageBox.innerText = '';
-    messageBox.style.opacity = '0';
+    messageBox.classList.remove('voxta_show');
     prompt.value = '';
     prompt.disabled = true;
-    prompt.style.opacity = '0';
+    promptBox.classList.remove('voxta_show');
     audioVisualizer.idle();
-    canvas.style.opacity = '0';
+    canvas.classList.remove('voxta_show');
 }
 
 voxtaClient.addEventListener('onopen', (evt) => {
     notifications.notify('Connected', 'success');
+    splash.classList.add('voxta_show');
 });
 voxtaClient.addEventListener('onclose', (evt) => {
     notifications.notify('Disconnected', 'danger');
@@ -55,6 +59,8 @@ voxtaClient.addEventListener('onerror', (evt) => {
 });
 
 voxtaClient.addEventListener('welcome', (evt) => {
+    // Clear characters
+    // TODO: Split the UI logic
     while (characterButtons.firstChild) {
         characterButtons.removeChild(characterButtons.firstChild);
     }
@@ -70,14 +76,10 @@ voxtaClient.addEventListener('welcome', (evt) => {
         button.appendChild(charDesc);
         button.onclick = () => {
             voxtaClient.loadCharacter(character.id);
-            characterButtons.style.opacity = '0';
+            characterButtons.classList.remove('voxta_show');
         };
         characterButtons.appendChild(button);
-        characterButtons.style.opacity = '1';
     });
-    setTimeout(() => {
-        characterButtons.style.opacity = '1';
-    }, 100);
 });
 voxtaClient.addEventListener('characterLoaded', (evt) => {
     character = evt.detail.character;
@@ -86,11 +88,11 @@ voxtaClient.addEventListener('characterLoaded', (evt) => {
 voxtaClient.addEventListener('ready', (evt) => {
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
     audioVisualizer.idle();
-    canvas.style.opacity = '1';
-    prompt.style.opacity = '1';
+    canvas.classList.add('voxta_show');
+    promptBox.classList.add('voxta_show');
 });
 voxtaClient.addEventListener('reply', (evt) => {
-    messageBox.style.opacity = '1';
+    messageBox.classList.add('voxta_show');
     messageBox.innerText = evt.detail.text;
     prompt.disabled = false;
 });
@@ -154,3 +156,13 @@ prompt.addEventListener('keydown', (evt) => {
         }
     }
 });
+
+selectCharacterButton.addEventListener('click', () => {
+    splash.classList.remove('voxta_show');
+    characterButtons.classList.add('voxta_show');
+});
+
+
+setTimeout(() => {
+    splash.classList.add('voxta_show');
+}, 100);

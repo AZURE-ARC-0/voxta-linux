@@ -9,8 +9,15 @@ canvas {
     z-index: 1;
     width: 60%;
     height: 60%;
-    opacity: 0;
-    transition: 1s;
+}
+
+#splash {
+    position: absolute;
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
 }
 
 #characterButtons {
@@ -19,8 +26,6 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    opacity: 0;
-    transition: 1s;
 }
 
 #message {
@@ -35,8 +40,6 @@ canvas {
     bottom: 20%;
     max-width: 70%;
     text-align: center;
-    opacity: 0;
-    transition: 0.5s;
 }
 
 .prompt-box {
@@ -46,18 +49,16 @@ canvas {
     z-index: 4;
 }
 
-.prompt-box input {
+#promptBox input {
     border-radius: 10px;
     width: 100%;
     background-color: #2a2b2e;
     border: 1px solid #2a2b2e;
     color: #959dad;
     text-align: center;
-    opacity: 0;
-    transition: 1s;
 }
 
-.prompt-box:disabled {
+#promptBox:disabled {
     background-color: #151517;
 }
 
@@ -72,4 +73,16 @@ canvas {
     opacity: 0;
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
     transform: translateY(50px);
+}
+
+.voxta_transition {
+    opacity: 0;
+    transition: 1s;
+    pointer-events: none;
+}
+
+.voxta_show {
+    opacity: 1;
+    transition: 1s;
+    pointer-events: auto;
 }

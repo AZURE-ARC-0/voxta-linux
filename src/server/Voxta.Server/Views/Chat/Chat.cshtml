@@ -9,10 +9,17 @@
     <link href="~/styles/chat-page.css" asp-append-version="true" rel="stylesheet">
 }
 
-<canvas id="audioVisualizer" width="800" height="480"></canvas>
-<div id="characterButtons"></div>
-<div id="message"></div>
-<div class="prompt-box">
+<canvas id="audioVisualizer" class="voxta_transition" width="800" height="480"></canvas>
+<div id="splash" class="voxta_transition">
+    <p><b>Voxta Server</b></p>
+    <p>You can now launch your virtual companion app, or you can start chatting here.</p>
+    <p>
+        <input id="selectCharacterButton" type="button" class="btn btn-secondary" value="Select a character"/>
+    </p>
+</div>
+<div id="characterButtons" class="voxta_transition"></div>
+<div id="message" class="voxta_transition"></div>
+<div id="promptBox" class="voxta_transition">
     <input type="text" id="prompt" disabled="disabled" />
 </div>
 <div id="notification"></div>
