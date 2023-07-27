@@ -12,8 +12,12 @@ public class SanitizerTests
     
     [TestCase("hello\n", "hello.")]
     [TestCase("\"hello.\"", "hello.")]
+    [TestCase("\"hello?\"", "hello?")]
     [TestCase("Hello. World", "Hello.")]
+    [TestCase("Hello! World", "Hello!")]
     [TestCase("Hello. World.\"", "Hello. World.")]
+    [TestCase("", "")]
+    
     public void TestSanitize(string input, string expected)
     {
         Assert.That(_sanitizer.Sanitize(input), Is.EqualTo(expected));
