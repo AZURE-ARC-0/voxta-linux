@@ -28,14 +28,5 @@ h1 {
 .dropdown-menu {
     left: auto;
     right: 10px;
-    transition: transform 1s ease-in-out;
     transform-origin: top right;
-}
-
-.show > .dropdown-menu {
-    transform: scaleX(1);
-}
-
-.dropdown-menu {
-    transform: scaleX(0);
 }
