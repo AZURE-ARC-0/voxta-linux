@@ -1,13 +1,6 @@
 const webView = window.chrome && window.chrome.webview;
 
 if (webView) {
-    document.addEventListener('DOMContentLoaded', function () {
-        const logo = document.getElementById('logo');
-        if(logo) {
-            logo.style.display = 'none';
-        }
-    });
-
     document.getRootNode().addEventListener('keyup', function (e) {
         let msg;
         if (e.key === 'F1') {
