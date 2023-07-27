@@ -43,12 +43,9 @@ window.initJsonEditor = (form, input, useDefaults) => {
         statusBar: false,
         colorPicker: false,
         language: 'en',
-        mode: 'form',
+        mode: useDefaults.checked ? 'view' : 'form',
         enableSort: false,
         enableTransform: false,
-        onChange: () => {
-            useDefaults.checked = false;
-        }
     }
     const editor = new JSONEditor(container, options)
 
@@ -60,5 +57,9 @@ window.initJsonEditor = (form, input, useDefaults) => {
         const json = editor.get();
         input.value = JSON.stringify(json);
         this.submit();
+    });
+
+    useDefaults.addEventListener("change", function () {
+        editor.setMode(useDefaults.checked ? 'view' : 'form');
     });
 }
