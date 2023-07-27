@@ -73,7 +73,7 @@
                 </div>
                 
                 <p class="d-flex justify-content-end mt-3">
-                    <a href="https://github.com/malfoyslastname/character-card-spec-v2">Character Card Spec V2</a>
+                    <a href="https://github.com/malfoyslastname/character-card-spec-v2" target="_blank">Character Card Spec V2</a>
                 </p>
             </div>
         </div>
@@ -86,7 +86,7 @@
                 <div class="mb-3">
                     <label asp-for="Character.Culture">Culture</label>
                     <input asp-for="Character.Culture" class="form-control"/>
-                    <div class="form-text">Affects which LLM, STT and TTS will be used for this character. Uses <a href="https://en.wikipedia.org/wiki/IETF_language_tag">BCP-47</a>.</div>
+                    <div class="form-text">Affects which LLM, STT and TTS will be used for this character. Uses <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">BCP-47</a>.</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Culture)</small>
                 </div>
                 <div class="form-check">
