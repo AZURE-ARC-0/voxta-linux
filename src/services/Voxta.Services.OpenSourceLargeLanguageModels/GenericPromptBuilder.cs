@@ -87,7 +87,7 @@ public class GenericPromptBuilder
         var character = chatSessionData.Character;
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.PostHistoryInstructions))
-            sb.AppendLineLinux(character.PostHistoryInstructions);
+            sb.AppendLineLinux(string.Join("\n", character.PostHistoryInstructions.Split(new[]{'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).Select(x => $"({x})")));
         return sb.ToString().TrimExcess();
     }
 }
