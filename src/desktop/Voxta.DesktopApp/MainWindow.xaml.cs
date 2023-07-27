@@ -90,16 +90,11 @@ public partial class MainWindow
 
     private void MainWindow_FormClosing(object? sender, CancelEventArgs cancelEventArgs)
     {
-        try
-        {
-            ConsoleControl.StopProcess();
-        }
-        catch
-        {
-            // ignored
-        }
-
-        _process?.WaitForExit();
+        if (_process is { HasExited: false }) try { _process.CloseMainWindow(); } catch { /* ignored */ }
+        if (_process is { HasExited: false }) try { _process.WaitForExit(1000); } catch { /* ignored */ }
+        if (_process is { HasExited: false }) try { _process.Kill(); } catch { /* ignored */ }
+        try { _process?.Close(); } catch { /* ignored */ }
+        _process?.Dispose();
     }
 
     private void WebServer_Exited(object? sender, EventArgs e)
