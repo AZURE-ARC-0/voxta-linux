@@ -7,8 +7,8 @@ public class GenericPromptBuilder
 {
     public string BuildReplyPrompt(IReadOnlyChatSessionData chatSessionData, int maxTokens = 4096, bool includePostHistoryPrompt = true)
     {
-        var systemPrompt = MakeSystemPrompt(chatSessionData.Character);
-        var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chatSessionData.Character, chatSessionData.Context, chatSessionData.Actions) : "";
+        var systemPrompt = MakeSystemPrompt(chatSessionData);
+        var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chatSessionData) : "";
         var sb = new StringBuilder();
         var chatMessages = chatSessionData.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
@@ -63,8 +63,9 @@ public class GenericPromptBuilder
         return sb.ToString().TrimExcess();
     }
 
-    private static string MakeSystemPrompt(CharacterCard character)
+    private static string MakeSystemPrompt(IReadOnlyChatSessionData chatSessionData)
     {
+        var character = chatSessionData.Character;
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.SystemPrompt))
             sb.AppendLineLinux(character.SystemPrompt);
@@ -74,18 +75,19 @@ public class GenericPromptBuilder
             sb.AppendLineLinux($"Personality of {character.Name}: {character.Personality}");
         if (!string.IsNullOrEmpty(character.Scenario))
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
+        if (!string.IsNullOrEmpty(chatSessionData.Context))
+            sb.AppendLineLinux(chatSessionData.Context);
+        if (chatSessionData.Actions is { Length: > 1 })
+            sb.AppendLineLinux($"Potential actions you will be able to do after you respond: {string.Join(", ", chatSessionData.Actions)}");
         return sb.ToString().TrimExcess();
     }
 
-    private static string MakePostHistoryPrompt(CharacterCard character, string? context, string[]? actions)
+    private static string MakePostHistoryPrompt(IReadOnlyChatSessionData chatSessionData)
     {
+        var character = chatSessionData.Character;
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.PostHistoryInstructions))
             sb.AppendLineLinux(character.PostHistoryInstructions);
-        if (!string.IsNullOrEmpty(context))
-            sb.AppendLineLinux($"Current context: {context}");
-        if (actions is { Length: > 1 })
-            sb.AppendLineLinux($"Available actions to be inferred after the response: {string.Join(", ", actions)}");
         return sb.ToString().TrimExcess();
     }
 }
