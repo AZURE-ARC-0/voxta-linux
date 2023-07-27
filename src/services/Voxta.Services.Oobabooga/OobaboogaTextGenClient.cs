@@ -29,7 +29,7 @@ public class OobaboogaTextGenClient : OobaboogaClientBase, ITextGenService
         var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
         
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
-        var text = await SendCompletionRequest(prompt, new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" }, cancellationToken);
+        var text = await SendCompletionRequest(prompt, new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n", "\"" }, cancellationToken);
         textGenPerf.Done();
         var sanitized = _sanitizer.Sanitize(text);
         

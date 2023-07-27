@@ -65,7 +65,7 @@ public class KoboldAITextGenClient : ITextGenService
         var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
         var body = Mapper.Map<KoboldAIRequestBody>(_parameters);
         body.Prompt = prompt;
-        body.StopSequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n" };
+        body.StopSequence = new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n", "\"" };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
