@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Model;
+﻿using System.Text;
+using Voxta.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace Voxta.Core;
@@ -14,87 +15,71 @@ public partial class ChatSession
 
     private async ValueTask HandleClientMessageAsync(ClientSendMessage clientSendMessage, CancellationToken abortCancellationToken, CancellationToken queueCancellationToken)
     {
+        _logger.LogInformation("Received chat message: {Text}", clientSendMessage.Text);
+
         try
         {
-            _logger.LogInformation("Received chat message: {Text}", clientSendMessage.Text);
-
-            var text = clientSendMessage.Text;
-
-            var speechInterruptionRatio = _chatSessionState.InterruptSpeech();
-
-            if (_chatSessionState.PendingUserMessage == null)
+            var lower = clientSendMessage.Text.ToLower();
+            switch (_chatSessionState.State)
             {
-                var userText = _chatTextProcessor.ProcessText(text);
-                var userTextData = new TextData
-                {
-                    Text = userText,
-                    Tokens = _textGen.GetTokenCount(userText)
-                };
-                var userMessageData = ChatMessageData.FromGen(_chatSessionData.UserName, userTextData);
-                _chatSessionData.Messages.Add(userMessageData);
-                _chatSessionState.PendingUserMessage = userMessageData;
+                case ChatSessionStates.Live:
+                    if (lower.Contains("go offline"))
+                        await EnterOfflineMode(queueCancellationToken);
+                    else if (lower.Contains("analysis mode"))
+                        await EnterDiagnosticsMode(queueCancellationToken);
+                    else
+                        await GenerateReplyAsync(clientSendMessage, abortCancellationToken, queueCancellationToken);
+                    break;
+                case ChatSessionStates.Paused:
+                    if (lower.Contains("go online"))
+                        await EnterOnlineMode(queueCancellationToken);
+                    else if (lower.Contains("analysis mode"))
+                        await EnterDiagnosticsMode(queueCancellationToken);
+                    else
+                        // TODO: Workaround because the client does not know we are offline and waits for the reply
+                        await SendReusableReplyWithSpeechAsync(".", queueCancellationToken);
+                    break;
+                case ChatSessionStates.Diagnostics:
+                    if (lower.Contains("go online"))
+                        await EnterOnlineMode(queueCancellationToken);
+                    else if (lower.Contains("go offline"))
+                        await EnterOfflineMode(queueCancellationToken);
+                    else if (lower.StartsWith("repeat") && lower.Length > 7)
+                        await SendReplyWithSpeechAsync(clientSendMessage.Text[7..], $"diag_{Guid.NewGuid()}", false, queueCancellationToken);
+                    else
+                        await SendReusableReplyWithSpeechAsync("Unknown command.", queueCancellationToken);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else
-            {
-                var append = '\n' + text;
-                _chatSessionState.PendingUserMessage.Text += append;
-                _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
-            }
-            
-            if (speechInterruptionRatio is > 0.05f and < 0.95f)
-            {
-                var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
-                if (lastCharacterMessage?.User == _chatSessionData.Character.Name)
-                {
-                    var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
-                    lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
-                    lastCharacterMessage.Tokens = _textGen.GetTokenCount(lastCharacterMessage.Text);
-                    _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Text);
-                }
-
-                text = "*interrupts {{char}}* " + text;
-                _logger.LogInformation("Added interruption notice to the user message. Updated text: {Text}", text);
-            }
-
-            _chatSessionData.Actions = clientSendMessage.Actions;
-            _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context);
-
-            ChatMessageData reply;
-            try
-            {
-                using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(queueCancellationToken, abortCancellationToken);
-                var linkedCancellationToken = linkedCancellationSource.Token;
-                var gen = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
-                if (string.IsNullOrWhiteSpace(gen.Text))
-                {
-                    throw new InvalidOperationException("AI service returned an empty string.");
-                }
-
-                reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, gen);
-            }
-            catch (OperationCanceledException)
-            {
-                // Reply will simply be dropped
-                return;
-            }
-            catch
-            {
-                if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StartMicrophoneTranscription();
-                throw;
-            }
-
-            _chatSessionState.PendingUserMessage = null;
-            _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Text);
-            
-            // TODO: Save into some storage
-            _chatSessionData.Messages.Add(reply);
-
-            var speechId = $"speech_{_chatSessionData.ChatId.ToString()}_{reply.Id}";
-            await SendReplyWithSpeechAsync(reply, speechId, queueCancellationToken);
         }
         finally
         {
             _chatSessionState.GenerateReplyEnd();
         }
+    }
+
+    private async Task EnterDiagnosticsMode(CancellationToken queueCancellationToken)
+    {
+        _chatSessionState.State = ChatSessionStates.Diagnostics;
+        var sb = new StringBuilder();
+        sb.AppendLineLinux("Diagnostics for character " + _chatSessionData.Character.Name);
+        sb.AppendLineLinux("Tex Generation: " + _textGen.ServiceName);
+        sb.AppendLineLinux("Text To Speech: " + _speechGenerator.ServiceName + " with voice " + _speechGenerator.Voice);
+        sb.AppendLineLinux("Action Inference: " + (_actionInference?.ServiceName ?? "None"));
+        sb.AppendLineLinux("Speech To Text: " + (_speechToText?.ServiceName ?? "None"));
+        await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, queueCancellationToken);
+    }
+
+    private async Task EnterOnlineMode(CancellationToken queueCancellationToken)
+    {
+        _chatSessionState.State = ChatSessionStates.Live;
+        await SendReusableReplyWithSpeechAsync("I'm now online!", queueCancellationToken);
+    }
+
+    private async Task EnterOfflineMode(CancellationToken queueCancellationToken)
+    {
+        _chatSessionState.State = ChatSessionStates.Paused;
+        await SendReusableReplyWithSpeechAsync("Going offline.", queueCancellationToken);
     }
 }

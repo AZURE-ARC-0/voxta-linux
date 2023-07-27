@@ -101,6 +101,13 @@ public class KoboldAITextGenClient : ITextGenService
 
         var text = sb.ToString();
         var sanitized = _sanitizer.Sanitize(text);
+        if (string.IsNullOrEmpty(sanitized))
+        {
+            if (string.IsNullOrEmpty(text))
+                throw new KoboldAIException("Empty response from KoboldAI");
+            else
+                throw new KoboldAIException($"No usable characters from response: {text}");
+        }
         
         return new TextData
         {

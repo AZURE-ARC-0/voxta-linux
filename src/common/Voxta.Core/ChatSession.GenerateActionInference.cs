@@ -5,25 +5,8 @@ namespace Voxta.Core;
 
 public partial class ChatSession
 {
-    private async Task SendReplyWithSpeechAsync(TextData reply, string speechId, CancellationToken cancellationToken)
+    private async Task GenerationActionInference(CancellationToken cancellationToken)
     {
-        var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(reply.Text, speechId, false, cancellationToken), cancellationToken);
-
-        await _tunnel.SendAsync(new ServerReplyMessage
-        {
-            Text = reply.Text,
-        }, cancellationToken);
-
-        var speechUrl = await speechTask;
-        if (speechUrl != null)
-        {
-            if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StopMicrophoneTranscription();
-            await _tunnel.SendAsync(new ServerSpeechMessage
-            {
-                Url = speechUrl,
-            }, cancellationToken);
-        }
-
         if (_actionInference != null && _chatSessionData.Actions is { Length: > 0 })
         {
             var action = await _actionInference.SelectActionAsync(_chatSessionData, cancellationToken);

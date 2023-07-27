@@ -6,6 +6,7 @@ namespace Voxta.Core;
 
 public class ChatSessionState
 {
+    public ChatSessionStates State = ChatSessionStates.Live;
     public TextData? PendingUserMessage;
     
     private readonly Stopwatch _audioPlaybackStopwatch = new();
@@ -76,4 +77,11 @@ public class ChatSessionState
         _perfTracker = null;
         return ratio;
     }
+}
+
+public enum ChatSessionStates
+{
+    Live,
+    Paused,
+    Diagnostics,
 }

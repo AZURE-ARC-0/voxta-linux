@@ -19,17 +19,20 @@ public class CharacterLiteDBRepository : ICharacterRepository
         var cards = _charactersCollection.Query()
             .Select(x => new { x.Id, x.Name, x.CreatorNotes, x.Services, x.ReadOnly, x.Culture, x.Prerequisites })
             .ToList();
-        
-        var result = cards.Select(b => new ServerWelcomeMessage.CharactersListItem
-        {
-            Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
-            Name = b.Name,
-            Description = b.CreatorNotes?[..Math.Min(50, b.CreatorNotes.Length)],
-            ReadOnly = b.ReadOnly,
-            Culture = b.Culture,
-            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
-            Prerequisites = b.Prerequisites ?? Array.Empty<string>(),
-        }).ToArray();
+
+        var result = cards
+            .Select(b => new ServerWelcomeMessage.CharactersListItem
+            {
+                Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
+                Name = b.Name,
+                Description = b.CreatorNotes?[..Math.Min(50, b.CreatorNotes.Length)],
+                ReadOnly = b.ReadOnly,
+                Culture = b.Culture,
+                // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+                Prerequisites = b.Prerequisites ?? Array.Empty<string>(),
+            })
+            .OrderBy(x => x.Name)
+            .ToArray();
 
         return Task.FromResult(result);
     }
