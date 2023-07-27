@@ -55,6 +55,7 @@ public partial class MainWindow
             var env = await CoreWebView2Environment.CreateAsync(null);
             await WebView.EnsureCoreWebView2Async(env);
             WebView.CoreWebView2.WebMessageReceived += WebView_CoreWebView2_WebMessageReceived;
+            WebView.Visibility = Visibility.Hidden;
             await WaitForServerReady("http://127.0.0.1:5384/ping");
             WebView.CoreWebView2.Navigate("http://127.0.0.1:5384");
         }

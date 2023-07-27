@@ -8,7 +8,7 @@
         Height="600"
         Width="800">
     <Grid Background="Black">
-        <wv2:WebView2 x:Name="WebView" Visibility="Hidden" NavigationCompleted="WebView_NavigationCompleted" />
-        <consoleControl:ConsoleControl x:Name="ConsoleControl" Visibility="Visible" />
+        <wv2:WebView2 x:Name="WebView" NavigationCompleted="WebView_NavigationCompleted" />
+        <consoleControl:ConsoleControl x:Name="ConsoleControl" />
     </Grid>
 </Window>
