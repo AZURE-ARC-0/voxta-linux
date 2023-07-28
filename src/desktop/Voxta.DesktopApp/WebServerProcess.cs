@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 
 namespace Voxta.DesktopApp;
 
@@ -44,50 +45,21 @@ public static class WebServerProcess
 
     public static void StopWebServer()
     {
+        if (_process == null) return;
+  
         try
         {
             if (_process is { HasExited: false })
-                try
-                {
-                    SendExitSignal();
-                }
-                catch
-                {
-                    /* ignored */
-                }
-
-            if (_process is { HasExited: false })
-                try
-                {
-                    _process.WaitForExit(10000);
-                }
-                catch
-                {
-                    /* ignored */
-                }
-
-            if (_process is { HasExited: false })
-                try
-                {
-                    _process.Kill();
-                }
-                catch
-                {
-                    /* ignored */
-                }
-
-            try
             {
-                _process?.Close();
+                SendExitSignal();
+                _process.WaitForExit(10000);
+                _process.Kill();
             }
-            catch
-            {
-                /* ignored */
-            }
-
-            _process?.Dispose();
+            _process.Close();
+            _process.Dispose();
+            _process = null;
         }
-        catch (ObjectDisposedException)
+        catch
         {
             /* ignored */
         }
@@ -119,10 +91,18 @@ public static class WebServerProcess
         return false;
     }
     
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool GenerateConsoleCtrlEvent(ConsoleCtrlEvent eEvent, int dwProcessGroupId);
+
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    private enum ConsoleCtrlEvent : uint
+    {
+        CTRL_C_EVENT = 0,
+    }
+
     private static void SendExitSignal()
     {
         if (_process == null || _process.HasExited) return;
-        var client = new HttpClient();
-        client.Send(new HttpRequestMessage(HttpMethod.Post, "/admin/shutdown") { Content = JsonContent.Create(new { }) });
+        GenerateConsoleCtrlEvent(ConsoleCtrlEvent.CTRL_C_EVENT, _process.Id);
     }
 }
