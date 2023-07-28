@@ -106,26 +106,26 @@ voxtaClient.addEventListener('speech', (evt) => {
 voxtaClient.addEventListener('action', (evt) => {
     switch (evt.detail.value) {
         case 'happy':
-            audioVisualizer.setColor('rgb(222,215,234)');
+            audioVisualizer.setColor('rgb(215,234,231)');
             break;
         case 'intense_love':
             // pink
-            audioVisualizer.setColor('#e91e63');
+            audioVisualizer.setColor('#e186a4');
             break;
         case 'sad':
             // blue
-            audioVisualizer.setColor('#2196f3');
+            audioVisualizer.setColor('#6d899f');
             break;
         case 'angry':
             // red
-            audioVisualizer.setColor('#f44336');
+            audioVisualizer.setColor('#fa2f2a');
             break;
         case 'confused':
             // purple
-            audioVisualizer.setColor('#9c27b0');
+            audioVisualizer.setColor('#a774ad');
             break;
         default:
-            audioVisualizer.setColor('#2196f3');
+            audioVisualizer.setColor('#afbcc7');
             break;
     }
 });
