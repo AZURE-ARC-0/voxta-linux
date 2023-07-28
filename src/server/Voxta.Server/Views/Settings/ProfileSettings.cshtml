@@ -44,8 +44,8 @@
                 <h3>Speech To Text Options</h3>
                 <div class="form-check mb-3">
                     <input asp-for="PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
-                    <label asp-for="PauseSpeechRecognitionDuringPlayback">Allow speech interruptions</label>
-                    <div class="form-text">Continues recording speech while the character speaks. Do not enable unless you use headphones, otherwise the character will interrupt itself.</div>
+                    <label asp-for="PauseSpeechRecognitionDuringPlayback">Prevent speech interruptions</label>
+                    <div class="form-text">Stops recording while the character speaks. The character may interrupt itself without this. You can disable if you have headphones.</div>
                     <span asp-validation-for="PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
                 </div>
             </div>
