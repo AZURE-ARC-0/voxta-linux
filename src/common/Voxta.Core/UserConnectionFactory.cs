@@ -16,13 +16,14 @@ public class UserConnectionFactory
         _sp = sp;
     }
     
-    public UserConnection Create(IUserConnectionTunnel tunnel)
+    public IUserConnection Create(IUserConnectionTunnel tunnel)
     {
         return new UserConnection(
             tunnel,
             _sp.GetRequiredService<ILoggerFactory>(),
             _sp.GetRequiredService<ICharacterRepository>(),
-            _sp.GetRequiredService<ChatSessionFactory>()
+            _sp.GetRequiredService<ChatSessionFactory>(),
+            _sp.GetRequiredService<IUserConnectionManager>()
         );
     }
 }

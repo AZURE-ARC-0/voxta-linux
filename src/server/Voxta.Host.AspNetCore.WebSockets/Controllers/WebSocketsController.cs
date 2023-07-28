@@ -29,11 +29,11 @@ public class WebSocketsController : ControllerBase
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
         var tunnel = new WebsocketUserConnectionTunnel(webSocket);
-        await using var chatSession = _chatInstanceFactory.Create(tunnel);
+        await using var userConnection = _chatInstanceFactory.Create(tunnel);
         _logger.LogInformation("WebSocket connection established");
         try
         {
-            await chatSession.HandleWebSocketConnectionAsync(cancellationToken);
+            await userConnection.HandleWebSocketConnectionAsync(cancellationToken);
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
             _logger.LogInformation("WebSocket connection closed");
         }

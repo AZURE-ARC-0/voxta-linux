@@ -10,9 +10,9 @@ public static class ServiceCollectionExtensions
     public static void AddVoxta(this IServiceCollection services)
     {
         services.AddScoped<UserConnectionFactory>();
+        services.AddSingleton<IUserConnectionManager, UserConnectionManager>();
         services.AddScoped<ChatSessionFactory>();
         services.AddScoped<SpeechGeneratorFactory>();
-        
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<Sanitizer>();
     }

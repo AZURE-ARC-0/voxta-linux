@@ -2,24 +2,36 @@
 using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
+using Voxta.Common;
 
 namespace Voxta.Core;
 
-public sealed class UserConnection : IAsyncDisposable
+public interface IUserConnection : IAsyncDisposable
+{
+    string ConnectionId { get; }
+    Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken);
+}
+
+public sealed class UserConnection : IUserConnection
 {
     private readonly IUserConnectionTunnel _tunnel;
     private readonly ICharacterRepository _charactersRepository;
     private readonly ChatSessionFactory _chatSessionFactory;
+    private readonly IUserConnectionManager _userConnectionManager;
     private readonly ILogger<UserConnection> _logger;
 
     private IChatSession? _chat;
 
-    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ICharacterRepository charactersRepository, ChatSessionFactory chatSessionFactory)
+    public string ConnectionId { get; } = Crypto.CreateCryptographicallySecureGuid().ToString();
+
+    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ICharacterRepository charactersRepository, ChatSessionFactory chatSessionFactory, IUserConnectionManager userConnectionManager)
     {
         _tunnel = tunnel;
         _charactersRepository = charactersRepository;
         _chatSessionFactory = chatSessionFactory;
+        _userConnectionManager = userConnectionManager;
         _logger = loggerFactory.CreateLogger<UserConnection>();
+        _userConnectionManager.Register(this);
     }
     
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
@@ -41,13 +53,12 @@ public sealed class UserConnection : IAsyncDisposable
                 switch (clientMessage)
                 {
                     case ClientStartChatMessage startChatMessage:
-                        if(_chat != null) await _chat.DisposeAsync();
-                        _chat = null;
                         await StartChatAsync(startChatMessage, cancellationToken);
                         break;
                     case ClientStopChatMessage:
                         if(_chat != null) await _chat.DisposeAsync();
                         _chat = null;
+                        _userConnectionManager.ReleaseChatLock(this);
                         break;
                     case ClientSendMessage sendMessage:
                         _chat?.HandleClientMessage(sendMessage);
@@ -103,9 +114,9 @@ public sealed class UserConnection : IAsyncDisposable
             SystemPrompt = character.SystemPrompt,
             PostHistoryInstructions = character.PostHistoryInstructions,
             Culture = character.Culture,
-            TextGenService = character.Services.TextGen.Service,
-            TtsService = character.Services.SpeechGen.Service,
-            TtsVoice = character.Services.SpeechGen.Voice,
+            TextGenService = character.Services.TextGen.Service ?? "",
+            TtsService = character.Services.SpeechGen.Service ?? "",
+            TtsVoice = character.Services.SpeechGen.Voice ?? "",
             EnableThinkingSpeech = character.Options?.EnableThinkingSpeech ?? true,
         }, cancellationToken);
     }
@@ -117,6 +128,15 @@ public sealed class UserConnection : IAsyncDisposable
 
     private async Task StartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
     {
+        if(_chat != null) await _chat.DisposeAsync();
+        _chat = null;
+        
+        if(!_userConnectionManager.TryGetChatLock(this))
+        {
+            await SendError("Another chat is in progress, close this one first.", cancellationToken);
+            return;
+        }
+        
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, startChatMessage, cancellationToken);
         
         _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
@@ -126,6 +146,7 @@ public sealed class UserConnection : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _userConnectionManager.Unregister(this);
         if (_chat != null) await _chat.DisposeAsync();
     }
 }
