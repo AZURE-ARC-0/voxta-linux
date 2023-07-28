@@ -12,6 +12,7 @@ public interface ISpeechGenerator : IDisposable
     string ServiceName { get; }
     string? Voice { get; }
     Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken);
+    Task<string?> LoadSpeechAsync(string file, string thinkingSpeechId, bool b, CancellationToken cancellationToken);
 }
 
 public class SpeechGeneratorFactory
@@ -44,6 +45,11 @@ public class NoSpeechGenerator : ISpeechGenerator
     public string Voice => "None";
     
     public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<string?>(null);
+    }
+    
+    public Task<string?> LoadSpeechAsync(string file, string id, bool reusable, CancellationToken cancellationToken)
     {
         return Task.FromResult<string?>(null);
     }
@@ -95,6 +101,18 @@ public class LocalSpeechGenerator : ISpeechGenerator
         );
         return speechUrl;
     }
+    
+    public async Task<string?> LoadSpeechAsync(string file, string id, bool reusable, CancellationToken cancellationToken)
+    {
+        var speechUrl = Path.Combine(_audioPath, $"{id}.{AudioData.GetExtension(_audioConverter.ContentType)}");
+        var speechTunnel = new ConversionSpeechTunnel(new FileSpeechTunnel(speechUrl), _audioConverter);
+        if (File.Exists(speechUrl)) return speechUrl;
+        if (!reusable)
+            _temporaryFileCleanup.MarkForDeletion(speechUrl, false);
+        var audioData = new AudioData(File.OpenRead(file), AudioData.FromExtension(Path.GetExtension(file)));
+        await speechTunnel.SendAsync(audioData, cancellationToken);
+        return speechUrl;
+    }
 
     public void Dispose()
     {
@@ -124,22 +142,26 @@ public class RemoteSpeechGenerator : ISpeechGenerator
 
     public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
     {
-        return Task.FromResult<string?>(CreateSpeechUrl(Crypto.CreateCryptographicallySecureGuid().ToString(), text, _ttsService, _ttsVoice, reusable));
-    }
-
-    private string CreateSpeechUrl(string id, string text, string ttsService, string ttsVoice, bool reusable)
-    {
-        _pendingSpeech.Push(id, new SpeechRequest
+        var pendingId = Crypto.CreateCryptographicallySecureGuid().ToString();
+        _pendingSpeech.Push(pendingId, new SpeechRequest
         {
-            Service = ttsService,
+            Service = _ttsService,
             Text = text,
-            Voice = ttsVoice,
+            Voice = _ttsVoice,
             Culture = _culture,
             ContentType = _contentType,
             Reusable = reusable,
         });
-        var speechUrl = $"/tts/gens/{id}.{AudioData.GetExtension(_contentType)}";
-        return speechUrl;
+        var speechUrl = $"/tts/gens/{pendingId}.{AudioData.GetExtension(_contentType)}";
+        return Task.FromResult<string?>(speechUrl);
+    }
+    
+    public Task<string?> LoadSpeechAsync(string file, string id, bool reusable, CancellationToken cancellationToken)
+    {
+        // Get the relative path of file from the root of the audio directory
+        var relativePath = Path.GetRelativePath("Data/Audio", file);
+        var speechUrl = $"/tts/file?path={relativePath.Replace('\\', '/')}&contentType={_contentType}";
+        return Task.FromResult<string?>(speechUrl);
     }
 
     public void Dispose()

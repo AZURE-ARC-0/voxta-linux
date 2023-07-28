@@ -31,6 +31,20 @@ public partial class ChatSession
             }
         }
 
+        #warning This should be moved to a separate method.
+        var supportedExtensions = new[] { ".m4a", ".wav", ".mp3", ".webm" };
+        if (Directory.Exists(@"Data\Audio\ThinkingSpeech\Shared"))
+        {
+            foreach (var file in Directory.GetFiles(@"Data\Audio\ThinkingSpeech\Shared"))
+            {
+                if (!supportedExtensions.Contains(Path.GetExtension(file).ToLower())) continue;
+                var thinkingSpeechId = Crypto.CreateSha1Hash($"{file}");
+                var thinkingSpeechUrl = await _speechGenerator.LoadSpeechAsync(file, thinkingSpeechId, true, cancellationToken);
+                if (thinkingSpeechUrl != null)
+                    thinkingSpeechUrls.Add(thinkingSpeechUrl);
+            }
+        }
+
         await _tunnel.SendAsync(new ServerReadyMessage
         {
             ChatId = _chatSessionData.ChatId,

@@ -6,8 +6,6 @@ namespace Voxta.Core;
 
 public class PendingSpeechManager
 {
-    // TODO: Clean up old speech requests after some time
-    // TODO: Instead of using a a pending technique, just load the chat?
     private readonly ConcurrentDictionary<string, SpeechRequest> _pendingSpeechRequests = new();
 
     public void Push(string id, SpeechRequest request)
@@ -17,6 +15,11 @@ public class PendingSpeechManager
 
     public bool TryGetValue(string id, [NotNullWhen(true)] out SpeechRequest? request)
     {
-        return _pendingSpeechRequests.TryRemove(id, out request);
+        return _pendingSpeechRequests.TryGetValue(id, out request);
+    }
+
+    public void RemoveValue(string id)
+    {
+        _pendingSpeechRequests.Remove(id, out _);
     }
 }

@@ -21,4 +21,16 @@ public sealed class AudioData
             _ => throw new NotSupportedException($"Content type '{contentType}' is not supported.")
         };
     }
+
+    public static string FromExtension(string extension)
+    {
+        return extension switch
+        {
+            ".mp3" => "audio/mpeg",
+            ".wav" => "audio/x-wav",
+            ".webm" => "audio/webm",
+            ".m4a" => "audio/aac",
+            _ => throw new NotSupportedException($"Extension '{extension}' is not supported.")
+        };
+    }
 }

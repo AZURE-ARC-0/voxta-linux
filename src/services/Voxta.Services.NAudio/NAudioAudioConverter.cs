@@ -55,13 +55,13 @@ public class NAudioAudioConverter : IAudioConverter
 
         return input.ContentType switch
         {
-            "audio/webm" => await ConvertWebm(input, cancellationToken, audioConvPerf),
+            "audio/webm" or "audio/aac" => await ConvertWithMediaFoundationReader(input, audioConvPerf, cancellationToken),
             "audio/mpeg" when _outputContentType is "audio/wav" or "audio/x-wav" => await ConvertMp3ToWavAsync(input),
             _ => throw new NotSupportedException($"Input {input.ContentType} and output {_outputContentType} pair is not supported")
         };
     }
 
-    private async Task<AudioData> ConvertWebm(AudioData input, CancellationToken cancellationToken, IPerformanceMetricsTracker audioConvPerf)
+    private async Task<AudioData> ConvertWithMediaFoundationReader(AudioData input, IPerformanceMetricsTracker audioConvPerf, CancellationToken cancellationToken)
     {
         var tmp = Path.GetTempFileName();
         await using var f = File.OpenWrite(tmp);
