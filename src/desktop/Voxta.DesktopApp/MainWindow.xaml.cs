@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 using System.Windows;
-using System.Diagnostics;
-using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows.Input;
@@ -11,36 +10,20 @@ namespace Voxta.DesktopApp;
 
 public partial class MainWindow
 {
-    private readonly Process? _process;
-
     public MainWindow()
     {
         InitializeComponent();
 
         Closing += MainWindow_FormClosing;
+        KeyUp += MainWindow_KeyUp;
 
         ConsoleControl.IsInputEnabled = false;
         ConsoleControl.FocusVisualStyle = null;
 
-        var webServerPath = "Voxta.Server.exe";
-        var webServerWorkingDirectoryPath = "";
-        #if(DEBUG)
-        if (!File.Exists(webServerPath))
-        {
-            webServerWorkingDirectoryPath = Path.GetFullPath(@"..\..\..\..\..\..\server\Voxta.Server");
-            webServerPath = Path.Combine(webServerWorkingDirectoryPath, @"bin\Debug\net7.0\win-x64\Voxta.Server.exe");
-        }
-        #endif
-        if (!File.Exists(webServerPath)) throw new FileNotFoundException(webServerPath);
-        var processStartInfo = new ProcessStartInfo(webServerPath)
-        {
-            WorkingDirectory = webServerWorkingDirectoryPath
-        };
-        ConsoleControl.StartProcess(processStartInfo);
-        _process = ConsoleControl.ProcessInterface.Process;
-        if (_process != null) _process.Exited += WebServer_Exited;
-
-        KeyUp += MainWindow_KeyUp;
+        ConsoleControl.StartProcess(WebServerProcess.CreateProcessStartInfo());
+        var process = ConsoleControl.ProcessInterface.Process;
+        WebServerProcess.Attach(process);
+        if (process != null) process.Exited += WebServer_Exited;
 
         #pragma warning disable CS4014
         InitializeAsync();
@@ -91,11 +74,7 @@ public partial class MainWindow
 
     private void MainWindow_FormClosing(object? sender, CancelEventArgs cancelEventArgs)
     {
-        if (_process is { HasExited: false }) try { _process.CloseMainWindow(); } catch { /* ignored */ }
-        if (_process is { HasExited: false }) try { _process.WaitForExit(1000); } catch { /* ignored */ }
-        if (_process is { HasExited: false }) try { _process.Kill(); } catch { /* ignored */ }
-        try { _process?.Close(); } catch { /* ignored */ }
-        _process?.Dispose();
+        WebServerProcess.StopWebServer();
     }
 
     private void WebServer_Exited(object? sender, EventArgs e)
@@ -192,8 +171,8 @@ public partial class MainWindow
             attempts++;
             await Task.Delay(millisecondsDelay);
         }
-
-        throw new InvalidOperationException("Server is not ready");
+        
+        MessageBox.Show("Failed to start the server. Inspect the console output for more information.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private void WebView_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
