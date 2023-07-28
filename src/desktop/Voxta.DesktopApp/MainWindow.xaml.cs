@@ -8,11 +8,24 @@ namespace Voxta.DesktopApp;
 
 public partial class MainWindow
 {
+    private bool _exiting;
+    
     public MainWindow()
     {
         InitializeComponent();
 
-        Closing += (_, _) => WebServerProcess.StopWebServer();
+        Closing += (_, e) =>
+        {
+            e.Cancel = true;
+            if(_exiting) return;
+            _exiting = true;
+            SwitchToTerminal();
+            new Thread(() =>
+            {
+                WebServerProcess.StopWebServer();
+                Dispatcher.Invoke(Application.Current.Shutdown);
+            }).Start();
+        };
         AppDomain.CurrentDomain.ProcessExit += (_, _) => WebServerProcess.StopWebServer();
         KeyUp += MainWindow_KeyUp;
 

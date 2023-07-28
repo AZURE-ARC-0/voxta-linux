@@ -52,7 +52,7 @@ public static class WebServerProcess
             if (_process is { HasExited: false })
             {
                 SendExitSignal();
-                _process.WaitForExit(10000);
+                _process.WaitForExit(30000);
                 _process.Kill();
             }
             _process.Close();
@@ -92,17 +92,24 @@ public static class WebServerProcess
     }
     
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool GenerateConsoleCtrlEvent(ConsoleCtrlEvent eEvent, int dwProcessGroupId);
-
+    static extern bool AttachConsole(uint dwProcessId);
+    [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+    static extern bool FreeConsole();
+    [DllImport("kernel32.dll")]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private enum ConsoleCtrlEvent : uint
-    {
-        CTRL_C_EVENT = 0,
-    }
+    static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate? HandlerRoutine, bool Add);
+    delegate bool ConsoleCtrlDelegate(uint dwCtrlType);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool GenerateConsoleCtrlEvent(uint dwCtrlEvent, uint dwProcessGroupId);
 
     private static void SendExitSignal()
     {
         if (_process == null || _process.HasExited) return;
-        GenerateConsoleCtrlEvent(ConsoleCtrlEvent.CTRL_C_EVENT, _process.Id);
+        if (!AttachConsole((uint)_process.Id)) return;
+        SetConsoleCtrlHandler(null, true);
+        GenerateConsoleCtrlEvent(0, 0);
+        FreeConsole();
+        SetConsoleCtrlHandler(null, false);
     }
 }
