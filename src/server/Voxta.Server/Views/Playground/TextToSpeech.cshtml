@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Playground - Text To Speech";
+}
+
+<div class="container">
+    <h1>Text To Speech Playground</h1>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Test Speech</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-2">
+                <label for="speechTestService">Service</label>
+                <select id="speechTestService" class="form-select">
+                    <option value="NovelAI">NovelAI</option>
+                </select>
+                <div class="form-text">Only NovelAI is currently available.</div>
+            </div>
+            <div class="mb-2">
+                <label for="speechTestVoice">Voice</label>
+                <select id="speechTestVoice" class="form-select">
+                    <option value="Ligeia">Ligeia</option>
+                    <option value="Aini">Aini</option>
+                    <option value="Aulon">Aulon</option>
+                </select>
+                <div class="form-text">Only a subset of voices are displayed.</div>
+            </div>
+            <div class="mb-2">
+                <label for="speechTestCulture">Culture</label>
+                <select id="speechTestCulture" class="form-select">
+                    <option value="en-US">en-US</option>
+                </select>
+                <div class="form-text">Only a subset of voices are displayed.</div>
+            </div>
+            <div class="mb-2">
+                <label for="speechTestText">Test speech</label>
+                <input type="text" id="speechTestText" value="I am Voxta, your AI companion." class="form-control"/>
+                <div class="form-text">Save your changes before testing.</div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <button class="btn btn-secondary" id="speechTestButton"><i class="bi bi-play"></i> Play speech</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let audio = null;
+    document.getElementById("speechTestButton").addEventListener("click", ev => {
+        if (audio) {
+            audio.pause();
+            audio = null;
+        }
+        const service = document.getElementById("speechTestService").value;
+        const voice = document.getElementById("speechTestVoice").value;
+        const text = document.getElementById("speechTestText").value;
+        const culture = document.getElementById("speechTestCulture").value;
+        if (text.length === 0) { return; }
+        audio = new Audio(`/tts/services/${service}/speak?culture=${encodeURIComponent(culture)}&voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(text)}`);
+        audio.addEventListener("error", ev => {
+            alert("An error occurred while playing the speech: " + ev.message);
+        });
+        audio.play();
+    });
+</script>

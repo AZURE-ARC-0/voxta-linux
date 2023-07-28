@@ -34,6 +34,7 @@ public class NovelAITextGenClient : ITextGenService
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
+    // TODO: Support kayra-v1
 
     public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {

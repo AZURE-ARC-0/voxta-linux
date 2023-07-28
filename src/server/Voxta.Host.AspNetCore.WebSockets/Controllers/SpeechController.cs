@@ -87,6 +87,31 @@ public class SpeechController : ControllerBase
         Response.ContentType = audioConverter.ContentType;
         await Response.SendFileAsync(file, cancellationToken: cancellationToken);
     }
+    
+    [HttpGet("/tts/services/{service}/speak")]
+    public async Task Speak(
+        [FromRoute] string service,
+        [FromQuery] string culture,
+        [FromQuery] string voice,
+        [FromQuery] string text,
+        [FromServices] IServiceFactory<ITextToSpeechService> speechGenFactory,
+        [FromServices] IAudioConverter audioConverter,
+        CancellationToken cancellationToken
+    )
+    {
+        var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(service), service, Array.Empty<string>(), culture, cancellationToken);
+        var speechRequest = new SpeechRequest
+        {
+            Service = service,
+            Voice = voice,
+            Culture = culture,
+            Text = text,
+            ContentType = "audio/webm",
+        };
+        ISpeechTunnel speechTunnel = new ConversionSpeechTunnel(new HttpResponseSpeechTunnel(Response), audioConverter);
+        audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
+        await textToSpeech.GenerateSpeechAsync(speechRequest, speechTunnel, cancellationToken);
+    }
 
     [HttpGet("/tts/services/{service}/voices")]
     public async Task<VoiceInfo[]> GetVoices(
