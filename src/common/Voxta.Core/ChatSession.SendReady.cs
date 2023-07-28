@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Model;
+﻿using System.Text.RegularExpressions;
+using Voxta.Abstractions.Model;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
 
@@ -6,6 +7,8 @@ namespace Voxta.Core;
 
 public partial class ChatSession
 {
+    private static readonly string[] SupportedExtensions = { ".m4a", ".wav", ".mp3", ".webm" };
+    
     public void SendReady()
     {
         Enqueue(SendReadyAsync);
@@ -30,20 +33,7 @@ public partial class ChatSession
                     thinkingSpeechUrls.Add(thinkingSpeechUrl);
             }
         }
-
-        #warning This should be moved to a separate method.
-        var supportedExtensions = new[] { ".m4a", ".wav", ".mp3", ".webm" };
-        if (Directory.Exists(@"Data\Audio\ThinkingSpeech\Shared"))
-        {
-            foreach (var file in Directory.GetFiles(@"Data\Audio\ThinkingSpeech\Shared"))
-            {
-                if (!supportedExtensions.Contains(Path.GetExtension(file).ToLower())) continue;
-                var thinkingSpeechId = Crypto.CreateSha1Hash($"{file}");
-                var thinkingSpeechUrl = await _speechGenerator.LoadSpeechAsync(file, thinkingSpeechId, true, cancellationToken);
-                if (thinkingSpeechUrl != null)
-                    thinkingSpeechUrls.Add(thinkingSpeechUrl);
-            }
-        }
+        await LoadThinkingSpeechFolder(@"Data\Audio\ThinkingSpeech\Shared", thinkingSpeechUrls, cancellationToken);
 
         await _tunnel.SendAsync(new ServerReadyMessage
         {
@@ -65,6 +55,21 @@ public partial class ChatSession
             _chatSessionData.Messages.Add(reply);
             _logger.LogInformation("Sending first message: {Message}", reply.Text);
             await SendReusableReplyWithSpeechAsync(reply.Text, cancellationToken);
+        }
+    }
+
+    private async Task LoadThinkingSpeechFolder(string folder, ICollection<string> thinkingSpeechUrls, CancellationToken cancellationToken)
+    {
+        if (!Directory.Exists(folder))
+            return;
+
+        foreach (var file in Directory.GetFiles(folder))
+        {
+            if (!SupportedExtensions.Contains(Path.GetExtension(file).ToLower())) continue;
+            var thinkingSpeechId = Crypto.CreateSha1Hash($"{file}");
+            var thinkingSpeechUrl = await _speechGenerator.LoadSpeechAsync(file, thinkingSpeechId, true, cancellationToken);
+            if (thinkingSpeechUrl != null)
+                thinkingSpeechUrls.Add(thinkingSpeechUrl);
         }
     }
 }
