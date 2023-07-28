@@ -1,10 +1,14 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace Voxta.DesktopApp;
 
 public static class WebServerProcess
 {
+    public const string BaseUrl = "http://127.0.0.1:5384";
+    
     private static Process? _process;
     
     public static ProcessStartInfo CreateProcessStartInfo()
@@ -40,45 +44,85 @@ public static class WebServerProcess
 
     public static void StopWebServer()
     {
-        if (_process is { HasExited: false })
-            try
-            {
-                _process.CloseMainWindow();
-            }
-            catch
-            {
-                /* ignored */
-            }
-
-        if (_process is { HasExited: false })
-            try
-            {
-                _process.WaitForExit(1000);
-            }
-            catch
-            {
-                /* ignored */
-            }
-
-        if (_process is { HasExited: false })
-            try
-            {
-                _process.Kill();
-            }
-            catch
-            {
-                /* ignored */
-            }
-
         try
         {
-            _process?.Close();
+            if (_process is { HasExited: false })
+                try
+                {
+                    SendExitSignal();
+                }
+                catch
+                {
+                    /* ignored */
+                }
+
+            if (_process is { HasExited: false })
+                try
+                {
+                    _process.WaitForExit(10000);
+                }
+                catch
+                {
+                    /* ignored */
+                }
+
+            if (_process is { HasExited: false })
+                try
+                {
+                    _process.Kill();
+                }
+                catch
+                {
+                    /* ignored */
+                }
+
+            try
+            {
+                _process?.Close();
+            }
+            catch
+            {
+                /* ignored */
+            }
+
+            _process?.Dispose();
         }
-        catch
+        catch (ObjectDisposedException)
         {
             /* ignored */
         }
+    }
 
-        _process?.Dispose();
+    public static async Task<bool> WaitForServerReady(string url = "http://127.0.0.1:5384/ping", int millisecondsDelay = 500, int maxAttempts = 20)
+    {
+        if (_process == null || _process.HasExited) return false;
+        
+        var client = new HttpClient();
+        var attempts = 0;
+        while (attempts < maxAttempts)
+        {
+            try
+            {
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                    return true;
+            }
+            catch
+            {
+                // Ignore exceptions, server is not ready
+            }
+
+            attempts++;
+            await Task.Delay(millisecondsDelay);
+        }
+
+        return false;
+    }
+    
+    private static void SendExitSignal()
+    {
+        if (_process == null || _process.HasExited) return;
+        var client = new HttpClient();
+        client.Send(new HttpRequestMessage(HttpMethod.Post, "/admin/shutdown") { Content = JsonContent.Create(new { }) });
     }
 }
