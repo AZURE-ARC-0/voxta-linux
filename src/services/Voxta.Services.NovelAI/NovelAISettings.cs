@@ -9,5 +9,19 @@ public class NovelAISettings : SettingsBase
 
     public required string Token { get; set; }
     public string Model { get; set; } = DefaultModel;
+    
+    public string[] ThinkingSpeech { get; set; } = {
+        "m",
+        "uh",
+        "..",
+        "...",
+        "mmh",
+        "hum",
+        "huh",
+        "!!",
+        "??",
+        "o",
+    };
+    
     public NovelAIParameters? Parameters { get; set; }
 }

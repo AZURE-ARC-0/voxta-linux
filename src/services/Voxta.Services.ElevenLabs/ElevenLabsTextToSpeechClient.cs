@@ -22,6 +22,9 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly HttpClient _httpClient;
     private string _culture = "en-US";
+    private string _model = "eleven_multilingual_v1";
+    private ElevenLabsParameters? _parameters;
+    private string[]? _thinkingSpeech;
 
     public ElevenLabsTextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
     {
@@ -40,6 +43,9 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         _httpClient.BaseAddress = new Uri("https://api.elevenlabs.io");
         _httpClient.DefaultRequestHeaders.Add("xi-api-key", Crypto.DecryptString(settings.ApiKey));
         _culture = culture;
+        _model = settings.Model;
+        _parameters = settings.Parameters ?? new ElevenLabsParameters();
+        _thinkingSpeech = settings.ThinkingSpeech;
         return true;
     }
 
@@ -47,7 +53,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
 
     public string[] GetThinkingSpeech()
     {
-        return Array.Empty<string>();
+        return _thinkingSpeech ?? Array.Empty<string>();
     }
 
     public async Task GenerateSpeechAsync(SpeechRequest speechRequest, ISpeechTunnel tunnel, CancellationToken cancellationToken)
@@ -56,12 +62,8 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         var body = new
         {
             text = speechRequest.Text,
-            model_id = _culture == "en-US" ? "eleven_monolingual_v1" : "eleven_multilingual_v1",
-            voice_settings = new
-            {
-                stability = 0.45,
-                similarity_boost = 0.75,
-            }
+            model_id = _culture == "en-US" ? _model : "eleven_multilingual_v1",
+            voice_settings = _parameters
         };
         var ttsPerf = _performanceMetrics.Start("ElevenLabs.TextToSpeech");
         var request = new HttpRequestMessage(HttpMethod.Post, $"/v1/text-to-speech/{voice}")

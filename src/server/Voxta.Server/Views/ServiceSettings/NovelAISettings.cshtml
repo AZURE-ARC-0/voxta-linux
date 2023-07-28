@@ -1,0 +1,100 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model NovelAISettingsViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Settings - NovelAI";
+}
+
+@section head {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.css" integrity="sha512-brXxIa/fpMfluh8HUWyrNssKy/H0oRzA0HhmipgfVwbXPamMUTZn1jEsvoGGwJYCRpSx4idujdul4vFwWgPROA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/styles/jsoneditor-dark.css" asp-append-version="true" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor-minimalist.js" integrity="sha512-H0X4c02ARmY4wCJ2CzRFfKWnB6ZrLFqsD9JYB3ljTOCtjSJB63Nfq/GUumYW3NMQRX3R2B8BH56DAywT4tQv6w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+}
+
+<div class="container">
+    <h1>NovelAI Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>Login to <a href="https://novelai.net/" target="_blank">novelai.net</a>, and open the Developer Console (F12 or CTRL+Shift+I). Then open the Console tab and paste <code>console.log(JSON.parse(localStorage.getItem('session')).auth_token)</code>. A code should show up starting with `ey...`. This is your Token.</p>
+        </div>
+    </div>
+    
+    <form id="configureForm" method="post" asp-action="PostNovelAISettings">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>General Configuration</h2>
+            </div>
+            <div class="card-body">
+                <div class="form-check mb-3">
+                    <input type="checkbox" asp-for="Enabled" class="form-check-input"/>
+                    <label asp-for="Enabled">Enabled</label>
+                    <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
+                    <span asp-validation-for="Enabled" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="Token">Token</label>
+                    <input asp-for="Token" class="form-control"/>
+                    <span asp-validation-for="Token" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Text Configuration</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Model">Model</label>
+                    <input asp-for="Model" class="form-control"/>
+                    <span asp-validation-for="Model" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Parameters">Text generation parameters</label>
+                    <input type="hidden" asp-for="Parameters" class="form-control"/>
+                    <div id="jsoneditor" class="jsoneditor" style="width: 100%; height: 400px;"></div>
+                </div>
+                <div class="form-check">
+                    <input asp-for="UseDefaults" type="checkbox" class="form-check-input"/>
+                    <label asp-for="UseDefaults">Use default parameters</label>
+                    <div class="form-text">Will ignore any changes you make on the parameters and use the default values instead.</div>
+                    <span asp-validation-for="UseDefaults" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Speech Configuration</h2>
+            </div>
+            <div class="card-body">
+                <div>
+                    <label asp-for="ThinkingSpeech">Thinking speech</label>
+                    <textarea rows="6" asp-for="ThinkingSpeech" class="form-control"></textarea>
+                    <div class="form-text">Those are generated sounds while the AI thinks and speech gets generated. One per line.</div>
+                    <span asp-validation-for="ThinkingSpeech" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+        <div class="text-danger mt-3">
+            @Html.ValidationSummary(false)
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        initJsonEditor(document.getElementById("configureForm"), document.getElementById("Parameters"), document.getElementById("UseDefaults"));
+    });
+</script>
+

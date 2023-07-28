@@ -1,8 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model NovelAISettingsViewModel
+@model ElevenLabsSettingsViewModel
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings - NovelAI";
+    ViewBag.Title = "Settings - ElevenLabs";
 }
 
 @section head {
@@ -12,18 +12,18 @@
 }
 
 <div class="container">
-    <h1>NovelAI Settings</h1>
+    <h1>ElevenLabs Settings</h1>
     
     <div class="card mb-3">
         <div class="card-header">
             <h2>Help</h2>
         </div>
         <div class="card-body">
-            <p>Login to <a href="https://novelai.net/" target="_blank">novelai.net</a>, and open the Developer Console (F12 or CTRL+Shift+I). Then open the Console tab and paste <code>console.log(JSON.parse(localStorage.getItem('session')).auth_token)</code>. A code should show up starting with `ey...`. This is your Token.</p>
+            <p>Go to <a href="https://elevenlabs.io/subscription" target="_blank">elevenlabs.io</a>, click on your profile icon and select Profile. You'll find the API Key there.</p>
         </div>
     </div>
     
-    <form id="configureForm" method="post" asp-action="PostNovelAISettings">
+    <form id="configureForm" method="post" asp-action="PostElevenLabsSettings">
         <div class="card mb-3">
             <div class="card-header">
                 <h2>Configuration</h2>
@@ -35,25 +35,44 @@
                     <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
                     <span asp-validation-for="Enabled" class="text-danger"></span>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="Token">Token</label>
-                    <input asp-for="Token" class="form-control"/>
-                    <span asp-validation-for="Token" class="text-danger"></span>
+                <div>
+                    <label asp-for="ApiKey">API key</label>
+                    <input asp-for="ApiKey" class="form-control"/>
+                    <span asp-validation-for="ApiKey" class="text-danger"></span>
                 </div>
-                <div class="mb-3">
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Speech Configuration</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
                     <label asp-for="Model">Model</label>
-                    <input asp-for="Model" class="form-control"/>
+                    <select asp-for="Model" class="form-control">
+                        <option value="eleven_monolingual_v1">Monolingual v1</option>
+                        <option value="eleven_multilingual_v1">Multilingual v1</option>
+                    </select>
+                    <div class="form-text">The multilingual model is used when the culture is not en-US.</div>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
+                <div>
+                    <label asp-for="ThinkingSpeech">Thinking speech</label>
+                    <textarea rows="6" asp-for="ThinkingSpeech" class="form-control"></textarea>
+                    <div class="form-text">Those are generated sounds while the AI thinks and speech gets generated. One per line.</div>
+                    <span asp-validation-for="ThinkingSpeech" class="text-danger"></span>
+                </div>
                 <div class="mb-3">
-                    <label asp-for="Parameters">Text generation parameters</label>
+                    <label asp-for="Parameters">Voice settings</label>
                     <input type="hidden" asp-for="Parameters" class="form-control"/>
-                    <div id="jsoneditor" class="jsoneditor" style="width: 100%; height: 400px;"></div>
+                    <div id="jsoneditor" class="jsoneditor" style="width: 100%; height: 80px;"></div>
+                    <div class="form-text"><a href="https://docs.elevenlabs.io/speech-synthesis/voice-settings" target="_blank">Voice Settings Documentation</a></div>
                 </div>
                 <div class="form-check">
                     <input asp-for="UseDefaults" type="checkbox" class="form-check-input"/>
                     <label asp-for="UseDefaults">Use default parameters</label>
-                    <div class="form-text">Will ignore any changes you make on the parameters and use the default values instead.</div>
+                    <div class="form-text">Will ignore any changes you make on the voice settings and use the default values instead.</div>
                     <span asp-validation-for="UseDefaults" class="text-danger"></span>
                 </div>
             </div>

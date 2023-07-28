@@ -19,6 +19,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
     private readonly ILogger<NovelAITextToSpeechClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private string[]? _thinkingSpeech;
 
     public NovelAITextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
     {
@@ -36,6 +37,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         if (string.IsNullOrEmpty(settings.Token)) return false;
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
+        _thinkingSpeech = settings.ThinkingSpeech;
         return true;
     }
 
@@ -43,19 +45,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
 
     public string[] GetThinkingSpeech()
     {
-        return new[]
-        {
-            "m",
-            "uh",
-            "..",
-            "...",
-            "mmh",
-            "hum",
-            "huh",
-            "!!",
-            "??",
-            "o",
-        };
+        return _thinkingSpeech ?? Array.Empty<string>();
     }
 
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
