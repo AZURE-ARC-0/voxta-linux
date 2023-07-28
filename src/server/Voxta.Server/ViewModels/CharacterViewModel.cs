@@ -6,6 +6,7 @@ public class CharacterViewModel
 {
     public required Character Character { get; init; }
     public required bool PrerequisiteNSFW { get; set; }
+    public required bool PrerequisiteGPT3 { get; set; }
 }
 
 public class CharacterViewModelWithOptions : CharacterViewModel

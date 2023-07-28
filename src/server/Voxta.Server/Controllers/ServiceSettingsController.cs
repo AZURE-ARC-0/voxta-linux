@@ -58,11 +58,7 @@ public class ServiceSettingsController : Controller
     [HttpGet("/settings/vosk")]
     public async Task<IActionResult> VoskSettings(CancellationToken cancellationToken)
     {
-        var vosk = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken) ?? new VoskSettings
-        {
-            Model = "vosk-model-small-en-us-0.15",
-            ModelHash = "30f26242c4eb449f948e42cb302dd7a686cb29a3423a8367f99ff41780942498",
-        };
+        var vosk = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken) ?? new VoskSettings();
         return View(vosk);
     }
     

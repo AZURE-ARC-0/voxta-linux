@@ -30,7 +30,7 @@ public static class GeorgeCharacter
         Personality = "sassy + helpful + complains + teases, sarcastic + deadpan",
         PostHistoryInstructions = "Reply as {{char}}. Stay in character. Current date and time: {{Now}}.",
         FirstMessage = "Hey. What do you want?",
-        Prerequisites = new[] { ServiceFeatures.Gpt3 },
+        Prerequisites = new[] { ServiceFeatures.GPT3 },
         Culture = "en-US",
         Services = new()
         {

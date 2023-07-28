@@ -10,7 +10,7 @@ namespace Voxta.Services.OpenAI;
 public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 {
     public string ServiceName => OpenAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.Gpt3 };
+    public string[] Features => new[] { ServiceFeatures.GPT3 };
     
     private readonly ITokenizer _tokenizer;
     private readonly Sanitizer _sanitizer;

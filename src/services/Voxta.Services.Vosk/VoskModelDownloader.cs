@@ -1,14 +1,13 @@
 ﻿using System.IO.Compression;
 using System.Security;
 using System.Security.Cryptography;
-using Voxta.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Voxta.Services.Vosk;
 
 public interface IVoskModelDownloader
 {
-    Task<global::Vosk.Model> AcquireModelAsync(CancellationToken cancellationToken);
+    Task<global::Vosk.Model> AcquireModelAsync(string model, string? modelZipHash, CancellationToken cancellationToken1);
 }
 
 public class VoskModelDownloader : IVoskModelDownloader
@@ -16,20 +15,18 @@ public class VoskModelDownloader : IVoskModelDownloader
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
     
     private readonly ILogger<VoskModelDownloader> _logger;
-    private readonly ISettingsRepository _settingsRepository;
 
-    public VoskModelDownloader(ILogger<VoskModelDownloader> logger, ISettingsRepository settingsRepository)
+    public VoskModelDownloader(ILogger<VoskModelDownloader> logger)
     {
         _logger = logger;
-        _settingsRepository = settingsRepository;
     }
     
-    public async Task<global::Vosk.Model> AcquireModelAsync(CancellationToken cancellationToken)
+    public async Task<global::Vosk.Model> AcquireModelAsync(string model, string? modelZipHash, CancellationToken cancellationToken)
     {
         await Semaphore.WaitAsync(cancellationToken);
         try
         {
-            return await AcquireModelInternalAsync(cancellationToken);
+            return await AcquireModelInternalAsync(model, modelZipHash, cancellationToken);
         }
         finally
         {
@@ -37,15 +34,10 @@ public class VoskModelDownloader : IVoskModelDownloader
         }
     }
 
-    private async Task<global::Vosk.Model> AcquireModelInternalAsync(CancellationToken cancellationToken)
+    private async Task<global::Vosk.Model> AcquireModelInternalAsync(string model, string? modelZipHash, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
-        if (settings == null)
-            throw new VoskException("There is no Vosk settings in the profile");
         var modelsPath = Path.GetFullPath("Models/Vosk");
-        var modelName = settings.Model;
-        var modelZipHash = settings.ModelHash;
-        var modelPath = Path.Combine(modelsPath, modelName);
+        var modelPath = Path.Combine(modelsPath, model);
         
         if (Directory.Exists(modelPath))
         {
@@ -53,7 +45,7 @@ public class VoskModelDownloader : IVoskModelDownloader
             return new global::Vosk.Model(modelPath);
         }
         
-        var fileUrl = $"https://alphacephei.com/vosk/models/{modelName}.zip";
+        var fileUrl = $"https://alphacephei.com/vosk/models/{model}.zip";
 
         _logger.LogInformation("Downloading Vosk model from {FileUrl}...", fileUrl);
         using var httpClient = new HttpClient();

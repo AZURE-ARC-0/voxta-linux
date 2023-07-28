@@ -51,10 +51,12 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
+        if (string.IsNullOrEmpty(settings.Model)) return false;
+        if (!settings.Model.Contains(culture, StringComparison.InvariantCultureIgnoreCase)) return false;
         if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         await Semaphore.WaitAsync(cancellationToken);
         if (_disposed) return false;
-        var model = await _modelDownloader.AcquireModelAsync(cancellationToken);
+        var model = await _modelDownloader.AcquireModelAsync(settings.Model, settings.ModelHash, cancellationToken);
         _recognizer = new VoskRecognizer(model, _sampleRate);
         _recognizer.SetWords(true);
         _recordingService.DataAvailable += DataAvailable;

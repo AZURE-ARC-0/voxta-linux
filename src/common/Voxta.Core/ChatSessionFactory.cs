@@ -60,7 +60,7 @@ public class ChatSessionFactory
             var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
             var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && profile.SpeechToText.Services.Any();
 
-            var prerequisites = startChatMessage.Prerequisites ?? Array.Empty<string>();
+            var prerequisites = startChatMessage.Prerequisites != null ? startChatMessage.Prerequisites.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) : Array.Empty<string>();
             textGen = await _textGenFactory.CreateAsync(profile.TextGen, startChatMessage.TextGenService, prerequisites, startChatMessage.Culture, cancellationToken);
             speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateAsync(profile.SpeechToText, startChatMessage.SttService ?? "", prerequisites, startChatMessage.Culture, cancellationToken) : null;
             actionInference = profile.ActionInference.Services.Any()

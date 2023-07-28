@@ -49,6 +49,8 @@ public class NovelAITextGenClient : ITextGenService
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Token)) return false;
+        if (!culture.StartsWith("en")) return false;
+        if (prerequisites.Contains(ServiceFeatures.GPT3)) return false;
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         _model = settings.Model;

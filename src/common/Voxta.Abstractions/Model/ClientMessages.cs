@@ -43,7 +43,7 @@ public class ClientStartChatMessage : ClientMessage
     public string? SystemPrompt { get; init; }
     public string? PostHistoryInstructions { get; init; }
 
-    public string[]? Prerequisites { get; set; }
+    public string? Prerequisites { get; set; }
     public string Culture { get; init; } = "en-US";
     public required string TextGenService { get; init; }
     public string? TtsService { get; init; }

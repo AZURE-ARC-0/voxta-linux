@@ -114,6 +114,7 @@ public sealed class UserConnection : IUserConnection
             SystemPrompt = character.SystemPrompt,
             PostHistoryInstructions = character.PostHistoryInstructions,
             Culture = character.Culture,
+            Prerequisites = character.Prerequisites != null ? string.Join(",", character.Prerequisites) : null,
             TextGenService = character.Services.TextGen.Service ?? "",
             TtsService = character.Services.SpeechGen.Service ?? "",
             TtsVoice = character.Services.SpeechGen.Voice ?? "",

@@ -34,6 +34,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
             if (success) return instance;
             if (instance.ServiceName == preferredService) throw new ServiceDisabledException();
         }
-        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service with name {preferredService}");
+
+        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service compatible with features {string.Join(", ", prerequisites)} and culture {culture}");
     }
 }
