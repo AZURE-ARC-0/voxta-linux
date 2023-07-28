@@ -42,7 +42,7 @@ canvas {
     text-align: center;
 }
 
-.prompt-box {
+#promptBox {
     position: fixed;
     bottom: 20px;
     width: 70%;
