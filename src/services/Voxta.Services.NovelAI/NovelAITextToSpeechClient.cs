@@ -7,6 +7,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
+using Voxta.Services.TextToSpeechUtils;
 
 namespace Voxta.Services.NovelAI;
 
@@ -19,12 +20,14 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
     private readonly ILogger<NovelAITextToSpeechClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private readonly ITextToSpeechPreprocessor _preprocessor;
     private string[]? _thinkingSpeech;
 
-    public NovelAITextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
+    public NovelAITextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
+        _preprocessor = preprocessor;
         _logger = loggerFactory.CreateLogger<NovelAITextToSpeechClient>();
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
@@ -75,7 +78,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
         var voice = GetVoice(speechRequest);
         var querystring = new Dictionary<string, string>
         {
-            ["text"] = speechRequest.Text,
+            ["text"] = _preprocessor.Preprocess(speechRequest.Text, speechRequest.Culture),
             ["voice"] = "-1",
             ["seed"] = voice,
             ["opus"] = "true",
