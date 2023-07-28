@@ -9,7 +9,7 @@ namespace Voxta.Services.OpenAI;
 public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceService
 {
     public string ServiceName => OpenAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
+    public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.Gpt3 };
     
     private readonly ITokenizer _tokenizer;
     private readonly IPerformanceMetrics _performanceMetrics;

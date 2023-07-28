@@ -21,7 +21,8 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
         {
             await _migrations.MigrateAsync();
             
-            await _charactersRepository.SaveCharacterAsync(VoxtaCharacter.Create());
+            await _charactersRepository.SaveCharacterAsync(CatherineCharacter.Create());
+            await _charactersRepository.SaveCharacterAsync(GeorgeCharacter.Create());
         }).Wait();
         
         return next;
