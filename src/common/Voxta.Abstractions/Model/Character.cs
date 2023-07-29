@@ -13,7 +13,7 @@ public class CharacterCard
     public required string Description { get; init; }
     public required string Personality { get; init; }
     public required string Scenario { get; init; }
-    public string? FirstMessage { get; init; }
+    public required string FirstMessage { get; init; }
     public string? MessageExamples { get; init; }
     public string? SystemPrompt { get; init; }
     public string? PostHistoryInstructions { get; init; }

@@ -165,6 +165,7 @@ public class DiagnosticsUtil
                         Description = "",
                         Personality = "",
                         Scenario = "This is a test",
+                        FirstMessage = "Beginning test.",
                     }
                 }, cancellationToken);
                 return "Response: " + result.Text;
@@ -231,6 +232,7 @@ public class DiagnosticsUtil
                         Description = "",
                         Personality = "",
                         Scenario = "This is a test",
+                        FirstMessage = "Beginning test."
                     },
                     Actions = actions
                 }, cancellationToken);
