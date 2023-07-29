@@ -9,6 +9,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
+using Voxta.Services.TextToSpeechUtils;
 
 namespace Voxta.Services.ElevenLabs;
 
@@ -20,16 +21,18 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
     private readonly ILogger<ElevenLabsTextToSpeechClient> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private readonly ITextToSpeechPreprocessor _preprocessor;
     private readonly HttpClient _httpClient;
     private string _culture = "en-US";
     private string _model = "eleven_multilingual_v1";
     private ElevenLabsParameters? _parameters;
     private string[]? _thinkingSpeech;
 
-    public ElevenLabsTextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
+    public ElevenLabsTextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
+        _preprocessor = preprocessor;
         _logger = loggerFactory.CreateLogger<ElevenLabsTextToSpeechClient>();
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
@@ -61,7 +64,7 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
         var voice = GetVoice(speechRequest);
         var body = new
         {
-            text = speechRequest.Text,
+            text = _preprocessor.Preprocess(speechRequest.Text, speechRequest.Culture),
             model_id = _culture == "en-US" ? _model : "eleven_multilingual_v1",
             voice_settings = _parameters
         };
