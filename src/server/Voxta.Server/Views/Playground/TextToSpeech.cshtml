@@ -16,6 +16,7 @@
                 <label for="speechTestService">Service</label>
                 <select id="speechTestService" class="form-select">
                     <option value="NovelAI">NovelAI</option>
+                    <option value="ElevenLabs">ElevenLabs</option>
                 </select>
                 <div class="form-text">Only NovelAI is currently available.</div>
             </div>
@@ -48,21 +49,46 @@
 </div>
 
 <script>
+    const service = document.getElementById("speechTestService");
+    const voice = document.getElementById("speechTestVoice");
+    const text = document.getElementById("speechTestText");
+    const culture = document.getElementById("speechTestCulture");
+    
     let audio = null;
+    
     document.getElementById("speechTestButton").addEventListener("click", ev => {
         if (audio) {
             audio.pause();
             audio = null;
         }
-        const service = document.getElementById("speechTestService").value;
-        const voice = document.getElementById("speechTestVoice").value;
-        const text = document.getElementById("speechTestText").value;
-        const culture = document.getElementById("speechTestCulture").value;
         if (text.length === 0) { return; }
-        audio = new Audio(`/tts/services/${service}/speak?culture=${encodeURIComponent(culture)}&voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(text)}`);
+        audio = new Audio(`/tts/services/${service.value}/speak?culture=${encodeURIComponent(culture.value)}&voice=${encodeURIComponent(voice.value)}&text=${encodeURIComponent(text.value)}`);
         audio.addEventListener("error", ev => {
             alert("An error occurred while playing the speech: " + ev.message);
         });
         audio.play();
+    });
+    
+    async function loadVoices() {
+        voice.innerHTML = "";
+        const response = await fetch('/tts/services/' + service.value + '/voices?culture=en-US');
+        const data = await response.json();
+        
+        voice.innerHTML = '';
+        
+        for (let item of data) {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.text = item.label;
+            voice.add(option);
+        }
+    }
+
+    document.getElementById("speechTestService").addEventListener("change", function() {
+        loadVoices();
+    });
+
+    window.addEventListener("load", function() {
+        loadVoices();
     });
 </script>

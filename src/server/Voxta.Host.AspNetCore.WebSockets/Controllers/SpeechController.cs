@@ -106,7 +106,7 @@ public class SpeechController : ControllerBase
             Voice = voice,
             Culture = culture,
             Text = text,
-            ContentType = "audio/webm",
+            ContentType = "audio/x-wav",
         };
         ISpeechTunnel speechTunnel = new ConversionSpeechTunnel(new HttpResponseSpeechTunnel(Response), audioConverter);
         audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
