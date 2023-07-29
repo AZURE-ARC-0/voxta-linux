@@ -50,7 +50,10 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label asp-for="Model">Model</label>
-                    <input asp-for="Model" class="form-control"/>
+                    <select asp-for="Model" class="form-select">
+                        <option value="clio-v1">Clio</option>
+                        <option value="kayra-v1">Kayra</option>
+                    </select>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
                 <div class="mb-3">

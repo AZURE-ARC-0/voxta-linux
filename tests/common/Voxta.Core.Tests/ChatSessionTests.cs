@@ -34,6 +34,7 @@ public class ChatSessionTests
                 Description = "",
                 Personality = "",
                 Scenario = "This is a test",
+                FirstMessage = "Ready.",
                 Services = null!
             },
             AudioPath = "/audio-path",

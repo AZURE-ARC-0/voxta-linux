@@ -4,193 +4,77 @@ using System.Text.Json.Serialization;
 namespace Voxta.Services.NovelAI;
 
 [Serializable]
-[SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
 public class NovelAIParameters
 {
     [JsonPropertyName("temperature")]
-    public double Temperature { get; set; } = 1.5;
+    public double Temperature { get; set; }
 
     [JsonPropertyName("max_length")]
-    public int MaxLength { get; set; } = 80;
+    public int MaxLength { get; set; }
 
     [JsonPropertyName("min_length")]
-    public int MinLength { get; set; } = 1;
+    public int MinLength { get; set; }
 
     [JsonPropertyName("top_k")]
-    public double TopK { get; set; } = 10;
+    public double TopK { get; set; }
 
     [JsonPropertyName("top_p")]
-    public double TopP { get; set; } = 0.75;
+    public double TopP { get; set; }
 
     [JsonPropertyName("top_a")]
-    public double TopA { get; set; } = 0.08;
+    public double TopA { get; set; }
 
     [JsonPropertyName("typical_p")]
-    public double TypicalP { get; set; } = 0.975;
+    public double TypicalP { get; set; }
 
     [JsonPropertyName("tail_free_sampling")]
-    public double TailFreeSampling { get; set; } = 0.967;
+    public double TailFreeSampling { get; set; }
 
     [JsonPropertyName("repetition_penalty")]
-    public double RepetitionPenalty { get; set; } = 2.25;
+    public double RepetitionPenalty { get; set; }
 
     [JsonPropertyName("repetition_penalty_frequency")]
-    public double RepetitionPenaltyFrequency { get; set; } = 0;
+    public double RepetitionPenaltyFrequency { get; set; }
 
     [JsonPropertyName("repetition_penalty_presence")]
-    public double RepetitionPenaltyPresence { get; set; } = 0.005;
+    public double RepetitionPenaltyPresence { get; set; }
 
     [JsonPropertyName("repetition_penalty_range")]
-    public int RepetitionPenaltyRange { get; set; } = 8192;
+    public int RepetitionPenaltyRange { get; set; }
 
     [JsonPropertyName("repetition_penalty_slope")]
-    public double RepetitionPenaltySlope { get; set; } = 0.09;
+    public double RepetitionPenaltySlope { get; set; }
 
     [JsonPropertyName("phrase_rep_pen")]
-    public string PhraseRepPen { get; set; } = "very_light";
+    public required string PhraseRepPen { get; set; }
 
     [JsonPropertyName("order")]
-    public int[] Order { get; set; } = { 1, 5, 0, 2, 3, 4 };
+    public required int[] Order { get; set; }
 
     [JsonPropertyName("repetition_penalty_whitelist")]
-    public int[] RepetitionPenaltyWhitelist { get; set; } = {
-        49256,
-        49264,
-        49231,
-        49287,
-        85,
-        380,
-        49216,
-        49211,
-        49215,
-        49220,
-        372,
-        335,
-        49223,
-        49255,
-        49399,
-        49262,
-        336,
-        333,
-        432,
-        363,
-        468,
-        492,
-        745,
-        401,
-        426,
-        623,
-        794,
-        1096,
-        2919,
-        2072,
-        7379,
-        1259,
-        2110,
-        620,
-        526,
-        487,
-        16562,
-        603,
-        805,
-        761,
-        2681,
-        942,
-        8917,
-        653,
-        3513,
-        506,
-        5301,
-        562,
-        5010,
-        614,
-        10942,
-        539,
-        2976,
-        462,
-        5189,
-        567,
-        2032,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        588,
-        803,
-        1040,
-        49209
-    };
+    public int[]? RepetitionPenaltyWhitelist { get; set; }
 
     [JsonPropertyName("bad_words_ids")]
-    public int[][] BadWordsIds { get; set; } = {
+    public int[][] BadWordsIds { get; set; } = Array.Empty<int[]>();
 
-        new[]
-        {
-            3
-        },
-        new[]
-        {
-            49356
-        },
-        new[]
-        {
-            1431
-        },
-        new[]
-        {
-            31715
-        },
-        new[]
-        {
-            34387
-        },
-        new[]
-        {
-            20765
-        },
-        new[]
-        {
-            30702
-        },
-        new[]
-        {
-            10691
-        },
-        new[]
-        {
-            49333
-        },
-        new[]
-        {
-            1266
-        },
-        new[]
-        {
-            19438
-        },
-        new[]
-        {
-            43145
-        },
-        new[]
-        {
-            26523
-        },
-        new[]
-        {
-            41471
-        },
-        new[]
-        {
-            2936
-        }
-    };
+    [JsonPropertyName("logit_bias_exp")]
+    public LogitBiasExp[]? LogitBiasExp { get; set; }
+}
+
+[Serializable]
+public class LogitBiasExp
+{
+    [JsonPropertyName("bias")]
+    public double Bias { get; set; }
+
+    [JsonPropertyName("ensure_sequence_finish")]
+    public bool EnsureSequenceFinish { get; set; }
+
+    [JsonPropertyName("generate_once")]
+    public bool GenerateOnce { get; set; }
+
+    [JsonPropertyName("sequence")]
+    public int[] Sequence { get; set; } = Array.Empty<int>();
 }
 
 [Serializable]

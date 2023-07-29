@@ -25,6 +25,7 @@ public class GenericPromptBuilderTests
                 Description = "some-description",
                 Personality = "some-personality",
                 Scenario = "some-scenario",
+                FirstMessage = "some-first-message",
             },
             Messages =
             {
@@ -57,6 +58,7 @@ public class GenericPromptBuilderTests
                 Description = "some-description",
                 Personality = "some-personality",
                 Scenario = "some-scenario",
+                FirstMessage = "some-first-message",
                 SystemPrompt = "some-system-prompt",
                 PostHistoryInstructions = "some-post-history-instructions",
                 MessageExamples = "Joe: Request\nJane: Response",
@@ -98,6 +100,7 @@ public class GenericPromptBuilderTests
                 Description = "some-description",
                 Personality = "some-personality",
                 Scenario = "some-scenario",
+                FirstMessage = "some-first-message",
                 SystemPrompt = "some-system-prompt",
                 PostHistoryInstructions = "some-post-history-instructions",
                 MessageExamples = "Joe: Request\nJane: Response",

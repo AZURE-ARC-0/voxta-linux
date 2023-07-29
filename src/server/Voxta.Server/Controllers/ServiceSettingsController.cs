@@ -201,7 +201,7 @@ public class ServiceSettingsController : Controller
             Enabled = novelai.Enabled,
             Model = novelai.Model,
             Token = !string.IsNullOrEmpty(novelai.Token) ? Crypto.DecryptString(novelai.Token) : "",
-            Parameters = JsonSerializer.Serialize(novelai.Parameters ?? new NovelAIParameters()),
+            Parameters = JsonSerializer.Serialize(novelai.Parameters ?? NovelAIPresets.DefaultForModel(novelai.Model)),
             ThinkingSpeech = string.Join('\n', novelai.ThinkingSpeech),
             UseDefaults = novelai.Parameters == null,
         };   
@@ -221,7 +221,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
             Token = string.IsNullOrEmpty(value.Token) ? "" : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? new NovelAIParameters(),
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? NovelAIPresets.DefaultForModel(value.Model),
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         });
         
