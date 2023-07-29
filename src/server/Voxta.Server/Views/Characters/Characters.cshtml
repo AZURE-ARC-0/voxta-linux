@@ -9,7 +9,7 @@
     
     <div class="card mb-3">
         <div class="card-header">
-            <h2>Existing Characters</h2>
+            <h2>Characters</h2>
         </div>
         <div class="card-body p-0">
             <table class="table mb-0">
@@ -18,7 +18,7 @@
                     <th>Name</th>
                     <th>Description</th>
                     <th>Requirements</th>
-                    <th colspan="3">Actions</th>
+                    <th></th>
                 </tr>
                 </thead>
 
@@ -27,14 +27,21 @@
                     {
                         <tr>
                             <td>
-                                @character.Name
-                            </td>
-                            <td>
-                                @character.Description
+                                @if (character.ReadOnly)
+                                {
+                                    <a class="btn btn-dark" href="/characters/@character.Id?edit=false" title="View">@character.Name</a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-dark" href="/characters/@character.Id?edit=true">@character.Name</a>
+                                }
                                 @if (character.ReadOnly)
                                 {
                                     <span class="badge badge-secondary">built-in</span>
                                 }
+                            </td>
+                            <td>
+                                @character.Description
                             </td>
                             <td>
                                 <span class="badge badge-secondary">@character.Culture</span>
@@ -43,27 +50,17 @@
                                     <span class="badge badge-dark">@prerequisite</span>
                                 }
                             </td>
-                            <td>
-                                @if (character.ReadOnly)
-                                {
-                                    <a class="btn btn-secondary" href="/characters/@character.Id?edit=false" title="View"><i class="bi bi-eye"></i></a>
-                                }
-                                else
-                                {
-                                    <a class="btn btn-primary" href="/characters/@character.Id?edit=true"><i class="bi bi-pencil"></i></a>
-                                }
-                            </td>
-                            <td>
-                                <a class="btn btn-secondary" href="/characters/new?from=@character.Id" title="Clone"><i class="bi bi-file-plus"></i></a>
-                            </td>
-                            <td>
-                                @if (!character.ReadOnly)
-                                {
-                                    <form action="/characters/delete" method="post">
-                                        <input type="hidden" name="charId" value="@character.Id"/>
-                                        <button type="submit" class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
-                                    </form>
-                                }
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    @if (!character.ReadOnly)
+                                    {
+                                        <form action="/characters/delete" method="post">
+                                            <input type="hidden" name="charId" value="@character.Id"/>
+                                            <button type="submit" class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                                        </form>
+                                    }
+                                    <a class="btn btn-secondary" href="/characters/new?from=@character.Id" title="Clone">Clone</a>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -90,7 +87,7 @@
 
                     <tr>
                         <td><span class="text-muted">Upload a Tavern V2 card</span></td>
-                        <td class="text-end">\
+                        <td class="text-end">
                             <p>If you have a V1 card, you can convert it <a href="https://malfoyslastname.github.io/chara-card-utils-web/" target="_blank">here</a>.</p>
                             <form action="/characters/import" enctype="multipart/form-data" method="post">
                                 <div class="mb-3">

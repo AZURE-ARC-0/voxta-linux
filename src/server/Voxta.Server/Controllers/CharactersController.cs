@@ -158,7 +158,7 @@ public class CharactersController : Controller
             PrerequisiteGPT3 = character.Prerequisites?.Contains(ServiceFeatures.GPT3) == true,
             TextGenServices = new[]
             {
-                new OptionViewModel { Name = "", Label = "Select automatically" },
+                new OptionViewModel("", "Select automatically"),
                 OptionViewModel.Create(OpenAIConstants.ServiceName),
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
                 OptionViewModel.Create(KoboldAIConstants.ServiceName),
@@ -167,12 +167,13 @@ public class CharactersController : Controller
             },
             TextToSpeechServices = new[]
             {
-                new OptionViewModel { Name = "", Label = "Select automatically" },
+                new OptionViewModel("", "Select automatically"),
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
                 OptionViewModel.Create(ElevenLabsConstants.ServiceName),
                 OptionViewModel.Create(AzureSpeechServiceConstants.ServiceName),
                 OptionViewModel.Create(FakesConstants.ServiceName),
             },
+            Cultures = CultureUtils.Bcp47LanguageTags.Select(c => new OptionViewModel(c.Name, c.Label)).ToArray(),
             Voices = voices,
         };
 

@@ -85,7 +85,7 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label asp-for="Character.Culture">Culture</label>
-                    <input asp-for="Character.Culture" class="form-control"/>
+                    <select asp-for="Character.Culture" asp-items="@(new SelectList(Model.Cultures, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
                     <div class="form-text">Affects which LLM, STT and TTS will be used for this character. Uses <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">BCP-47</a>.</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Culture)</small>
                 </div>
