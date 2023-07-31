@@ -1,8 +1,8 @@
-using Voxta.Abstractions.Model;
 using NUnit.Framework;
-using Voxta.Services.OpenSourceLargeLanguageModels;
+using Voxta.Abstractions.Model;
+using Voxta.Shared.LargeLanguageModelsUtils;
 
-namespace Voxta.Services.OpenAI.Tests;
+namespace Voxta.Shared.OpenSourceLargeLanguageModels.Tests;
 
 public class GenericPromptBuilderTests
 {

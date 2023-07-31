@@ -9,7 +9,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
-using Voxta.Services.TextToSpeechUtils;
+using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.ElevenLabs;
 

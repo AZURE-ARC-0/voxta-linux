@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\services\Voxta.Services.TextToSpeechUtils\Voxta.Services.TextToSpeechUtils.csproj" />
+      <ProjectReference Include="..\..\..\src\shared\Voxta.Shared.TextToSpeechUtils\Voxta.Shared.TextToSpeechUtils.csproj" />
     </ItemGroup>
 
 </Project>

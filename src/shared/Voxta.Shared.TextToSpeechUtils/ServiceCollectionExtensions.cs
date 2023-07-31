@@ -1,6 +1,6 @@
-﻿using Voxta.Services.TextToSpeechUtils;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Voxta.Shared.TextToSpeechUtils;
 
 public static class ServiceCollectionExtensions
 {

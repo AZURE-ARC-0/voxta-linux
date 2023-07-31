@@ -1,6 +1,7 @@
 ﻿using Voxta.Abstractions.DependencyInjection;
 using Voxta.Abstractions.Services;
 using Voxta.Services.NovelAI;
+using Voxta.Shared.TextToSpeechUtils;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

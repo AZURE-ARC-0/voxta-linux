@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using Humanizer;
 
-namespace Voxta.Services.TextToSpeechUtils;
+namespace Voxta.Shared.TextToSpeechUtils;
 
 public interface ITextToSpeechPreprocessor
 {

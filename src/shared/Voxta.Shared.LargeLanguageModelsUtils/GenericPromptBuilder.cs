@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Voxta.Abstractions.Model;
 
-namespace Voxta.Services.OpenSourceLargeLanguageModels;
+namespace Voxta.Shared.LargeLanguageModelsUtils;
 
 public class GenericPromptBuilder
 {

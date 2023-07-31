@@ -13,10 +13,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
-      <ProjectReference Include="..\..\common\Voxta.Common\Voxta.Common.csproj" />
-      <ProjectReference Include="..\Voxta.Services.OpenSourceLargeLanguageModels\Voxta.Services.OpenSourceLargeLanguageModels.csproj" />
-      <ProjectReference Include="..\Voxta.Services.TextToSpeechUtils\Voxta.Services.TextToSpeechUtils.csproj" />
+        <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
+        <ProjectReference Include="..\..\common\Voxta.Common\Voxta.Common.csproj" />
+        <ProjectReference Include="..\..\shared\Voxta.Shared.LargeLanguageModelsUtils\Voxta.Shared.LargeLanguageModelsUtils.csproj" />
+        <ProjectReference Include="..\..\shared\Voxta.Shared.TextToSpeechUtils\Voxta.Shared.TextToSpeechUtils.csproj" />
     </ItemGroup>
 
 </Project>

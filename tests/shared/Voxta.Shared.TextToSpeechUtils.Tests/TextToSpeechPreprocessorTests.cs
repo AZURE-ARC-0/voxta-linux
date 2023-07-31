@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Voxta.Services.TextToSpeechUtils.Tests;
+namespace Voxta.Shared.TextToSpeechUtils.Tests;
 
 public class TextToSpeechPreprocessorTests
 {
