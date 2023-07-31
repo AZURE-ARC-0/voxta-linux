@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using LiteDB;
 
 namespace Voxta.Abstractions.Model;
@@ -7,7 +8,18 @@ namespace Voxta.Abstractions.Model;
 public class ProfileSettings
 {
     public static readonly string SharedId = Guid.Empty.ToString();
-    
+
+    public ProfileSettings()
+    {
+    }
+
+    [SetsRequiredMembers]
+    public ProfileSettings(string name, ServicesList textGen)
+    {
+        Name = name;
+        TextGen = textGen;
+    }
+
     [BsonId] public string Id { get; init; } = SharedId;
     
     [MinLength(1)]

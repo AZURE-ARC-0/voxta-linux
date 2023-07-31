@@ -1,60 +1,14 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
+using Voxta.Common;
 
 namespace Voxta.Host.AspNetCore.WebSockets;
 
 public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
 {
-    private static readonly JsonSerializerOptions SerializeOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false,
-        Converters = { new BooleanStringJsonConverter(), new NullableGuidJsonConverter() }
-    };
-
-    private class BooleanStringJsonConverter : JsonConverter<bool>
-    {
-        public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.True:
-                    return true;
-                case JsonTokenType.False:
-                    return false;
-                case JsonTokenType.String:
-                    var stringValue = reader.GetString();
-                    return bool.TryParse(stringValue, out var value) && value;
-                default:
-                    throw new JsonException("Invalid boolean value");
-            }
-        }
-
-        public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString());
-        }
-    }
-
-    private class NullableGuidJsonConverter : JsonConverter<Guid?>
-    {
-        public override Guid? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            var stringValue = reader.GetString();
-            if (string.IsNullOrEmpty(stringValue)) return null;
-            return Guid.Parse(stringValue);
-        }
-
-        public override void Write(Utf8JsonWriter writer, Guid? value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString());
-        }
-    }
-    
     private readonly byte[] _buffer = new byte[1024 * 4];
     
     private readonly WebSocket _webSocket;
@@ -82,7 +36,7 @@ public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
         try
         {
             message.Seek(0, SeekOrigin.Begin);
-            return await JsonSerializer.DeserializeAsync<T>(message, SerializeOptions, cancellationToken);
+            return await JsonSerializer.DeserializeAsync<T>(message, VoxtaJsonSerializer.SerializeOptions, cancellationToken);
         }
         catch (JsonException exc)
         {
@@ -96,7 +50,7 @@ public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
         try
         {
             await _webSocket.SendAsync(
-                JsonSerializer.SerializeToUtf8Bytes<ServerMessage>(message, SerializeOptions),
+                JsonSerializer.SerializeToUtf8Bytes<ServerMessage>(message, VoxtaJsonSerializer.SerializeOptions),
                 WebSocketMessageType.Text,
                 true,
                 cancellationToken

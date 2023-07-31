@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<FakesTextGenClient>();
         services.AddTransient<FakesTextToSpeechClient>();
+        services.AddTransient<FakesActionInferenceClient>();
     }
     
     public static void RegisterFakes(this IServiceRegistry<ITextGenService> registry)

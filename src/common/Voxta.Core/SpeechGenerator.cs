@@ -26,16 +26,16 @@ public class SpeechGeneratorFactory
     
     public ISpeechGenerator Create(ITextToSpeechService? service, string? ttsVoice, string culture, string? audioPath, string[] acceptContentTypes, CancellationToken cancellationToken)
     {
-        if (service == null || string.IsNullOrEmpty(ttsVoice))
+        if (service == null)
             return new NoSpeechGenerator();
         
         var audioConverter = _sp.GetRequiredService<IAudioConverter>();
         audioConverter.SelectOutputContentType(acceptContentTypes, service.ContentType);
 
         if (audioPath == null)
-            return new RemoteSpeechGenerator(service.ServiceName, ttsVoice, culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
+            return new RemoteSpeechGenerator(service.ServiceName, ttsVoice ?? "", culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
 
-        return new LocalSpeechGenerator(service, ttsVoice, culture, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
+        return new LocalSpeechGenerator(service, ttsVoice ?? "", culture, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
     }
 }
 

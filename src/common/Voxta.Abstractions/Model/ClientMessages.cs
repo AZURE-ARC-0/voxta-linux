@@ -45,7 +45,7 @@ public class ClientStartChatMessage : ClientMessage
 
     public string? Prerequisites { get; set; }
     public string Culture { get; init; } = "en-US";
-    public required string TextGenService { get; init; }
+    public string? TextGenService { get; init; }
     public string? TtsService { get; init; }
     public string? TtsVoice { get; init; }
     public string[] AcceptedAudioContentTypes { get; set; } = { "audio/x-wav", "audio/mpeg" };

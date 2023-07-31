@@ -43,7 +43,7 @@ public partial class ChatSession
         
         _logger.LogInformation("Chat ready!");
 
-        if (_chatSessionData.Character.FirstMessage != null)
+        if (!string.IsNullOrEmpty(_chatSessionData.Character.FirstMessage))
         {
             var textData = new TextData
             {
