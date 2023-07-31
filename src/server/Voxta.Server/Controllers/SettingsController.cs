@@ -47,7 +47,7 @@ public class SettingsController : Controller
 
     private async Task<SettingsViewModel> GetSettingsViewModel(Func<Task<DiagnosticsResult>> getServices, CancellationToken cancellationToken)
     {
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? CreateDefaultProfile();
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? ProfileUtils.CreateDefaultProfile();
         var services = await getServices();
         var vm = new SettingsViewModel
         {
@@ -132,55 +132,6 @@ public class SettingsController : Controller
         return vm;
     }
 
-    private static ProfileSettings CreateDefaultProfile()
-    {
-        return new ProfileSettings
-        {
-            Name = "User",
-            TextGen =
-            {
-                Services = new[]
-                {
-                    OobaboogaConstants.ServiceName,
-                    KoboldAIConstants.ServiceName,
-                    NovelAIConstants.ServiceName,
-                    OpenAIConstants.ServiceName,
-                }
-            },
-            SpeechToText =
-            {
-                Services = new[]
-                {
-                    AzureSpeechServiceConstants.ServiceName,
-                    #if(WINDOWS)
-                    WindowsSpeechConstants.ServiceName,
-                    #endif
-                    VoskConstants.ServiceName,
-                }
-            },
-            TextToSpeech =
-            {
-                Services = new[]
-                {
-                    NovelAIConstants.ServiceName,
-                    ElevenLabsConstants.ServiceName,
-                    AzureSpeechServiceConstants.ServiceName,
-                    #if(WINDOWS)
-                    WindowsSpeechConstants.ServiceName,
-                    #endif
-                }
-            },
-            ActionInference =
-            {
-                Services = new[]
-                {
-                    OpenAIConstants.ServiceName,
-                    OobaboogaConstants.ServiceName
-                }
-            }
-        };
-    }
-
     [HttpPost("/settings/reorder")]
     public async Task<ActionResult> Reorder([FromForm] string type, [FromForm] string name, [FromForm] string direction)
     {
@@ -223,7 +174,7 @@ public class SettingsController : Controller
     [HttpGet("/settings/profile")]
     public async Task<IActionResult> ProfileSettings(CancellationToken cancellationToken)
     {
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? CreateDefaultProfile();
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? ProfileUtils.CreateDefaultProfile();
         var vm = new ProfileViewModel
         {
             Name = profile.Name,
@@ -241,7 +192,7 @@ public class SettingsController : Controller
             return View("ProfileSettings", value);
         }
         
-        var profile = await _profileRepository.GetProfileAsync(CancellationToken.None) ?? CreateDefaultProfile();
+        var profile = await _profileRepository.GetProfileAsync(CancellationToken.None) ?? ProfileUtils.CreateDefaultProfile();
 
         profile.Name = value.Name;
         profile.Description = value.Description;

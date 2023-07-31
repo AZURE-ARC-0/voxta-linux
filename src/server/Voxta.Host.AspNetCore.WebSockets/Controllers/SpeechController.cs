@@ -6,6 +6,7 @@ using Voxta.Abstractions.Services;
 using Voxta.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Abstractions.Exceptions;
 using Voxta.Common;
 
 namespace Voxta.Host.AspNetCore.WebSockets.Controllers;
@@ -131,7 +132,14 @@ public class SpeechController : ControllerBase
             };
         }
         // NOTE: There is no voices list implementation that require any prerequisites.
-        var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(service), service, Array.Empty<string>(), culture, cancellationToken);
-        return await textToSpeech.GetVoicesAsync(cancellationToken);
+        try
+        {
+            var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(service), service, Array.Empty<string>(), culture, cancellationToken);
+            return await textToSpeech.GetVoicesAsync(cancellationToken);
+        }
+        catch (ServiceDisabledException)
+        {
+            return Array.Empty<VoiceInfo>();
+        }
     }
 }

@@ -109,6 +109,18 @@ public class DiagnosticsUtil
             Features = Array.Empty<string>()
         };
 
+        if (profile == null)
+        {
+            return new DiagnosticsResult
+            {
+                Profile = profileResult,
+                ActionInferenceServices = Array.Empty<ServiceDiagnosticsResult>(),
+                TextGenServices = Array.Empty<ServiceDiagnosticsResult>(),
+                TextToSpeechServices = Array.Empty<ServiceDiagnosticsResult>(),
+                SpeechToTextServices = Array.Empty<ServiceDiagnosticsResult>(),
+            };
+        }
+
         var textGen = new[]
         {
             Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
