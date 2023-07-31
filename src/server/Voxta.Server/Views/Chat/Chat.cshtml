@@ -11,13 +11,15 @@
 
 <canvas id="audioVisualizer" class="voxta_transition" width="800" height="480"></canvas>
 <div id="splash" class="voxta_transition">
-    <p><b>Voxta Server</b></p>
+    <p><b>Hi <span id="username">user</span>,</b></p>
     <p>You can now launch your virtual companion app, or you can start chatting here.</p>
     <p>
-        <input id="selectCharacterButton" type="button" class="btn btn-secondary" value="Select a character"/>
+        <input id="selectCharacterButton" type="button" class="btn btn-secondary" value="Start a new conversation"/>
+        <input id="selectChatButton" type="button" class="btn btn-secondary" value="Continue a previous conversation"/>
     </p>
 </div>
 <div id="characterButtons" class="voxta_transition"></div>
+<div id="chatButtons" class="voxta_transition"></div>
 <div id="message" class="voxta_transition"></div>
 <div id="promptBox" class="voxta_transition">
     <input type="text" id="prompt" disabled="disabled" />

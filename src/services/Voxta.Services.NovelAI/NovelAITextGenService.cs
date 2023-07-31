@@ -57,10 +57,10 @@ public class NovelAITextGenService : ITextGenService
         return true;
     }
 
-    public async ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new NovelAIPromptBuilder();
-        var input = builder.BuildReplyPrompt(chatSessionData, includePostHistoryPrompt: false);
+        var input = builder.BuildReplyPrompt(chat, includePostHistoryPrompt: false);
         var parameters = Mapper.Map<NovelAIRequestBodyParameters>(_parameters);
 
         /*

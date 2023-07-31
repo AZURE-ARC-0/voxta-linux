@@ -34,13 +34,13 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         return base.InitializeAsync(prerequisites, culture, cancellationToken);
     }
 
-    public async ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new OpenAIPromptBuilder(_tokenizer);
         
         var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
 
-        var messages = builder.BuildReplyPrompt(chatSessionData, 4096);
+        var messages = builder.BuildReplyPrompt(chat, 4096);
 
         tokenizePerf.Pause();
 

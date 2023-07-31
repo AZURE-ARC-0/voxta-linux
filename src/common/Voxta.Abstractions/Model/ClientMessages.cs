@@ -3,6 +3,8 @@
 namespace Voxta.Abstractions.Model;
 
 [Serializable]
+[JsonDerivedType(typeof(ClientLoadCharactersListMessage), typeDiscriminator: "loadCharactersList")]
+[JsonDerivedType(typeof(ClientLoadChatsListMessage), typeDiscriminator: "loadChatsList")]
 [JsonDerivedType(typeof(ClientLoadCharacterMessage), typeDiscriminator: "loadCharacter")]
 [JsonDerivedType(typeof(ClientStartChatMessage), typeDiscriminator: "startChat")]
 [JsonDerivedType(typeof(ClientStopChatMessage), typeDiscriminator: "stopChat")]
@@ -19,6 +21,16 @@ public class ClientSendMessage : ClientMessage
     public required string Text { get; init; }
     public string? Context { get; init; }
     public string[]? Actions { get; init; }
+}
+
+[Serializable]
+public class ClientLoadCharactersListMessage : ClientMessage
+{
+}
+
+[Serializable]
+public class ClientLoadChatsListMessage : ClientMessage
+{
 }
 
 [Serializable]

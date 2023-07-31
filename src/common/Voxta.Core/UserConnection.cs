@@ -15,31 +15,41 @@ public interface IUserConnection : IAsyncDisposable
 public sealed class UserConnection : IUserConnection
 {
     private readonly IUserConnectionTunnel _tunnel;
+    private readonly IProfileRepository _profileRepository;
     private readonly ICharacterRepository _charactersRepository;
+    private readonly IChatRepository _chatRepository;
     private readonly ChatSessionFactory _chatSessionFactory;
     private readonly IUserConnectionManager _userConnectionManager;
     private readonly ILogger<UserConnection> _logger;
 
     private IChatSession? _chat;
+    
 
     public string ConnectionId { get; } = Crypto.CreateCryptographicallySecureGuid().ToString();
 
-    public UserConnection(IUserConnectionTunnel tunnel, ILoggerFactory loggerFactory, ICharacterRepository charactersRepository, ChatSessionFactory chatSessionFactory, IUserConnectionManager userConnectionManager)
+    public UserConnection(IUserConnectionTunnel tunnel,
+        IUserConnectionManager userConnectionManager,
+        IProfileRepository profileRepository,
+        ICharacterRepository charactersRepository,
+        IChatRepository chatRepository,
+        ChatSessionFactory chatSessionFactory,
+        ILoggerFactory loggerFactory)
     {
         _tunnel = tunnel;
+        _userConnectionManager = userConnectionManager;
+        _profileRepository = profileRepository;
         _charactersRepository = charactersRepository;
         _chatSessionFactory = chatSessionFactory;
-        _userConnectionManager = userConnectionManager;
+        _chatRepository = chatRepository;
         _logger = loggerFactory.CreateLogger<UserConnection>();
         _userConnectionManager.Register(this);
     }
-    
+
     public async Task HandleWebSocketConnectionAsync(CancellationToken cancellationToken)
     {   
-        var characters = await _charactersRepository.GetCharactersListAsync(cancellationToken);
         await _tunnel.SendAsync(new ServerWelcomeMessage
         {
-            Characters = characters
+            Username = (await _profileRepository.GetProfileAsync(cancellationToken))?.Name ?? "User",
         }, cancellationToken);
 
         while (!_tunnel.Closed)
@@ -69,6 +79,12 @@ public sealed class UserConnection : IUserConnection
                     case ClientSpeechPlaybackCompleteMessage:
                         _chat?.HandleSpeechPlaybackComplete();
                         break;
+                    case ClientLoadCharactersListMessage:
+                        await LoadCharactersListAsync(cancellationToken);
+                        break;
+                    case ClientLoadChatsListMessage:
+                        await LoadChatsListAsync(cancellationToken);
+                        break;
                     case ClientLoadCharacterMessage loadCharacterMessage:
                         await LoadCharacterAsync(loadCharacterMessage.CharacterId, cancellationToken);
                         break;
@@ -92,6 +108,24 @@ public sealed class UserConnection : IUserConnection
         }
     }
 
+    private async Task LoadCharactersListAsync(CancellationToken cancellationToken)
+    {
+        var characters = await _charactersRepository.GetCharactersListAsync(cancellationToken);
+        await _tunnel.SendAsync(new ServerCharactersListLoadedMessage
+        {
+            Characters = characters,
+        }, cancellationToken);
+    }
+    
+    private async Task LoadChatsListAsync(CancellationToken cancellationToken)
+    {
+        var chats = await _chatRepository.GetChatsListAsync(cancellationToken);
+        await _tunnel.SendAsync(new ServerChatsListLoadedMessage
+        {
+            Chats = chats,
+        }, cancellationToken);
+    }
+
     private async Task LoadCharacterAsync(string characterId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Loading character {CharacterId}", characterId);
@@ -103,13 +137,13 @@ public sealed class UserConnection : IUserConnection
             return;
         }
 
-        await _tunnel.SendAsync(new CharacterLoadedMessage
+        await _tunnel.SendAsync(new ServerCharacterLoadedMessage
         {
             Name = character.Name,
             Description = character.Description,
             Personality = character.Personality,
             Scenario = character.Scenario,
-            FirstMessage = character.FirstMessage ?? "",
+            FirstMessage = character.FirstMessage,
             MessageExamples = character.MessageExamples ?? "",
             SystemPrompt = character.SystemPrompt,
             PostHistoryInstructions = character.PostHistoryInstructions,

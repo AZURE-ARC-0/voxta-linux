@@ -16,14 +16,14 @@ public class KoboldAITextGenService : KoboldAIClientBase, ITextGenService
         _performanceMetrics = performanceMetrics;
     }
 
-    public async ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder();
-        var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
+        var prompt = builder.BuildReplyPrompt(chat, -1);
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
         var text = await SendCompletionRequest(
             prompt,
-            new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n", "\"" },
+            new[] { "END_OF_DIALOG", "You:", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n", "\"" },
             cancellationToken
         );
         textGenPerf.Done();

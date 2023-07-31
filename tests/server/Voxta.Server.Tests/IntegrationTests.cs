@@ -75,7 +75,7 @@ public class WebSocketTest
     public async Task SendMessageAndGetReply()
     {
         var welcome = await Receive<ServerWelcomeMessage>();
-        Assert.That(welcome.Characters, Is.Not.Empty);
+        Assert.That(welcome.Username, Is.EqualTo("User"));
         
         await Send(new ClientStartChatMessage
         {

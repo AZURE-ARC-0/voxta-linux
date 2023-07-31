@@ -4,7 +4,9 @@ namespace Voxta.Abstractions.Model;
 
 [Serializable]
 [JsonDerivedType(typeof(ServerWelcomeMessage), typeDiscriminator: "welcome")]
-[JsonDerivedType(typeof(CharacterLoadedMessage), typeDiscriminator: "characterLoaded")]
+[JsonDerivedType(typeof(ServerCharactersListLoadedMessage), typeDiscriminator: "charactersListLoaded")]
+[JsonDerivedType(typeof(ServerCharacterLoadedMessage), typeDiscriminator: "characterLoaded")]
+[JsonDerivedType(typeof(ServerChatsListLoadedMessage), typeDiscriminator: "chatsListLoaded")]
 [JsonDerivedType(typeof(ServerReadyMessage), typeDiscriminator: "ready")]
 [JsonDerivedType(typeof(ServerReplyMessage), typeDiscriminator: "reply")]
 [JsonDerivedType(typeof(ServerSpeechRecognitionStartMessage), typeDiscriminator: "speechRecognitionStart")]
@@ -19,6 +21,12 @@ public abstract class ServerMessage
 
 [Serializable]
 public class ServerWelcomeMessage : ServerMessage
+{
+    public required string Username { get; set; }
+}
+
+[Serializable]
+public class ServerCharactersListLoadedMessage : ServerMessage
 {
     public required CharactersListItem[] Characters { get; set; }
     
@@ -35,7 +43,20 @@ public class ServerWelcomeMessage : ServerMessage
 }
 
 [Serializable]
-public class CharacterLoadedMessage : ServerMessage
+public class ServerChatsListLoadedMessage : ServerMessage
+{
+    public required ChatsListItem[] Chats { get; set; }
+    
+    [Serializable]
+    public class ChatsListItem
+    {
+        public required string Id { get; init; }
+        public required string CharacterName { get; init; }
+    }
+}
+
+[Serializable]
+public class ServerCharacterLoadedMessage : ServerMessage
 {
     public required string Name { get; init; }
     public required string Description { get; init; }

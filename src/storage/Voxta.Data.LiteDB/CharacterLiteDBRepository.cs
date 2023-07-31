@@ -14,14 +14,14 @@ public class CharacterLiteDBRepository : ICharacterRepository
         _charactersCollection = db.GetCollection<Character>();
     }
     
-    public Task<ServerWelcomeMessage.CharactersListItem[]> GetCharactersListAsync(CancellationToken cancellationToken)
+    public Task<ServerCharactersListLoadedMessage.CharactersListItem[]> GetCharactersListAsync(CancellationToken cancellationToken)
     {
         var cards = _charactersCollection.Query()
             .Select(x => new { x.Id, x.Name, x.CreatorNotes, x.Services, x.ReadOnly, x.Culture, x.Prerequisites })
             .ToList();
 
         var result = cards
-            .Select(b => new ServerWelcomeMessage.CharactersListItem
+            .Select(b => new ServerCharactersListLoadedMessage.CharactersListItem
             {
                 Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
                 Name = b.Name,

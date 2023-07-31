@@ -6,8 +6,8 @@ namespace Voxta.Services.OpenSourceLargeLanguageModels;
 public class NovelAIPromptBuilder : GenericPromptBuilder
 {
     // https://docs.novelai.net/text/chatformat.html
-    protected override string MakeSystemPrompt(IReadOnlyChatSessionData chatSessionData)
+    protected override string MakeSystemPrompt(IChatInferenceData chat)
     {
-        return base.MakeSystemPrompt(chatSessionData) + "\n***\n[ Style: chat ]";
+        return base.MakeSystemPrompt(chat) + "\n***\n[ Style: chat ]";
     }
 }

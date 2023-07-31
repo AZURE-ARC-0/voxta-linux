@@ -35,12 +35,22 @@
         switch (data.$type) {
             case 'welcome':
                 this.dispatchEvent(new CustomEvent('welcome', {
+                    detail: {username: data.username}
+                }));
+                break;
+            case 'charactersListLoaded':
+                this.dispatchEvent(new CustomEvent('charactersListLoaded', {
                     detail: {characters: data.characters}
+                }));
+                break;
+            case 'chatsListLoaded':
+                this.dispatchEvent(new CustomEvent('chatsListLoaded', {
+                    detail: {chats: data.chats}
                 }));
                 break;
             case 'characterLoaded':
                 this.dispatchEvent(new CustomEvent('characterLoaded', {
-                    detail: {character: data}
+                    detail: {character: data.character}
                 }));
                 break;
             case 'ready':
@@ -88,6 +98,20 @@
                 console.error('unknown message type', data)
         }
     };
+
+    loadCharactersList() {
+        const msg = JSON.stringify({
+            $type: "loadCharactersList"
+        });
+        this.socket.send(msg);
+    }
+
+    loadChatsList() {
+        const msg = JSON.stringify({
+            $type: "loadChatsList"
+        });
+        this.socket.send(msg);
+    }
 
     loadCharacter(characterId) {
         const msg = JSON.stringify({

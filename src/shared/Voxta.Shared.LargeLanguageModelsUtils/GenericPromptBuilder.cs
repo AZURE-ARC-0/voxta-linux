@@ -5,12 +5,12 @@ namespace Voxta.Shared.LargeLanguageModelsUtils;
 
 public class GenericPromptBuilder
 {
-    public string BuildReplyPrompt(IReadOnlyChatSessionData chatSessionData, int maxTokens = 4096, bool includePostHistoryPrompt = true)
+    public string BuildReplyPrompt(IChatInferenceData chat, int maxTokens = 4096, bool includePostHistoryPrompt = true)
     {
-        var systemPrompt = MakeSystemPrompt(chatSessionData);
-        var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chatSessionData) : "";
+        var systemPrompt = MakeSystemPrompt(chat);
+        var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chat) : "";
         var sb = new StringBuilder();
-        var chatMessages = chatSessionData.GetMessages();
+        var chatMessages = chat.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
@@ -25,7 +25,7 @@ public class GenericPromptBuilder
             sb.AppendLineLinux(postHistoryPrompt);
         }
 
-        sb.Append($"{chatSessionData.Character.Name}: ");
+        sb.Append($"{chat.Character.Name}: ");
 
         return sb.ToString().TrimExcess();
     }
@@ -63,9 +63,9 @@ public class GenericPromptBuilder
         return sb.ToString().TrimExcess();
     }
 
-    protected virtual string MakeSystemPrompt(IReadOnlyChatSessionData chatSessionData)
+    protected virtual string MakeSystemPrompt(IChatInferenceData chat)
     {
-        var character = chatSessionData.Character;
+        var character = chat.Character;
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.SystemPrompt))
             sb.AppendLineLinux(character.SystemPrompt);
@@ -75,16 +75,16 @@ public class GenericPromptBuilder
             sb.AppendLineLinux($"Personality of {character.Name}: {character.Personality}");
         if (!string.IsNullOrEmpty(character.Scenario))
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
-        if (!string.IsNullOrEmpty(chatSessionData.Context))
-            sb.AppendLineLinux(chatSessionData.Context);
-        if (chatSessionData.Actions is { Length: > 1 })
-            sb.AppendLineLinux($"Potential actions you will be able to do after you respond: {string.Join(", ", chatSessionData.Actions)}");
+        if (!string.IsNullOrEmpty(chat.Context))
+            sb.AppendLineLinux(chat.Context);
+        if (chat.Actions is { Length: > 1 })
+            sb.AppendLineLinux($"Potential actions you will be able to do after you respond: {string.Join(", ", chat.Actions)}");
         return sb.ToString().TrimExcess();
     }
 
-    private static string MakePostHistoryPrompt(IReadOnlyChatSessionData chatSessionData)
+    private static string MakePostHistoryPrompt(IChatInferenceData chat)
     {
-        var character = chatSessionData.Character;
+        var character = chat.Character;
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.PostHistoryInstructions))
             sb.AppendLineLinux(string.Join("\n", character.PostHistoryInstructions.Split(new[]{'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).Select(x => $"({x})")));

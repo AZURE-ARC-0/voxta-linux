@@ -13,23 +13,23 @@ public class OpenAIPromptBuilder
         _tokenizer = tokenizer;
     }
 
-    public List<OpenAIMessage> BuildReplyPrompt(IReadOnlyChatSessionData chatSessionData, int maxTokens)
+    public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxTokens)
     {
-        var systemPrompt = MakeSystemPrompt(chatSessionData.Character);
+        var systemPrompt = MakeSystemPrompt(chat.Character);
         var systemPromptTokens = _tokenizer?.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count ?? 0;
-        var postHistoryPrompt = MakePostHistoryPrompt(chatSessionData.Character, chatSessionData.Context, chatSessionData.Actions);
+        var postHistoryPrompt = MakePostHistoryPrompt(chat.Character, chat.Context, chat.Actions);
         var postHistoryPromptTokens = _tokenizer?.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count ?? 0;
 
         var totalTokens = systemPromptTokens + postHistoryPromptTokens;
         
         var messages = new List<OpenAIMessage> { new() { role = "system", content = systemPrompt } };
-        var chatMessages = chatSessionData.GetMessages();
+        var chatMessages = chat.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= maxTokens) break;
-            var role = message.User == chatSessionData.Character.Name ? "assistant" : "user";
+            var role = message.User == chat.Character.Name ? "assistant" : "user";
             messages.Insert(1, new() { role = role, content = message.Text });
         }
 

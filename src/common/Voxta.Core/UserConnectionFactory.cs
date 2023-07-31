@@ -20,10 +20,12 @@ public class UserConnectionFactory
     {
         return new UserConnection(
             tunnel,
-            _sp.GetRequiredService<ILoggerFactory>(),
+            _sp.GetRequiredService<IUserConnectionManager>(),
+            _sp.GetRequiredService<IProfileRepository>(),
             _sp.GetRequiredService<ICharacterRepository>(),
+            _sp.GetRequiredService<IChatRepository>(),
             _sp.GetRequiredService<ChatSessionFactory>(),
-            _sp.GetRequiredService<IUserConnectionManager>()
+            _sp.GetRequiredService<ILoggerFactory>()
         );
     }
 }

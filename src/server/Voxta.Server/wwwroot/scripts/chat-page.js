@@ -6,7 +6,9 @@ const canvas = document.getElementById('audioVisualizer');
 const audioVisualizer = new AudioVisualizer(canvas);
 const splash = document.getElementById('splash');
 const selectCharacterButton = document.getElementById('selectCharacterButton');
+const selectChatButton = document.getElementById('selectChatButton');
 const characterButtons = document.getElementById('characterButtons');
+const chatButtons = document.getElementById('chatButtons');
 const messageBox = document.getElementById('message');
 const promptBox = document.getElementById('promptBox');
 const prompt = document.getElementById('prompt');
@@ -44,6 +46,9 @@ const reset  = () => {
     promptBox.classList.remove('voxta_show');
     audioVisualizer.idle();
     canvas.classList.remove('voxta_show');
+    characterButtons.classList.remove('voxta_show');
+    chatButtons.classList.remove('voxta_show');
+    splash.classList.remove('voxta_show');
 }
 
 voxtaClient.addEventListener('onopen', (evt) => {
@@ -59,10 +64,20 @@ voxtaClient.addEventListener('onerror', (evt) => {
 });
 
 voxtaClient.addEventListener('welcome', (evt) => {
-    // Clear characters
+    const username = document.getElementById('username');
+    username.textContent = evt.detail.username;
+    splash.classList.add('voxta_show');
+});
+voxtaClient.addEventListener('charactersListLoaded', (evt) => {
     // TODO: Split the UI logic
     while (characterButtons.firstChild) {
         characterButtons.removeChild(characterButtons.firstChild);
+    }
+    if(evt.detail.characters.length === 0) {
+        const info = document.createElement('p');
+        info.className = 'text-muted';
+        info.textContent = 'No characters found';
+        characterButtons.appendChild(info);
     }
     evt.detail.characters.forEach(character => {
         const button = document.createElement('button');
@@ -80,10 +95,58 @@ voxtaClient.addEventListener('welcome', (evt) => {
         };
         characterButtons.appendChild(button);
     });
+    {
+        const back = document.createElement('back');
+        back.className = 'btn btn-secondary';
+        back.textContent = 'Back';
+        back.onclick = () => {
+            characterButtons.classList.remove('voxta_show');
+            splash.classList.add('voxta_show');
+        };
+        characterButtons.appendChild(back);
+    }
 });
 voxtaClient.addEventListener('characterLoaded', (evt) => {
     character = evt.detail.character;
     voxtaClient.startChat(evt.detail.character);
+});
+voxtaClient.addEventListener('chatsListLoaded', (evt) => {
+    // TODO: Split the UI logic
+    while (chatButtons.firstChild) {
+        chatButtons.removeChild(chatButtons.firstChild);
+    }
+    if(evt.detail.chats.length === 0) {
+        const info = document.createElement('p');
+        info.className = 'text-muted';
+        info.textContent = 'No chats found';
+        chatButtons.appendChild(info);
+    }
+    evt.detail.chats.forEach(chat => {
+        const button = document.createElement('button');
+        button.className = 'btn btn-secondary';
+        const charName = document.createElement('b');
+        charName.textContent = chat.name;
+        button.appendChild(charName);
+        const charDesc = document.createElement('div');
+        charDesc.className = 'small';
+        charDesc.textContent = chat.description;
+        button.appendChild(charDesc);
+        button.onclick = () => {
+            voxtaClient.loadCharacter(chat.id);
+            chatButtons.classList.remove('voxta_show');
+        };
+        chatButtons.appendChild(button);
+    });
+    {
+        const back = document.createElement('back');
+        back.className = 'btn btn-secondary';
+        back.textContent = 'Back';
+        back.onclick = () => {
+            chatButtons.classList.remove('voxta_show');
+            splash.classList.add('voxta_show');
+        };
+        chatButtons.appendChild(back);
+    }
 });
 voxtaClient.addEventListener('ready', (evt) => {
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
@@ -160,9 +223,11 @@ prompt.addEventListener('keydown', (evt) => {
 selectCharacterButton.addEventListener('click', () => {
     splash.classList.remove('voxta_show');
     characterButtons.classList.add('voxta_show');
+    voxtaClient.loadCharactersList();
 });
 
-
-setTimeout(() => {
-    splash.classList.add('voxta_show');
-}, 100);
+selectChatButton.addEventListener('click', () => {
+    splash.classList.remove('voxta_show');
+    chatButtons.classList.add('voxta_show');
+    voxtaClient.loadChatsList();
+});
