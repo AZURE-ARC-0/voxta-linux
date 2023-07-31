@@ -103,7 +103,7 @@ public class ChatSessionTests
     [Test]
     public async Task TestHandleClientMessage()
     {
-        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).ReturnsAsync(new TextData { Text = "Pong!" });
+        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).ReturnsAsync("Pong!");
         _speechGenerator.Setup(m => m.CreateSpeechAsync("Pong!", It.IsAny<string>(), false, It.IsAny<CancellationToken>())).ReturnsAsync("/audio-path");
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerSpeechMessage>(), It.IsAny<CancellationToken>())).Verifiable();
@@ -122,7 +122,7 @@ public class ChatSessionTests
     public async Task TestHandleClientMessage_InterruptSpeech()
     {
         var genIdx = 0;
-        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => new TextData { Text = genIdx++ == 0 ? "This speech will be interrupted." : "How rude!" });
+        _textGen.Setup(m => m.GenerateReplyAsync(It.IsAny<IReadOnlyChatSessionData>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => genIdx++ == 0 ? "This speech will be interrupted." : "How rude!");
         _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), false, It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
 
@@ -156,7 +156,7 @@ public class ChatSessionTests
             .Returns<IReadOnlyChatSessionData, CancellationToken>(async (_, ct) =>
             {
                 if (genIdx++ == 0) await Task.Delay(10000, ct);
-                return new TextData { Text = $"Pong {genIdx}!" };
+                return $"Pong {genIdx}!";
             });
         _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), false, It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();

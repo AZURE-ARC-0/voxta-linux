@@ -53,13 +53,15 @@ public partial class ChatSession
         {
             using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(queueCancellationToken, abortCancellationToken);
             var linkedCancellationToken = linkedCancellationSource.Token;
-            var gen = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
-            if (string.IsNullOrWhiteSpace(gen.Text))
+            var generated = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
+            if (string.IsNullOrWhiteSpace(generated))
             {
                 throw new InvalidOperationException("AI service returned an empty string.");
             }
 
-            reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, gen);
+            var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
+
+            reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, genData);
         }
         catch (OperationCanceledException)
         {

@@ -171,7 +171,7 @@ public class DiagnosticsUtil
                         FirstMessage = "Beginning test.",
                     }
                 }, cancellationToken);
-                return "Response: " + result.Text;
+                return "Response: " + result;
             }
         );
     }

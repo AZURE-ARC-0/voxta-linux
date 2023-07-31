@@ -7,7 +7,6 @@ using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
-using Voxta.Common;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Services.KoboldAI;
@@ -30,15 +29,13 @@ public class KoboldAITextGenClient : ITextGenService
     
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
-    private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private KoboldAIParameters? _parameters;
 
-    public KoboldAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
+    public KoboldAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
     {
         _httpClient = httpClientFactory.CreateClient($"{KoboldAIConstants.ServiceName}.TextGen");
         _settingsRepository = settingsRepository;
-        _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
     }
     
@@ -58,7 +55,7 @@ public class KoboldAITextGenClient : ITextGenService
         return 0;
     }
 
-    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder();
         // TODO: count tokens?
@@ -89,31 +86,16 @@ public class KoboldAITextGenClient : ITextGenService
             if (!line.StartsWith("data:")) continue;
             var json = JsonSerializer.Deserialize<TextGenEventData>(line[5..]);
             if (json == null) break;
-            // TODO: Determine which tokens are considered end tokens.
             var token = json.token;
             sb.Append(token);
-            // TODO: Determine a rule of thumb for when to stop.
-            // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
         reader.Close();
         
         textGenPerf.Done();
 
         var text = sb.ToString();
-        var sanitized = _sanitizer.Sanitize(text);
-        if (string.IsNullOrEmpty(sanitized))
-        {
-            if (string.IsNullOrEmpty(text))
-                throw new KoboldAIException("Empty response from KoboldAI");
-            else
-                throw new KoboldAIException($"No usable characters from response: {text}");
-        }
         
-        return new TextData
-        {
-            Text = sanitized,
-            Tokens = 0,
-        };
+        return text;
     }
     
     [Serializable]

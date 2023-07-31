@@ -27,6 +27,7 @@ public sealed partial class ChatSession : IChatSession
     private readonly ISpeechGenerator _speechGenerator;
     private readonly IActionInferenceService? _actionInference;
     private readonly ISpeechToTextService? _speechToText;
+    private readonly ISanitizer _sanitizer = new Sanitizer();
 
     public ChatSession(IUserConnectionTunnel tunnel,
         ILoggerFactory loggerFactory,

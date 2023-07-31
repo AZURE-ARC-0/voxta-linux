@@ -1,4 +1,4 @@
-﻿namespace Voxta.Common.Tests;
+﻿namespace Voxta.Core.Tests;
 
 public class SanitizerTests
 {

@@ -31,14 +31,12 @@ public class NovelAITextGenClient : ITextGenService
     private readonly HttpClient _httpClient;
     private NovelAIParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
-    private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
     
-    public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
+    public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics)
     {
         _settingsRepository = settingsRepository;
-        _sanitizer = sanitizer;
         _performanceMetrics = performanceMetrics;
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextGen");
     }
@@ -58,7 +56,7 @@ public class NovelAITextGenClient : ITextGenService
         return true;
     }
 
-    public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var builder = new NovelAIPromptBuilder();
         var input = builder.BuildReplyPrompt(chatSessionData, includePostHistoryPrompt: false);
@@ -114,28 +112,20 @@ public class NovelAITextGenClient : ITextGenService
             if (!line.StartsWith("data:")) continue;
             var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);
             if (json == null || json.token.Length == 0) break;
-            // TODO: Determine which tokens are considered end tokens.
             if (json.token[^1] is '\"' or '\n')
             {
                 sb.Append(json.token[..^1]);
                 break;
             }
             sb.Append(json.token);
-            // TODO: Determine a rule of thumb for when to stop.
-            // if (sb.Length > 40 && json.token.Contains('.') || json.token.Contains('!') || json.token.Contains('?')) break;
         }
         reader.Close();
         
         textGenPerf.Done();
 
         var text = sb.ToString();
-        var sanitized = _sanitizer.Sanitize(text);
         
-        return new TextData
-        {
-            Text = sanitized,
-            Tokens = 0,
-        };
+        return text;
     }
     
     public int GetTokenCount(string message)

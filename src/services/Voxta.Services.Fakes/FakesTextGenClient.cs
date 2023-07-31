@@ -13,13 +13,9 @@ public class FakesTextGenClient : ITextGenService
         return Task.FromResult(true);
     }
 
-    public ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        return ValueTask.FromResult(new TextData
-        {
-            Text = "This is a fake reply to: " + chatSessionData.GetMessages().LastOrDefault(x => x.User == chatSessionData.UserName)?.Text,
-            Tokens = 0,
-        });
+        return ValueTask.FromResult("This is a fake reply to: " + chatSessionData.GetMessages().LastOrDefault(x => x.User == chatSessionData.UserName)?.Text);
     }
 
     public int GetTokenCount(string message)
