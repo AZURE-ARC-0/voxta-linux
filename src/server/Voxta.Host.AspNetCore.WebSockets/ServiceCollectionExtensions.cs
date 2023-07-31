@@ -60,8 +60,12 @@ public static class ServiceCollectionExtensions
         textToSpeechRegistry.RegisterAzureSpeechService();
         speechToTextRegistry.RegisterAzureSpeechService();
 
+        #if(WINDOWS)
+        
         services.AddWindowsSpeech();
         textToSpeechRegistry.RegisterWindowsSpeech();
         speechToTextRegistry.RegisterWindowsSpeech();
+        
+        #endif
     }
 }

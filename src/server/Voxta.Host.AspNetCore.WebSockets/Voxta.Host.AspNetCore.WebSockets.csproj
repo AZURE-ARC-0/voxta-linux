@@ -23,7 +23,6 @@
         <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
         <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Azure.SpeechService\Voxta.Services.Azure.SpeechService.csproj" />
-        <ProjectReference Include="..\..\services\Voxta.Services.WindowsSpeech\Voxta.Services.WindowsSpeech.csproj" />
         <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj" />
@@ -33,6 +32,10 @@
         <ProjectReference Include="..\..\services\Voxta.Services.Oobabooga\Voxta.Services.Oobabooga.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.OpenAI\Voxta.Services.OpenAI.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Vosk\Voxta.Services.Vosk.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+        <ProjectReference Include="..\..\services\Voxta.Services.WindowsSpeech\Voxta.Services.WindowsSpeech.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using System.Speech.Recognition;
+﻿#if(WINDOWS)
+using System.Speech.Recognition;
 using Microsoft.Extensions.Logging;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
@@ -85,3 +86,4 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         _recognizer = null;
     }
 }
+#endif

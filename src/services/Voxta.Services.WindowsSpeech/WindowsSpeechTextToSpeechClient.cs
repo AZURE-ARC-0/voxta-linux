@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if(WINDOWS)
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Speech.Synthesis;
 using Voxta.Abstractions.Diagnostics;
@@ -101,3 +102,4 @@ public class WindowsSpeechTextToSpeechClient : ITextToSpeechService
     {
     }
 }
+#endif
