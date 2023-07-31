@@ -42,8 +42,4 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
         actionInferencePerf.Done();
         return animation.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
     }
-
-    public void Dispose()
-    {
-    }
 }

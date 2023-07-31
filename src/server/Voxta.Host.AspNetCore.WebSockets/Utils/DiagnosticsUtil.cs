@@ -13,7 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Exceptions;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.Vosk;
+#if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
+#endif
 
 namespace Voxta.Host.AspNetCore.WebSockets.Utils;
 
@@ -120,7 +122,9 @@ public class DiagnosticsUtil
             Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, runTests, cancellationToken), cancellationToken),
             Task.Run(async () => await TryTextToSpeechAsync(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            #if(WINDOWS)
             Task.Run(async () => await TryTextToSpeechAsync(WindowsSpeechConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            #endif
         };
         
         var actionInference = new[]
@@ -134,7 +138,9 @@ public class DiagnosticsUtil
         {
             stt[0] = await TrySpeechToText(VoskConstants.ServiceName, runTests, cancellationToken);
             stt[1] = await TrySpeechToText(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken);
+            #if(WINDOWS)
             stt[2] = await TrySpeechToText(WindowsSpeechConstants.ServiceName, runTests, cancellationToken);
+            #endif
         }, cancellationToken);
 
         await Task.WhenAll(textGen.Concat(tts).Concat(actionInference).Concat(new[] { sttTask }));

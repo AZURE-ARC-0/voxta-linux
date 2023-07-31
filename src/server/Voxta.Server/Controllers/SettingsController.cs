@@ -11,7 +11,9 @@ using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Services.AzureSpeechService;
+#if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
+#endif
 
 namespace Voxta.Server.Controllers;
 
@@ -137,19 +139,44 @@ public class SettingsController : Controller
             Name = "User",
             TextGen =
             {
-                Services = new[] { OobaboogaConstants.ServiceName, KoboldAIConstants.ServiceName, NovelAIConstants.ServiceName, OpenAIConstants.ServiceName }
+                Services = new[]
+                {
+                    OobaboogaConstants.ServiceName,
+                    KoboldAIConstants.ServiceName,
+                    NovelAIConstants.ServiceName,
+                    OpenAIConstants.ServiceName,
+                }
             },
             SpeechToText =
             {
-                Services = new[] { AzureSpeechServiceConstants.ServiceName, WindowsSpeechConstants.ServiceName, VoskConstants.ServiceName }
+                Services = new[]
+                {
+                    AzureSpeechServiceConstants.ServiceName,
+                    #if(WINDOWS)
+                    WindowsSpeechConstants.ServiceName,
+                    #endif
+                    VoskConstants.ServiceName,
+                }
             },
             TextToSpeech =
             {
-                Services = new[] { NovelAIConstants.ServiceName, ElevenLabsConstants.ServiceName, AzureSpeechServiceConstants.ServiceName, WindowsSpeechConstants.ServiceName }
+                Services = new[]
+                {
+                    NovelAIConstants.ServiceName,
+                    ElevenLabsConstants.ServiceName,
+                    AzureSpeechServiceConstants.ServiceName,
+                    #if(WINDOWS)
+                    WindowsSpeechConstants.ServiceName,
+                    #endif
+                }
             },
             ActionInference =
             {
-                Services = new[] { OpenAIConstants.ServiceName, OobaboogaConstants.ServiceName }
+                Services = new[]
+                {
+                    OpenAIConstants.ServiceName,
+                    OobaboogaConstants.ServiceName
+                }
             }
         };
     }

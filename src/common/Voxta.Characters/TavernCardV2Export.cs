@@ -27,9 +27,9 @@ public static class TavernCardV2Export
                 {
                     { "voxta/prerequisites", character.Prerequisites != null ? string.Join(",", character.Prerequisites) : "" },
                     { "voxta/culture", character.Culture },
-                    { "voxta/textgen/service", character.Services.TextGen.Service },
-                    { "voxta/tts/service", character.Services.SpeechGen.Service },
-                    { "voxta/tts/voice", character.Services.SpeechGen.Voice },
+                    { "voxta/textgen/service", character.Services.TextGen.Service ?? "" },
+                    { "voxta/tts/service", character.Services.SpeechGen.Service ?? "" },
+                    { "voxta/tts/voice", character.Services.SpeechGen.Voice ?? "" },
                     { "voxta/options/enable_thinking_speech", character.Options?.EnableThinkingSpeech ?? true ? "true" : "false" },
                 }
             }

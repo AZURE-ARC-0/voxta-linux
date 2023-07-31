@@ -51,7 +51,7 @@ public static class TavernCardV2Import
             Personality = data.Personality ?? "",
             Scenario = data.Scenario ?? "",
             MessageExamples = data.MesExample,
-            FirstMessage = data.FirstMes,
+            FirstMessage = data.FirstMes ?? "",
             PostHistoryInstructions = data.PostHistoryInstructions,
             CreatorNotes = data.CreatorNotes,
             SystemPrompt = data.SystemPrompt,

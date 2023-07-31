@@ -15,7 +15,9 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Services.AzureSpeechService;
+#if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
+#endif
 
 namespace Voxta.Server.Controllers;
 
@@ -164,7 +166,9 @@ public class CharactersController : Controller
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
                 OptionViewModel.Create(KoboldAIConstants.ServiceName),
                 OptionViewModel.Create(OobaboogaConstants.ServiceName),
+                #if(DEBUG)
                 OptionViewModel.Create(FakesConstants.ServiceName),
+                #endif
             },
             TextToSpeechServices = new[]
             {
@@ -172,8 +176,12 @@ public class CharactersController : Controller
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
                 OptionViewModel.Create(ElevenLabsConstants.ServiceName),
                 OptionViewModel.Create(AzureSpeechServiceConstants.ServiceName),
+                #if(WINDOWS)
                 OptionViewModel.Create(WindowsSpeechConstants.ServiceName),
+                #endif
+                #if(DEBUG)
                 OptionViewModel.Create(FakesConstants.ServiceName),
+                #endif
             },
             Cultures = CultureUtils.Bcp47LanguageTags.Select(c => new OptionViewModel(c.Name, c.Label)).ToArray(),
             Voices = voices,

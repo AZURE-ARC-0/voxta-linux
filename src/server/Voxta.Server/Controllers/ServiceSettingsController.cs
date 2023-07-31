@@ -10,7 +10,9 @@ using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Services.AzureSpeechService;
+#if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
+#endif
 
 namespace Voxta.Server.Controllers;
 
@@ -51,29 +53,6 @@ public class ServiceSettingsController : Controller
             Region = value.Region.TrimCopyPasteArtefacts(),
             LogFilename = value.LogFilename?.TrimCopyPasteArtefacts(),
             FilterProfanity = value.FilterProfanity,
-        });
-        
-        return RedirectToAction("Settings", "Settings");
-    }
-    
-    [HttpGet("/settings/windowsspeech")]
-    public async Task<IActionResult> WindowsSpeechSettings(CancellationToken cancellationToken)
-    {
-        var windowsspeech = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
-        return View(windowsspeech);
-    }
-    
-    [HttpPost("/settings/windowsspeech")]
-    public async Task<IActionResult> PostWindowsSpeechSettings([FromForm] WindowsSpeechSettings value)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View("WindowsSpeechSettings", value);
-        }
-
-        await _settingsRepository.SaveAsync(new WindowsSpeechSettings
-        {
-            Enabled = value.Enabled,
         });
         
         return RedirectToAction("Settings", "Settings");
@@ -289,4 +268,35 @@ public class ServiceSettingsController : Controller
         
         return RedirectToAction("Settings", "Settings");
     }
+    
+    #if(WINDOWS)
+    
+    [HttpGet("/settings/windowsspeech")]
+    public async Task<IActionResult> WindowsSpeechSettings(CancellationToken cancellationToken)
+    {
+        var windowsspeech = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
+        var vm = new WindowsSpeechSettingsViewModel
+        {
+            Enabled = windowsspeech.Enabled
+        };
+        return View(vm);
+    }
+    
+    [HttpPost("/settings/windowsspeech")]
+    public async Task<IActionResult> PostWindowsSpeechSettings([FromForm] WindowsSpeechSettingsViewModel value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("WindowsSpeechSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new WindowsSpeechSettings
+        {
+            Enabled = value.Enabled,
+        });
+        
+        return RedirectToAction("Settings", "Settings");
+    }
+    
+    #endif
 }
