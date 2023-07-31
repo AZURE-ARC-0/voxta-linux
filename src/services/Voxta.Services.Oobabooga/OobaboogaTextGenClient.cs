@@ -3,7 +3,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
-using Voxta.Services.OpenAI;
+using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.Oobabooga;
 

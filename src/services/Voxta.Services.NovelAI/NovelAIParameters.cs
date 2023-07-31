@@ -65,16 +65,16 @@ public class NovelAIParameters
 public class LogitBiasExp
 {
     [JsonPropertyName("bias")]
-    public double Bias { get; set; }
+    public double Bias { get; init; }
 
     [JsonPropertyName("ensure_sequence_finish")]
-    public bool EnsureSequenceFinish { get; set; }
+    public bool EnsureSequenceFinish { get; init; }
 
     [JsonPropertyName("generate_once")]
-    public bool GenerateOnce { get; set; }
+    public bool GenerateOnce { get; init; }
 
     [JsonPropertyName("sequence")]
-    public int[] Sequence { get; set; } = Array.Empty<int>();
+    public required int[] Sequence { get; init; }
 }
 
 [Serializable]
@@ -98,10 +98,6 @@ public class NovelAIRequestBodyParameters : NovelAIParameters
 
     [JsonPropertyName("stop_sequences")]
     public int[][] StopSequences { get; set; } = {
-        // User:
-        new[] { 21978, 49287 },
-        // "
-        new[] { 49264 },
         // \n
         new[] { 85 }
     };

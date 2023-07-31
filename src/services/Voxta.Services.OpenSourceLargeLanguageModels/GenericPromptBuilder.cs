@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Voxta.Abstractions.Model;
 
-namespace Voxta.Services.OpenAI;
+namespace Voxta.Services.OpenSourceLargeLanguageModels;
 
 public class GenericPromptBuilder
 {
@@ -14,7 +14,7 @@ public class GenericPromptBuilder
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
-            sb.Insert(0, $"{message.User}: \"{message.Text}\"\n");
+            sb.Insert(0, $"{message.User}: {message.Text}\n");
         }
 
         sb.Insert(0, '\n');
@@ -25,7 +25,7 @@ public class GenericPromptBuilder
             sb.AppendLineLinux(postHistoryPrompt);
         }
 
-        sb.Append($"{chatSessionData.Character.Name}: \"");
+        sb.Append($"{chatSessionData.Character.Name}: ");
 
         return sb.ToString().TrimExcess();
     }
@@ -40,7 +40,7 @@ public class GenericPromptBuilder
             You are tasked with inferring the best action from a list based on the content of a sample chat.
 
             Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}
-            """);
+            """.ReplaceLineEndings("\n"));
 
         sb.AppendLineLinux("Conversation Context:");
         sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
@@ -63,7 +63,7 @@ public class GenericPromptBuilder
         return sb.ToString().TrimExcess();
     }
 
-    private static string MakeSystemPrompt(IReadOnlyChatSessionData chatSessionData)
+    protected virtual string MakeSystemPrompt(IReadOnlyChatSessionData chatSessionData)
     {
         var character = chatSessionData.Character;
         var sb = new StringBuilder();

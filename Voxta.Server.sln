@@ -83,6 +83,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.TextToSpeech
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.TextToSpeechUtils.Tests", "tests\services\Voxta.Services.TextToSpeechUtils.Tests\Voxta.Services.TextToSpeechUtils.Tests.csproj", "{8A202917-CCFB-4DCF-BABC-CF8760FC67CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.NovelAI.Tests", "tests\services\Voxta.Services.NovelAI.Tests\Voxta.Services.NovelAI.Tests.csproj", "{4B79B3F8-C99F-4AE7-A2E0-F2C4984E23DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -196,6 +198,10 @@ Global
 		{8A202917-CCFB-4DCF-BABC-CF8760FC67CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A202917-CCFB-4DCF-BABC-CF8760FC67CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A202917-CCFB-4DCF-BABC-CF8760FC67CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B79B3F8-C99F-4AE7-A2E0-F2C4984E23DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B79B3F8-C99F-4AE7-A2E0-F2C4984E23DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B79B3F8-C99F-4AE7-A2E0-F2C4984E23DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B79B3F8-C99F-4AE7-A2E0-F2C4984E23DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6A1407C5-B5D2-4651-ADE0-36CAE2C4F66E} = {6AB181C5-92BE-45CB-890F-EF6B60BBA7C0}
@@ -232,5 +238,6 @@ Global
 		{814DD6B7-F982-4D3A-95E2-BFB9D5DEED14} = {8E3FA0CF-0C95-4A5A-8739-971BF8365BC7}
 		{E1996C9A-5C11-45F5-B194-40D0B09E95C6} = {35AF5316-3D66-4671-8BDE-3451123AE7EA}
 		{8A202917-CCFB-4DCF-BABC-CF8760FC67CA} = {25A82547-1D1F-4416-8782-AEED31D97038}
+		{4B79B3F8-C99F-4AE7-A2E0-F2C4984E23DF} = {25A82547-1D1F-4416-8782-AEED31D97038}
 	EndGlobalSection
 EndGlobal

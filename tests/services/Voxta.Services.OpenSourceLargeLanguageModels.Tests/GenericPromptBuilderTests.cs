@@ -1,5 +1,6 @@
 using Voxta.Abstractions.Model;
 using NUnit.Framework;
+using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.OpenAI.Tests;
 
@@ -39,10 +40,10 @@ public class GenericPromptBuilderTests
         Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
-        Joe: "Hello"
-        Jane: "World"
-        Joe: "Question"
-        Jane: "
+        Joe: Hello
+        Jane: World
+        Joe: Question
+        Jane: 
         """.ReplaceLineEndings("\n").TrimExcess()));
     }
     
@@ -78,13 +79,13 @@ public class GenericPromptBuilderTests
         Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
-        Joe: "Hello"
-        Jane: "World"
-        Joe: "Question"
-        some-post-history-instructions
-        Current context: some-context
-        Available actions to be inferred after the response: action1, action2
-        Jane: "
+        some-context
+        Potential actions you will be able to do after you respond: action1, action2
+        Joe: Hello
+        Jane: World
+        Joe: Question
+        (some-post-history-instructions)
+        Jane: 
         """.ReplaceLineEndings("\n").TrimExcess()));
     }
     
@@ -116,17 +117,23 @@ public class GenericPromptBuilderTests
         });
 
         Assert.That(actual, Is.EqualTo("""
-        You are a tool that selects the character animation for a Virtual Reality game. You will be presented with a chat, and must provide the animation to play from the provided list. Only answer with a single animation name. Example response: [smile]
+        You are tasked with inferring the best action from a list based on the content of a sample chat.
+
+        Actions: [action1], [action2]
+        Conversation Context:
         Jane's Personality: some-personality
         Scenario: some-scenario
-        Previous messages:
+        Context: some-context
+
+        Conversation:
         Joe: Hello
         Jane: World
         Joe: Question
-        ---
-        Context: some-context
-        Available actions: [action1], [action2]
-        Write the action Jane should play.
+        
+        Based on the last message, which of the following actions is the most applicable for Jane: [action1], [action2]
+
+        Only write the action.
+
         Action: [
         """.ReplaceLineEndings("\n").TrimExcess()));
     }

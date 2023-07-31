@@ -8,7 +8,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
-using Voxta.Services.OpenAI;
+using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.NovelAI;
 
@@ -29,12 +29,12 @@ public class NovelAITextGenClient : ITextGenService
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly HttpClient _httpClient;
-    private NovelAIRequestBodyParameters? _parameters;
+    private NovelAIParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
     private readonly Sanitizer _sanitizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
-
+    
     public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, Sanitizer sanitizer, IPerformanceMetrics performanceMetrics)
     {
         _settingsRepository = settingsRepository;
@@ -49,24 +49,49 @@ public class NovelAITextGenClient : ITextGenService
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Token)) return false;
-        if (!culture.StartsWith("en")) return false;
+        if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
         if (prerequisites.Contains(ServiceFeatures.GPT3)) return false;
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
         _model = settings.Model;
-        _parameters = Mapper.Map<NovelAIRequestBodyParameters>(settings.Parameters ?? NovelAIPresets.DefaultForModel(_model));
+        _parameters = settings.Parameters ?? NovelAIPresets.DefaultForModel(_model);
         return true;
     }
 
     public async ValueTask<TextData> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
-        var builder = new GenericPromptBuilder();
+        var builder = new NovelAIPromptBuilder();
         var input = builder.BuildReplyPrompt(chatSessionData, includePostHistoryPrompt: false);
+        var parameters = Mapper.Map<NovelAIRequestBodyParameters>(_parameters);
+
+        /*
+        // TODO: Add this once I have a NAI tokenizer. Also, most of this can be pre-generate or cached in InitializeAsync.
+        var bias = new List<LogitBiasExp>(4)
+        {
+            new()
+            {
+                Bias = 2,
+                EnsureSequenceFinish = true,
+                GenerateOnce = true,
+                Sequence = _tokenizer.Encode($"\n{chatSessionData.Character.Name}:")
+            },
+            new()
+            {
+                Bias = 0,
+                EnsureSequenceFinish = true,
+                GenerateOnce = true,
+                Sequence = _tokenizer.Encode($"\n{chatSessionData.UserName}: ")
+            }
+        };
+        bias.AddRange(parameters.LogitBiasExp ?? Array.Empty<LogitBiasExp>());
+        parameters.LogitBiasExp = bias.ToArray();
+        */
+        
         var body = new
         {
             model = _model,
             input,
-            parameters = _parameters
+            parameters
         };
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
