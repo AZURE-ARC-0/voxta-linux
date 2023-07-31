@@ -10,6 +10,7 @@ using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.WindowsSpeech;
 
 namespace Voxta.Server.Controllers;
 
@@ -50,6 +51,29 @@ public class ServiceSettingsController : Controller
             Region = value.Region.TrimCopyPasteArtefacts(),
             LogFilename = value.LogFilename?.TrimCopyPasteArtefacts(),
             FilterProfanity = value.FilterProfanity,
+        });
+        
+        return RedirectToAction("Settings", "Settings");
+    }
+    
+    [HttpGet("/settings/windowsspeech")]
+    public async Task<IActionResult> WindowsSpeechSettings(CancellationToken cancellationToken)
+    {
+        var windowsspeech = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
+        return View(windowsspeech);
+    }
+    
+    [HttpPost("/settings/windowsspeech")]
+    public async Task<IActionResult> PostWindowsSpeechSettings([FromForm] WindowsSpeechSettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("WindowsSpeechSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new WindowsSpeechSettings
+        {
+            Enabled = value.Enabled,
         });
         
         return RedirectToAction("Settings", "Settings");

@@ -7,7 +7,7 @@ using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Voxta.Services.AzureSpeechService;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Voxta.Services.AzureSpeechService;
 
 public class AzureSpeechServiceSpeechToText : ISpeechToTextService
 {

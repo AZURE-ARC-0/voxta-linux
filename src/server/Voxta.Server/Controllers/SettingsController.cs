@@ -11,6 +11,7 @@ using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.WindowsSpeech;
 
 namespace Voxta.Server.Controllers;
 
@@ -140,11 +141,11 @@ public class SettingsController : Controller
             },
             SpeechToText =
             {
-                Services = new[] { AzureSpeechServiceConstants.ServiceName, VoskConstants.ServiceName }
+                Services = new[] { AzureSpeechServiceConstants.ServiceName, WindowsSpeechConstants.ServiceName, VoskConstants.ServiceName }
             },
             TextToSpeech =
             {
-                Services = new[] { NovelAIConstants.ServiceName, ElevenLabsConstants.ServiceName, AzureSpeechServiceConstants.ServiceName }
+                Services = new[] { NovelAIConstants.ServiceName, ElevenLabsConstants.ServiceName, AzureSpeechServiceConstants.ServiceName, WindowsSpeechConstants.ServiceName }
             },
             ActionInference =
             {

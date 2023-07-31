@@ -102,8 +102,7 @@ public class NovelAITextToSpeechClient : ITextToSpeechService
             await tunnel.ErrorAsync(new NovelAIException($"Unable to generate speech: {reason}"), cancellationToken);
             return;
         }
-
-        // TODO: Optimize later (we're forced to use a temp file because of the MediaFoundationReader)
+        
         await using var stream = await audioResponse.Content.ReadAsStreamAsync(cancellationToken);
         await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();

@@ -38,8 +38,8 @@ public class LiteDBMigrations
             foreach (var doc in profileSettings.FindAll())
             {
                 doc.TextGen.Services = new[] { "TextGenerationWebUI", "KoboldAI", "NovelAI", "OpenAI" };
-                doc.SpeechToText.Services = new[] { "AzureSpeechService", "Vosk" };
-                doc.TextToSpeech.Services = new[] { "NovelAI", "ElevenLabs", "AzureSpeechService" };
+                doc.SpeechToText.Services = new[] { "AzureSpeechService", "Vosk", "WindowsSpeech" };
+                doc.TextToSpeech.Services = new[] { "NovelAI", "ElevenLabs", "AzureSpeechService", "WindowsSpeech" };
                 doc.ActionInference.Services = new[] { "OpenAI", "TextGenerationWebUI" };
                 profileSettings.Update(doc);
             }

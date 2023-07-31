@@ -15,6 +15,7 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.WindowsSpeech;
 
 namespace Voxta.Server.Controllers;
 
@@ -171,6 +172,7 @@ public class CharactersController : Controller
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
                 OptionViewModel.Create(ElevenLabsConstants.ServiceName),
                 OptionViewModel.Create(AzureSpeechServiceConstants.ServiceName),
+                OptionViewModel.Create(WindowsSpeechConstants.ServiceName),
                 OptionViewModel.Create(FakesConstants.ServiceName),
             },
             Cultures = CultureUtils.Bcp47LanguageTags.Select(c => new OptionViewModel(c.Name, c.Label)).ToArray(),
