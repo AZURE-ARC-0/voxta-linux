@@ -7,6 +7,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Core;
 
@@ -20,6 +21,7 @@ public class ChatSessionFactory
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
     private readonly IServiceFactory<ISpeechToTextService> _speechToTextServiceFactory;
+    private readonly ITimeProvider _timeProvider;
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
@@ -29,7 +31,8 @@ public class ChatSessionFactory
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
         IServiceFactory<IActionInferenceService> animationSelectionFactory,
-        IServiceFactory<ISpeechToTextService> speechToTextServiceFactory
+        IServiceFactory<ISpeechToTextService> speechToTextServiceFactory,
+        ITimeProvider timeProvider
         )
     {
         _loggerFactory = loggerFactory;
@@ -40,6 +43,7 @@ public class ChatSessionFactory
         _textToSpeechFactory = textToSpeechFactory;
         _animationSelectionFactory = animationSelectionFactory;
         _speechToTextServiceFactory = speechToTextServiceFactory;
+        _timeProvider = timeProvider;
         _profileRepository = profileRepository;
     }
 
@@ -96,6 +100,8 @@ public class ChatSessionFactory
             };
             // TODO: Optimize by pre-calculating tokens count
 
+            var state = new ChatSessionState(_timeProvider);
+
             return new ChatSession(
                 tunnel,
                 _loggerFactory,
@@ -104,7 +110,7 @@ public class ChatSessionFactory
                 chatData,
                 textProcessor,
                 profile,
-                new ChatSessionState(),
+                state,
                 speechGenerator,
                 actionInference,
                 speechToText

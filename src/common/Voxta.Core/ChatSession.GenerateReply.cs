@@ -10,6 +10,21 @@ public partial class ChatSession
         var text = clientSendMessage.Text;
 
         var speechInterruptionRatio = _chatSessionState.InterruptSpeech();
+        
+        if (speechInterruptionRatio is > 0.05f and < 0.95f)
+        {
+            var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
+            if (lastCharacterMessage?.User == _chatSessionData.Character.Name)
+            {
+                var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
+                lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
+                lastCharacterMessage.Tokens = _textGen.GetTokenCount(lastCharacterMessage.Text);
+                _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Text);
+            }
+
+            text = "*interrupts {{char}}* " + text;
+            _logger.LogInformation("Added interruption notice to the user message. Updated text: {Text}", text);
+        }
 
         if (_chatSessionState.PendingUserMessage == null)
         {
@@ -28,21 +43,6 @@ public partial class ChatSession
             var append = '\n' + text;
             _chatSessionState.PendingUserMessage.Text += append;
             _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
-        }
-        
-        if (speechInterruptionRatio is > 0.05f and < 0.95f)
-        {
-            var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
-            if (lastCharacterMessage?.User == _chatSessionData.Character.Name)
-            {
-                var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
-                lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
-                lastCharacterMessage.Tokens = _textGen.GetTokenCount(lastCharacterMessage.Text);
-                _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Text);
-            }
-
-            text = "*interrupts {{char}}* " + text;
-            _logger.LogInformation("Added interruption notice to the user message. Updated text: {Text}", text);
         }
 
         _chatSessionData.Actions = clientSendMessage.Actions;

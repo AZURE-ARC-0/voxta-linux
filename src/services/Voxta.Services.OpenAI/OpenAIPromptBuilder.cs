@@ -52,7 +52,7 @@ public class OpenAIPromptBuilder
                     You are tasked with inferring the best action from a list based on the content of a sample chat.
 
                     Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}
-                    """
+                    """.ReplaceLineEndings("\n")
             },
         };
         

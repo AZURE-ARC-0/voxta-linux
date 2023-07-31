@@ -43,6 +43,7 @@ public class OpenAIPromptBuilderTests
         system: Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
+        Only write a single reply from Jane for natural speech.
         user: Hello
         assistant: World
         user: Question
@@ -82,6 +83,7 @@ public class OpenAIPromptBuilderTests
         Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
+        Only write a single reply from Jane for natural speech.
         user: Hello
         assistant: World
         user: Question
@@ -120,17 +122,22 @@ public class OpenAIPromptBuilderTests
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
-        system: You are a tool that selects the character animation for a Virtual Reality game. You will be presented with a chat, and must provide the animation to play from the provided list. Only answer with a single animation name. Example response: [smile]
-        user: Jane's Personality: some-personality
+        system: You are tasked with inferring the best action from a list based on the content of a sample chat.
+
+        Actions: [action1], [action2]
+        user: Conversation Context:
+        Jane's Personality: some-personality
         Scenario: some-scenario
-        Previous messages:
+        Context: some-context
+
+        Conversation:
         Joe: Hello
         Jane: World
         Joe: Question
-        ---
-        Context: some-context
-        Available actions: [action1], [action2]
-        Write the action Jane should play.
+
+        Based on the last message, which of the following actions is the most applicable for Jane: [action1], [action2]
+
+        Only write the action.
         """.ReplaceLineEndings("\n").TrimExcess()));
     }
 }

@@ -2,6 +2,7 @@
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Core;
 
@@ -15,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SpeechGeneratorFactory>();
         services.AddSingleton<PendingSpeechManager>();
         services.AddSingleton<Sanitizer>();
+        services.AddSingleton<ITimeProvider, TimeProvider>();
     }
     
     public static IServiceRegistry<ISpeechToTextService> AddSpeechToTextRegistry(this IServiceCollection services)

@@ -1,20 +1,27 @@
-﻿using System.Diagnostics;
-using Voxta.Abstractions.Diagnostics;
+﻿using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Core;
 
 public class ChatSessionState
 {
+    private readonly ITimeProvider _timeProvider;
     public ChatSessionStates State = ChatSessionStates.Live;
     public TextData? PendingUserMessage;
     
-    private readonly Stopwatch _audioPlaybackStopwatch = new();
+    private DateTimeOffset _audioPlaybackStart;
     private double _audioPlaybackDuration;
+    
     private IPerformanceMetricsTracker? _perfTracker;
     
     private CancellationTokenSource? _generateReplyAbort;
     private TaskCompletionSource<bool>? _generateReplyTaskCompletionSource;
+
+    public ChatSessionState(ITimeProvider timeProvider)
+    {
+        _timeProvider = timeProvider;
+    }
 
     public CancellationToken GenerateReplyBegin(IPerformanceMetricsTracker perfTracker)
     {
@@ -56,7 +63,7 @@ public class ChatSessionState
 
     public void StartSpeechAudio(double duration)
     {
-        _audioPlaybackStopwatch.Restart();
+        _audioPlaybackStart = _timeProvider.UtcNow;
         _audioPlaybackDuration = duration;
         _perfTracker?.Done();
         _perfTracker = null;
@@ -64,15 +71,17 @@ public class ChatSessionState
     
     public void StopSpeechAudio()
     {
-        _audioPlaybackStopwatch.Stop();
+        _audioPlaybackStart = default;
         _audioPlaybackDuration = 0;
     }
 
     public double InterruptSpeech()
     {
-        if (!_audioPlaybackStopwatch.IsRunning || _audioPlaybackDuration == 0) return 0;
-        _audioPlaybackStopwatch.Stop();
-        var ratio = _audioPlaybackStopwatch.Elapsed.TotalSeconds / _audioPlaybackDuration;
+        if (_audioPlaybackDuration == 0) return 0;
+        var now = _timeProvider.UtcNow;
+        var duration = now - _audioPlaybackStart;
+        var ratio = duration.TotalSeconds / _audioPlaybackDuration;
+        _audioPlaybackStart = default;
         _audioPlaybackDuration = 0;
         _perfTracker = null;
         return ratio;

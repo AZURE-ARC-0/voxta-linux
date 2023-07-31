@@ -4,6 +4,7 @@ using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Core.Tests;
 
@@ -15,6 +16,7 @@ public class ChatSessionTests
     private Mock<ITextGenService> _textGen = null!;
     private List<string> _serverErrors = null!;
     private Mock<ISpeechGenerator> _speechGenerator = null!;
+    private Mock<ITimeProvider> _timeProvider = null!;
 
     [SetUp]
     public void Setup()
@@ -48,7 +50,8 @@ public class ChatSessionTests
             Description = "User Description",
             PauseSpeechRecognitionDuringPlayback = false,
         };
-        var chatSessionState = new ChatSessionState();
+        _timeProvider = new Mock<ITimeProvider>();
+        var chatSessionState = new ChatSessionState(_timeProvider.Object);
         _speechGenerator = new Mock<ISpeechGenerator>();
 
         _session = new ChatSession(
@@ -123,11 +126,12 @@ public class ChatSessionTests
         _speechGenerator.Setup(m => m.CreateSpeechAsync(It.IsAny<string>(), It.IsAny<string>(), false, It.IsAny<CancellationToken>())).ReturnsAsync((string?) null);
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
 
+        _timeProvider.Setup(m => m.UtcNow).Returns(new DateTimeOffset(2000, 1, 1, 0, 0, 0, 0, TimeSpan.Zero));
         _session.HandleClientMessage(new ClientSendMessage { Text = "Hello!" });
-        await _session.WaitForPendingQueueItemsAsync();
         _session.HandleSpeechPlaybackStart(1);
-        await Task.Delay(500);
+        _timeProvider.Setup(m => m.UtcNow).Returns(new DateTimeOffset(2000, 1, 1, 0, 0, 0, 500, TimeSpan.Zero));
         _session.HandleClientMessage(new ClientSendMessage { Text = "Stop!" });
+        await _session.WaitForPendingQueueItemsAsync();
 
         await AssertSession();
         Assert.Multiple(() =>
