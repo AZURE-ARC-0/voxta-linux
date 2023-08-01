@@ -20,7 +20,6 @@ public class Character : CharacterCardExtended
     [BsonId] public required Guid Id { get; set; }
     public bool ReadOnly { get; set; }
 }
-    
 
 [Serializable]
 public class CharacterServicesMap

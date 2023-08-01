@@ -106,6 +106,7 @@ public sealed partial class UserConnection : IUserConnection
             catch (WebSocketException exc)
             {
                 _logger.LogInformation("Disconnected by websocket abort: {Reason}", exc.Message);
+                return;
             }
             catch (Exception exc)
             {
@@ -154,20 +155,7 @@ public sealed partial class UserConnection : IUserConnection
 
         await _tunnel.SendAsync(new ServerCharacterLoadedMessage
         {
-            Name = character.Name,
-            Description = character.Description,
-            Personality = character.Personality,
-            Scenario = character.Scenario,
-            FirstMessage = character.FirstMessage,
-            MessageExamples = character.MessageExamples ?? "",
-            SystemPrompt = character.SystemPrompt,
-            PostHistoryInstructions = character.PostHistoryInstructions,
-            Culture = character.Culture,
-            Prerequisites = character.Prerequisites != null ? string.Join(",", character.Prerequisites) : null,
-            TextGenService = character.Services.TextGen.Service ?? "",
-            TtsService = character.Services.SpeechGen.Service ?? "",
-            TtsVoice = character.Services.SpeechGen.Voice ?? "",
-            EnableThinkingSpeech = character.Options?.EnableThinkingSpeech ?? true,
+            Character = character
         }, cancellationToken);
     }
 

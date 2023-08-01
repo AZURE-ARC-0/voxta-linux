@@ -50,7 +50,7 @@
                 break;
             case 'characterLoaded':
                 this.dispatchEvent(new CustomEvent('characterLoaded', {
-                    detail: {character: data}
+                    detail: {character: data.character}
                 }));
                 break;
             case 'ready':
@@ -84,14 +84,14 @@
                     detail: {text: data.text}
                 }));
                 break;
-            case 'error':
-                this.dispatchEvent(new CustomEvent('error', {
-                    detail: {message: data.message}
-                }));
-                break;
             case 'action':
                 this.dispatchEvent(new CustomEvent('action', {
                     detail: {value: data.value}
+                }));
+                break;
+            case 'error':
+                this.dispatchEvent(new CustomEvent('error', {
+                    detail: {message: data.message}
                 }));
                 break;
             default:

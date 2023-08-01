@@ -57,22 +57,7 @@ public class ServerChatsListLoadedMessage : ServerMessage
 [Serializable]
 public class ServerCharacterLoadedMessage : ServerMessage
 {
-    public required string Name { get; init; }
-    public required string Description { get; init; }
-    public required string Personality { get; init; }
-    public required string Scenario { get; init; }
-    public required string FirstMessage { get; init; }
-    public required string MessageExamples { get; init; }
-    public string? SystemPrompt { get; init; }
-    public string? PostHistoryInstructions { get; init; }
-    
-    public required string Culture { get; init; }
-    public string? Prerequisites { get; init; }
-    public required string TextGenService { get; init; }
-    public required string TtsService { get; init; }
-    public required string TtsVoice { get; init; }
-    
-    public bool EnableThinkingSpeech { get; init; }
+    public required Character Character { get; init; }
 }
 
 [Serializable]
