@@ -151,7 +151,21 @@ public class ChatSessionFactory
             {
                 ChatId = chatId ?? Crypto.CreateCryptographicallySecureGuid(),
                 UserName = profile.Name,
-                Character = character,
+                Character = new CharacterCardExtended
+                {
+                    
+                    Name = character.Name,
+                    Description = textProcessor.ProcessText(character.Description),
+                    Personality = textProcessor.ProcessText(character.Personality),
+                    Scenario = textProcessor.ProcessText(character.Scenario),
+                    FirstMessage = textProcessor.ProcessText(character.FirstMessage),
+                    MessageExamples = textProcessor.ProcessText(character.MessageExamples),
+                    SystemPrompt = textProcessor.ProcessText(character.SystemPrompt),
+                    PostHistoryInstructions = textProcessor.ProcessText(character.PostHistoryInstructions),
+                    Prerequisites = character.Prerequisites,
+                    Culture = character.Culture,
+                    Services = character.Services
+                },
                 ThinkingSpeech = thinkingSpeech,
                 AudioPath = startChatMessage.AudioPath,
             };
