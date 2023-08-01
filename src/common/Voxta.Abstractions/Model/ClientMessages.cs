@@ -40,27 +40,38 @@ public class ClientLoadCharacterMessage : ClientMessage
 }
 
 [Serializable]
-public class ClientStartChatMessage : ClientMessage
+public abstract class ClientDoChatMessageBase : ClientMessage
 {
-    public Guid? ChatId { get; init; }
     public string? AudioPath { get; init; }
     public bool UseServerSpeechRecognition { get; init; }
-    
+    public string[] AcceptedAudioContentTypes { get; set; } = { "audio/x-wav", "audio/mpeg" };
+}
+
+
+[Serializable]
+public class ClientResumeChatMessage : ClientDoChatMessageBase
+{
+    public required Guid ChatId { get; init; }
+}
+
+[Serializable]
+public class ClientStartChatMessage : ClientDoChatMessageBase
+{
+    public Guid? ChatId { get; init; }
     public required string Name { get; init; }
     public required string Description { get; init; }
     public required string Personality { get; init; }
     public required string Scenario { get; init; }
+    
     public string? FirstMessage { get; init; }
     public string? MessageExamples { get; init; }
     public string? SystemPrompt { get; init; }
     public string? PostHistoryInstructions { get; init; }
-
     public string? Prerequisites { get; set; }
     public string Culture { get; init; } = "en-US";
     public string? TextGenService { get; init; }
     public string? TtsService { get; init; }
     public string? TtsVoice { get; init; }
-    public string[] AcceptedAudioContentTypes { get; set; } = { "audio/x-wav", "audio/mpeg" };
     public string? SttService { get; set; }
     public string? ActionInferenceService { get; set; }
 }

@@ -64,7 +64,7 @@ public class CharactersController : Controller
                 MessageExamples = "",
                 SystemPrompt = "",
                 PostHistoryInstructions = "",
-                Services = new Character.CharacterServicesMap
+                Services = new CharacterServicesMap
                 {
                     TextGen = new ServiceMap
                     {
@@ -76,7 +76,7 @@ public class CharactersController : Controller
                         Voice = "",
                     },
                 },
-                Options = new Character.CharacterOptions
+                Options = new CharacterOptions
                 {
                     EnableThinkingSpeech = true,
                 }
@@ -137,7 +137,7 @@ public class CharactersController : Controller
     {
         VoiceInfo[] voices; 
 
-        if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
+        if (!string.IsNullOrEmpty(character.Services.SpeechGen?.Service))
         {
             var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
             var ttsService = await ttsServiceFactory.CreateAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);

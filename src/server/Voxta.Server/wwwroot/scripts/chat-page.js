@@ -124,15 +124,9 @@ voxtaClient.addEventListener('chatsListLoaded', (evt) => {
     evt.detail.chats.forEach(chat => {
         const button = document.createElement('button');
         button.className = 'btn btn-secondary';
-        const charName = document.createElement('b');
-        charName.textContent = chat.name;
-        button.appendChild(charName);
-        const charDesc = document.createElement('div');
-        charDesc.className = 'small';
-        charDesc.textContent = chat.description;
-        button.appendChild(charDesc);
+        button.textContent = `Chat ${chat.name}`;
         button.onclick = () => {
-            voxtaClient.loadCharacter(chat.id);
+            voxtaClient.resumeChat(chat.id);
             chatButtons.classList.remove('voxta_show');
         };
         chatButtons.appendChild(button);

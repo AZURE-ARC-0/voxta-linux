@@ -34,7 +34,7 @@ public partial class ChatSession
                 Text = userText,
                 Tokens = _textGen.GetTokenCount(userText)
             };
-            var userMessageData = ChatMessageData.FromGen(_chatSessionData.UserName, userTextData);
+            var userMessageData = ChatMessageData.FromGen(_chatSessionData.ChatId, _chatSessionData.UserName, userTextData);
             _chatSessionData.Messages.Add(userMessageData);
             _chatSessionState.PendingUserMessage = userMessageData;
         }
@@ -61,7 +61,7 @@ public partial class ChatSession
 
             var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
 
-            reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, genData);
+            reply = ChatMessageData.FromGen(_chatSessionData.ChatId, _chatSessionData.Character.Name, genData);
         }
         catch (OperationCanceledException)
         {

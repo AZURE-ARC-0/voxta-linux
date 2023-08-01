@@ -16,17 +16,15 @@ public class ChatLiteDBRepository : IChatRepository
     
     public Task<ServerChatsListLoadedMessage.ChatsListItem[]> GetChatsListAsync(CancellationToken cancellationToken)
     {
-        var chats = _chatsCollection.Query()
-            .Select(x => new { x.Id, x.Character })
-            .ToList();
+        var chats = _chatsCollection.Query().ToList();
 
         var result = chats
             .Select(c => new ServerChatsListLoadedMessage.ChatsListItem
             {
                 Id = c.Id ?? throw new NullReferenceException("Chat ID was null"),
-                CharacterName = c.Character.Name
+                Name = c.Character.Name,
             })
-            .OrderBy(x => x.CharacterName)
+            .OrderBy(x => x.Id)
             .ToArray();
 
         return Task.FromResult(result);

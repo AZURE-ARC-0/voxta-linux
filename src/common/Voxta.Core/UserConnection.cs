@@ -65,6 +65,9 @@ public sealed class UserConnection : IUserConnection
                     case ClientStartChatMessage startChatMessage:
                         await StartChatAsync(startChatMessage, cancellationToken);
                         break;
+                    case ClientResumeChatMessage resumeChatMessage:
+                        await StartChatAsync(resumeChatMessage, cancellationToken);
+                        break;
                     case ClientStopChatMessage:
                         if(_chat != null) await _chat.DisposeAsync();
                         _chat = null;
@@ -149,9 +152,9 @@ public sealed class UserConnection : IUserConnection
             PostHistoryInstructions = character.PostHistoryInstructions,
             Culture = character.Culture,
             Prerequisites = character.Prerequisites != null ? string.Join(",", character.Prerequisites) : null,
-            TextGenService = character.Services.TextGen.Service ?? "",
-            TtsService = character.Services.SpeechGen.Service ?? "",
-            TtsVoice = character.Services.SpeechGen.Voice ?? "",
+            TextGenService = character.Services.TextGen?.Service ?? "",
+            TtsService = character.Services.SpeechGen?.Service ?? "",
+            TtsVoice = character.Services.SpeechGen?.Voice ?? "",
             EnableThinkingSpeech = character.Options?.EnableThinkingSpeech ?? true,
         }, cancellationToken);
     }
@@ -175,6 +178,24 @@ public sealed class UserConnection : IUserConnection
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, startChatMessage, cancellationToken);
         
         _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
+
+        _chat.SendReady();
+    }
+    
+    private async Task StartChatAsync(ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
+    {
+        if(_chat != null) await _chat.DisposeAsync();
+        _chat = null;
+        
+        if(!_userConnectionManager.TryGetChatLock(this))
+        {
+            await SendError("Another chat is in progress, close this one first.", cancellationToken);
+            return;
+        }
+        
+        _chat = await _chatSessionFactory.CreateAsync(_tunnel, resumeChatMessage, cancellationToken);
+        
+        _logger.LogInformation("Started chat: {ChatId}", resumeChatMessage.ChatId);
 
         _chat.SendReady();
     }

@@ -51,7 +51,7 @@ public class ServerChatsListLoadedMessage : ServerMessage
     public class ChatsListItem
     {
         public required string Id { get; init; }
-        public required string CharacterName { get; init; }
+        public required string Name { get; init; }
     }
 }
 

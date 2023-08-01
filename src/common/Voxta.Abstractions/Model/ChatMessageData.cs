@@ -1,17 +1,35 @@
-﻿namespace Voxta.Abstractions.Model;
+﻿using LiteDB;
+
+namespace Voxta.Abstractions.Model;
 
 [Serializable]
 public class ChatMessageData : TextData
 {
-    public Guid Id { get; init; }
+    public required string ChatId { get; init; }
+    [BsonId] public required string Id { get; set; }
     public required string User { get; init; }
-    public DateTimeOffset Timestamp { get; init; }
+    public required DateTimeOffset Timestamp { get; init; }
 
-    public static ChatMessageData FromGen(string user, TextData gen)
+    #warning Remove
+    public static ChatMessageData Fake(string user, string message)
     {
         return new ChatMessageData
         {
-            Id = Guid.NewGuid(),
+            ChatId = Guid.Empty.ToString(),
+            Id = Guid.NewGuid().ToString(),
+            User = user,
+            Timestamp = DateTimeOffset.UtcNow,
+            Text = message,
+            Tokens = 0,
+        };
+    }
+
+    public static ChatMessageData FromGen(Guid chatId, string user, TextData gen)
+    {
+        return new ChatMessageData
+        {
+            ChatId = chatId.ToString(),
+            Id = Guid.NewGuid().ToString(),
             User = user,
             Timestamp = DateTimeOffset.UtcNow,
             Text = gen.Text,

@@ -28,9 +28,8 @@ public class ChatSessionTests
         _chatSessionData = new ChatSessionData
         {
             UserName = "User",
-            Character = new Character
+            Character = new CharacterCardExtended
             {
-                Id = Guid.NewGuid().ToString(),
                 Name = "Assistant",
                 SystemPrompt = "You are a test assistant",
                 Description = "",
@@ -40,7 +39,7 @@ public class ChatSessionTests
                 Services = null!
             },
             AudioPath = "/audio-path",
-            TtsVoice = "voice",
+            
         };
         var chatTextProcessor = new Mock<IChatTextProcessor>();
         chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>())).Returns<string?>(text => text ?? "");

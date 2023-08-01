@@ -147,7 +147,6 @@ public class DiagnosticsUtil
 
     private async Task<ServiceDiagnosticsResult> TryTextGenAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
-
         return await TestServiceAsync(
             serviceName,
             runTests,
@@ -157,14 +156,16 @@ public class DiagnosticsUtil
                 var result = await service.GenerateReplyAsync(new ChatSessionData
                 {
                     UserName = "User",
-                    Character = new CharacterCard
+                    Character = new Character
                     {
+                        Id = Guid.NewGuid().ToString(),
                         Name = "Assistant",
                         SystemPrompt = "You are a test assistant",
                         Description = "",
                         Personality = "",
                         Scenario = "This is a test",
                         FirstMessage = "Beginning test.",
+                        Services = null!,
                     }
                 }, cancellationToken);
                 return "Response: " + result;
@@ -224,14 +225,15 @@ public class DiagnosticsUtil
                 var result = await service.SelectActionAsync(new ChatSessionData
                 {
                     UserName = "User",
-                    Character = new CharacterCard
+                    Character = new CharacterCardExtended
                     {
                         Name = "Assistant",
                         SystemPrompt = "You are a test assistant",
                         Description = "",
                         Personality = "",
                         Scenario = "This is a test",
-                        FirstMessage = "Beginning test."
+                        FirstMessage = "Beginning test.",
+                        Services = null!
                     },
                     Actions = actions
                 }, cancellationToken);

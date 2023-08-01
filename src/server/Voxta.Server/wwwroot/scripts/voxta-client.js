@@ -50,7 +50,7 @@
                 break;
             case 'characterLoaded':
                 this.dispatchEvent(new CustomEvent('characterLoaded', {
-                    detail: {character: data.character}
+                    detail: {character: data}
                 }));
                 break;
             case 'ready':
@@ -125,6 +125,16 @@
         const msg = JSON.stringify({
             ...character,
             $type: "startChat",
+            useServerSpeechRecognition: true,
+            acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
+        });
+        this.socket.send(msg);
+    }
+
+    resumeChat(id) {
+        const msg = JSON.stringify({
+            id: id,
+            $type: "resumeChat",
             useServerSpeechRecognition: true,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });

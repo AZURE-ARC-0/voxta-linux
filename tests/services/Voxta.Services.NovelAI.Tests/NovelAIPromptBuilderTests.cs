@@ -26,12 +26,13 @@ public class NovelAIPromptBuilderTests
                 Personality = "some-personality",
                 Scenario = "some-scenario",
                 FirstMessage = "some-first-message",
+                Services = null!,
             },
             Messages =
             {
-                new ChatMessageData { User = "Joe", Text = "Hello" },
-                new ChatMessageData { User = "Jane", Text = "World" },
-                new ChatMessageData { User = "Joe", Text = "Question" },
+                ChatMessageData.Fake("Joe", "Hello"),
+                ChatMessageData.Fake("Jane", "World"),
+                ChatMessageData.Fake("Joe", "Question"),
             }
         }, 4096);
 

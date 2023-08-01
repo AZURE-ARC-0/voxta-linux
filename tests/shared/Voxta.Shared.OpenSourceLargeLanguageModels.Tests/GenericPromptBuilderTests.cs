@@ -27,12 +27,13 @@ public class GenericPromptBuilderTests
                 Personality = "some-personality",
                 Scenario = "some-scenario",
                 FirstMessage = "some-first-message",
+                Services = null!,
             },
             Messages =
             {
-                new ChatMessageData { User = "Joe", Text = "Hello" },
-                new ChatMessageData { User = "Jane", Text = "World" },
-                new ChatMessageData { User = "Joe", Text = "Question" },
+                ChatMessageData.Fake("Joe", "Hello"),
+                ChatMessageData.Fake("Jane", "World"),
+                ChatMessageData.Fake("Joe", "Question"),
             }
         }, 4096);
 
@@ -63,12 +64,13 @@ public class GenericPromptBuilderTests
                 SystemPrompt = "some-system-prompt",
                 PostHistoryInstructions = "some-post-history-instructions",
                 MessageExamples = "Joe: Request\nJane: Response",
+                Services = null!,
             },
             Messages =
             {
-                new ChatMessageData { User = "Joe", Text = "Hello" },
-                new ChatMessageData { User = "Jane", Text = "World" },
-                new ChatMessageData { User = "Joe", Text = "Question" },
+                ChatMessageData.Fake("Joe", "Hello"),
+                ChatMessageData.Fake("Jane", "World"),
+                ChatMessageData.Fake("Joe", "Question"),
             },
             Actions = new[] { "action1", "action2" },
             Context = "some-context",
@@ -105,12 +107,13 @@ public class GenericPromptBuilderTests
                 SystemPrompt = "some-system-prompt",
                 PostHistoryInstructions = "some-post-history-instructions",
                 MessageExamples = "Joe: Request\nJane: Response",
+                Services = null!,
             },
             Messages =
             {
-                new ChatMessageData { User = "Joe", Text = "Hello" },
-                new ChatMessageData { User = "Jane", Text = "World" },
-                new ChatMessageData { User = "Joe", Text = "Question" },
+                ChatMessageData.Fake("Joe", "Hello"),
+                ChatMessageData.Fake("Jane", "World"),
+                ChatMessageData.Fake("Joe", "Question"),
             },
             Actions = new[] { "action1", "action2" },
             Context = "some-context",

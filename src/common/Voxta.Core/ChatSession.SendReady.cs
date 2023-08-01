@@ -26,7 +26,7 @@ public partial class ChatSession
         {
             foreach (var thinkingSpeech in _chatSessionData.ThinkingSpeech)
             {
-                var thinkingSpeechId = Crypto.CreateSha1Hash($"{_chatSessionData.TtsVoice}::{thinkingSpeech}");
+                var thinkingSpeechId = Crypto.CreateSha1Hash($"{_chatSessionData.Character.Services.SpeechGen?.Voice ?? "NULL"}::{thinkingSpeech}");
                 var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, thinkingSpeechId, true, cancellationToken);
                 if (thinkingSpeechUrl != null)
                     thinkingSpeechUrls.Add(thinkingSpeechUrl);
@@ -43,17 +43,26 @@ public partial class ChatSession
         
         _logger.LogInformation("Chat ready!");
 
-        if (!string.IsNullOrEmpty(_chatSessionData.Character.FirstMessage))
+        if (_chatSessionData.Messages.Count == 0 && !string.IsNullOrEmpty(_chatSessionData.Character.FirstMessage))
         {
             var textData = new TextData
             {
                 Text = _chatSessionData.Character.FirstMessage,
                 Tokens = _textGen.GetTokenCount(_chatSessionData.Character.FirstMessage)
             };
-            var reply = ChatMessageData.FromGen(_chatSessionData.Character.Name, textData);
+            var reply = ChatMessageData.FromGen( _chatSessionData.ChatId, _chatSessionData.Character.Name, textData);
+            #warning Save
             _chatSessionData.Messages.Add(reply);
             _logger.LogInformation("Sending first message: {Message}", reply.Text);
             await SendReusableReplyWithSpeechAsync(reply.Text, cancellationToken);
+        }
+        else if (_chatSessionData.Messages.Count > 0)
+        {
+            #warning We should remember how long ago the user disconnected
+            HandleClientMessage(new ClientSendMessage
+            {
+                Text = $"({_chatSessionData.UserName} disconnects for a while and comes back online)"
+            });
         }
     }
 

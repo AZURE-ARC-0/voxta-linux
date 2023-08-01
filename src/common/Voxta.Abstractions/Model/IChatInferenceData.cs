@@ -3,7 +3,7 @@
 public interface IChatInferenceData
 {
     string UserName { get; }
-    CharacterCard Character { get; }
+    CharacterCardExtended Character { get; }
     string? Context { get; }
     string[]? Actions { get; }
 

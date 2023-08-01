@@ -5,7 +5,7 @@ public class ChatSessionData : IChatInferenceData
 {
     public Guid ChatId { get; init; }
     public required string UserName { get; init; }
-    public required CharacterCard Character { get; init; }
+    public required CharacterCardExtended Character { get; init; }
     public string? Context { get; set; }
     public string[]? Actions { get; set; }
     public string[]? ThinkingSpeech { get; init; }
@@ -15,7 +15,6 @@ public class ChatSessionData : IChatInferenceData
     public List<ChatMessageData> Messages { get; } = new();
     
     public string? AudioPath { get; init; }
-    public string? TtsVoice { get; set; }
 
     public string GetMessagesAsString()
     {
