@@ -1,4 +1,4 @@
-﻿namespace Voxta.Services.NovelAI;
+﻿namespace Voxta.Services.NovelAI.Presets;
 
 public static class ClioPresets
 {

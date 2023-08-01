@@ -10,6 +10,7 @@ using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.NovelAI.Presets;
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
 #endif

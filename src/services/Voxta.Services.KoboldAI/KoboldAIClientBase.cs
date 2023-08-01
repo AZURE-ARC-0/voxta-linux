@@ -1,11 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
+using Voxta.Common;
 
 namespace Voxta.Services.KoboldAI;
 
@@ -64,38 +63,25 @@ public class KoboldAIClientBase
         var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
         request.Content = bodyContent;
-
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+        request.ConfigureEvenStream();
         using var response = await _httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
             throw new KoboldAIException(await response.Content.ReadAsStringAsync(cancellationToken));
 
-        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
-#warning Extract to common utility for SSE
-        var sb = new StringBuilder();
-        while (true)
-        {
-            var line = await reader.ReadLineAsync(cancellationToken);
-            if (line == null) break;
-            if (!line.StartsWith("data:")) continue;
-            var json = JsonSerializer.Deserialize<TextGenEventData>(line[5..]);
-            if (json == null) break;
-            var token = json.token;
-            sb.Append(token);
-        }
-        reader.Close();
-        return sb.ToString();
+        return await response.ReadEventStream<TextGenEventData>(cancellationToken);
     }
-    
+
     [Serializable]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private class TextGenEventData
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    private class TextGenEventData : IEventStreamData
     {
         public required string token { get; init; }
         public bool final { get; init; }
         public int ptr { get; init; }
         public string? error { get; init; }
+        public string GetToken() => token;
     }
 
     public void Dispose()

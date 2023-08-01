@@ -8,6 +8,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
+using Voxta.Services.NovelAI.Presets;
 using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.NovelAI;
@@ -95,36 +96,14 @@ public class NovelAITextGenService : ITextGenService
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+        request.ConfigureEvenStream();
 
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
         using var response = await _httpClient.SendAsync(request, cancellationToken);
-
         if (!response.IsSuccessStatusCode)
             throw new NovelAIException(await response.Content.ReadAsStringAsync(cancellationToken));
-
-        using var reader = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
-        var sb = new StringBuilder();
-        while (true)
-        {
-            var line = await reader.ReadLineAsync(cancellationToken);
-            if (line == null) break;
-            if (!line.StartsWith("data:")) continue;
-            var json = JsonSerializer.Deserialize<NovelAIEventData>(line[5..]);
-            if (json == null || json.token.Length == 0) break;
-            if (json.token[^1] is '\"' or '\n')
-            {
-                sb.Append(json.token[..^1]);
-                break;
-            }
-            sb.Append(json.token);
-        }
-        reader.Close();
-        
+        var text = await response.ReadEventStream<NovelAIEventData>(cancellationToken);
         textGenPerf.Done();
-
-        var text = sb.ToString();
-        
         return text;
     }
     
@@ -135,12 +114,14 @@ public class NovelAITextGenService : ITextGenService
 
     [Serializable]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    private class NovelAIEventData
+    private class NovelAIEventData : IEventStreamData
     {
         public required string token { get; init; }
         public bool final { get; init; }
         public int ptr { get; init; }
         public string? error { get; init; }
+        
+        public string GetToken() => token;
     }
 
     public void Dispose()
