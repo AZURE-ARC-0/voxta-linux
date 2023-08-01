@@ -14,35 +14,30 @@ public class ChatLiteDBRepository : IChatRepository
         _chatsCollection = db.GetCollection<Chat>();
     }
     
-    public Task<ServerChatsListLoadedMessage.ChatsListItem[]> GetChatsListAsync(CancellationToken cancellationToken)
+    public Task<Chat[]> GetChatsListAsync(Guid charId, CancellationToken cancellationToken)
     {
         var chats = _chatsCollection.Query().ToList();
 
         var result = chats
-            .Select(c => new ServerChatsListLoadedMessage.ChatsListItem
-            {
-                Id = c.Id ?? throw new NullReferenceException("Chat ID was null"),
-                Name = c.Character.Name,
-            })
-            .OrderBy(x => x.Id)
+            .OrderByDescending(x => x.CreatedAt)
             .ToArray();
 
         return Task.FromResult(result);
     }
     
-    public Task<Chat?> GetChatAsync(string id, CancellationToken cancellationToken)
+    public Task<Chat?> GetChatAsync(Guid id, CancellationToken cancellationToken)
     {
         var chat = _chatsCollection.FindOne(x => x.Id == id);
         return Task.FromResult<Chat?>(chat);
     }
 
-    public Task SaveChatAsync(Chat card)
+    public Task SaveChatAsync(Chat chat)
     {
-        _chatsCollection.Upsert(card);
+        _chatsCollection.Upsert(chat);
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(string charId)
+    public Task DeleteAsync(Guid charId)
     {
         _chatsCollection.DeleteMany(x => x.Id == charId);
         return Task.CompletedTask;

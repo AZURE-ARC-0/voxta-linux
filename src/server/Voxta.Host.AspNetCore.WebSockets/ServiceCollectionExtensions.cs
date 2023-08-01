@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
         services.AddNovelAI();
         textGenRegistry.RegisterNovelAI();
         textToSpeechRegistry.RegisterNovelAI();
+        actionInferenceRegistry.RegisterNovelAI();
 
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();

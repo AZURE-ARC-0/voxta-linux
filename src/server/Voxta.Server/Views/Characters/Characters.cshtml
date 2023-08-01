@@ -29,11 +29,11 @@
                             <td>
                                 @if (character.ReadOnly)
                                 {
-                                    <a class="btn btn-dark" href="/characters/@character.Id?edit=false" title="View">@character.Name</a>
+                                    <a class="btn btn-dark" href="/characters/@character.Id" title="View">@character.Name</a>
                                 }
                                 else
                                 {
-                                    <a class="btn btn-dark" href="/characters/@character.Id?edit=true">@character.Name</a>
+                                    <a class="btn btn-dark" href="/characters/@character.Id" title="Edit">@character.Name</a>
                                 }
                                 @if (character.ReadOnly)
                                 {
@@ -60,6 +60,14 @@
                                         </form>
                                     }
                                     <a class="btn btn-secondary" href="/characters/new?from=@character.Id" title="Clone">Clone</a>
+                                    @if (character.ReadOnly)
+                                    {
+                                        <a class="btn btn-secondary" href="/characters/@character.Id" title="View">View</a>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-secondary" href="/characters/@character.Id" title="Edit">Edit</a>
+                                    }
                                 </div>
                             </td>
                         </tr>

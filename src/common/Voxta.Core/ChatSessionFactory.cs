@@ -5,7 +5,6 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
-using Voxta.Common;
 using Microsoft.Extensions.Logging;
 using Voxta.Abstractions.System;
 
@@ -52,68 +51,7 @@ public class ChatSessionFactory
         _profileRepository = profileRepository;
     }
 
-    public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
-    {
-        var chat = await _chatRepository.GetChatAsync(resumeChatMessage.ChatId.ToString(), cancellationToken);
-        if (chat == null) throw new NullReferenceException($"Could not find chat {resumeChatMessage.ChatId}");
-        return await CreateAsync(
-            tunnel,
-            resumeChatMessage.ChatId,
-            chat.Character,
-            resumeChatMessage,
-            cancellationToken
-        );
-    }
-
-    public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
-    {
-        var character = new CharacterCardExtended
-        {
-            Name = startChatMessage.Name,
-            Description = startChatMessage.Description,
-            Personality = startChatMessage.Personality,
-            Scenario = startChatMessage.Scenario,
-            FirstMessage = startChatMessage.FirstMessage ?? "",
-            MessageExamples = startChatMessage.MessageExamples,
-            SystemPrompt = startChatMessage.SystemPrompt,
-            PostHistoryInstructions = startChatMessage.PostHistoryInstructions,
-            Prerequisites = startChatMessage.Prerequisites?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-            Culture = startChatMessage.Culture,
-            Services = new CharacterServicesMap
-            {
-                SpeechGen = new VoiceServiceMap
-                {
-                    Service = startChatMessage.TtsService,
-                    Voice = startChatMessage.TtsVoice,
-                },
-                TextGen = new ServiceMap
-                {
-                    Service = startChatMessage.TextGenService,
-                },
-                ActionInference = new ServiceMap
-                {
-                    Service = startChatMessage.ActionInferenceService
-                }
-            }
-        };
-        #warning TODO
-        /*
-        await _chatRepository.SaveChatAsync(new Chat
-        {
-            Id = startChatMessage.ChatId,
-            Character = character
-        });
-        */
-        return await CreateAsync(
-            tunnel,
-            startChatMessage.ChatId,
-            character,
-            startChatMessage,
-            cancellationToken
-        );
-    }
-
-    private async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, Guid? chatId, CharacterCardExtended character, ClientDoChatMessageBase startChatMessage, CancellationToken cancellationToken)
+    public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, Chat chat, CharacterCardExtended character, ClientDoChatMessageBase startChatMessage, CancellationToken cancellationToken)
     {
         ITextGenService? textGen = null;
         ISpeechToTextService? speechToText = null;
@@ -145,15 +83,14 @@ public class ChatSessionFactory
 
             speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, character.Services.SpeechGen?.Voice, culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
-            var messages = chatId.HasValue ? await _chatMessageRepository.GetChatMessagesAsync(chatId.Value, cancellationToken) : null;
+            var messages = await _chatMessageRepository.GetChatMessagesAsync(chat.Id, cancellationToken);
             
             var chatData = new ChatSessionData
             {
-                ChatId = chatId ?? Crypto.CreateCryptographicallySecureGuid(),
+                Chat = chat,
                 UserName = profile.Name,
                 Character = new CharacterCardExtended
                 {
-                    
                     Name = character.Name,
                     Description = textProcessor.ProcessText(character.Description),
                     Personality = textProcessor.ProcessText(character.Personality),
@@ -169,10 +106,7 @@ public class ChatSessionFactory
                 ThinkingSpeech = thinkingSpeech,
                 AudioPath = startChatMessage.AudioPath,
             };
-            if (messages != null)
-            {
-                chatData.Messages.AddRange(messages);
-            }
+            chatData.Messages.AddRange(messages);
             // TODO: Optimize by pre-calculating tokens count
 
             var state = new ChatSessionState(_timeProvider);

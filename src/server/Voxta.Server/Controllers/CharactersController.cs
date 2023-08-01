@@ -43,7 +43,7 @@ public class CharactersController : Controller
     [HttpGet("/characters/{charId}")]
     public async Task<IActionResult> Character(
         [FromRoute] string charId,
-        [FromQuery] string? from,
+        [FromQuery] Guid? from,
         [FromServices] IServiceFactory<ITextToSpeechService> ttsServiceFactory,
         CancellationToken cancellationToken
         )
@@ -54,7 +54,7 @@ public class CharactersController : Controller
         {
             character = new Character
             {
-                Id = Crypto.CreateCryptographicallySecureGuid().ToString(),
+                Id = Crypto.CreateCryptographicallySecureGuid(),
                 ReadOnly = false,
                 Name = "",
                 Description = "",
@@ -84,12 +84,12 @@ public class CharactersController : Controller
         }
         else
         {
-            character = await _characterRepository.GetCharacterAsync(from ?? charId, cancellationToken);
+            character = await _characterRepository.GetCharacterAsync(from ?? Guid.Parse(charId), cancellationToken);
             if (character == null)
                 return NotFound("Character not found");
             if (isNew)
             {
-                character.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
+                character.Id = Crypto.CreateCryptographicallySecureGuid();
                 character.ReadOnly = false;
             }
         }
@@ -100,8 +100,13 @@ public class CharactersController : Controller
     }
     
     [HttpPost("/characters/delete")]
-    public async Task<IActionResult> Delete([FromForm] string charId)
+    public async Task<IActionResult> Delete([FromForm] Guid charId, [FromServices] IChatMessageRepository chatMessageRepository, [FromServices] IChatRepository chatRepository)
     {
+        foreach (var chat in await chatRepository.GetChatsListAsync(charId, CancellationToken.None))
+        {
+            await chatMessageRepository.DeleteChatMessages(chat.Id);
+            await chatRepository.DeleteAsync(chat.Id);
+        }
         await _characterRepository.DeleteAsync(charId);
         return RedirectToAction("Characters");
     }
@@ -121,7 +126,7 @@ public class CharactersController : Controller
             return View(vm);
         }
 
-        if (charId != "new" && charId != data.Character.Id)
+        if (charId != "new" && Guid.Parse(charId) != data.Character.Id)
             return BadRequest("Character ID mismatch");
 
         var prerequisites = new List<string>();
@@ -137,7 +142,7 @@ public class CharactersController : Controller
     {
         VoiceInfo[] voices; 
 
-        if (!string.IsNullOrEmpty(character.Services.SpeechGen?.Service))
+        if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
         {
             var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
             var ttsService = await ttsServiceFactory.CreateAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
@@ -206,7 +211,7 @@ public class CharactersController : Controller
         if (card?.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
 
         var character = TavernCardV2Import.ConvertCardToCharacter(card.Data);
-        character.Id = Crypto.CreateCryptographicallySecureGuid().ToString();
+        character.Id = Crypto.CreateCryptographicallySecureGuid();
 
         await _characterRepository.SaveCharacterAsync(character);
         
@@ -216,7 +221,7 @@ public class CharactersController : Controller
 
 
     [HttpGet("/characters/{charId}/download")]
-    public async Task<IActionResult> Download([FromRoute] string charId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Download([FromRoute] Guid charId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterAsync(charId, cancellationToken);
         if (character == null) return NotFound();

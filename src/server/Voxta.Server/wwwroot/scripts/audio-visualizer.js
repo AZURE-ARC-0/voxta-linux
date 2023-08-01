@@ -38,11 +38,14 @@
         if (this.currentAudio) {
             this.currentAudio.pause();
             this.currentAudio = null;
+            return true;
         }
         if (this.currentSource) {
             this.currentSource.stop();
             this.currentSource = null;
+            return true;
         }
+        return false;
     }
 
     play(url, onStart, onComplete) {
@@ -65,6 +68,7 @@
             if(onStart) onStart(this.currentAudio.duration);
         });
         this.currentAudio.addEventListener('ended', () => {
+            this.currentAudio = null;
             this.idle();
             if(onComplete) onComplete();
         });
@@ -91,6 +95,7 @@
                 this.talk();
                 if(onStart) onStart(audioBuffer.duration);
                 source.onended = () => {
+                    this.currentSource = null;
                     this.idle();
                     if(onComplete) onComplete();
                 };

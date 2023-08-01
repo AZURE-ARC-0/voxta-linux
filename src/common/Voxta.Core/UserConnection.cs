@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Model;
+﻿using System.Net.WebSockets;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Microsoft.Extensions.Logging;
@@ -54,7 +55,6 @@ public sealed class UserConnection : IUserConnection
 
         while (!_tunnel.Closed)
         {
-
             try
             {
                 var clientMessage = await _tunnel.ReceiveAsync<ClientMessage>(cancellationToken);
@@ -62,11 +62,14 @@ public sealed class UserConnection : IUserConnection
 
                 switch (clientMessage)
                 {
+                    case ClientNewChatMessage newChatMessage:
+                        await StartChatAsync(newChatMessage, cancellationToken);
+                        break;
                     case ClientStartChatMessage startChatMessage:
                         await StartChatAsync(startChatMessage, cancellationToken);
                         break;
                     case ClientResumeChatMessage resumeChatMessage:
-                        await StartChatAsync(resumeChatMessage, cancellationToken);
+                        await ResumeChatAsync(resumeChatMessage, cancellationToken);
                         break;
                     case ClientStopChatMessage:
                         if(_chat != null) await _chat.DisposeAsync();
@@ -85,8 +88,8 @@ public sealed class UserConnection : IUserConnection
                     case ClientLoadCharactersListMessage:
                         await LoadCharactersListAsync(cancellationToken);
                         break;
-                    case ClientLoadChatsListMessage:
-                        await LoadChatsListAsync(cancellationToken);
+                    case ClientLoadChatsListMessage loadChatsListMessage:
+                        await LoadChatsListAsync(loadChatsListMessage.CharacterId, cancellationToken);
                         break;
                     case ClientLoadCharacterMessage loadCharacterMessage:
                         await LoadCharacterAsync(loadCharacterMessage.CharacterId, cancellationToken);
@@ -99,6 +102,10 @@ public sealed class UserConnection : IUserConnection
             catch (OperationCanceledException)
             {
                 _logger.LogInformation("Disconnected by cancellation");
+            }
+            catch (WebSocketException exc)
+            {
+                _logger.LogInformation("Disconnected by websocket abort: {Reason}", exc.Message);
             }
             catch (Exception exc)
             {
@@ -120,16 +127,21 @@ public sealed class UserConnection : IUserConnection
         }, cancellationToken);
     }
     
-    private async Task LoadChatsListAsync(CancellationToken cancellationToken)
+    private async Task LoadChatsListAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var chats = await _chatRepository.GetChatsListAsync(cancellationToken);
+        var chats = await _chatRepository.GetChatsListAsync(characterId, cancellationToken);
         await _tunnel.SendAsync(new ServerChatsListLoadedMessage
         {
-            Chats = chats,
+            Chats = chats
+                .Select(c => new ServerChatsListLoadedMessage.ChatsListItem
+                {
+                    Id = c.Id
+                })
+                .ToArray(),
         }, cancellationToken);
     }
 
-    private async Task LoadCharacterAsync(string characterId, CancellationToken cancellationToken)
+    private async Task LoadCharacterAsync(Guid characterId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Loading character {CharacterId}", characterId);
         
@@ -152,9 +164,9 @@ public sealed class UserConnection : IUserConnection
             PostHistoryInstructions = character.PostHistoryInstructions,
             Culture = character.Culture,
             Prerequisites = character.Prerequisites != null ? string.Join(",", character.Prerequisites) : null,
-            TextGenService = character.Services.TextGen?.Service ?? "",
-            TtsService = character.Services.SpeechGen?.Service ?? "",
-            TtsVoice = character.Services.SpeechGen?.Voice ?? "",
+            TextGenService = character.Services.TextGen.Service ?? "",
+            TtsService = character.Services.SpeechGen.Service ?? "",
+            TtsVoice = character.Services.SpeechGen.Voice ?? "",
             EnableThinkingSpeech = character.Options?.EnableThinkingSpeech ?? true,
         }, cancellationToken);
     }
@@ -164,6 +176,36 @@ public sealed class UserConnection : IUserConnection
         return _tunnel.SendAsync(new ServerErrorMessage { Message = message }, cancellationToken);
     }
 
+    #warning Refactor those three functions
+    private async Task StartChatAsync(ClientNewChatMessage newChatMessage, CancellationToken cancellationToken)
+    {
+        if(_chat != null) await _chat.DisposeAsync();
+        _chat = null;
+        
+        if(!_userConnectionManager.TryGetChatLock(this))
+        {
+            await SendError("Another chat is in progress, close this one first.", cancellationToken);
+            return;
+        }
+        
+        var character = await _charactersRepository.GetCharacterAsync(newChatMessage.CharacterId, cancellationToken);
+        if (character == null) throw new NullReferenceException($"Could not find character {newChatMessage.CharacterId}");
+        var chat = new Chat
+        {
+            Id = Crypto.CreateCryptographicallySecureGuid(),
+            CharacterId = character.Id,
+        };
+        await _chatRepository.SaveChatAsync(chat);
+
+        _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, newChatMessage, cancellationToken);
+
+        await _chatRepository.SaveChatAsync(chat);
+        
+        _logger.LogInformation("Started chat: {ChatId}", chat.Id);
+
+        _chat.SendReady();
+    }
+    
     private async Task StartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
     {
         if(_chat != null) await _chat.DisposeAsync();
@@ -175,14 +217,38 @@ public sealed class UserConnection : IUserConnection
             return;
         }
         
-        _chat = await _chatSessionFactory.CreateAsync(_tunnel, startChatMessage, cancellationToken);
+        var character = await _charactersRepository.GetCharacterAsync(startChatMessage.Character.Id, cancellationToken);
+        if (character == null)
+        {
+            await _charactersRepository.SaveCharacterAsync(startChatMessage.Character);
+            character = startChatMessage.Character;
+        }
+
+        Chat? chat = null;
+        if (startChatMessage.ChatId != null)
+        {
+            chat = await _chatRepository.GetChatAsync(startChatMessage.ChatId.Value, cancellationToken);
+        }
+        if (chat == null)
+        {
+            chat = new Chat
+            {
+                Id = Crypto.CreateCryptographicallySecureGuid(),
+                CharacterId = character.Id,
+            };
+            await _chatRepository.SaveChatAsync(chat);
+        }
+
+        _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, startChatMessage, cancellationToken);
+        
+        await _chatRepository.SaveChatAsync(chat);
         
         _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
 
         _chat.SendReady();
     }
     
-    private async Task StartChatAsync(ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
+    private async Task ResumeChatAsync(ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
     {
         if(_chat != null) await _chat.DisposeAsync();
         _chat = null;
@@ -193,7 +259,12 @@ public sealed class UserConnection : IUserConnection
             return;
         }
         
-        _chat = await _chatSessionFactory.CreateAsync(_tunnel, resumeChatMessage, cancellationToken);
+        var chat = await _chatRepository.GetChatAsync(resumeChatMessage.ChatId, cancellationToken);
+        if (chat == null) throw new InvalidOperationException($"Chat {resumeChatMessage.ChatId} not found");
+        var character = await _charactersRepository.GetCharacterAsync(chat.CharacterId, cancellationToken);
+        if (character == null) throw new InvalidOperationException($"Character {chat.CharacterId} referenced in chat {resumeChatMessage.ChatId} was found");
+        
+        _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, resumeChatMessage, cancellationToken);
         
         _logger.LogInformation("Started chat: {ChatId}", resumeChatMessage.ChatId);
 

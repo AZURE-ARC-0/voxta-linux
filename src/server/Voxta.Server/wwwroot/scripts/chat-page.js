@@ -6,7 +6,6 @@ const canvas = document.getElementById('audioVisualizer');
 const audioVisualizer = new AudioVisualizer(canvas);
 const splash = document.getElementById('splash');
 const selectCharacterButton = document.getElementById('selectCharacterButton');
-const selectChatButton = document.getElementById('selectChatButton');
 const characterButtons = document.getElementById('characterButtons');
 const chatButtons = document.getElementById('chatButtons');
 const messageBox = document.getElementById('message');
@@ -15,10 +14,10 @@ const prompt = document.getElementById('prompt');
 const notifications = new Notifications(document.getElementById('notification'));
 const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
 
-let character = { name: '', enableThinkingSpeech: false };
+let selectedCharacter = { name: '', enableThinkingSpeech: false };
 let thinkingSpeechUrls = [];
 const playThinkingSpeech = () => {
-    if (!character.enableThinkingSpeech) return;
+    if (!selectedCharacter.enableThinkingSpeech) return;
     if (thinkingSpeechUrls.length) {
         const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
         audioVisualizer.play(audioUrl, () => {
@@ -90,14 +89,19 @@ voxtaClient.addEventListener('charactersListLoaded', (evt) => {
         charDesc.textContent = character.description;
         button.appendChild(charDesc);
         button.onclick = () => {
-            voxtaClient.loadCharacter(character.id);
+            while (chatButtons.firstChild) {
+                chatButtons.removeChild(chatButtons.firstChild);
+            }
+            selectedCharacter = character;
+            voxtaClient.loadChatsList(character.id);
             characterButtons.classList.remove('voxta_show');
+            chatButtons.classList.add('voxta_show');
         };
         characterButtons.appendChild(button);
     });
     {
-        const back = document.createElement('back');
-        back.className = 'btn btn-secondary';
+        const back = document.createElement('button');
+        back.className = 'btn btn-secondary colspan';
         back.textContent = 'Back';
         back.onclick = () => {
             characterButtons.classList.remove('voxta_show');
@@ -106,34 +110,49 @@ voxtaClient.addEventListener('charactersListLoaded', (evt) => {
         characterButtons.appendChild(back);
     }
 });
-voxtaClient.addEventListener('characterLoaded', (evt) => {
-    character = evt.detail.character;
-    voxtaClient.startChat(evt.detail.character);
-});
 voxtaClient.addEventListener('chatsListLoaded', (evt) => {
     // TODO: Split the UI logic
     while (chatButtons.firstChild) {
         chatButtons.removeChild(chatButtons.firstChild);
     }
+
+    const title = document.createElement('h2');
+    title.className = 'text-center colspan';
+    title.textContent = selectedCharacter.name;
+    chatButtons.appendChild(title);
+    
     if(evt.detail.chats.length === 0) {
         const info = document.createElement('p');
-        info.className = 'text-muted';
+        info.className = 'text-muted text-center colspan';
         info.textContent = 'No chats found';
         chatButtons.appendChild(info);
     }
+    
     evt.detail.chats.forEach(chat => {
         const button = document.createElement('button');
         button.className = 'btn btn-secondary';
-        button.textContent = `Chat ${chat.name}`;
+        button.textContent = `Continue`;
         button.onclick = () => {
             voxtaClient.resumeChat(chat.id);
             chatButtons.classList.remove('voxta_show');
         };
         chatButtons.appendChild(button);
     });
+
     {
-        const back = document.createElement('back');
-        back.className = 'btn btn-secondary';
+        const newChatButton = document.createElement('button');
+        newChatButton.className = 'btn btn-secondary colspan';
+        newChatButton.textContent = 'New chat';
+        newChatButton.onclick = () => {
+            voxtaClient.newChat(selectedCharacter.id);
+            chatButtons.classList.remove('voxta_show');
+        };
+        chatButtons.appendChild(newChatButton);
+    }
+
+    {
+        const back = document.createElement('button');
+        back.className = 'btn btn-secondary colspan';
         back.textContent = 'Back';
         back.onclick = () => {
             chatButtons.classList.remove('voxta_show');
@@ -200,6 +219,9 @@ voxtaClient.addEventListener('speechRecognitionEnd', (evt) => {
 });
 voxtaClient.addEventListener('error', (evt) => {
     notifications.notify('Server error: ' + evt.detail.message, 'danger');
+    audioVisualizer.stop();
+    audioVisualizer.idle();
+    voxtaClient.speechPlaybackComplete();
 });
 
 voxtaClient.connect();
@@ -218,10 +240,4 @@ selectCharacterButton.addEventListener('click', () => {
     splash.classList.remove('voxta_show');
     characterButtons.classList.add('voxta_show');
     voxtaClient.loadCharactersList();
-});
-
-selectChatButton.addEventListener('click', () => {
-    splash.classList.remove('voxta_show');
-    chatButtons.classList.add('voxta_show');
-    voxtaClient.loadChatsList();
 });

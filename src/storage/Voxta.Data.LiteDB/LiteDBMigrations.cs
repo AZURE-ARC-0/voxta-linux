@@ -16,38 +16,22 @@ public class LiteDBMigrations
     {
         if (_db.UserVersion == 3)
         {
-            Migrate_2_To_3();
-            _db.UserVersion = 3;
+            Migrate_3_To_4();
+            _db.UserVersion = 4;
         }
 
         return Task.CompletedTask;
     }
 
-    private void Migrate_2_To_3()
+    private void Migrate_3_To_4()
     {
+        var characters = _db.GetCollection("Character");
+        foreach (var character in characters.FindAll())
         {
-            var profileSettings = _db.GetCollection("ProfileSettings");
-            foreach (var doc in profileSettings.FindAll())
-            {
-                doc.Remove("Services");
-                profileSettings.Update(doc);
-            }
-        }
-        {
-            var profileSettings = _db.GetCollection<ProfileSettings>();
-            foreach (var doc in profileSettings.FindAll())
-            {
-                doc.TextGen.Services = new[] { "TextGenerationWebUI", "KoboldAI", "NovelAI", "OpenAI" };
-                doc.SpeechToText.Services = new[] { "AzureSpeechService", "Vosk", "WindowsSpeech" };
-                doc.TextToSpeech.Services = new[] { "NovelAI", "ElevenLabs", "AzureSpeechService", "WindowsSpeech" };
-                doc.ActionInference.Services = new[] { "OpenAI", "TextGenerationWebUI" };
-                profileSettings.Update(doc);
-            }
-        }
-        var characters = _db.GetCollection<Character>();
-        foreach (var characterId in characters.Query().Where(x => x.ReadOnly).Select(x => x.Id).ToList())
-        {
-            characters.Delete(characterId);
+            var id = character["_id"];
+            characters.Delete(id);
+            character["_id"] = new BsonValue(Guid.Parse(id.AsString));
+            characters.Insert(character);
         }
     }
 }

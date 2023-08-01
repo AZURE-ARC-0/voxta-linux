@@ -6,7 +6,7 @@ public static class GeorgeCharacter
 {
     public static Character Create() => new()
     {
-        Id = "6227dc38-f656-413f-bba8-773380bad9d9",
+        Id = Guid.Parse("6227dc38-f656-413f-bba8-773380bad9d9"),
         ReadOnly = true,
         Name = "George",
         CreatorNotes = "Helpful and friendly.",

@@ -106,9 +106,10 @@
         this.socket.send(msg);
     }
 
-    loadChatsList() {
+    loadChatsList(characterId) {
         const msg = JSON.stringify({
-            $type: "loadChatsList"
+            $type: "loadChatsList",
+            characterId
         });
         this.socket.send(msg);
     }
@@ -121,20 +122,20 @@
         this.socket.send(msg);
     }
 
-    startChat(character) {
+    newChat(characterId) {
         const msg = JSON.stringify({
-            ...character,
-            $type: "startChat",
+            $type: "newChat",
+            characterId,
             useServerSpeechRecognition: true,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });
         this.socket.send(msg);
     }
 
-    resumeChat(id) {
+    resumeChat(chatId) {
         const msg = JSON.stringify({
-            id: id,
             $type: "resumeChat",
+            chatId: chatId,
             useServerSpeechRecognition: true,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });

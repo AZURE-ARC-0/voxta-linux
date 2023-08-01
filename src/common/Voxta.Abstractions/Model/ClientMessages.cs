@@ -6,6 +6,8 @@ namespace Voxta.Abstractions.Model;
 [JsonDerivedType(typeof(ClientLoadCharactersListMessage), typeDiscriminator: "loadCharactersList")]
 [JsonDerivedType(typeof(ClientLoadChatsListMessage), typeDiscriminator: "loadChatsList")]
 [JsonDerivedType(typeof(ClientLoadCharacterMessage), typeDiscriminator: "loadCharacter")]
+[JsonDerivedType(typeof(ClientNewChatMessage), typeDiscriminator: "newChat")]
+[JsonDerivedType(typeof(ClientResumeChatMessage), typeDiscriminator: "resumeChat")]
 [JsonDerivedType(typeof(ClientStartChatMessage), typeDiscriminator: "startChat")]
 [JsonDerivedType(typeof(ClientStopChatMessage), typeDiscriminator: "stopChat")]
 [JsonDerivedType(typeof(ClientSendMessage), typeDiscriminator: "send")]
@@ -31,12 +33,13 @@ public class ClientLoadCharactersListMessage : ClientMessage
 [Serializable]
 public class ClientLoadChatsListMessage : ClientMessage
 {
+    public required Guid CharacterId { get; init; }
 }
 
 [Serializable]
 public class ClientLoadCharacterMessage : ClientMessage
 {
-    public required string CharacterId { get; init; }
+    public required Guid CharacterId { get; init; }
 }
 
 [Serializable]
@@ -47,6 +50,11 @@ public abstract class ClientDoChatMessageBase : ClientMessage
     public string[] AcceptedAudioContentTypes { get; set; } = { "audio/x-wav", "audio/mpeg" };
 }
 
+[Serializable]
+public class ClientNewChatMessage : ClientDoChatMessageBase
+{
+    public Guid CharacterId { get; init; }
+}
 
 [Serializable]
 public class ClientResumeChatMessage : ClientDoChatMessageBase
@@ -58,22 +66,7 @@ public class ClientResumeChatMessage : ClientDoChatMessageBase
 public class ClientStartChatMessage : ClientDoChatMessageBase
 {
     public Guid? ChatId { get; init; }
-    public required string Name { get; init; }
-    public required string Description { get; init; }
-    public required string Personality { get; init; }
-    public required string Scenario { get; init; }
-    
-    public string? FirstMessage { get; init; }
-    public string? MessageExamples { get; init; }
-    public string? SystemPrompt { get; init; }
-    public string? PostHistoryInstructions { get; init; }
-    public string? Prerequisites { get; set; }
-    public string Culture { get; init; } = "en-US";
-    public string? TextGenService { get; init; }
-    public string? TtsService { get; init; }
-    public string? TtsVoice { get; init; }
-    public string? SttService { get; set; }
-    public string? ActionInferenceService { get; set; }
+    public required Character Character { get; init; }
 }
 
 [Serializable]

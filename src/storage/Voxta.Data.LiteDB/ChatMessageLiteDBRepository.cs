@@ -23,4 +23,10 @@ public class ChatMessageLiteDBRepository : IChatMessageRepository
 
         return Task.FromResult(messages);
     }
+
+    public Task DeleteChatMessages(Guid chatId)
+    {
+        _chatMessagesCollection.DeleteMany(x => x.ChatId == chatId);
+        return Task.CompletedTask;
+    }
 }

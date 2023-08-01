@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Model;
+﻿using Humanizer;
+using Voxta.Abstractions.Model;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +16,7 @@ public partial class ChatSession
 
     private async ValueTask SendReadyAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Beginning chat with {CharacterName} with ID: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.ChatId);
+        _logger.LogInformation("Beginning chat with {CharacterName} with ID: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.Chat.Id);
         _logger.LogInformation("Tex Gen: {ServiceName}", _textGen.ServiceName);
         _logger.LogInformation("Text To Speech: {ServiceName} (voice: {Voice})", _speechGenerator.ServiceName, _speechGenerator.Voice);
         _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.ServiceName ?? "None");
@@ -36,7 +37,7 @@ public partial class ChatSession
 
         await _tunnel.SendAsync(new ServerReadyMessage
         {
-            ChatId = _chatSessionData.ChatId,
+            ChatId = _chatSessionData.Chat.Id,
             ThinkingSpeechUrls = thinkingSpeechUrls.ToArray(),
                 
         }, cancellationToken);
@@ -50,19 +51,21 @@ public partial class ChatSession
                 Text = _chatSessionData.Character.FirstMessage,
                 Tokens = _textGen.GetTokenCount(_chatSessionData.Character.FirstMessage)
             };
-            var reply = ChatMessageData.FromGen( _chatSessionData.ChatId, _chatSessionData.Character.Name, textData);
-            #warning Save
-            _chatSessionData.Messages.Add(reply);
+            var reply = _chatSessionData.AddMessage(_chatSessionData.Character.Name, textData);
             _logger.LogInformation("Sending first message: {Message}", reply.Text);
             await SendReusableReplyWithSpeechAsync(reply.Text, cancellationToken);
         }
         else if (_chatSessionData.Messages.Count > 0)
         {
-            #warning We should remember how long ago the user disconnected
-            HandleClientMessage(new ClientSendMessage
+            // TODO: Externalize these messages into a dedicated, localizable class
+            var duration = _chatSessionData.Chat.LastMessageAt - DateTimeOffset.UtcNow;
+            if (duration > TimeSpan.FromMinutes(10))
             {
-                Text = $"({_chatSessionData.UserName} disconnects for a while and comes back online)"
-            });
+                HandleClientMessage(new ClientSendMessage
+                {
+                    Text = $"({_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online)"
+                });
+            }
         }
     }
 

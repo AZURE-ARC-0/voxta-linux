@@ -17,7 +17,7 @@ public class CharacterCardExtended : CharacterCard
 [Serializable]
 public class Character : CharacterCardExtended
 {
-    [BsonId] public required string Id { get; set; }
+    [BsonId] public required Guid Id { get; set; }
     public bool ReadOnly { get; set; }
 }
     

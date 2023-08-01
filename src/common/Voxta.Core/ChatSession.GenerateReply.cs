@@ -34,8 +34,7 @@ public partial class ChatSession
                 Text = userText,
                 Tokens = _textGen.GetTokenCount(userText)
             };
-            var userMessageData = ChatMessageData.FromGen(_chatSessionData.ChatId, _chatSessionData.UserName, userTextData);
-            _chatSessionData.Messages.Add(userMessageData);
+            var userMessageData = _chatSessionData.AddMessage(_chatSessionData.UserName, userTextData);
             _chatSessionState.PendingUserMessage = userMessageData;
         }
         else
@@ -61,7 +60,7 @@ public partial class ChatSession
 
             var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
 
-            reply = ChatMessageData.FromGen(_chatSessionData.ChatId, _chatSessionData.Character.Name, genData);
+            reply = _chatSessionData.AddMessage(_chatSessionData.Character.Name, genData);
         }
         catch (OperationCanceledException)
         {
@@ -76,11 +75,8 @@ public partial class ChatSession
 
         _chatSessionState.PendingUserMessage = null;
         _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Text);
-        
-        // TODO: Save into some storage
-        _chatSessionData.Messages.Add(reply);
 
-        var speechId = $"speech_{_chatSessionData.ChatId.ToString()}_{reply.Id}";
+        var speechId = $"speech_{_chatSessionData.Chat.Id}_{reply.Id}";
         await SendReplyWithSpeechAsync(reply.Text, speechId, false, queueCancellationToken);
         await GenerationActionInference(queueCancellationToken);
     }

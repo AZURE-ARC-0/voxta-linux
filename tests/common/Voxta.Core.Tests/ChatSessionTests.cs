@@ -28,6 +28,11 @@ public class ChatSessionTests
         _chatSessionData = new ChatSessionData
         {
             UserName = "User",
+            Chat = new Chat
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = Guid.NewGuid(),
+            },
             Character = new CharacterCardExtended
             {
                 Name = "Assistant",

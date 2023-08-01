@@ -23,7 +23,7 @@ public class CharacterLiteDBRepository : ICharacterRepository
         var result = cards
             .Select(b => new ServerCharactersListLoadedMessage.CharactersListItem
             {
-                Id = b.Id ?? throw new NullReferenceException("Character card ID was null"),
+                Id = b.Id,
                 Name = b.Name,
                 Description = b.CreatorNotes?[..Math.Min(50, b.CreatorNotes.Length)],
                 ReadOnly = b.ReadOnly,
@@ -37,19 +37,19 @@ public class CharacterLiteDBRepository : ICharacterRepository
         return Task.FromResult(result);
     }
     
-    public Task<Character?> GetCharacterAsync(string id, CancellationToken cancellationToken)
+    public Task<Character?> GetCharacterAsync(Guid id, CancellationToken cancellationToken)
     {
         var character = _charactersCollection.FindOne(x => x.Id == id);
         return Task.FromResult<Character?>(character);
     }
 
-    public Task SaveCharacterAsync(Character card)
+    public Task SaveCharacterAsync(Character character)
     {
-        _charactersCollection.Upsert(card);
+        _charactersCollection.Upsert(character);
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(string charId)
+    public Task DeleteAsync(Guid charId)
     {
         _charactersCollection.DeleteMany(x => x.Id == charId);
         return Task.CompletedTask;

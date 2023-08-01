@@ -156,9 +156,10 @@ public class DiagnosticsUtil
                 var result = await service.GenerateReplyAsync(new ChatSessionData
                 {
                     UserName = "User",
+                    Chat = null!,
                     Character = new Character
                     {
-                        Id = Guid.NewGuid().ToString(),
+                        Id = Guid.NewGuid(),
                         Name = "Assistant",
                         SystemPrompt = "You are a test assistant",
                         Description = "",
@@ -225,6 +226,7 @@ public class DiagnosticsUtil
                 var result = await service.SelectActionAsync(new ChatSessionData
                 {
                     UserName = "User",
+                    Chat = null!,
                     Character = new CharacterCardExtended
                     {
                         Name = "Assistant",

@@ -33,7 +33,7 @@ public class ServerCharactersListLoadedMessage : ServerMessage
     [Serializable]
     public class CharactersListItem
     {
-        public required string Id { get; init; }
+        public required Guid Id { get; init; }
         public required string Name { get; init; }
         public required string? Description { get; set; }
         public required bool ReadOnly { get; init; }
@@ -50,8 +50,7 @@ public class ServerChatsListLoadedMessage : ServerMessage
     [Serializable]
     public class ChatsListItem
     {
-        public required string Id { get; init; }
-        public required string Name { get; init; }
+        public required Guid Id { get; init; }
     }
 }
 

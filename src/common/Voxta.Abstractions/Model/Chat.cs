@@ -5,6 +5,8 @@ namespace Voxta.Abstractions.Model;
 [Serializable]
 public class Chat
 {
-    [BsonId] public required string Id { get; set; }
-    public required Character Character { get; set; }
+    [BsonId] public required Guid Id { get; set; }
+    public required Guid CharacterId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset LastMessageAt { get; set; } = DateTimeOffset.UtcNow;
 }

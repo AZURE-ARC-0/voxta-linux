@@ -76,13 +76,19 @@ public class WebSocketTest
     {
         var welcome = await Receive<ServerWelcomeMessage>();
         Assert.That(welcome.Username, Is.EqualTo("User"));
-        
+
         await Send(new ClientStartChatMessage
         {
-            Name = "Bot",
-            Description = "Desc",
-            Personality = "Test",
-            Scenario = "Test",
+            Character = new Character
+            {
+                Id = Guid.Empty,
+                Name = "Bot",
+                Description = "Desc",
+                Personality = "Test",
+                Scenario = "Test",
+                FirstMessage = "First",
+                Services = new CharacterServicesMap()
+            }
         });
         
         var ready = await Receive<ServerReadyMessage>();

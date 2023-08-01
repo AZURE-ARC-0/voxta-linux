@@ -21,6 +21,11 @@ public class GenericPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
                     Character = new()
                     {
                         Name = "Jane",
@@ -54,6 +59,11 @@ public class GenericPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
                     Character = new()
                     {
                         Name = "Jane",
@@ -96,6 +106,11 @@ public class GenericPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
                     Character = new()
                     {
                         Name = "Jane",

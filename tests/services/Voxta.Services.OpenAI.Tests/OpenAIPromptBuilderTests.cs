@@ -23,6 +23,11 @@ public class OpenAIPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
                     Character = new()
                     {
                         Name = "Jane",
@@ -57,6 +62,11 @@ public class OpenAIPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
                     Character = new()
                     {
                         Name = "Jane",
@@ -100,6 +110,11 @@ public class OpenAIPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
                     Character = new()
                     {
                         Name = "Jane",

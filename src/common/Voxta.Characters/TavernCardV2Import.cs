@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Voxta.Abstractions.Model;
+using Voxta.Common;
 
 namespace Voxta.Characters;
 
@@ -45,7 +46,7 @@ public static class TavernCardV2Import
     {
         return new Character
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = data.Extensions.TryGetValue("voxta/charId", out var charId) && !string.IsNullOrEmpty(charId) ? Guid.Parse(charId) : Crypto.CreateCryptographicallySecureGuid(),
             Name = data.Name,
             Description = data.Description ?? "",
             Personality = data.Personality ?? "",

@@ -20,6 +20,11 @@ public class NovelAIPromptBuilderTests
             new ChatSessionData
                 {
                     UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.NewGuid(),
+                        CharacterId = Guid.NewGuid(),
+                    },
                     Character = new()
                     {
                         Name = "Jane",
