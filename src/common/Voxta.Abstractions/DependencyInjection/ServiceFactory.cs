@@ -7,6 +7,7 @@ namespace Voxta.Abstractions.DependencyInjection;
 
 public interface IServiceFactory<TInterface> where TInterface : class
 {
+    IEnumerable<string> ServiceNames { get; }
     Task<TInterface> CreateAsync(ServicesList services, string preferredService, string[] prerequisites, string culture, CancellationToken cancellationToken);
 }
 
@@ -14,6 +15,8 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
 {
     private readonly IServiceRegistry<TInterface> _registry;
     private readonly IServiceProvider _sp;
+
+    public IEnumerable<string> ServiceNames => _registry.Types.Keys;
 
     public ServiceFactory(IServiceRegistry<TInterface> registry, IServiceProvider sp)
     {

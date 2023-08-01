@@ -4,18 +4,8 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
-using Voxta.Services.ElevenLabs;
-using Voxta.Services.KoboldAI;
-using Voxta.Services.NovelAI;
-using Voxta.Services.Oobabooga;
-using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Exceptions;
-using Voxta.Services.AzureSpeechService;
-using Voxta.Services.Vosk;
-#if(WINDOWS)
-using Voxta.Services.WindowsSpeech;
-#endif
 
 namespace Voxta.Host.AspNetCore.WebSockets.Utils;
 
@@ -52,21 +42,21 @@ public class DiagnosticsUtil
     private readonly IServiceFactory<ITextGenService> _textGenFactory;
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly IServiceFactory<ISpeechToTextService> _speechToTextFactory;
-    private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
+    private readonly IServiceFactory<IActionInferenceService> _actionInferenceFactory;
 
     public DiagnosticsUtil(
         IProfileRepository profileRepository,
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
         IServiceFactory<ISpeechToTextService> speechToTextFactory,
-        IServiceFactory<IActionInferenceService> animationSelectionFactory
+        IServiceFactory<IActionInferenceService> actionInferenceFactory
         )
     {
         _profileRepository = profileRepository;
         _textGenFactory = textGenFactory;
         _textToSpeechFactory = textToSpeechFactory;
         _speechToTextFactory = speechToTextFactory;
-        _animationSelectionFactory = animationSelectionFactory;
+        _actionInferenceFactory = actionInferenceFactory;
     }
 
     public Task<DiagnosticsResult> GetAllServicesAsync(CancellationToken cancellationToken)
@@ -121,39 +111,26 @@ public class DiagnosticsUtil
             };
         }
 
-        var textGen = new[]
-        {
-            Task.Run(async () => await TryTextGenAsync(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextGenAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextGenAsync(KoboldAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextGenAsync(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-        };
+        var textGen = _textGenFactory.ServiceNames.Select(serviceName =>
+            Task.Run(async () => await TryTextGenAsync(serviceName, runTests, cancellationToken), cancellationToken)
+        ).ToArray();
         
-        var tts = new[]
-        {
-            Task.Run(async () => await TryTextToSpeechAsync(NovelAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextToSpeechAsync(ElevenLabsConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryTextToSpeechAsync(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            #if(WINDOWS)
-            Task.Run(async () => await TryTextToSpeechAsync(WindowsSpeechConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            #endif
-        };
+        var tts = _textToSpeechFactory.ServiceNames.Select(serviceName =>
+            Task.Run(async () => await TryTextToSpeechAsync(serviceName, runTests, cancellationToken), cancellationToken)
+        ).ToArray();
         
-        var actionInference = new[]
-        {
-            Task.Run(async () => await TryActionInference(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryActionInference(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryActionInference(KoboldAIConstants.ServiceName, runTests, cancellationToken), cancellationToken)
-        };
+        var actionInference = _actionInferenceFactory.ServiceNames.Select(serviceName =>
+            Task.Run(async () => await TryActionInferenceAsync(serviceName, runTests, cancellationToken), cancellationToken)
+        ).ToArray();
 
-        var stt = new ServiceDiagnosticsResult[3];
+        var sttNames = _speechToTextFactory.ServiceNames.ToArray();
+        var stt = new ServiceDiagnosticsResult[sttNames.Length];
         var sttTask = Task.Run(async () =>
         {
-            stt[0] = await TrySpeechToText(VoskConstants.ServiceName, runTests, cancellationToken);
-            stt[1] = await TrySpeechToText(AzureSpeechServiceConstants.ServiceName, runTests, cancellationToken);
-            #if(WINDOWS)
-            stt[2] = await TrySpeechToText(WindowsSpeechConstants.ServiceName, runTests, cancellationToken);
-            #endif
+            for (var i = 0; i < sttNames.Length; i++)
+            {
+                stt[i] = await TrySpeechToText(sttNames[i], runTests, cancellationToken);
+            }
         }, cancellationToken);
 
         await Task.WhenAll(textGen.Concat(tts).Concat(actionInference).Concat(new[] { sttTask }));
@@ -161,10 +138,10 @@ public class DiagnosticsUtil
         return new DiagnosticsResult
         {
             Profile = profileResult,
-            TextGenServices = textGen.Select(t => t.Result).OrderBy(x => profile?.TextGen.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
-            TextToSpeechServices = tts.Select(t => t.Result).OrderBy(x => profile?.TextToSpeech.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
-            ActionInferenceServices = actionInference.Select(t => t.Result).OrderBy(x => profile?.ActionInference.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
-            SpeechToTextServices = stt.OrderBy(x => profile?.SpeechToText.Order(x.ServiceName) ?? 0).ThenBy(x => x.ServiceName).ToArray(),
+            TextGenServices = textGen.Select(t => t.Result).OrderBy(x => profile.TextGen.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
+            TextToSpeechServices = tts.Select(t => t.Result).OrderBy(x => profile.TextToSpeech.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
+            ActionInferenceServices = actionInference.Select(t => t.Result).OrderBy(x => profile.ActionInference.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
+            SpeechToTextServices = stt.OrderBy(x => profile.SpeechToText.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
         };
     }
 
@@ -235,12 +212,12 @@ public class DiagnosticsUtil
         }
     }
     
-    private async Task<ServiceDiagnosticsResult> TryActionInference(string serviceName, bool runTests, CancellationToken cancellationToken)
+    private async Task<ServiceDiagnosticsResult> TryActionInferenceAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
     {
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _animationSelectionFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _actionInferenceFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
             async service =>
             {
                 var actions = new[] { "test_successful", "talk_to_user" };
