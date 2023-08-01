@@ -4,5 +4,5 @@ namespace Voxta.Abstractions.Services;
 
 public interface IActionInferenceService : IService
 {
-    ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken);
+    ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken);
 }

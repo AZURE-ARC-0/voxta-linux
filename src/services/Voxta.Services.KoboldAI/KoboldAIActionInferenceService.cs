@@ -16,10 +16,10 @@ public class KoboldAIActionInferenceService : KoboldAIClientBase, IActionInferen
         _performanceMetrics = performanceMetrics;
     }
 
-    public async ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder();
-        var prompt = builder.BuildActionInferencePrompt(chatSessionData);
+        var prompt = builder.BuildActionInferencePrompt(chat);
         
         var actionInferencePerf = _performanceMetrics.Start($"{KoboldAIConstants.ServiceName}.ActionInference");
         var action = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);

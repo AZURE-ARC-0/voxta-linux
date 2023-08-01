@@ -39,10 +39,10 @@ public class OpenAIPromptBuilder
         return messages;
     }
 
-    public List<OpenAIMessage> BuildActionInferencePrompt(ChatSessionData chatSessionData)
+    public List<OpenAIMessage> BuildActionInferencePrompt(IChatInferenceData chat)
     {
-        if (chatSessionData.Actions == null || chatSessionData.Actions.Length < 1)
-            throw new ArgumentException("No actions provided.", nameof(chatSessionData));
+        if (chat.Actions == null || chat.Actions.Length < 1)
+            throw new ArgumentException("No actions provided.", nameof(chat));
         
         var messages = new List<OpenAIMessage>
         {
@@ -51,26 +51,26 @@ public class OpenAIPromptBuilder
                 content = $"""
                     You are tasked with inferring the best action from a list based on the content of a sample chat.
 
-                    Actions: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}
+                    Actions: {string.Join(", ", chat.Actions.Select(a => $"[{a}]"))}
                     """.ReplaceLineEndings("\n")
             },
         };
         
         var sb = new StringBuilder();
         sb.AppendLineLinux("Conversation Context:");
-        sb.AppendLineLinux(chatSessionData.Character.Name + "'s Personality: " + chatSessionData.Character.Personality);
-        sb.AppendLineLinux("Scenario: " + chatSessionData.Character.Scenario);
-        if (!string.IsNullOrEmpty(chatSessionData.Context))
-            sb.AppendLineLinux($"Context: {chatSessionData.Context}");
+        sb.AppendLineLinux(chat.Character.Name + "'s Personality: " + chat.Character.Personality);
+        sb.AppendLineLinux("Scenario: " + chat.Character.Scenario);
+        if (!string.IsNullOrEmpty(chat.Context))
+            sb.AppendLineLinux($"Context: {chat.Context}");
         sb.AppendLineLinux();
 
         sb.AppendLineLinux("Conversation:");
-        foreach (var message in chatSessionData.Messages.TakeLast(8))
+        foreach (var message in chat.GetMessages().TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
         sb.AppendLineLinux();
-        sb.AppendLineLinux($"Based on the last message, which of the following actions is the most applicable for {chatSessionData.Character.Name}: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}"); 
+        sb.AppendLineLinux($"Based on the last message, which of the following actions is the most applicable for {chat.Character.Name}: {string.Join(", ", chat.Actions.Select(a => $"[{a}]"))}"); 
         sb.AppendLineLinux();
         sb.AppendLineLinux("Only write the action.");
         

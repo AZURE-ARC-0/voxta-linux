@@ -13,11 +13,11 @@ public class MockActionInferenceService : IActionInferenceService
         return Task.FromResult(true);
     }
 
-    public ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        if(chatSessionData.Actions is null || chatSessionData.Actions.Length == 0)
+        if(chat.Actions is null || chat.Actions.Length == 0)
             return ValueTask.FromResult("idle");
-        var action = chatSessionData.Actions[Random.Shared.Next(chatSessionData.Actions.Length)];
+        var action = chat.Actions[Random.Shared.Next(chat.Actions.Length)];
         return ValueTask.FromResult(action);
     }
 

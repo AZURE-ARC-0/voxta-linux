@@ -15,17 +15,11 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     private readonly IPerformanceMetrics _performanceMetrics;
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics)
-        : base(httpClientFactory, settingsRepository)
+        : base(httpClientFactory, settingsRepository, tokenizer)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
         _tokenizer = tokenizer;
         _performanceMetrics = performanceMetrics;
-    }
-
-    public int GetTokenCount(string message)
-    {
-        if (string.IsNullOrEmpty(message)) return 0;
-        return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
     public override Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)

@@ -25,10 +25,10 @@ public class Character : CharacterCardExtended
 [Serializable]
 public class CharacterServicesMap
 {
-    public ServiceMap? TextGen { get; init; }
-    public VoiceServiceMap? SpeechGen { get; init; }
-    public ServiceMap? ActionInference { get; init; }
-    public ServiceMap? SpeechToText { get; init; }
+    public ServiceMap TextGen { get; init; } = new();
+    public VoiceServiceMap SpeechGen { get; init; } = new();
+    public ServiceMap ActionInference { get; init; } = new();
+    public ServiceMap SpeechToText { get; init; } = new();
 }
     
 [Serializable]

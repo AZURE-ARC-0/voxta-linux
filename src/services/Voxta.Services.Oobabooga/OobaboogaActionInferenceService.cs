@@ -19,10 +19,10 @@ public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInfer
         _performanceMetrics = performanceMetrics;
     }
 
-    public async ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder();
-        var prompt = builder.BuildActionInferencePrompt(chatSessionData);
+        var prompt = builder.BuildActionInferencePrompt(chat);
         
         var actionInferencePerf = _performanceMetrics.Start($"{OobaboogaConstants.ServiceName}.ActionInference");
         var action = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);

@@ -30,7 +30,7 @@ public class GenericPromptBuilder
         return sb.ToString().TrimExcess();
     }
 
-    public string BuildActionInferencePrompt(ChatSessionData chatSessionData)
+    public string BuildActionInferencePrompt(IChatInferenceData chatSessionData)
     {
         if (chatSessionData.Actions == null || chatSessionData.Actions.Length < 1)
             throw new ArgumentException("No actions provided.", nameof(chatSessionData));
@@ -50,7 +50,7 @@ public class GenericPromptBuilder
         sb.AppendLineLinux();
 
         sb.AppendLineLinux("Conversation:");
-        foreach (var message in chatSessionData.Messages.TakeLast(8))
+        foreach (var message in chatSessionData.GetMessages().TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }

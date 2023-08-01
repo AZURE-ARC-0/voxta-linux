@@ -57,6 +57,7 @@ public static class ProfileUtils
                     OpenAIConstants.ServiceName,
                     OobaboogaConstants.ServiceName,
                     KoboldAIConstants.ServiceName,
+                    NovelAIConstants.ServiceName,
                 }
             }
         };

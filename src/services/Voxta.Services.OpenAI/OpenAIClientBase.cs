@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using AutoMapper;
+using Microsoft.DeepDev;
 using Voxta.Abstractions.Repositories;
 using Voxta.Common;
 
@@ -21,14 +22,22 @@ public abstract class OpenAIClientBase
     }
     
     private readonly ISettingsRepository _settingsRepository;
+    private readonly ITokenizer _tokenizer;
     private readonly HttpClient _httpClient;
     private OpenAIParameters? _parameters;
     private string _model = "gpt-3.5-turbo";
 
-    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
+    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer)
     {
         _settingsRepository = settingsRepository;
+        _tokenizer = tokenizer;
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
+    }
+
+    public int GetTokenCount(string message)
+    {
+        if (string.IsNullOrEmpty(message)) return 0;
+        return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
     public virtual async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)

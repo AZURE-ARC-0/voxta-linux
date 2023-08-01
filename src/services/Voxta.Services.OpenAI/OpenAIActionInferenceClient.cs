@@ -15,28 +15,22 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
     private readonly IPerformanceMetrics _performanceMetrics;
 
     public OpenAIActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics)
-        : base(httpClientFactory, settingsRepository)
+        : base(httpClientFactory, settingsRepository, tokenizer)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.ActionInference");
         _tokenizer = tokenizer;
         _performanceMetrics = performanceMetrics;
     }
 
-    public int GetTokenCount(string message)
+    public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(message)) return 0;
-        return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
-    }
-
-    public async ValueTask<string> SelectActionAsync(ChatSessionData chatSessionData, CancellationToken cancellationToken)
-    {
-        if(chatSessionData.Actions is null || chatSessionData.Actions.Length == 0)
+        if(chat.Actions is null || chat.Actions.Length == 0)
             return "idle";
-        if (chatSessionData.Actions.Length == 1) return chatSessionData.Actions[0];
+        if (chat.Actions.Length == 1) return chat.Actions[0];
 
         var actionInferencePerf = _performanceMetrics.Start("OpenAI.ActionInference");
-        var builder = new OpenAIPromptBuilder(null);
-        var messages = builder.BuildActionInferencePrompt(chatSessionData);
+        var builder = new OpenAIPromptBuilder(_tokenizer);
+        var messages = builder.BuildActionInferencePrompt(chat);
         
         var animation = await SendChatRequestAsync(messages, cancellationToken);
         actionInferencePerf.Done();
