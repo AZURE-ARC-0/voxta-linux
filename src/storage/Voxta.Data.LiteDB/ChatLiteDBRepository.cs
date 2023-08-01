@@ -19,6 +19,7 @@ public class ChatLiteDBRepository : IChatRepository
         var chats = _chatsCollection.Query().ToList();
 
         var result = chats
+            .Where(c => c.CharacterId == charId)
             .OrderByDescending(x => x.CreatedAt)
             .ToArray();
 
