@@ -4,6 +4,7 @@ using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 
 namespace Voxta.Core.Tests;
@@ -57,6 +58,8 @@ public class ChatSessionTests
         _timeProvider = new Mock<ITimeProvider>();
         var chatSessionState = new ChatSessionState(_timeProvider.Object);
         _speechGenerator = new Mock<ISpeechGenerator>();
+        var chatRepository = new Mock<IChatRepository>();
+        var chatMessageRepository = new Mock<IChatMessageRepository>();
 
         _session = new ChatSession(
             _tunnelMock.Object,
@@ -69,7 +72,9 @@ public class ChatSessionTests
             chatSessionState,
             _speechGenerator.Object,
             null,
-            null
+            null,
+            chatRepository.Object,
+            chatMessageRepository.Object
         );
 
         _tunnelMock

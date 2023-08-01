@@ -34,7 +34,7 @@ public partial class ChatSession
                 Text = userText,
                 Tokens = _textGen.GetTokenCount(userText)
             };
-            var userMessageData = _chatSessionData.AddMessage(_chatSessionData.UserName, userTextData);
+            var userMessageData = await SaveMessageAsync(_chatSessionData.UserName, userTextData);
             _chatSessionState.PendingUserMessage = userMessageData;
         }
         else
@@ -42,25 +42,18 @@ public partial class ChatSession
             var append = '\n' + text;
             _chatSessionState.PendingUserMessage.Text += append;
             _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
+            await SaveMessageAsync(_chatSessionState.PendingUserMessage);
         }
 
         _chatSessionData.Actions = clientSendMessage.Actions;
         _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context);
 
-        ChatMessageData reply;
+        string generated;
         try
         {
             using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(queueCancellationToken, abortCancellationToken);
             var linkedCancellationToken = linkedCancellationSource.Token;
-            var generated = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
-            if (string.IsNullOrWhiteSpace(generated))
-            {
-                throw new InvalidOperationException("AI service returned an empty string.");
-            }
-
-            var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
-
-            reply = _chatSessionData.AddMessage(_chatSessionData.Character.Name, genData);
+            generated = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -73,7 +66,15 @@ public partial class ChatSession
             throw;
         }
 
+        if (string.IsNullOrWhiteSpace(generated))
+        {
+            throw new InvalidOperationException("AI service returned an empty string.");
+        }
+
         _chatSessionState.PendingUserMessage = null;
+        var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
+        var reply = await SaveMessageAsync(_chatSessionData.Character.Name, genData);
+        
         _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Text);
 
         var speechId = $"speech_{_chatSessionData.Chat.Id}_{reply.Id}";

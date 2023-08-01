@@ -8,7 +8,7 @@ public class ChatSessionState
 {
     private readonly ITimeProvider _timeProvider;
     public ChatSessionStates State = ChatSessionStates.Live;
-    public TextData? PendingUserMessage;
+    public ChatMessageData? PendingUserMessage;
     
     private DateTimeOffset _audioPlaybackStart;
     private double _audioPlaybackDuration;

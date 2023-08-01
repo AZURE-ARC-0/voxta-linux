@@ -51,21 +51,18 @@ public partial class ChatSession
                 Text = _chatSessionData.Character.FirstMessage,
                 Tokens = _textGen.GetTokenCount(_chatSessionData.Character.FirstMessage)
             };
-            var reply = _chatSessionData.AddMessage(_chatSessionData.Character.Name, textData);
+            var reply = await SaveMessageAsync(_chatSessionData.Character.Name, textData);
             _logger.LogInformation("Sending first message: {Message}", reply.Text);
             await SendReusableReplyWithSpeechAsync(reply.Text, cancellationToken);
         }
         else if (_chatSessionData.Messages.Count > 0)
         {
             // TODO: Externalize these messages into a dedicated, localizable class
-            var duration = _chatSessionData.Chat.LastMessageAt - DateTimeOffset.UtcNow;
-            if (duration > TimeSpan.FromMinutes(10))
+            var duration = DateTimeOffset.UtcNow - _chatSessionData.Messages[^1].Timestamp;
+            HandleClientMessage(new ClientSendMessage
             {
-                HandleClientMessage(new ClientSendMessage
-                {
-                    Text = $"({_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online)"
-                });
-            }
+                Text = $"({_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online)"
+            });
         }
     }
 

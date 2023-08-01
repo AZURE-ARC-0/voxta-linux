@@ -24,6 +24,12 @@ public class ChatMessageLiteDBRepository : IChatMessageRepository
         return Task.FromResult(messages);
     }
 
+    public Task SaveMessageAsync(ChatMessageData message)
+    {
+        _chatMessagesCollection.Insert(message);
+        return Task.CompletedTask;
+    }
+
     public Task DeleteChatMessages(Guid chatId)
     {
         _chatMessagesCollection.DeleteMany(x => x.ChatId == chatId);
