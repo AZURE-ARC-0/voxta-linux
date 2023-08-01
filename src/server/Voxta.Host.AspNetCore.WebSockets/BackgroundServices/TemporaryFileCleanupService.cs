@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Voxta.Abstractions.Management;
 using Timer = System.Threading.Timer;
 
