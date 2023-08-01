@@ -2,30 +2,30 @@
 
 public static class KayraPresets
 {
-    public static NovelAIParameters Carefree()
+    public static NovelAIParameters FreshCoffee()
     {
 	    return new NovelAIParameters
 	    {
-		    Temperature = 1.35,
+		    Temperature = 0.8,
 		    MaxLength = 80,
 		    MinLength = 1,
-		    TopK = 12,
-		    TopP = 0.85,
-		    TopA = 0.1,
-		    TypicalP = 0.975,
-		    TailFreeSampling = 0.915,
-		    RepetitionPenalty = 2.8,
-		    RepetitionPenaltyFrequency = 0.02,
-		    RepetitionPenaltyPresence = 0,
-		    RepetitionPenaltyRange = 2048,
-		    RepetitionPenaltySlope = 0.02,
+		    TopK = 25,
+		    TopP = 1,
+		    TopA = null,
+		    TypicalP = null,
+		    TailFreeSampling = 0.925,
+		    RepetitionPenalty = 1.9,
+		    RepetitionPenaltyFrequency = 0.0025,
+		    RepetitionPenaltyPresence = 0.001,
+		    RepetitionPenaltyRange = 768,
+		    RepetitionPenaltySlope = 1,
 		    PhraseRepPen = "aggressive",
 		    Order = new[] {
-			    2,
-			    3,
+			    6,
 			    0,
-			    4,
-			    1
+			    1,
+			    2,
+			    3
 		    },
 		    RepetitionPenaltyWhitelist = new[]
 		    {
@@ -102,86 +102,6 @@ public static class KayraPresets
 			    10,
 			    11,
 			    12
-		    },
-		    BadWordsIds = new[]
-		    {
-			    new[]
-			    {
-				    3
-			    },
-			    new[]
-			    {
-				    49356
-			    },
-			    new[]
-			    {
-				    1431
-			    },
-			    new[]
-			    {
-				    31715
-			    },
-			    new[]
-			    {
-				    34387
-			    },
-			    new[]
-			    {
-				    20765
-			    },
-			    new[]
-			    {
-				    30702
-			    },
-			    new[]
-			    {
-				    10691
-			    },
-			    new[]
-			    {
-				    49333
-			    },
-			    new[]
-			    {
-				    1266
-			    },
-			    new[]
-			    {
-				    19438
-			    },
-			    new[]
-			    {
-				    43145
-			    },
-			    new[]
-			    {
-				    26523
-			    },
-			    new[]
-			    {
-				    41471
-			    },
-			    new[]
-			    {
-				    2936
-			    },
-			    new[]
-			    {
-				    85,
-				    85
-			    },
-			    new[]
-			    {
-				    49332
-			    },
-			    new[]
-			    {
-				    7286
-			    },
-			    new[]
-			    {
-				    1115
-			    },
 		    },
 		    LogitBiasExp = new LogitBiasExp[]
 		    {

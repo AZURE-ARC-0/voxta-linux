@@ -95,69 +95,6 @@ public static class ClioPresets
                 1040,
                 49209
             },
-            BadWordsIds = new[]
-            {
-                new[]
-                {
-                    3
-                },
-                new[]
-                {
-                    49356
-                },
-                new[]
-                {
-                    1431
-                },
-                new[]
-                {
-                    31715
-                },
-                new[]
-                {
-                    34387
-                },
-                new[]
-                {
-                    20765
-                },
-                new[]
-                {
-                    30702
-                },
-                new[]
-                {
-                    10691
-                },
-                new[]
-                {
-                    49333
-                },
-                new[]
-                {
-                    1266
-                },
-                new[]
-                {
-                    19438
-                },
-                new[]
-                {
-                    43145
-                },
-                new[]
-                {
-                    26523
-                },
-                new[]
-                {
-                    41471
-                },
-                new[]
-                {
-                    2936
-                }
-            },
             LogitBiasExp = Array.Empty<LogitBiasExp>(),
         };
     }

@@ -22,10 +22,10 @@ public class NovelAIParameters
     public double TopP { get; set; }
 
     [JsonPropertyName("top_a")]
-    public double TopA { get; set; }
+    public double? TopA { get; set; }
 
     [JsonPropertyName("typical_p")]
-    public double TypicalP { get; set; }
+    public double? TypicalP { get; set; }
 
     [JsonPropertyName("tail_free_sampling")]
     public double TailFreeSampling { get; set; }
@@ -55,7 +55,86 @@ public class NovelAIParameters
     public int[]? RepetitionPenaltyWhitelist { get; set; }
 
     [JsonPropertyName("bad_words_ids")]
-    public int[][] BadWordsIds { get; set; } = Array.Empty<int[]>();
+    public int[][] BadWordsIds { get; set; } = new[]
+    {
+        new[]
+        {
+            3
+        },
+        new[]
+        {
+            49356
+        },
+        new[]
+        {
+            1431
+        },
+        new[]
+        {
+            31715
+        },
+        new[]
+        {
+            34387
+        },
+        new[]
+        {
+            20765
+        },
+        new[]
+        {
+            30702
+        },
+        new[]
+        {
+            10691
+        },
+        new[]
+        {
+            49333
+        },
+        new[]
+        {
+            1266
+        },
+        new[]
+        {
+            19438
+        },
+        new[]
+        {
+            43145
+        },
+        new[]
+        {
+            26523
+        },
+        new[]
+        {
+            41471
+        },
+        new[]
+        {
+            2936
+        },
+        new[]
+        {
+            85,
+            85
+        },
+        new[]
+        {
+            49332
+        },
+        new[]
+        {
+            7286
+        },
+        new[]
+        {
+            1115
+        },
+    };
 
     [JsonPropertyName("logit_bias_exp")]
     public LogitBiasExp[]? LogitBiasExp { get; set; }

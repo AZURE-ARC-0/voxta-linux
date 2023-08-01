@@ -21,7 +21,7 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
         var builder = new NovelAIPromptBuilder();
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
         var input = builder.BuildReplyPrompt(chat, includePostHistoryPrompt: false);
-        var text = await SendCompletionRequest(input, "vanilla", cancellationToken);
+        var text = await SendCompletionRequest(input, "special_instruct", cancellationToken);
         textGenPerf.Done();
         return text;
     }
