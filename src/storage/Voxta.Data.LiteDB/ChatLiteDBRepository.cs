@@ -7,10 +7,12 @@ namespace Voxta.Data.LiteDB;
 
 public class ChatLiteDBRepository : IChatRepository
 {
+    private readonly IChatMessageRepository _chatMessageRepository;
     private readonly ILiteCollection<Chat> _chatsCollection;
 
-    public ChatLiteDBRepository(ILiteDatabase db)
+    public ChatLiteDBRepository(ILiteDatabase db, IChatMessageRepository chatMessageRepository)
     {
+        _chatMessageRepository = chatMessageRepository;
         _chatsCollection = db.GetCollection<Chat>();
     }
     
@@ -38,9 +40,9 @@ public class ChatLiteDBRepository : IChatRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid charId)
+    public async Task DeleteAsync(Guid charId)
     {
-        _chatsCollection.DeleteMany(x => x.Id == charId);
-        return Task.CompletedTask;
+        await _chatMessageRepository.DeleteChatMessages(charId);
+        _chatsCollection.Delete(charId);
     }
 }

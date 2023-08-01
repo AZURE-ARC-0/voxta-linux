@@ -190,6 +190,13 @@ public sealed class UserConnection : IUserConnection
         
         var character = await _charactersRepository.GetCharacterAsync(newChatMessage.CharacterId, cancellationToken);
         if (character == null) throw new NullReferenceException($"Could not find character {newChatMessage.CharacterId}");
+        if (newChatMessage.ClearExistingChats)
+        {
+            foreach (var c in await _chatRepository.GetChatsListAsync(newChatMessage.CharacterId, CancellationToken.None))
+            {
+                await _chatRepository.DeleteAsync(c.Id);
+            }
+        }
         var chat = new Chat
         {
             Id = Crypto.CreateCryptographicallySecureGuid(),

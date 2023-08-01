@@ -54,6 +54,7 @@ public abstract class ClientDoChatMessageBase : ClientMessage
 public class ClientNewChatMessage : ClientDoChatMessageBase
 {
     public Guid CharacterId { get; init; }
+    public bool ClearExistingChats { get; init; }
 }
 
 [Serializable]

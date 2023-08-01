@@ -132,27 +132,30 @@ voxtaClient.addEventListener('chatsListLoaded', (evt) => {
         chatButtons.appendChild(info);
     }
     
-    evt.detail.chats.forEach(chat => {
-        const button = document.createElement('button');
-        button.className = 'btn btn-secondary';
-        button.textContent = `Continue`;
-        button.onclick = () => {
-            voxtaClient.resumeChat(chat.id);
-            chatButtons.classList.remove('voxta_show');
-        };
-        chatButtons.appendChild(button);
-    });
-
-    {
-        const newChatButton = document.createElement('button');
-        newChatButton.className = 'btn btn-secondary colspan';
-        newChatButton.textContent = 'New chat';
-        newChatButton.onclick = () => {
-            voxtaClient.newChat(selectedCharacter.id);
-            chatButtons.classList.remove('voxta_show');
-        };
-        chatButtons.appendChild(newChatButton);
+    if(evt.detail.chats.length) {
+        evt.detail.chats.forEach(chat => {
+            const button = document.createElement('button');
+            button.className = 'btn btn-secondary colspan';
+            button.textContent = `Continue`;
+            button.onclick = () => {
+                voxtaClient.resumeChat(chat.id);
+                chatButtons.classList.remove('voxta_show');
+            };
+            chatButtons.appendChild(button);
+        });
     }
+    
+    const newChatButton = document.createElement('button');
+    newChatButton.className = 'btn btn-secondary colspan';
+    newChatButton.textContent = 'New chat';
+    newChatButton.onclick = () => {
+        voxtaClient.newChat({
+            characterId: selectedCharacter.id,
+            clearExistingChats: true
+        });
+        chatButtons.classList.remove('voxta_show');
+    };
+    chatButtons.appendChild(newChatButton);
 
     {
         const back = document.createElement('button');

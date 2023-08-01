@@ -38,7 +38,7 @@ public class WebsocketUserConnectionTunnel : IUserConnectionTunnel
             message.Seek(0, SeekOrigin.Begin);
             return await JsonSerializer.DeserializeAsync<T>(message, VoxtaJsonSerializer.SerializeOptions, cancellationToken);
         }
-        catch (JsonException exc)
+        catch (Exception exc)
         {
             throw new JsonException($"Failed to deserialize: {Encoding.UTF8.GetString(_buffer.AsMemory(0, result.Count).Span)}", exc);
         }

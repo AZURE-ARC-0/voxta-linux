@@ -100,13 +100,8 @@ public class CharactersController : Controller
     }
     
     [HttpPost("/characters/delete")]
-    public async Task<IActionResult> Delete([FromForm] Guid charId, [FromServices] IChatMessageRepository chatMessageRepository, [FromServices] IChatRepository chatRepository)
+    public async Task<IActionResult> Delete([FromForm] Guid charId)
     {
-        foreach (var chat in await chatRepository.GetChatsListAsync(charId, CancellationToken.None))
-        {
-            await chatMessageRepository.DeleteChatMessages(chat.Id);
-            await chatRepository.DeleteAsync(chat.Id);
-        }
         await _characterRepository.DeleteAsync(charId);
         return RedirectToAction("Characters");
     }

@@ -122,10 +122,11 @@
         this.socket.send(msg);
     }
 
-    newChat(characterId) {
+    newChat(params) {
         const msg = JSON.stringify({
             $type: "newChat",
-            characterId,
+            characterId: params.characterId,
+            clearExistingChats: params.clearExistingChats,
             useServerSpeechRecognition: true,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });
