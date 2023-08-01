@@ -43,7 +43,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Server", "src\server\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.ElevenLabs", "src\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj", "{984AC35B-527F-435B-8C0B-C1F78BA7CEDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.Fakes", "src\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj", "{D18C6462-8196-408B-9032-5B142DAB51D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.Mocks", "src\services\Voxta.Services.Mocks\Voxta.Services.Mocks.csproj", "{D18C6462-8196-408B-9032-5B142DAB51D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.KoboldAI", "src\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj", "{6FC0F360-FCE1-41AD-8087-6555D518964B}"
 EndProject

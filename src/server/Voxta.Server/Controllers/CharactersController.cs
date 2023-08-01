@@ -9,7 +9,7 @@ using Voxta.Common;
 using Voxta.Server.ViewModels;
 using Voxta.Services.KoboldAI;
 using Voxta.Services.ElevenLabs;
-using Voxta.Services.Fakes;
+using Voxta.Services.Mocks;
 using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
@@ -167,7 +167,7 @@ public class CharactersController : Controller
                 OptionViewModel.Create(OobaboogaConstants.ServiceName),
                 OptionViewModel.Create(KoboldAIConstants.ServiceName),
                 #if(DEBUG)
-                OptionViewModel.Create(FakesConstants.ServiceName),
+                OptionViewModel.Create(MockConstants.ServiceName),
                 #endif
             },
             TextToSpeechServices = new[]
@@ -180,7 +180,7 @@ public class CharactersController : Controller
                 OptionViewModel.Create(WindowsSpeechConstants.ServiceName),
                 #endif
                 #if(DEBUG)
-                OptionViewModel.Create(FakesConstants.ServiceName),
+                OptionViewModel.Create(MockConstants.ServiceName),
                 #endif
             },
             Cultures = CultureUtils.Bcp47LanguageTags.Select(c => new OptionViewModel(c.Name, c.Label)).ToArray(),

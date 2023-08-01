@@ -1,11 +1,11 @@
 ﻿using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Services;
 
-namespace Voxta.Services.Fakes;
+namespace Voxta.Services.Mocks;
 
-public class FakesActionInferenceClient : IActionInferenceService
+public class MockActionInferenceClient : IActionInferenceService
 {
-    public string ServiceName => FakesConstants.ServiceName;
+    public string ServiceName => MockConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)

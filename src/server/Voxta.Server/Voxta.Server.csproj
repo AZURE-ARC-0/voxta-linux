@@ -44,7 +44,7 @@
     <ProjectReference Include="..\..\services\Voxta.Services.Azure.SpeechService\Voxta.Services.Azure.SpeechService.csproj" />
     <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.Fakes\Voxta.Services.Fakes.csproj" />
+    <ProjectReference Include="..\..\services\Voxta.Services.Mocks\Voxta.Services.Mocks.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
     <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />

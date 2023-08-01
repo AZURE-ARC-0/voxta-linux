@@ -30,10 +30,10 @@ public static class ServiceCollectionExtensions
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
         var actionInferenceRegistry = services.AddActionInferenceRegistry();
 
-        services.AddFakes();
-        textGenRegistry.RegisterFakes();
-        textToSpeechRegistry.RegisterFakes();
-        actionInferenceRegistry.RegisterFakes();
+        services.AddMocks();
+        textGenRegistry.RegisterMocks();
+        textToSpeechRegistry.RegisterMocks();
+        actionInferenceRegistry.RegisterMocks();
 
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
