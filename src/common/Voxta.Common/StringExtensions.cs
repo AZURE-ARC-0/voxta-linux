@@ -11,6 +11,11 @@ public static class StringExtensions
     {
         return value.Trim('"', ' ');
     }
+    
+    public static string TrimContainedToLower(this string value)
+    {
+        return value.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
+    }
 
     // https://gist.github.com/Davidblkx/e12ab0bb2aff7fd8072632b396538560
     public static int GetLevenshteinDistance(this string source, string value)

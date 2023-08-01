@@ -55,7 +55,8 @@ public static class ProfileUtils
                 Services = new[]
                 {
                     OpenAIConstants.ServiceName,
-                    OobaboogaConstants.ServiceName
+                    OobaboogaConstants.ServiceName,
+                    KoboldAIConstants.ServiceName,
                 }
             }
         };

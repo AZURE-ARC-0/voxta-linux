@@ -4,16 +4,13 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
-namespace Voxta.Services.Oobabooga;
+namespace Voxta.Services.KoboldAI;
 
-public class OobaboogaActionInferenceClient : OobaboogaClientBase, IActionInferenceService
+public class KoboldAIActionInferenceClient : KoboldAIClientBase, IActionInferenceService
 {
-    public string ServiceName => OobaboogaConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
-    
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OobaboogaActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
+    public KoboldAIActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
         :base(httpClientFactory, settingsRepository)
     {
         _performanceMetrics = performanceMetrics;
@@ -24,7 +21,7 @@ public class OobaboogaActionInferenceClient : OobaboogaClientBase, IActionInfere
         var builder = new GenericPromptBuilder();
         var prompt = builder.BuildActionInferencePrompt(chatSessionData);
         
-        var actionInferencePerf = _performanceMetrics.Start($"{OobaboogaConstants.ServiceName}.ActionInference");
+        var actionInferencePerf = _performanceMetrics.Start($"{KoboldAIConstants.ServiceName}.ActionInference");
         var action = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);
         actionInferencePerf.Done();
         

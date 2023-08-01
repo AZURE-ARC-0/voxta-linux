@@ -142,7 +142,8 @@ public class DiagnosticsUtil
         var actionInference = new[]
         {
             Task.Run(async () => await TryActionInference(OpenAIConstants.ServiceName, runTests, cancellationToken), cancellationToken),
-            Task.Run(async () => await TryActionInference(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken)
+            Task.Run(async () => await TryActionInference(OobaboogaConstants.ServiceName, runTests, cancellationToken), cancellationToken),
+            Task.Run(async () => await TryActionInference(KoboldAIConstants.ServiceName, runTests, cancellationToken), cancellationToken)
         };
 
         var stt = new ServiceDiagnosticsResult[3];

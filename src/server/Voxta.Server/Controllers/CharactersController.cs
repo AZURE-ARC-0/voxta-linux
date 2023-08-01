@@ -164,8 +164,8 @@ public class CharactersController : Controller
                 new OptionViewModel("", "Select automatically"),
                 OptionViewModel.Create(OpenAIConstants.ServiceName),
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
-                OptionViewModel.Create(KoboldAIConstants.ServiceName),
                 OptionViewModel.Create(OobaboogaConstants.ServiceName),
+                OptionViewModel.Create(KoboldAIConstants.ServiceName),
                 #if(DEBUG)
                 OptionViewModel.Create(FakesConstants.ServiceName),
                 #endif

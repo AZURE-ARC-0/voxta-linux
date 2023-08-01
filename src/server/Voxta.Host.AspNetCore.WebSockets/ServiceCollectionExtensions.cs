@@ -45,7 +45,8 @@ public static class ServiceCollectionExtensions
 
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();
-
+        actionInferenceRegistry.RegisterKoboldAI();
+        
         services.AddOobabooga();
         textGenRegistry.RegisterOobabooga();
         actionInferenceRegistry.RegisterOobabooga();
