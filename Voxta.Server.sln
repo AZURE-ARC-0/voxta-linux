@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{F4B78CA0-7
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 		.github\workflows\package.yml = .github\workflows\package.yml
+		.github\FUNDING.yml = .github\FUNDING.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6AB181C5-92BE-45CB-890F-EF6B60BBA7C0}"
