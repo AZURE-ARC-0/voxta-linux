@@ -163,10 +163,17 @@ public class SettingsController : Controller
     {
         if (direction != "up") throw new NotSupportedException("Only up is supported");
         var index = Array.IndexOf(services.Services, name);
-        if (index <= 0) return services;
+        if (index == 0) return services;
         var list = new List<string>(services.Services);
-        list.RemoveAt(index);
-        list.Insert(index - 1, name);
+        if (index == -1)
+        {
+            list.Add(name);
+        }
+        else
+        {
+            list.RemoveAt(index);
+            list.Insert(index - 1, name);
+        }
         services.Services = list.ToArray();
         return services;
     }
