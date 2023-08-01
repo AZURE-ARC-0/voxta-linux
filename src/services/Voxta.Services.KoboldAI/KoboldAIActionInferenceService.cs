@@ -6,11 +6,11 @@ using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Services.KoboldAI;
 
-public class KoboldAIActionInferenceClient : KoboldAIClientBase, IActionInferenceService
+public class KoboldAIActionInferenceService : KoboldAIClientBase, IActionInferenceService
 {
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public KoboldAIActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
+    public KoboldAIActionInferenceService(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
         :base(httpClientFactory, settingsRepository)
     {
         _performanceMetrics = performanceMetrics;

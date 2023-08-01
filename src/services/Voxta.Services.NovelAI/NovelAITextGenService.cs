@@ -12,11 +12,11 @@ using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.NovelAI;
 
-public class NovelAITextGenClient : ITextGenService
+public class NovelAITextGenService : ITextGenService
 {
     private static readonly IMapper Mapper;
     
-    static NovelAITextGenClient()
+    static NovelAITextGenService()
     {
         var config = new MapperConfiguration(cfg =>
         {
@@ -34,7 +34,7 @@ public class NovelAITextGenClient : ITextGenService
     private readonly IPerformanceMetrics _performanceMetrics;
     private string _model = "clio-v1";
     
-    public NovelAITextGenClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics)
+    public NovelAITextGenService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;

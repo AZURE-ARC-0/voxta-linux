@@ -8,17 +8,17 @@ public static class ServiceCollectionExtensions
 {
     public static void AddOobabooga(this IServiceCollection services)
     {
-        services.AddTransient<OobaboogaTextGenClient>();
-        services.AddTransient<OobaboogaActionInferenceClient>();
+        services.AddTransient<OobaboogaTextGenService>();
+        services.AddTransient<OobaboogaActionInferenceService>();
     }
     
     public static void RegisterOobabooga(this IServiceRegistry<ITextGenService> registry)
     {
-        registry.Add<OobaboogaTextGenClient>(OobaboogaConstants.ServiceName);
+        registry.Add<OobaboogaTextGenService>(OobaboogaConstants.ServiceName);
     }
     
     public static void RegisterOobabooga(this IServiceRegistry<IActionInferenceService> registry)
     {
-        registry.Add<OobaboogaActionInferenceClient>(OobaboogaConstants.ServiceName);
+        registry.Add<OobaboogaActionInferenceService>(OobaboogaConstants.ServiceName);
     }
 }

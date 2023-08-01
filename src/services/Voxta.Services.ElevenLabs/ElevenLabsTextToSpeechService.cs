@@ -13,12 +13,12 @@ using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.ElevenLabs;
 
-public class ElevenLabsTextToSpeechClient : ITextToSpeechService
+public class ElevenLabsTextToSpeechService : ITextToSpeechService
 {
     public string ServiceName => ElevenLabsConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
-    private readonly ILogger<ElevenLabsTextToSpeechClient> _logger;
+    private readonly ILogger<ElevenLabsTextToSpeechService> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
@@ -28,12 +28,12 @@ public class ElevenLabsTextToSpeechClient : ITextToSpeechService
     private ElevenLabsParameters? _parameters;
     private string[]? _thinkingSpeech;
 
-    public ElevenLabsTextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
+    public ElevenLabsTextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
-        _logger = loggerFactory.CreateLogger<ElevenLabsTextToSpeechClient>();
+        _logger = loggerFactory.CreateLogger<ElevenLabsTextToSpeechService>();
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     

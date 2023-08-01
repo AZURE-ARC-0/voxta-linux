@@ -6,7 +6,7 @@ using NAudio.Wave;
 
 namespace Voxta.Services.Mocks;
 
-public class MockTextToSpeechClient : ITextToSpeechService
+public class MockTextToSpeechService : ITextToSpeechService
 {
     public string ServiceName => MockConstants.ServiceName;
     public string ContentType => "audio/x-wav";

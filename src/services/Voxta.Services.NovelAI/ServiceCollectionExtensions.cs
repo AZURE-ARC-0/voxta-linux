@@ -10,17 +10,17 @@ public static class ServiceCollectionExtensions
     public static void AddNovelAI(this IServiceCollection services)
     {
         services.AddTextToSpeechUtils();
-        services.AddTransient<NovelAITextGenClient>();
-        services.AddTransient<NovelAITextToSpeechClient>();
+        services.AddTransient<NovelAITextGenService>();
+        services.AddTransient<NovelAITextToSpeechService>();
     }
     
     public static void RegisterNovelAI(this IServiceRegistry<ITextGenService> registry)
     {
-        registry.Add<NovelAITextGenClient>(NovelAIConstants.ServiceName);
+        registry.Add<NovelAITextGenService>(NovelAIConstants.ServiceName);
     }
     
     public static void RegisterNovelAI(this IServiceRegistry<ITextToSpeechService> registry)
     {
-        registry.Add<NovelAITextToSpeechClient>(NovelAIConstants.ServiceName);
+        registry.Add<NovelAITextToSpeechService>(NovelAIConstants.ServiceName);
     }
 }

@@ -11,7 +11,7 @@ using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.WindowsSpeech;
 
-public class WindowsSpeechTextToSpeechClient : ITextToSpeechService
+public class WindowsSpeechTextToSpeechService : ITextToSpeechService
 {
     public string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
@@ -23,7 +23,7 @@ public class WindowsSpeechTextToSpeechClient : ITextToSpeechService
     private string[]? _thinkingSpeech;
     private readonly SpeechSynthesizer _synthesizer;
 
-    public WindowsSpeechTextToSpeechClient(ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
+    public WindowsSpeechTextToSpeechService(ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;

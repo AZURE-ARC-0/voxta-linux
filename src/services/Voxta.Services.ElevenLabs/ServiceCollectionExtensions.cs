@@ -8,11 +8,11 @@ public static class ServiceCollectionExtensions
 {
     public static void AddElevenLabs(this IServiceCollection services)
     {
-        services.AddTransient<ElevenLabsTextToSpeechClient>();
+        services.AddTransient<ElevenLabsTextToSpeechService>();
     }
     
     public static void RegisterElevenLabs(this IServiceRegistry<ITextToSpeechService> registry)
     {
-        registry.Add<ElevenLabsTextToSpeechClient>(ElevenLabsConstants.ServiceName);
+        registry.Add<ElevenLabsTextToSpeechService>(ElevenLabsConstants.ServiceName);
     }
 }

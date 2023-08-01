@@ -4,17 +4,14 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
-namespace Voxta.Services.Oobabooga;
+namespace Voxta.Services.KoboldAI;
 
-public class OobaboogaTextGenClient : OobaboogaClientBase, ITextGenService
+public class KoboldAITextGenService : KoboldAIClientBase, ITextGenService
 {
-    public string ServiceName => OobaboogaConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
-    
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OobaboogaTextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
-    :base(httpClientFactory, settingsRepository)
+    public KoboldAITextGenService(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
+        : base(httpClientFactory, settingsRepository)
     {
         _performanceMetrics = performanceMetrics;
     }
@@ -22,13 +19,14 @@ public class OobaboogaTextGenClient : OobaboogaClientBase, ITextGenService
     public async ValueTask<string> GenerateReplyAsync(IReadOnlyChatSessionData chatSessionData, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder();
-        // TODO: count tokens?
         var prompt = builder.BuildReplyPrompt(chatSessionData, -1);
-        
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
-        var text = await SendCompletionRequest(prompt, new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n", "\"" }, cancellationToken);
+        var text = await SendCompletionRequest(
+            prompt,
+            new[] { "END_OF_DIALOG", "You:", $"{chatSessionData.UserName}:", $"{chatSessionData.Character.Name}:", "\n", "\"" },
+            cancellationToken
+        );
         textGenPerf.Done();
-        
         return text;
     }
 }

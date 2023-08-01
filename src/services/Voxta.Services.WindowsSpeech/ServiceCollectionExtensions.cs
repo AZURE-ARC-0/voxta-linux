@@ -11,13 +11,13 @@ public static class ServiceCollectionExtensions
     public static void AddWindowsSpeech(this IServiceCollection services)
     {
         services.AddTextToSpeechUtils();
-        services.AddTransient<WindowsSpeechTextToSpeechClient>();
+        services.AddTransient<WindowsSpeechTextToSpeechService>();
         services.AddTransient<WindowsSpeechSpeechToText>();
     }
     
     public static void RegisterWindowsSpeech(this IServiceRegistry<ITextToSpeechService> registry)
     {
-        registry.Add<WindowsSpeechTextToSpeechClient>(WindowsSpeechConstants.ServiceName);
+        registry.Add<WindowsSpeechTextToSpeechService>(WindowsSpeechConstants.ServiceName);
     }
     
     public static void RegisterWindowsSpeech(this IServiceRegistry<ISpeechToTextService> registry)

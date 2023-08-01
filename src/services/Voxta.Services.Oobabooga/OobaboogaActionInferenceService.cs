@@ -6,14 +6,14 @@ using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Services.Oobabooga;
 
-public class OobaboogaActionInferenceClient : OobaboogaClientBase, IActionInferenceService
+public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInferenceService
 {
     public string ServiceName => OobaboogaConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OobaboogaActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
+    public OobaboogaActionInferenceService(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
         :base(httpClientFactory, settingsRepository)
     {
         _performanceMetrics = performanceMetrics;

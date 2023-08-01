@@ -8,17 +8,17 @@ public static class ServiceCollectionExtensions
 {
     public static void AddKoboldAI(this IServiceCollection services)
     {
-        services.AddTransient<KoboldAITextGenClient>();
-        services.AddTransient<KoboldAIActionInferenceClient>();
+        services.AddTransient<KoboldAITextGenService>();
+        services.AddTransient<KoboldAIActionInferenceService>();
     }
     
     public static void RegisterKoboldAI(this IServiceRegistry<ITextGenService> registry)
     {
-        registry.Add<KoboldAITextGenClient>(KoboldAIConstants.ServiceName);
+        registry.Add<KoboldAITextGenService>(KoboldAIConstants.ServiceName);
     }
     
     public static void RegisterKoboldAI(this IServiceRegistry<IActionInferenceService> registry)
     {
-        registry.Add<KoboldAIActionInferenceClient>(KoboldAIConstants.ServiceName);
+        registry.Add<KoboldAIActionInferenceService>(KoboldAIConstants.ServiceName);
     }
 }

@@ -3,7 +3,7 @@ using Voxta.Abstractions.Services;
 
 namespace Voxta.Services.Mocks;
 
-public class MockTextGenClient : ITextGenService
+public class MockTextGenService : ITextGenService
 {
     public string ServiceName => MockConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };

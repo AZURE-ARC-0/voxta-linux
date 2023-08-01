@@ -11,24 +11,24 @@ using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.NovelAI;
 
-public class NovelAITextToSpeechClient : ITextToSpeechService
+public class NovelAITextToSpeechService : ITextToSpeechService
 {
     public string ServiceName => NovelAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly HttpClient _httpClient;
-    private readonly ILogger<NovelAITextToSpeechClient> _logger;
+    private readonly ILogger<NovelAITextToSpeechService> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
     private string[]? _thinkingSpeech;
 
-    public NovelAITextToSpeechClient(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
+    public NovelAITextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
-        _logger = loggerFactory.CreateLogger<NovelAITextToSpeechClient>();
+        _logger = loggerFactory.CreateLogger<NovelAITextToSpeechService>();
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
     

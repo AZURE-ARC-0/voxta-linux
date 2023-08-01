@@ -8,23 +8,23 @@ public static class ServiceCollectionExtensions
 {
     public static void AddMocks(this IServiceCollection services)
     {
-        services.AddTransient<MockTextGenClient>();
-        services.AddTransient<MockTextToSpeechClient>();
-        services.AddTransient<MockActionInferenceClient>();
+        services.AddTransient<MockTextGenService>();
+        services.AddTransient<MockTextToSpeechService>();
+        services.AddTransient<MockActionInferenceService>();
     }
     
     public static void RegisterMocks(this IServiceRegistry<ITextGenService> registry)
     {
-        registry.Add<MockTextGenClient>(MockConstants.ServiceName);
+        registry.Add<MockTextGenService>(MockConstants.ServiceName);
     }
     
     public static void RegisterMocks(this IServiceRegistry<ITextToSpeechService> registry)
     {
-        registry.Add<MockTextToSpeechClient>(MockConstants.ServiceName);
+        registry.Add<MockTextToSpeechService>(MockConstants.ServiceName);
     }
     
     public static void RegisterMocks(this IServiceRegistry<IActionInferenceService> registry)
     {
-        registry.Add<MockActionInferenceClient>(MockConstants.ServiceName);
+        registry.Add<MockActionInferenceService>(MockConstants.ServiceName);
     }
 }

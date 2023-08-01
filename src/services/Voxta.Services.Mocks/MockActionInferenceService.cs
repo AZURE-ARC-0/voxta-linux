@@ -3,7 +3,7 @@ using Voxta.Abstractions.Services;
 
 namespace Voxta.Services.Mocks;
 
-public class MockActionInferenceClient : IActionInferenceService
+public class MockActionInferenceService : IActionInferenceService
 {
     public string ServiceName => MockConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
