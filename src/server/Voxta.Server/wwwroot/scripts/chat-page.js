@@ -15,6 +15,7 @@ const notifications = new Notifications(document.getElementById('notification'))
 const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
 
 let selectedCharacter = { name: '', enableThinkingSpeech: false };
+let selectedChatId = null;
 let thinkingSpeechUrls = [];
 const playThinkingSpeech = () => {
     if (!selectedCharacter.enableThinkingSpeech) return;
@@ -52,7 +53,6 @@ const reset  = () => {
 
 voxtaClient.addEventListener('onopen', (evt) => {
     notifications.notify('Connected', 'success');
-    splash.classList.add('voxta_show');
 });
 voxtaClient.addEventListener('onclose', (evt) => {
     notifications.notify('Disconnected', 'danger');
@@ -65,7 +65,11 @@ voxtaClient.addEventListener('onerror', (evt) => {
 voxtaClient.addEventListener('welcome', (evt) => {
     const username = document.getElementById('username');
     username.textContent = evt.detail.username;
-    splash.classList.add('voxta_show');
+    if(selectedChatId) {
+        voxtaClient.resumeChat(selectedChatId);
+    } else {
+        splash.classList.add('voxta_show');
+    }
 });
 voxtaClient.addEventListener('charactersListLoaded', (evt) => {
     // TODO: Split the UI logic
@@ -162,6 +166,7 @@ voxtaClient.addEventListener('chatsListLoaded', (evt) => {
     }
 });
 voxtaClient.addEventListener('ready', (evt) => {
+    selectedChatId = evt.detail.chatId;
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
     audioVisualizer.idle();
     canvas.classList.add('voxta_show');

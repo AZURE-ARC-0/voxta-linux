@@ -59,10 +59,13 @@ public partial class ChatSession
         {
             // TODO: Externalize these messages into a dedicated, localizable class
             var duration = DateTimeOffset.UtcNow - _chatSessionData.Messages[^1].Timestamp;
-            HandleClientMessage(new ClientSendMessage
+            if (duration > TimeSpan.FromMinutes(5))
             {
-                Text = $"({_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online)"
-            });
+                HandleClientMessage(new ClientSendMessage
+                {
+                    Text = $"(OOC: {_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online)"
+                });
+            }
         }
     }
 
