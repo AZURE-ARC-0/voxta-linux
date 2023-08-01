@@ -14,7 +14,7 @@ public class ChatMessageLiteDBRepository : IChatMessageRepository
         _chatMessagesCollection = db.GetCollection<ChatMessageData>();
     }
     
-    public Task<ChatMessageData[]> GetChatMessagesAsync(string chatId, CancellationToken cancellationToken)
+    public Task<ChatMessageData[]> GetChatMessagesAsync(Guid chatId, CancellationToken cancellationToken)
     {
         var messages = _chatMessagesCollection.Query()
             .Where(c => c.ChatId == chatId)

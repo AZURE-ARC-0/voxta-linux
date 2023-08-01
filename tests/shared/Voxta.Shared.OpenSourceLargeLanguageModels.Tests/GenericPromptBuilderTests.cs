@@ -17,25 +17,24 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptMinimal()
     {
-        var actual = _builder.BuildReplyPrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            }
-        }, 4096);
+        var actual = _builder.BuildReplyPrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        Services = null!,
+                    }
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+            , 4096);
 
         Assert.That(actual, Is.EqualTo("""
         Description of Jane: some-description
@@ -51,30 +50,29 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptFull()
     {
-        var actual = _builder.BuildReplyPrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                SystemPrompt = "some-system-prompt",
-                PostHistoryInstructions = "some-post-history-instructions",
-                MessageExamples = "Joe: Request\nJane: Response",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            },
-            Actions = new[] { "action1", "action2" },
-            Context = "some-context",
-        }, 4096);
+        var actual = _builder.BuildReplyPrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        SystemPrompt = "some-system-prompt",
+                        PostHistoryInstructions = "some-post-history-instructions",
+                        MessageExamples = "Joe: Request\nJane: Response",
+                        Services = null!,
+                    },
+                    Actions = new[] { "action1", "action2" },
+                    Context = "some-context",
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+            , 4096);
 
         Assert.That(actual, Is.EqualTo("""
         some-system-prompt
@@ -94,30 +92,29 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptActionInference()
     {
-        var actual = _builder.BuildActionInferencePrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                SystemPrompt = "some-system-prompt",
-                PostHistoryInstructions = "some-post-history-instructions",
-                MessageExamples = "Joe: Request\nJane: Response",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            },
-            Actions = new[] { "action1", "action2" },
-            Context = "some-context",
-        });
+        var actual = _builder.BuildActionInferencePrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        SystemPrompt = "some-system-prompt",
+                        PostHistoryInstructions = "some-post-history-instructions",
+                        MessageExamples = "Joe: Request\nJane: Response",
+                        Services = null!,
+                    },
+                    Actions = new[] { "action1", "action2" },
+                    Context = "some-context",
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+        );
 
         Assert.That(actual, Is.EqualTo("""
         You are tasked with inferring the best action from a list based on the content of a sample chat.

@@ -19,25 +19,24 @@ public class OpenAIPromptBuilderTests
     [Test]
     public void TestPromptMinimal()
     {
-        var messages = _builder.BuildReplyPrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            }
-        }, 4096);
+        var messages = _builder.BuildReplyPrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        Services = null!,
+                    }
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+            , 4096);
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
@@ -54,30 +53,29 @@ public class OpenAIPromptBuilderTests
     [Test]
     public void TestPromptFull()
     {
-        var messages = _builder.BuildReplyPrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                SystemPrompt = "some-system-prompt",
-                PostHistoryInstructions = "some-post-history-instructions",
-                MessageExamples = "Joe: Request\nJane: Response",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            },
-            Actions = new[] { "action1", "action2" },
-            Context = "some-context",
-        }, 4096);
+        var messages = _builder.BuildReplyPrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        SystemPrompt = "some-system-prompt",
+                        PostHistoryInstructions = "some-post-history-instructions",
+                        MessageExamples = "Joe: Request\nJane: Response",
+                        Services = null!,
+                    },
+                    Actions = new[] { "action1", "action2" },
+                    Context = "some-context",
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+            , 4096);
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
@@ -98,30 +96,29 @@ public class OpenAIPromptBuilderTests
     [Test]
     public void TestPromptActionInference()
     {
-        var messages = _builder.BuildActionInferencePrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                SystemPrompt = "some-system-prompt",
-                PostHistoryInstructions = "some-post-history-instructions",
-                MessageExamples = "Joe: Request\nJane: Response",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            },
-            Actions = new[] { "action1", "action2" },
-            Context = "some-context",
-        });
+        var messages = _builder.BuildActionInferencePrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        SystemPrompt = "some-system-prompt",
+                        PostHistoryInstructions = "some-post-history-instructions",
+                        MessageExamples = "Joe: Request\nJane: Response",
+                        Services = null!,
+                    },
+                    Actions = new[] { "action1", "action2" },
+                    Context = "some-context",
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+        );
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""

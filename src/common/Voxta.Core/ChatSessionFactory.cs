@@ -145,7 +145,7 @@ public class ChatSessionFactory
 
             speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, character.Services.SpeechGen?.Voice, culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
-            var messages = chatId.HasValue ? await _chatMessageRepository.GetChatMessagesAsync(chatId.Value.ToString(), cancellationToken) : null;
+            var messages = chatId.HasValue ? await _chatMessageRepository.GetChatMessagesAsync(chatId.Value, cancellationToken) : null;
             
             var chatData = new ChatSessionData
             {

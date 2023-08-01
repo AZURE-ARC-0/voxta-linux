@@ -16,25 +16,24 @@ public class NovelAIPromptBuilderTests
     [Test]
     public void TestPromptMinimal()
     {
-        var actual = _builder.BuildReplyPrompt(new ChatSessionData
-        {
-            UserName = "Joe",
-            Character = new()
-            {
-                Name = "Jane",
-                Description = "some-description",
-                Personality = "some-personality",
-                Scenario = "some-scenario",
-                FirstMessage = "some-first-message",
-                Services = null!,
-            },
-            Messages =
-            {
-                ChatMessageData.Fake("Joe", "Hello"),
-                ChatMessageData.Fake("Jane", "World"),
-                ChatMessageData.Fake("Joe", "Question"),
-            }
-        }, 4096);
+        var actual = _builder.BuildReplyPrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        Services = null!,
+                    }
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+        );
 
         Assert.That(actual, Is.EqualTo("""
         Description of Jane: some-description

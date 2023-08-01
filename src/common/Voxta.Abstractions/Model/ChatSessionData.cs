@@ -21,3 +21,12 @@ public class ChatSessionData : IChatInferenceData
         return string.Join("\n", Messages.Select(m => $"{m.User}: {m.Text}"));
     }
 }
+
+public static class ChatSessionDataExtensions
+{
+    public static ChatSessionData AddMessage(this ChatSessionData chat, string user, string message)
+    {
+        chat.Messages.Add(ChatMessageData.FromText(chat.ChatId, user, message));
+        return chat;
+    }
+}
