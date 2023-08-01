@@ -2,230 +2,129 @@
 import {AudioVisualizer} from "/scripts/audio-visualizer.js";
 import {Notifications} from "/scripts/notifications.js";
 
-const canvas = document.getElementById('audioVisualizer');
+const getId = id => document.getElementById(id);
+const [canvas, splash, selectCharacterButton, characterButtons, chatButtons, messageBox, promptBox, prompt] =
+    ['audioVisualizer', 'splash', 'selectCharacterButton', 'characterButtons', 'chatButtons', 'message', 'promptBox', 'prompt'].map(getId);
+
 const audioVisualizer = new AudioVisualizer(canvas);
-const splash = document.getElementById('splash');
-const selectCharacterButton = document.getElementById('selectCharacterButton');
-const characterButtons = document.getElementById('characterButtons');
-const chatButtons = document.getElementById('chatButtons');
-const messageBox = document.getElementById('message');
-const promptBox = document.getElementById('promptBox');
-const prompt = document.getElementById('prompt');
-const notifications = new Notifications(document.getElementById('notification'));
+const notifications = new Notifications(getId('notification'));
 const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
 
-let selectedCharacter = { name: '', enableThinkingSpeech: false };
+let selectedCharacter = {name: '', enableThinkingSpeech: false};
 let selectedChatId = null;
 let thinkingSpeechUrls = [];
 const playThinkingSpeech = () => {
-    if (!selectedCharacter.enableThinkingSpeech) return;
-    if (thinkingSpeechUrls.length) {
-        const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
-        audioVisualizer.play(audioUrl, () => {
-        }, () => {
-        });
-    }
+    if (!selectedCharacter.enableThinkingSpeech || !thinkingSpeechUrls.length) return;
+    const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
+    audioVisualizer.play(audioUrl, () => {
+    }, () => {
+    });
 }
 
-const sendMessage = (text) => {
+const sendChatMessage = text => {
     playThinkingSpeech();
     audioVisualizer.think();
     prompt.disabled = true;
-    voxtaClient.send(
-        text,
-        "Chatting with speech and no webcam.",
-        ['happy', 'intense_love', 'sad', 'angry', 'confused']
-    );
+    voxtaClient.send(text, "Chatting with speech and no webcam.", ['happy', 'intense_love', 'sad', 'angry', 'confused']);
 }
 
-const reset  = () => {
-    messageBox.innerText = '';
-    messageBox.classList.remove('voxta_show');
-    prompt.value = '';
-    prompt.disabled = true;
-    promptBox.classList.remove('voxta_show');
-    audioVisualizer.idle();
-    canvas.classList.remove('voxta_show');
-    characterButtons.classList.remove('voxta_show');
-    chatButtons.classList.remove('voxta_show');
-    splash.classList.remove('voxta_show');
-}
+const resetUI = () => ['voxta_show', 'innerText', 'disabled'].forEach(prop => [messageBox, promptBox, audioVisualizer, canvas, characterButtons, chatButtons, splash, prompt].forEach(el => el[prop] = ''));
 
-voxtaClient.addEventListener('onopen', (evt) => {
-    notifications.notify('Connected', 'success');
-});
-voxtaClient.addEventListener('onclose', (evt) => {
+const removeAllChildNodes = parent => {
+    while (parent.firstChild) parent.removeChild(parent.firstChild);
+};
+
+const createElement = (parent, tagName, className, textContent) => {
+    const el = document.createElement(tagName);
+    el.className = className;
+    el.textContent = textContent;
+    parent.appendChild(el);
+    return el;
+};
+
+const createButton = (parent, className, textContent, onClick) => {
+    const button = createElement(parent, 'button', className, textContent);
+    button.onclick = onClick;
+    return button;
+};
+
+voxtaClient.addEventListener('onopen', () => notifications.notify('Connected', 'success'));
+voxtaClient.addEventListener('onclose', () => {
     notifications.notify('Disconnected', 'danger');
-    reset();
+    resetUI();
 });
-voxtaClient.addEventListener('onerror', (evt) => {
-    notifications.notify('Error: ' + evt.detail.message, 'danger');
+voxtaClient.addEventListener('onerror', evt => notifications.notify('Error: ' + evt.detail.message, 'danger'));
+voxtaClient.addEventListener('welcome', evt => {
+    getId('username').textContent = evt.detail.username;
+    selectedChatId ? voxtaClient.resumeChat(selectedChatId) : splash.classList.add('voxta_show');
 });
-
-voxtaClient.addEventListener('welcome', (evt) => {
-    const username = document.getElementById('username');
-    username.textContent = evt.detail.username;
-    if(selectedChatId) {
-        voxtaClient.resumeChat(selectedChatId);
-    } else {
-        splash.classList.add('voxta_show');
-    }
-});
-voxtaClient.addEventListener('charactersListLoaded', (evt) => {
-    // TODO: Split the UI logic
-    while (characterButtons.firstChild) {
-        characterButtons.removeChild(characterButtons.firstChild);
-    }
-    if(evt.detail.characters.length === 0) {
-        const info = document.createElement('p');
-        info.className = 'text-muted';
-        info.textContent = 'No characters found';
-        characterButtons.appendChild(info);
+voxtaClient.addEventListener('charactersListLoaded', evt => {
+    removeAllChildNodes(characterButtons);
+    if (evt.detail.characters.length === 0) {
+        createElement(characterButtons, 'p', 'text-center text-muted', 'No characters found');
     }
     evt.detail.characters.forEach(character => {
-        const button = document.createElement('button');
-        button.className = 'btn btn-secondary';
-        const charName = document.createElement('b');
-        charName.textContent = character.name;
-        button.appendChild(charName);
-        const charDesc = document.createElement('div');
-        charDesc.className = 'small';
-        charDesc.textContent = character.description;
-        button.appendChild(charDesc);
-        button.onclick = () => {
-            while (chatButtons.firstChild) {
-                chatButtons.removeChild(chatButtons.firstChild);
-            }
+        createButton(characterButtons, 'btn btn-secondary', character.name, () => {
+            removeAllChildNodes(chatButtons);
             selectedCharacter = character;
             voxtaClient.loadChatsList(character.id);
             characterButtons.classList.remove('voxta_show');
             chatButtons.classList.add('voxta_show');
-        };
-        characterButtons.appendChild(button);
+        });
     });
-    {
-        const back = document.createElement('button');
-        back.className = 'btn btn-secondary colspan';
-        back.textContent = 'Back';
-        back.onclick = () => {
-            characterButtons.classList.remove('voxta_show');
-            splash.classList.add('voxta_show');
-        };
-        characterButtons.appendChild(back);
-    }
+    createButton(characterButtons, 'btn btn-secondary colspan', 'Back', () => {
+        characterButtons.classList.remove('voxta_show');
+        splash.classList.add('voxta_show');
+    });
 });
-voxtaClient.addEventListener('chatsListLoaded', (evt) => {
-    // TODO: Split the UI logic
-    while (chatButtons.firstChild) {
-        chatButtons.removeChild(chatButtons.firstChild);
-    }
-
-    const title = document.createElement('h2');
-    title.className = 'text-center colspan';
-    title.textContent = selectedCharacter.name;
-    chatButtons.appendChild(title);
-    
-    if(evt.detail.chats.length === 0) {
-        const info = document.createElement('p');
-        info.className = 'text-muted text-center colspan';
-        info.textContent = 'No chats found';
-        chatButtons.appendChild(info);
-    }
-    
-    if(evt.detail.chats.length) {
-        evt.detail.chats.forEach(chat => {
-            const button = document.createElement('button');
-            button.className = 'btn btn-secondary colspan';
-            button.textContent = `Continue`;
-            button.onclick = () => {
-                voxtaClient.resumeChat(chat.id);
-                chatButtons.classList.remove('voxta_show');
-            };
-            chatButtons.appendChild(button);
-        });
-    }
-    
-    const newChatButton = document.createElement('button');
-    newChatButton.className = 'btn btn-secondary colspan';
-    newChatButton.textContent = 'New chat';
-    newChatButton.onclick = () => {
-        voxtaClient.newChat({
-            characterId: selectedCharacter.id,
-            clearExistingChats: true
-        });
+voxtaClient.addEventListener('chatsListLoaded', evt => {
+    removeAllChildNodes(chatButtons);
+    createElement(chatButtons, 'h2', 'text-center colspan', selectedCharacter.name);
+    if (evt.detail.chats.length === 0) createElement(chatButtons, 'p', 'text-muted text-center colspan', 'No chats found');
+    evt.detail.chats.forEach(chat => createButton(chatButtons, 'btn btn-secondary colspan', 'Continue', () => {
+        voxtaClient.resumeChat(chat.id);
         chatButtons.classList.remove('voxta_show');
-    };
-    chatButtons.appendChild(newChatButton);
-
-    {
-        const back = document.createElement('button');
-        back.className = 'btn btn-secondary colspan';
-        back.textContent = 'Back';
-        back.onclick = () => {
-            chatButtons.classList.remove('voxta_show');
-            splash.classList.add('voxta_show');
-        };
-        chatButtons.appendChild(back);
-    }
+    }));
+    createButton(chatButtons, 'btn btn-secondary colspan', 'New chat', () => {
+        voxtaClient.newChat({characterId: selectedCharacter.id, clearExistingChats: true});
+        chatButtons.classList.remove('voxta_show');
+    });
+    createButton(chatButtons, 'btn btn-secondary colspan', 'Back', () => {
+        chatButtons.classList.remove('voxta_show');
+        splash.classList.add('voxta_show');
+    });
 });
-voxtaClient.addEventListener('ready', (evt) => {
+voxtaClient.addEventListener('ready', evt => {
     selectedChatId = evt.detail.chatId;
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
     audioVisualizer.idle();
     canvas.classList.add('voxta_show');
     promptBox.classList.add('voxta_show');
 });
-voxtaClient.addEventListener('reply', (evt) => {
+voxtaClient.addEventListener('reply', evt => {
     messageBox.classList.add('voxta_show');
     messageBox.innerText = evt.detail.text;
     prompt.disabled = false;
 });
-voxtaClient.addEventListener('speech', (evt) => {
-    audioVisualizer.play(
-        evt.detail.url,
-        (duration) => voxtaClient.speechPlaybackStart(duration),
-        () => voxtaClient.speechPlaybackComplete()
-    );
-});
-voxtaClient.addEventListener('action', (evt) => {
-    switch (evt.detail.value) {
-        case 'happy':
-            audioVisualizer.setColor('rgb(215,234,231)');
-            break;
-        case 'intense_love':
-            // pink
-            audioVisualizer.setColor('#e186a4');
-            break;
-        case 'sad':
-            // blue
-            audioVisualizer.setColor('#6d899f');
-            break;
-        case 'angry':
-            // red
-            audioVisualizer.setColor('#fa2f2a');
-            break;
-        case 'confused':
-            // purple
-            audioVisualizer.setColor('#a774ad');
-            break;
-        default:
-            audioVisualizer.setColor('#afbcc7');
-            break;
-    }
-});
-voxtaClient.addEventListener('speechRecognitionStart', (evt) => {
+voxtaClient.addEventListener('speech', evt => audioVisualizer.play(evt.detail.url, duration => voxtaClient.speechPlaybackStart(duration), () => voxtaClient.speechPlaybackComplete()));
+voxtaClient.addEventListener('action', evt => audioVisualizer.setColor({
+    'happy': 'rgb(215,234,231)',
+    'intense_love': '#e186a4',
+    'sad': '#6d899f',
+    'angry': '#fa2f2a',
+    'confused': '#a774ad'
+}[evt.detail.value] || '#afbcc7'));
+voxtaClient.addEventListener('speechRecognitionStart', () => {
     audioVisualizer.stop();
     audioVisualizer.listen();
 });
-voxtaClient.addEventListener('speechRecognitionPartial', (evt) => {
-    prompt.value = evt.detail.text;
-});
-voxtaClient.addEventListener('speechRecognitionEnd', (evt) => {
-    sendMessage(evt.detail.text);
+voxtaClient.addEventListener('speechRecognitionPartial', evt => prompt.value = evt.detail.text);
+voxtaClient.addEventListener('speechRecognitionEnd', evt => {
+    sendChatMessage(evt.detail.text);
     prompt.value = evt.detail.text;
     prompt.disabled = true;
 });
-voxtaClient.addEventListener('error', (evt) => {
+voxtaClient.addEventListener('error', evt => {
     notifications.notify('Server error: ' + evt.detail.message, 'danger');
     audioVisualizer.stop();
     audioVisualizer.idle();
@@ -234,11 +133,11 @@ voxtaClient.addEventListener('error', (evt) => {
 
 voxtaClient.connect();
 
-prompt.addEventListener('keydown', (evt) => {
+prompt.addEventListener('keydown', evt => {
     if (evt.key === 'Enter') {
         evt.preventDefault();
-        if(!prompt.disabled) {
-            sendMessage(prompt.value);
+        if (!prompt.disabled) {
+            sendChatMessage(prompt.value);
             prompt.value = '';
         }
     }
