@@ -63,13 +63,13 @@ public sealed partial class UserConnection : IUserConnection
                 switch (clientMessage)
                 {
                     case ClientNewChatMessage newChatMessage:
-                        await StartChatAsync(newChatMessage, cancellationToken);
+                        await HandleNewChatAsync(newChatMessage, cancellationToken);
                         break;
                     case ClientStartChatMessage startChatMessage:
-                        await StartChatAsync(startChatMessage, cancellationToken);
+                        await HandleStartChatAsync(startChatMessage, cancellationToken);
                         break;
                     case ClientResumeChatMessage resumeChatMessage:
-                        await ResumeChatAsync(resumeChatMessage, cancellationToken);
+                        await HandleResumeChatAsync(resumeChatMessage, cancellationToken);
                         break;
                     case ClientStopChatMessage:
                         if (_chat != null) await _chat.DisposeAsync();

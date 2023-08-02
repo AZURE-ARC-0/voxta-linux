@@ -6,7 +6,7 @@ namespace Voxta.Core;
 
 public sealed partial class UserConnection
 {
-    private async Task DisposeAndLockChat(CancellationToken cancellationToken)
+    private async Task DisposeAndLockChatAsync(CancellationToken cancellationToken)
     {
         if (_chat != null) await _chat.DisposeAsync();
         _chat = null;
@@ -18,7 +18,7 @@ public sealed partial class UserConnection
         }
     }
 
-    private async Task<Chat> CreateNewChat(Character character)
+    private async Task<Chat> CreateNewChatAsync(Character character)
     {
         var chat = new Chat
         {
@@ -29,9 +29,9 @@ public sealed partial class UserConnection
         return chat;
     }
 
-    private async Task StartChatAsync(ClientNewChatMessage newChatMessage, CancellationToken cancellationToken)
+    private async Task HandleNewChatAsync(ClientNewChatMessage newChatMessage, CancellationToken cancellationToken)
     {
-        await DisposeAndLockChat(cancellationToken);
+        await DisposeAndLockChatAsync(cancellationToken);
 
         var character = await _charactersRepository.GetCharacterAsync(newChatMessage.CharacterId, cancellationToken);
         if (character == null) throw new NullReferenceException($"Could not find character {newChatMessage.CharacterId}");
@@ -39,18 +39,19 @@ public sealed partial class UserConnection
         foreach (var c in await _chatRepository.GetChatsListAsync(newChatMessage.CharacterId, CancellationToken.None))
         {
             await _chatRepository.DeleteAsync(c.Id);
+            _logger.LogInformation("Deleted previous chat {ChatId}", c.Id);
         }
 
-        var chat = await CreateNewChat(character);
+        var chat = await CreateNewChatAsync(character);
 
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, newChatMessage, cancellationToken);
-        _logger.LogInformation("Started chat: {ChatId}", chat.Id);
+        _logger.LogInformation("New chat: {ChatId}", chat.Id);
         _chat.SendReady();
     }
 
-    private async Task StartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
+    private async Task HandleStartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
     {
-        await DisposeAndLockChat(cancellationToken);
+        await DisposeAndLockChatAsync(cancellationToken);
 
         var character = await _charactersRepository.GetCharacterAsync(startChatMessage.Character.Id, cancellationToken);
         if (character == null)
@@ -65,16 +66,16 @@ public sealed partial class UserConnection
             chat = await _chatRepository.GetChatAsync(startChatMessage.ChatId.Value, cancellationToken);
         }
 
-        chat ??= await CreateNewChat(character);
+        chat ??= await CreateNewChatAsync(character);
 
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, startChatMessage, cancellationToken);
         _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
         _chat.SendReady();
     }
 
-    private async Task ResumeChatAsync(ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
+    private async Task HandleResumeChatAsync(ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
     {
-        await DisposeAndLockChat(cancellationToken);
+        await DisposeAndLockChatAsync(cancellationToken);
 
         var chat = await _chatRepository.GetChatAsync(resumeChatMessage.ChatId, cancellationToken);
         if (chat == null) throw new InvalidOperationException($"Chat {resumeChatMessage.ChatId} not found");
@@ -83,7 +84,7 @@ public sealed partial class UserConnection
         if (character == null) throw new InvalidOperationException($"Character {chat.CharacterId} referenced in chat {resumeChatMessage.ChatId} was found");
 
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, resumeChatMessage, cancellationToken);
-        _logger.LogInformation("Started chat: {ChatId}", resumeChatMessage.ChatId);
+        _logger.LogInformation("Resumed chat: {ChatId}", resumeChatMessage.ChatId);
         _chat.SendReady();
     }
 }
