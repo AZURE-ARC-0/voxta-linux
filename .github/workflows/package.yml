@@ -36,7 +36,7 @@ jobs:
         dotnet publish -c Release --no-build --no-restore --output ./publish/desktop src/desktop/Voxta.DesktopApp/Voxta.DesktopApp.csproj
     - name: Merge
       run: |
-        mv ./publish/desktop/* ./publish/server/
+        mv --no-clobber ./publish/desktop/* ./publish/server/
     - name: Zip
       run: |
         cd publish/server
