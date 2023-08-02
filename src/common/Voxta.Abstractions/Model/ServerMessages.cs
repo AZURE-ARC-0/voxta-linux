@@ -65,6 +65,7 @@ public class ServerReadyMessage : ServerMessage
 {
     public required Guid ChatId { get; init; }
     public required string[] ThinkingSpeechUrls { get; init; }
+    public required CharacterServicesMap Services { get; init; }
 }
 
 [Serializable]

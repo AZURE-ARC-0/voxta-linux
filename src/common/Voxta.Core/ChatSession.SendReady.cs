@@ -38,6 +38,26 @@ public partial class ChatSession
         await _tunnel.SendAsync(new ServerReadyMessage
         {
             ChatId = _chatSessionData.Chat.Id,
+            Services = new CharacterServicesMap
+            {
+                TextGen = new ServiceMap
+                {
+                    Service = _textGen.ServiceName,
+                },
+                SpeechGen = new VoiceServiceMap
+                {
+                    Service = _speechGenerator.ServiceName,
+                    Voice = _speechGenerator.Voice,
+                },
+                SpeechToText = new ServiceMap
+                {
+                    Service = _speechToText?.ServiceName ?? "",
+                },
+                ActionInference = new ServiceMap
+                {
+                    Service = _actionInference?.ServiceName ?? "",
+                },
+            },
             ThinkingSpeechUrls = thinkingSpeechUrls.ToArray(),
                 
         }, cancellationToken);
@@ -61,7 +81,7 @@ public partial class ChatSession
             var duration = DateTimeOffset.UtcNow - _chatSessionData.Messages[^1].Timestamp;
             HandleClientMessage(new ClientSendMessage
             {
-                Text = $"(OOC: {_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online)"
+                Text = $"[OOC: {_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online]"
             });
         }
     }
