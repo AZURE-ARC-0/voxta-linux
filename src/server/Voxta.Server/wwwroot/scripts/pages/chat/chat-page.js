@@ -1,22 +1,26 @@
-﻿import {VoxtaClient} from "/scripts/voxta-client.js";
-import {AudioVisualizer} from "/scripts/audio-visualizer.js";
-import {Notifications} from "/scripts/notifications.js";
-import {ChatPageView} from "/scripts/pages/chat/chat-page-view.js";
+﻿import {VoxtaClient} from "../../services/voxta-client.js";
+import {AudioVisualizer} from "../../components/audio-visualizer.js";
+import {Notifications} from "../../components/notifications.js";
 
-const view = new ChatPageView();
 const getId = id => document.getElementById(id);
-const [canvas, splash, selectCharacterButton, characterButtons, chatButtons, messageBox, promptBox, prompt] =
-    ['audioVisualizer', 'splash', 'selectCharacterButton', 'characterButtons', 'chatButtons', 'message', 'promptBox', 'prompt'].map(getId);
+const canvas = getId('audioVisualizer');
+const splash = getId('splash');
+const selectCharacterButton = getId('selectCharacterButton');
+const characterButtons = getId('characterButtons');
+const chatButtons = getId('chatButtons');
+const messageBox = getId('message');
+const promptBox = getId('promptBox');
+const prompt = getId('prompt');
 
 const audioVisualizer = new AudioVisualizer(canvas);
 const notifications = new Notifications(getId('notification'));
 const voxtaClient = new VoxtaClient('ws://127.0.0.1:5384/ws');
 
-let selectedCharacter = {name: '', enableThinkingSpeech: false};
+let selectedCharacter = {name: ''};
 let selectedChatId = null;
 let thinkingSpeechUrls = [];
 const playThinkingSpeech = () => {
-    if (!selectedCharacter.enableThinkingSpeech || !thinkingSpeechUrls.length) return;
+    if (!thinkingSpeechUrls.length) return;
     const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
     audioVisualizer.play(audioUrl, () => {
     }, () => {
@@ -27,10 +31,27 @@ const sendChatMessage = text => {
     playThinkingSpeech();
     audioVisualizer.think();
     prompt.disabled = true;
-    voxtaClient.send(text, "Chatting with speech and no webcam.", ['happy', 'intense_love', 'sad', 'angry', 'confused']);
+    voxtaClient.send(
+        text,
+        "Chatting with speech and no webcam.",
+        ['happy', 'intense_love', 'sad', 'angry', 'confused']
+    );
 }
 
-const resetUI = () => ['voxta_show', 'innerText', 'disabled'].forEach(prop => [messageBox, promptBox, audioVisualizer, canvas, characterButtons, chatButtons, splash, prompt].forEach(el => el[prop] = ''));
+const resetUI  = () => {
+    messageBox.innerText = '';
+    prompt.value = '';
+    prompt.disabled = true;
+    
+    messageBox.classList.remove('voxta_show');
+    promptBox.classList.remove('voxta_show');
+    canvas.classList.remove('voxta_show');
+    characterButtons.classList.remove('voxta_show');
+    chatButtons.classList.remove('voxta_show');
+    splash.classList.remove('voxta_show');
+
+    audioVisualizer.idle();
+}
 
 const removeAllChildNodes = parent => {
     while (parent.firstChild) parent.removeChild(parent.firstChild);
@@ -82,15 +103,22 @@ voxtaClient.addEventListener('charactersListLoaded', evt => {
 voxtaClient.addEventListener('chatsListLoaded', evt => {
     removeAllChildNodes(chatButtons);
     createElement(chatButtons, 'h2', 'text-center colspan', selectedCharacter.name);
-    if (evt.detail.chats.length === 0) createElement(chatButtons, 'p', 'text-muted text-center colspan', 'No chats found');
-    evt.detail.chats.forEach(chat => createButton(chatButtons, 'btn btn-secondary colspan', 'Continue', () => {
-        voxtaClient.resumeChat(chat.id);
-        chatButtons.classList.remove('voxta_show');
-    }));
-    createButton(chatButtons, 'btn btn-secondary colspan', 'New chat', () => {
-        voxtaClient.newChat({characterId: selectedCharacter.id, clearExistingChats: true});
-        chatButtons.classList.remove('voxta_show');
-    });
+    if (evt.detail.chats.length === 0) {
+        createElement(chatButtons, 'p', 'text-muted text-center colspan', 'No chats found');
+        createButton(chatButtons, 'btn btn-secondary colspan', 'New chat', () => {
+            voxtaClient.newChat({characterId: selectedCharacter.id});
+            chatButtons.classList.remove('voxta_show');
+        });
+    } else {
+        evt.detail.chats.forEach(chat => createButton(chatButtons, 'btn btn-secondary colspan', 'Continue', () => {
+            voxtaClient.resumeChat(chat.id);
+            chatButtons.classList.remove('voxta_show');
+        }));
+        createButton(chatButtons, 'btn btn-secondary colspan', 'Clear and reset chat', () => {
+            voxtaClient.newChat({characterId: selectedCharacter.id});
+            chatButtons.classList.remove('voxta_show');
+        });
+    }
     createButton(chatButtons, 'btn btn-secondary colspan', 'Back', () => {
         chatButtons.classList.remove('voxta_show');
         splash.classList.add('voxta_show');

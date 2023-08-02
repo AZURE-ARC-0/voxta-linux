@@ -126,7 +126,6 @@
         const msg = JSON.stringify({
             $type: "newChat",
             characterId: params.characterId,
-            clearExistingChats: params.clearExistingChats,
             useServerSpeechRecognition: true,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });
