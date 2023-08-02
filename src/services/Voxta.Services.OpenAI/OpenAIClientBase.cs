@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.DeepDev;
 using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.System;
 using Voxta.Common;
 
 namespace Voxta.Services.OpenAI;
@@ -30,14 +31,16 @@ public abstract class OpenAIClientBase
     
     private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
     private OpenAIParameters? _parameters;
     private string _model = "gpt-3.5-turbo";
 
-    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer)
+    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
         _tokenizer = tokenizer;
+        _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
@@ -54,7 +57,7 @@ public abstract class OpenAIClientBase
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.ApiKey)) return false;
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  Crypto.DecryptString(settings.ApiKey));
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;
         _parameters = new OpenAIParameters();
         return true;

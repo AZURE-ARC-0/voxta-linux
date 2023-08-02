@@ -3,6 +3,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Microsoft.DeepDev;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Services.OpenAI;
 
@@ -14,8 +15,8 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     private readonly ITokenizer _tokenizer;
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics)
-        : base(httpClientFactory, settingsRepository, tokenizer)
+    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
+        : base(httpClientFactory, settingsRepository, tokenizer, encryptionProvider)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
         _tokenizer = tokenizer;

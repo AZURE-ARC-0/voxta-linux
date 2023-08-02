@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
+using Voxta.Abstractions.System;
 using Voxta.Common;
 
 namespace Voxta.Services.AzureSpeechService;
@@ -15,6 +16,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     
     private readonly IRecordingService _recordingService;
     private readonly ISettingsRepository _settingsRepository;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly ILogger<AzureSpeechServiceSpeechToText> _logger;
     private SpeechRecognizer? _recognizer;
     private PushAudioInputStream? _pushStream;
@@ -23,10 +25,11 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     public event EventHandler<string>? SpeechRecognitionPartial;
     public event EventHandler<string>? SpeechRecognitionFinished;
 
-    public AzureSpeechServiceSpeechToText(IRecordingService recordingService, ISettingsRepository settingsRepository, ILoggerFactory loggerFactory)
+    public AzureSpeechServiceSpeechToText(IRecordingService recordingService, ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, ILocalEncryptionProvider encryptionProvider)
     {
         _recordingService = recordingService;
         _settingsRepository = settingsRepository;
+        _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceSpeechToText>();
     }
     
@@ -39,7 +42,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         if (string.IsNullOrEmpty(settings.Region)) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
         
-        var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
+        var config = SpeechConfig.FromSubscription(_encryptionProvider.Decrypt(settings.SubscriptionKey), settings.Region);
         config.SpeechRecognitionLanguage = culture;
         if (settings.FilterProfanity)
         {

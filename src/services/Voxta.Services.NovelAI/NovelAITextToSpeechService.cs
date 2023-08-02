@@ -7,6 +7,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions.System;
 using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.NovelAI;
@@ -21,13 +22,15 @@ public class NovelAITextToSpeechService : ITextToSpeechService
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
     private string[]? _thinkingSpeech;
 
-    public NovelAITextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
+    public NovelAITextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
+        _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<NovelAITextToSpeechService>();
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
@@ -40,7 +43,7 @@ public class NovelAITextToSpeechService : ITextToSpeechService
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en")) return false;
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _thinkingSpeech = settings.ThinkingSpeech;
         return true;
     }

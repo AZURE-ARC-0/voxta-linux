@@ -4,6 +4,7 @@ using Voxta.Data.LiteDB;
 using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 using Voxta.Abstractions.Management;
+using Voxta.Abstractions.System;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Server.BackgroundServices;
 
@@ -21,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddLiteDBRepositories();
         services.AddTransient<DiagnosticsUtil>();
+        services.AddSingleton<ILocalEncryptionProvider, DPAPIEncryptionProvider>();
         
         services.AddSingleton<TemporaryFileCleanupService>();
         services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());

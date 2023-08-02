@@ -17,6 +17,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />
+        <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>

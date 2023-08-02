@@ -9,6 +9,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions.System;
 using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.ElevenLabs;
@@ -22,17 +23,19 @@ public class ElevenLabsTextToSpeechService : ITextToSpeechService
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
     private string _culture = "en-US";
     private string _model = "eleven_multilingual_v1";
     private ElevenLabsParameters? _parameters;
     private string[]? _thinkingSpeech;
 
-    public ElevenLabsTextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
+    public ElevenLabsTextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
+        _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<ElevenLabsTextToSpeechService>();
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
@@ -44,7 +47,7 @@ public class ElevenLabsTextToSpeechService : ITextToSpeechService
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.ApiKey)) throw new AuthenticationException("ElevenLabs token is missing.");
         _httpClient.BaseAddress = new Uri("https://api.elevenlabs.io");
-        _httpClient.DefaultRequestHeaders.Add("xi-api-key", Crypto.DecryptString(settings.ApiKey));
+        _httpClient.DefaultRequestHeaders.Add("xi-api-key", _encryptionProvider.Decrypt(settings.ApiKey));
         _culture = culture;
         _model = settings.Model;
         _parameters = settings.Parameters ?? new ElevenLabsParameters();

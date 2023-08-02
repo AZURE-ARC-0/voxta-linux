@@ -6,6 +6,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions.System;
 using VoiceInfo = Voxta.Abstractions.Model.VoiceInfo;
 
 namespace Voxta.Services.AzureSpeechService;
@@ -19,13 +20,15 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
     private readonly ILogger<AzureSpeechServiceTextToSpeech> _logger;
     private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
     private SpeechSynthesizer? _speechSynthesizer;
     private string _culture = "en-US";
 
-    public AzureSpeechServiceTextToSpeech(ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics)
+    public AzureSpeechServiceTextToSpeech(ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
+        _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceTextToSpeech>();
     }
     
@@ -38,7 +41,7 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         if (string.IsNullOrEmpty(settings.Region)) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
         
-        var config = SpeechConfig.FromSubscription(Crypto.DecryptString(settings.SubscriptionKey), settings.Region);
+        var config = SpeechConfig.FromSubscription(_encryptionProvider.Decrypt(settings.SubscriptionKey), settings.Region);
         if (settings.FilterProfanity)
         {
             config.SetProfanity(ProfanityOption.Removed);

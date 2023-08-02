@@ -3,6 +3,7 @@ using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Services.OpenAI;
 
@@ -14,8 +15,8 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
     private readonly ITokenizer _tokenizer;
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public OpenAIActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics)
-        : base(httpClientFactory, settingsRepository, tokenizer)
+    public OpenAIActionInferenceClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
+        : base(httpClientFactory, settingsRepository, tokenizer, encryptionProvider)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.ActionInference");
         _tokenizer = tokenizer;

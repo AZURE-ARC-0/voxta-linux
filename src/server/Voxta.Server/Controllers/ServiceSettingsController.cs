@@ -9,6 +9,7 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Abstractions.System;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.NovelAI.Presets;
 #if(WINDOWS)
@@ -21,10 +22,12 @@ namespace Voxta.Server.Controllers;
 public class ServiceSettingsController : Controller
 {
     private readonly ISettingsRepository _settingsRepository;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
 
-    public ServiceSettingsController(ISettingsRepository settingsRepository)
+    public ServiceSettingsController(ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
+        _encryptionProvider = encryptionProvider;
     }
     
     [HttpGet("/settings/azurespeechservice")]
@@ -35,7 +38,7 @@ public class ServiceSettingsController : Controller
             SubscriptionKey = "",
             Region = "",
         };
-        if (!string.IsNullOrEmpty(azurespeechservice.SubscriptionKey)) azurespeechservice.SubscriptionKey = Crypto.DecryptString(azurespeechservice.SubscriptionKey);  
+        if (!string.IsNullOrEmpty(azurespeechservice.SubscriptionKey)) azurespeechservice.SubscriptionKey = _encryptionProvider.Decrypt(azurespeechservice.SubscriptionKey);  
         return View(azurespeechservice);
     }
     
@@ -50,7 +53,7 @@ public class ServiceSettingsController : Controller
         await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
         {
             Enabled = value.Enabled,
-            SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? "" : Crypto.EncryptString(value.SubscriptionKey.TrimCopyPasteArtefacts()),
+            SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? "" : _encryptionProvider.Encrypt(value.SubscriptionKey.TrimCopyPasteArtefacts()),
             Region = value.Region.TrimCopyPasteArtefacts(),
             LogFilename = value.LogFilename?.TrimCopyPasteArtefacts(),
             FilterProfanity = value.FilterProfanity,
@@ -95,7 +98,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = elevenlabs.Enabled,
             Model = elevenlabs.Model,
-            ApiKey = !string.IsNullOrEmpty(elevenlabs.ApiKey) ? Crypto.DecryptString(elevenlabs.ApiKey) : "",
+            ApiKey = !string.IsNullOrEmpty(elevenlabs.ApiKey) ? _encryptionProvider.Decrypt(elevenlabs.ApiKey) : "",
             Parameters = JsonSerializer.Serialize(elevenlabs.Parameters ?? new ElevenLabsParameters()),
             ThinkingSpeech = string.Join('\n', elevenlabs.ThinkingSpeech),
             UseDefaults = elevenlabs.Parameters == null,
@@ -114,7 +117,7 @@ public class ServiceSettingsController : Controller
         await _settingsRepository.SaveAsync(new ElevenLabsSettings
         {
             Enabled = value.Enabled,
-            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
+            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<ElevenLabsParameters>(value.Parameters) ?? new ElevenLabsParameters(),
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -204,7 +207,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = novelai.Enabled,
             Model = novelai.Model,
-            Token = !string.IsNullOrEmpty(novelai.Token) ? Crypto.DecryptString(novelai.Token) : "",
+            Token = !string.IsNullOrEmpty(novelai.Token) ? _encryptionProvider.Decrypt(novelai.Token) : "",
             Parameters = JsonSerializer.Serialize(novelai.Parameters ?? NovelAIPresets.DefaultForModel(novelai.Model)),
             ThinkingSpeech = string.Join('\n', novelai.ThinkingSpeech),
             UseDefaults = novelai.Parameters == null,
@@ -223,7 +226,7 @@ public class ServiceSettingsController : Controller
         await _settingsRepository.SaveAsync(new NovelAISettings
         {
             Enabled = value.Enabled,
-            Token = string.IsNullOrEmpty(value.Token) ? "" : Crypto.EncryptString(value.Token.TrimCopyPasteArtefacts()),
+            Token = string.IsNullOrEmpty(value.Token) ? "" : _encryptionProvider.Encrypt(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? NovelAIPresets.DefaultForModel(value.Model),
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -239,7 +242,7 @@ public class ServiceSettingsController : Controller
         {
             ApiKey = "",
         };
-        if (!string.IsNullOrEmpty(openai.ApiKey)) openai.ApiKey = Crypto.DecryptString(openai.ApiKey);  
+        if (!string.IsNullOrEmpty(openai.ApiKey)) openai.ApiKey = _encryptionProvider.Decrypt(openai.ApiKey);  
         var vm = new OpenAISettingsViewModel
         {
             Enabled = openai.Enabled,
@@ -262,7 +265,7 @@ public class ServiceSettingsController : Controller
         await _settingsRepository.SaveAsync(new OpenAISettings
         {
             Enabled = value.Enabled,
-            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : Crypto.EncryptString(value.ApiKey.TrimCopyPasteArtefacts()),
+            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OpenAIParameters>(value.Parameters) ?? new OpenAIParameters(),
         });

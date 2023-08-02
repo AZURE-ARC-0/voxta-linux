@@ -2,6 +2,7 @@
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
+using Voxta.Abstractions.System;
 using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.NovelAI;
@@ -10,8 +11,8 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
 {
     private readonly IPerformanceMetrics _performanceMetrics;
 
-    public NovelAITextGenService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics)
-        : base(settingsRepository, httpClientFactory)
+    public NovelAITextGenService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
+        : base(settingsRepository, httpClientFactory, encryptionProvider)
     {
         _performanceMetrics = performanceMetrics;
     }

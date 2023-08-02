@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.System;
 using Voxta.Common;
 using Voxta.Services.NovelAI.Presets;
 
@@ -36,11 +37,13 @@ public class NovelAIClientBase
     private readonly HttpClient _httpClient;
     private NovelAIParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
+    private readonly ILocalEncryptionProvider _encryptionProvider;
     private string _model = "clio-v1";
-    
-    public NovelAIClientBase(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory)
+
+    protected NovelAIClientBase(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
+        _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
     }
     
@@ -54,7 +57,7 @@ public class NovelAIClientBase
         if (prerequisites.Contains(ServiceFeatures.GPT3)) return false;
         if (!ValidateSettings(settings)) return false;
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Crypto.DecryptString(settings.Token));
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _model = settings.Model;
         _parameters = settings.Parameters ?? NovelAIPresets.DefaultForModel(_model);
         return true;
