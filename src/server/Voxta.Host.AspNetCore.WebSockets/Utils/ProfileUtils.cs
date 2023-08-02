@@ -6,7 +6,9 @@ using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
+#if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
+#endif
 
 namespace Voxta.Host.AspNetCore.WebSockets.Utils;
 
