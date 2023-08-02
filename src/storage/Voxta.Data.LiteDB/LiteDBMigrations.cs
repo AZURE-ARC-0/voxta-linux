@@ -29,9 +29,14 @@ public class LiteDBMigrations
         foreach (var character in characters.FindAll())
         {
             var id = character["_id"];
-            characters.Delete(id);
-            character["_id"] = new BsonValue(Guid.Parse(id.AsString));
-            characters.Insert(character);
+            if (id.Type == BsonType.String)
+            {
+                characters.Delete(id);
+                id = new BsonValue(Guid.Parse(id.AsString));
+                character["_id"] = id;
+                if (!characters.FindById(id))
+                    characters.Insert(character);
+            }
         }
     }
 }
