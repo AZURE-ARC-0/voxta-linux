@@ -6,6 +6,9 @@ using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
+#if(DEBUG)
+using Voxta.Services.Mocks;
+#endif
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
 #endif
@@ -27,6 +30,9 @@ public static class ProfileUtils
                     KoboldAIConstants.ServiceName,
                     NovelAIConstants.ServiceName,
                     OpenAIConstants.ServiceName,
+                    #if(DEBUG)
+                    MockConstants.ServiceName,
+                    #endif
                 }
             },
             SpeechToText =
@@ -38,6 +44,9 @@ public static class ProfileUtils
                     WindowsSpeechConstants.ServiceName,
 #endif
                     VoskConstants.ServiceName,
+#if(DEBUG)
+                    MockConstants.ServiceName,
+#endif
                 }
             },
             TextToSpeech =
@@ -50,6 +59,9 @@ public static class ProfileUtils
 #if(WINDOWS)
                     WindowsSpeechConstants.ServiceName,
 #endif
+#if(DEBUG)
+                    MockConstants.ServiceName,
+#endif
                 }
             },
             ActionInference =
@@ -60,6 +72,9 @@ public static class ProfileUtils
                     OobaboogaConstants.ServiceName,
                     KoboldAIConstants.ServiceName,
                     NovelAIConstants.ServiceName,
+#if(DEBUG)
+                    MockConstants.ServiceName,
+#endif
                 }
             }
         };
