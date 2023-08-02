@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Voxta.Abstractions.Repositories;
 
@@ -9,6 +10,12 @@ namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaClientBase
 {
+    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    {
+        WriteIndented = false,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+    
     private static readonly IMapper Mapper;
     
     static OobaboogaClientBase()
@@ -56,7 +63,7 @@ public class OobaboogaClientBase
         body.Prompt = prompt;
         body.StoppingStrings = stoppingStrings;
         
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/generate");
         request.Content = bodyContent;

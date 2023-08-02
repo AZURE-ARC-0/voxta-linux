@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
@@ -12,6 +13,12 @@ namespace Voxta.Services.NovelAI;
 
 public class NovelAIClientBase
 {
+    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    {
+        WriteIndented = false,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+    
     private static readonly IMapper Mapper;
     
     static NovelAIClientBase()
@@ -92,7 +99,7 @@ public class NovelAIClientBase
             input = prompt,
             parameters
         };
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;

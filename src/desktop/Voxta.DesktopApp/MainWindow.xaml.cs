@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Net.Http;
 using System.Text.Json;
 using System.Windows.Input;
 using Microsoft.Web.WebView2.Core;

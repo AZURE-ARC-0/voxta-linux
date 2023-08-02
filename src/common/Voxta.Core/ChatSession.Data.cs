@@ -16,4 +16,12 @@ public partial class ChatSession
         perf.Done();
         return message;
     }
+    
+    private async Task<ChatMessageData> UpdateMessageAsync(ChatMessageData message)
+    {
+        var perf = _performanceMetrics.Start("Db");
+        await _chatMessageRepository.UpdateMessageAsync(message);
+        perf.Done();
+        return message;
+    }
 }

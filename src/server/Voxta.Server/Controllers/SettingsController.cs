@@ -2,17 +2,9 @@
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Server.ViewModels;
-using Voxta.Services.KoboldAI;
-using Voxta.Services.ElevenLabs;
-using Voxta.Services.NovelAI;
-using Voxta.Services.Oobabooga;
-using Voxta.Services.OpenAI;
-using Voxta.Services.Vosk;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
-using Voxta.Services.AzureSpeechService;
 #if(WINDOWS)
-using Voxta.Services.WindowsSpeech;
 #endif
 
 namespace Voxta.Server.Controllers;

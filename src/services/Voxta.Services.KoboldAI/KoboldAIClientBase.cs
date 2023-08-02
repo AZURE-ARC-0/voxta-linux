@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
@@ -10,6 +11,12 @@ namespace Voxta.Services.KoboldAI;
 
 public class KoboldAIClientBase
 {
+    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    {
+        WriteIndented = false,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+    
     private static readonly IMapper Mapper;
     
     static KoboldAIClientBase()
@@ -60,7 +67,7 @@ public class KoboldAIClientBase
         body.Prompt = prompt;
         body.StopSequence = stoppingStrings;
 
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
         request.Content = bodyContent;
         request.ConfigureEvenStream();

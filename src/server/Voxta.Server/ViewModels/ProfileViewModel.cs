@@ -1,6 +1,4 @@
-﻿using Voxta.Abstractions.Model;
-
-namespace Voxta.Server.ViewModels;
+﻿namespace Voxta.Server.ViewModels;
 
 public class ProfileViewModel
 {

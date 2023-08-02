@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.DeepDev;
 using Voxta.Abstractions.Repositories;
@@ -10,6 +11,12 @@ namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase
 {
+    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    {
+        WriteIndented = false,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+    
     private static readonly IMapper Mapper;
     
     static OpenAIClientBase()
@@ -59,7 +66,7 @@ public abstract class OpenAIClientBase
         body.Messages = messages;
         body.Model = _model;
 
-        var content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        var content = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/v1/chat/completions", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

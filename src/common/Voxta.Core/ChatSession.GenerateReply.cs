@@ -39,10 +39,10 @@ public partial class ChatSession
         }
         else
         {
-            var append = '\n' + text;
+            var append = "; " + text;
             _chatSessionState.PendingUserMessage.Text += append;
             _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
-            await SaveMessageAsync(_chatSessionState.PendingUserMessage);
+            await UpdateMessageAsync(_chatSessionState.PendingUserMessage);
         }
 
         _chatSessionData.Actions = clientSendMessage.Actions;

@@ -23,7 +23,7 @@ public class KoboldAITextGenService : KoboldAIClientBase, ITextGenService
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
         var text = await SendCompletionRequest(
             prompt,
-            new[] { "END_OF_DIALOG", "You:", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n", "\"" },
+            new[] { "END_OF_DIALOG", "You:", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n" },
             cancellationToken
         );
         textGenPerf.Done();
