@@ -66,6 +66,7 @@ public class KoboldAIClientBase
         var body = Mapper.Map<KoboldAIRequestBody>(_parameters);
         body.Prompt = prompt;
         body.StopSequence = stoppingStrings;
+        // TODO: We want to add logit bias here to avoid [, ( and OOC from being generated.
 
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");

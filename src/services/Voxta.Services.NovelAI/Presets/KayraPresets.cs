@@ -105,6 +105,43 @@ public static class KayraPresets
 		    },
 		    LogitBiasExp = new LogitBiasExp[]
 		    {
+			    // Voxta
+			    new()
+			    {
+				    Bias = -2,
+				    EnsureSequenceFinish = true,
+				    GenerateOnce = false,
+				    Sequence = new[] { 49263 } // (
+			    },
+			    new()
+			    {
+				    Bias = -2,
+				    EnsureSequenceFinish = true,
+				    GenerateOnce = false,
+				    Sequence = new[] { 49356 } // [
+			    },
+			    new()
+			    {
+				    Bias = -2,
+				    EnsureSequenceFinish = true,
+				    GenerateOnce = false,
+				    Sequence = new[] { 49399 } // *
+			    },
+			    new()
+			    {
+				    Bias = -2,
+				    EnsureSequenceFinish = true,
+				    GenerateOnce = false,
+				    Sequence = new[] { 49534 } // ~
+			    },
+			    new()
+			    {
+				    Bias = -2,
+				    EnsureSequenceFinish = true,
+				    GenerateOnce = false,
+				    Sequence = new[] { 49292, 5576 } // OOC
+			    },
+			    // NovelAI Build In
 			    new()
 			    {
 				    Bias = -0.08,
