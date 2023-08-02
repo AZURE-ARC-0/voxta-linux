@@ -137,7 +137,66 @@ public class NovelAIParameters
     };
 
     [JsonPropertyName("logit_bias_exp")]
-    public LogitBiasExp[]? LogitBiasExp { get; set; }
+    public LogitBiasExp[]? LogitBiasExp { get; set; } = {
+
+        // Voxta
+        new()
+        {
+            Bias = -2,
+            EnsureSequenceFinish = true,
+            GenerateOnce = false,
+            Sequence = new[] { 49263 } // (
+        },
+        new()
+        {
+            Bias = -2,
+            EnsureSequenceFinish = true,
+            GenerateOnce = false,
+            Sequence = new[] { 49356 } // [
+        },
+        new()
+        {
+            Bias = -2,
+            EnsureSequenceFinish = true,
+            GenerateOnce = false,
+            Sequence = new[] { 49399 } // *
+        },
+        new()
+        {
+            Bias = -2,
+            EnsureSequenceFinish = true,
+            GenerateOnce = false,
+            Sequence = new[] { 49534 } // ~
+        },
+        new()
+        {
+            Bias = -2,
+            EnsureSequenceFinish = true,
+            GenerateOnce = false,
+            Sequence = new[] { 49292, 5576 } // OOC
+        },
+        // NovelAI Build In
+        new()
+        {
+            Bias = -0.08,
+            EnsureSequenceFinish = false,
+            GenerateOnce = false,
+            Sequence = new[]
+            {
+                23
+            }
+        },
+        new()
+        {
+            Bias = -0.08,
+            EnsureSequenceFinish = false,
+            GenerateOnce = false,
+            Sequence = new[]
+            {
+                21
+            }
+        }
+    };
 }
 
 [Serializable]

@@ -22,7 +22,7 @@ public class Sanitizer : ISanitizer
         result = RemoveProbableEmotes.Replace(result, "");
         result = SanitizeMessage.Replace(result, "");
         result = result.Trim('\"', '\'', ' ');
-        if (result == "") return result;
+        if (result == "") return "...";
 
         var lastPunctuationIndex = result.LastIndexOfAny(_punctuation);
     
@@ -34,9 +34,6 @@ public class Sanitizer : ISanitizer
         {
             result = result[..(lastPunctuationIndex + 1)];
         }
-
-        if (result == "")
-            return "...";
         
         return result;
     }

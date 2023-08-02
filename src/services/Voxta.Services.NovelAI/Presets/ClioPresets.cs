@@ -95,7 +95,6 @@ public static class ClioPresets
                 1040,
                 49209
             },
-            LogitBiasExp = Array.Empty<LogitBiasExp>(),
         };
     }
 }
