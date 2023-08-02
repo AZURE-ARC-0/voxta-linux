@@ -7,6 +7,7 @@ using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
+using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
 using Voxta.Services.NovelAI.Presets;
 
@@ -21,6 +22,8 @@ public class NovelAIClientBase
     };
     
     private static readonly IMapper Mapper;
+    
+    protected static readonly ITokenizer Tokenizer = new NovelAITokenizer();
     
     static NovelAIClientBase()
     {
@@ -66,6 +69,11 @@ public class NovelAIClientBase
     protected virtual bool ValidateSettings(NovelAISettings settings)
     {
         return true;
+    }
+    
+    public int GetTokenCount(string value)
+    {
+        return Tokenizer.CountTokens(value);
     }
 
     protected async ValueTask<string> SendCompletionRequest(string prompt, string prefix, CancellationToken cancellationToken)
@@ -113,11 +121,6 @@ public class NovelAIClientBase
             throw new NovelAIException(await response.Content.ReadAsStringAsync(cancellationToken));
         var text = await response.ReadEventStream<NovelAIEventData>(cancellationToken);
         return text;
-    }
-    
-    public int GetTokenCount(string message)
-    {
-        return 0;
     }
 
     [Serializable]

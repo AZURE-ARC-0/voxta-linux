@@ -31,10 +31,10 @@ public class WebSocketTest
         {
             Id = Guid.Empty.ToString(),
             Name = "User",
-            TextGen = new ServicesList { Services = new[] { "Fakes" } },
-            SpeechToText = new ServicesList { Services = new[] { "Fakes" } },
-            TextToSpeech = new ServicesList { Services = new[] { "Fakes" } },
-            ActionInference = new ServicesList { Services = new[] { "Fakes" } },
+            TextGen = new ServicesList { Services = new[] { "Mocks" } },
+            SpeechToText = new ServicesList { Services = new[] { "Mocks" } },
+            TextToSpeech = new ServicesList { Services = new[] { "Mocks" } },
+            ActionInference = new ServicesList { Services = new[] { "Mocks" } },
         });
             
         var webDir = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "..", "..", "..", "src", "server", "Voxta.Server"));
@@ -92,30 +92,49 @@ public class WebSocketTest
         });
         
         var ready = await Receive<ServerReadyMessage>();
-        Assert.That(ready.ChatId, Is.Not.EqualTo(Guid.Empty));
-
+        Assert.Multiple(() =>
+        {
+            Assert.That(ready.ChatId, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(ready.Services.TextGen.Service, Is.EqualTo("Mocks"));
+            Assert.That(ready.Services.SpeechGen.Service, Is.EqualTo("Mocks"));
+            Assert.That(ready.Services.ActionInference.Service, Is.EqualTo("Mocks"));
+            Assert.That(ready.Services.SpeechToText.Service, Is.EqualTo(""));
+        });
+        
+        var firstMsg = await Receive<ServerReplyMessage>();
+        Assert.That(firstMsg.Text, Is.EqualTo("First"));
+        
+        var firstSpeech = await Receive<ServerSpeechMessage>();
+        await AssetHttpAudio(firstSpeech);
+        
         await Send(new ClientSendMessage { Text = "Hello, world!", Actions = new[] { "action1, action2" } });
 
         var reply = await Receive<ServerReplyMessage>();
-        Assert.That(reply.Text, Is.Not.Null.Or.Empty);
+        Assert.That(reply.Text, Is.EqualTo("Echo: Hello, world!"));
         
-        var speech = await Receive<ServerSpeechMessage>();
-        Assert.That(speech.Url, Does.Match(@"/tts/gens/.+\.wav"));
+        var replySpeech = await Receive<ServerSpeechMessage>();
+        await AssetHttpAudio(replySpeech);
         
         var action = await Receive<ServerActionMessage>();
         Assert.That(action.Value, Is.Not.Null.Or.Empty);
+    }
+
+    private async Task AssetHttpAudio(ServerSpeechMessage message)
+    {
+        Assert.That(message.Url, Does.Match(@"/tts/gens/.+\.wav"));
         
-        var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, speech.Url));
+        var response = await _httpClient.GetAsync(new Uri(_server.BaseAddress, message.Url));
         if (!response.IsSuccessStatusCode)
-            Assert.Fail($"GET {speech.Url}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+            Assert.Fail($"GET {message.Url}{Environment.NewLine}{await response.Content.ReadAsStringAsync()}");
+        
         Assert.Multiple(() =>
         {
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), speech.Url);
-            Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), speech.Url);
-            Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1), speech.Url);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), message.Url);
+            Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("audio/x-wav"), message.Url);
+            Assert.That(response.Content.Headers.ContentLength, Is.GreaterThan(1), message.Url);
         });
     }
-    
+
     private Task Send<T>(T message) where T : ClientMessage
     {
         var requestBytes = JsonSerializer.SerializeToUtf8Bytes<ClientMessage>(message, VoxtaJsonSerializer.SerializeOptions);
@@ -155,9 +174,9 @@ public class WebSocketTest
         if (response is not T typedResponse)
         {
             if (response is ServerErrorMessage errorMessage)
-                throw new Exception("Server error: " + errorMessage.Message);
+                throw new Exception("Server error: " + (errorMessage.Details ?? errorMessage.Message));
 
-            throw new InvalidCastException($"Failed to cast response of type {response.GetType().Name} to type {typeof(T).Name}.");
+            throw new InvalidCastException($"Failed to cast response of type {response.GetType().Name} to type {typeof(T).Name}. Was: {Encoding.UTF8.GetString(_buffer.AsMemory(0, result.Count).Span)}");
         }
         return typedResponse;
     }

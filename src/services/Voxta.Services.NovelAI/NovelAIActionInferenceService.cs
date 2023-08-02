@@ -24,7 +24,7 @@ public class NovelAIActionInferenceService : NovelAIClientBase, IActionInference
 
     public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new NovelAIPromptBuilder();
+        var builder = new NovelAIPromptBuilder(Tokenizer);
         var actionInferencePerf = _performanceMetrics.Start($"{NovelAIConstants.ServiceName}.ActionInference");
         var input = builder.BuildActionInferencePrompt(chat);
         var action = await SendCompletionRequest(input, "special_instruct", cancellationToken);

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Voxta.Abstractions.Exceptions;
 using Voxta.Abstractions.Model;
-using Voxta.Abstractions.Services;
 
-namespace Voxta.Abstractions.DependencyInjection;
+namespace Voxta.Abstractions.Services;
 
 public interface IServiceFactory<TInterface> where TInterface : class
 {
@@ -30,7 +29,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         foreach (var option in options)
         {
             if (!_registry.Types.TryGetValue(option, out var type))
-                continue;
+                continue;  
 
             var instance = (TInterface)_sp.GetRequiredService(type);
             var success = await instance.InitializeAsync(prerequisites, culture, cancellationToken);
@@ -38,6 +37,6 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
             if (instance.ServiceName == preferredService) throw new ServiceDisabledException();
         }
 
-        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service compatible with features {string.Join(", ", prerequisites)} and culture {culture}");
+        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service compatible with features [{string.Join(", ", prerequisites)}] and culture {culture}");
     }
 }

@@ -15,7 +15,7 @@ public class MockTextGenService : ITextGenService
 
     public ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        return ValueTask.FromResult("This is a fake reply to: " + chat.GetMessages().LastOrDefault(x => x.User == chat.UserName)?.Text);
+        return ValueTask.FromResult("Echo: " + chat.GetMessages().LastOrDefault(x => x.User == chat.UserName)?.Text);
     }
 
     public int GetTokenCount(string message)

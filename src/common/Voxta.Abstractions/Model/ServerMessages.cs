@@ -106,5 +106,17 @@ public class ServerActionMessage : ServerMessage
 [Serializable]
 public class ServerErrorMessage : ServerMessage
 {
-    public required string Message { get; set; }
+    public string Message { get; set; }
+    public string? Details { get; set; }
+
+    public ServerErrorMessage(string message)
+    {
+        Message = message;
+    }
+    
+    public ServerErrorMessage(Exception exc)
+    {
+        Message = exc.Message;
+        Details = exc.ToString();
+    }
 }

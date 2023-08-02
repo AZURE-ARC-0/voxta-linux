@@ -111,10 +111,7 @@ public sealed partial class UserConnection : IUserConnection
             catch (Exception exc)
             {
                 _logger.LogError(exc, "Error processing socket message");
-                await _tunnel.SendAsync(new ServerErrorMessage
-                {
-                    Message = exc.Message,
-                }, cancellationToken);
+                await _tunnel.SendAsync(new ServerErrorMessage(exc), cancellationToken);
             }
         }
     }
@@ -161,7 +158,7 @@ public sealed partial class UserConnection : IUserConnection
 
     private Task SendError(string message, CancellationToken cancellationToken)
     {
-        return _tunnel.SendAsync(new ServerErrorMessage { Message = message }, cancellationToken);
+        return _tunnel.SendAsync(new ServerErrorMessage(message), cancellationToken);
     }
 
     public async ValueTask DisposeAsync()

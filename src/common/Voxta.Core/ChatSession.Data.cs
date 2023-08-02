@@ -11,7 +11,7 @@ public partial class ChatSession
     
     private async Task<ChatMessageData> SaveMessageAsync(ChatMessageData message)
     {
-        var perf = _performanceMetrics.Start("Db");
+        var perf = _performanceMetrics.Start("Database");
         await _chatMessageRepository.SaveMessageAsync(message);
         perf.Done();
         return message;
@@ -19,7 +19,7 @@ public partial class ChatSession
     
     private async Task<ChatMessageData> UpdateMessageAsync(ChatMessageData message)
     {
-        var perf = _performanceMetrics.Start("Db");
+        var perf = _performanceMetrics.Start("Database");
         await _chatMessageRepository.UpdateMessageAsync(message);
         perf.Done();
         return message;

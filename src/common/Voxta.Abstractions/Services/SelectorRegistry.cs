@@ -1,4 +1,4 @@
-﻿namespace Voxta.Abstractions.DependencyInjection;
+﻿namespace Voxta.Abstractions.Services;
 
 public interface IServiceRegistry<in TInterface> where TInterface : class
 {

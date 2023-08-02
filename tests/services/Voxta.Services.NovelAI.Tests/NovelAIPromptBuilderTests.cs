@@ -1,5 +1,6 @@
 using Voxta.Abstractions.Model;
 using Voxta.Services.OpenSourceLargeLanguageModels;
+using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Services.OpenAI.Tests;
 
@@ -10,7 +11,8 @@ public class NovelAIPromptBuilderTests
     [SetUp]
     public void Setup()
     {
-        _builder = new NovelAIPromptBuilder();
+        var tokenizer = new AverageTokenizer();
+        _builder = new NovelAIPromptBuilder(tokenizer);
     }
 
     [Test]

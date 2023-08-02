@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Voxta.Abstractions.DependencyInjection;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Services;

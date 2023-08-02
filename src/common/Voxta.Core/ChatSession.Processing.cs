@@ -39,7 +39,7 @@ public partial class ChatSession
                 catch (Exception exc)
                 {
                     _logger.LogError(exc, "Error processing message {MessageType}", message.GetType().Name);
-                    await _tunnel.SendAsync(new ServerErrorMessage { Message = exc.Message }, cancellationToken);
+                    await _tunnel.SendAsync(new ServerErrorMessage(exc), cancellationToken);
                 }
                 finally
                 {

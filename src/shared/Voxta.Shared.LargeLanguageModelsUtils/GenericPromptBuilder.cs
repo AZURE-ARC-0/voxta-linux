@@ -1,10 +1,18 @@
 ﻿using System.Text;
 using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Tokenizers;
 
 namespace Voxta.Shared.LargeLanguageModelsUtils;
 
 public class GenericPromptBuilder
 {
+    private readonly ITokenizer _tokenizer;
+
+    public GenericPromptBuilder(ITokenizer tokenizer)
+    {
+        _tokenizer = tokenizer;
+    }
+    
     public string BuildReplyPrompt(IChatInferenceData chat, int maxTokens = 4096, bool includePostHistoryPrompt = true)
     {
         var systemPrompt = MakeSystemPrompt(chat);

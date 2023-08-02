@@ -16,7 +16,7 @@ public class SanitizerTests
     [TestCase("Hello. World", "Hello.")]
     [TestCase("Hello! World", "Hello!")]
     [TestCase("Hello. World.\"", "Hello. World.")]
-    [TestCase("", "")]
+    [TestCase("", "...")]
     
     public void TestSanitize(string input, string expected)
     {

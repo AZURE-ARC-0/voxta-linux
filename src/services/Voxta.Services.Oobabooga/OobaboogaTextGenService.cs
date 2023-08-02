@@ -21,7 +21,7 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
 
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new GenericPromptBuilder();
+        var builder = new GenericPromptBuilder(Tokenizer);
         // TODO: count tokens?
         var prompt = builder.BuildReplyPrompt(chat, -1);
         

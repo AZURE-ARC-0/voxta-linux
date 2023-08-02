@@ -19,7 +19,7 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
 
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new NovelAIPromptBuilder();
+        var builder = new NovelAIPromptBuilder(Tokenizer);
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
         var input = builder.BuildReplyPrompt(chat, includePostHistoryPrompt: false);
         var text = await SendCompletionRequest(input, "special_instruct", cancellationToken);

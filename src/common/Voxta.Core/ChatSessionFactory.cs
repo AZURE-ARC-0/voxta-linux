@@ -1,5 +1,4 @@
 ﻿using System.Runtime.ExceptionServices;
-using Voxta.Abstractions.DependencyInjection;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;

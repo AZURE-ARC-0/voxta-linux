@@ -42,7 +42,7 @@ public class ChatSessionTests
                 Personality = "",
                 Scenario = "This is a test",
                 FirstMessage = "Ready.",
-                Services = null!
+                Services = new CharacterServicesMap()
             },
             AudioPath = "/audio-path",
             
@@ -60,11 +60,13 @@ public class ChatSessionTests
         _speechGenerator = new Mock<ISpeechGenerator>();
         var chatRepository = new Mock<IChatRepository>();
         var chatMessageRepository = new Mock<IChatMessageRepository>();
-
+        var performanceMetrics = new Mock<IPerformanceMetrics>();
+        performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
+        
         _session = new ChatSession(
             _tunnelMock.Object,
             new NullLoggerFactory(),
-            Mock.Of<IPerformanceMetrics>(),
+            performanceMetrics.Object,
             _textGen.Object,
             _chatSessionData,
             chatTextProcessor.Object,
@@ -79,7 +81,7 @@ public class ChatSessionTests
 
         _tunnelMock
             .Setup(m => m.SendAsync(It.IsAny<ServerErrorMessage>(), It.IsAny<CancellationToken>()))
-            .Callback<ServerErrorMessage, CancellationToken>((msg, _) => _serverErrors.Add(msg.Message));
+            .Callback<ServerErrorMessage, CancellationToken>((msg, _) => _serverErrors.Add(msg.Details ?? msg.Message));
     }
     
     [TearDown]
@@ -177,8 +179,7 @@ public class ChatSessionTests
         Assert.Multiple(() =>
         {
             Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
-                User: Ping 1!
-                Ping 2!
+                User: Ping 1!; Ping 2!
                 Assistant: Pong 2!
                 """.ReplaceLineEndings("\n")));
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("Pong 2!"));

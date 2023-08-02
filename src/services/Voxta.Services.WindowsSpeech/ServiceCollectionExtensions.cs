@@ -1,5 +1,4 @@
 ﻿#if(WINDOWS)
-using Voxta.Abstractions.DependencyInjection;
 using Voxta.Abstractions.Services;
 using Voxta.Services.WindowsSpeech;
 using Voxta.Shared.TextToSpeechUtils;

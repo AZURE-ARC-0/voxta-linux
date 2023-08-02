@@ -11,7 +11,8 @@ public class GenericPromptBuilderTests
     [SetUp]
     public void Setup()
     {
-        _builder = new GenericPromptBuilder();
+        var tokenizer = new AverageTokenizer();
+        _builder = new GenericPromptBuilder(tokenizer);
     }
 
     [Test]

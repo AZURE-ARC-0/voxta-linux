@@ -5,7 +5,9 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
+using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Services.KoboldAI;
 
@@ -18,6 +20,8 @@ public class KoboldAIClientBase
     };
     
     private static readonly IMapper Mapper;
+    
+    protected static readonly ITokenizer Tokenizer = TokenizerFactory.GetDefault();
     
     static KoboldAIClientBase()
     {
