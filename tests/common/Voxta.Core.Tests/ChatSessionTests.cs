@@ -96,7 +96,7 @@ public class ChatSessionTests
     {
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReadyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
         
-        _session.SendReady();
+        _session.HandleStartChat();
         
         await AssertSession();
     }
@@ -106,7 +106,7 @@ public class ChatSessionTests
     {
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReadyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
         
-        _session.SendReady();
+        _session.HandleStartChat();
         
         await AssertSession();
         Assert.Inconclusive("Does not actually test the greeting message.");

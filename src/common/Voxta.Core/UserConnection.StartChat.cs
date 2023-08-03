@@ -46,7 +46,7 @@ public sealed partial class UserConnection
 
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, newChatMessage, cancellationToken);
         _logger.LogInformation("New chat: {ChatId}", chat.Id);
-        _chat.SendReady();
+        _chat.HandleStartChat();
     }
 
     private async Task HandleStartChatAsync(ClientStartChatMessage startChatMessage, CancellationToken cancellationToken)
@@ -70,7 +70,7 @@ public sealed partial class UserConnection
 
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, startChatMessage, cancellationToken);
         _logger.LogInformation("Started chat: {ChatId}", startChatMessage.ChatId);
-        _chat.SendReady();
+        _chat.HandleStartChat();
     }
 
     private async Task HandleResumeChatAsync(ClientResumeChatMessage resumeChatMessage, CancellationToken cancellationToken)
@@ -85,6 +85,6 @@ public sealed partial class UserConnection
 
         _chat = await _chatSessionFactory.CreateAsync(_tunnel, chat, character, resumeChatMessage, cancellationToken);
         _logger.LogInformation("Resumed chat: {ChatId}", resumeChatMessage.ChatId);
-        _chat.SendReady();
+        _chat.HandleStartChat();
     }
 }

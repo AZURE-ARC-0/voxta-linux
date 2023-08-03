@@ -9,7 +9,7 @@ namespace Voxta.Core;
 
 public interface IChatSession : IAsyncDisposable
 {
-    void SendReady();
+    void HandleStartChat();
     void HandleClientMessage(ClientSendMessage clientSendMessage);
     void HandleSpeechPlaybackStart(double duration);
     void HandleSpeechPlaybackComplete();

@@ -9,14 +9,14 @@ public partial class ChatSession
 {
     private static readonly string[] SupportedExtensions = { ".m4a", ".wav", ".mp3", ".webm" };
     
-    public void SendReady()
+    public void HandleStartChat()
     {
-        Enqueue(SendReadyAsync);
+        Enqueue(HandleStartChatAsync);
     }
 
-    private async ValueTask SendReadyAsync(CancellationToken cancellationToken)
+    private async ValueTask HandleStartChatAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Beginning chat with {CharacterName} with ID: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.Chat.Id);
+        _logger.LogInformation("Beginning chat with {CharacterName}: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.Chat.Id);
         _logger.LogInformation("Tex Gen: {ServiceName}", _textGen.ServiceName);
         _logger.LogInformation("Text To Speech: {ServiceName} (voice: {Voice})", _speechGenerator.ServiceName, _speechGenerator.Voice);
         _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.ServiceName ?? "None");
