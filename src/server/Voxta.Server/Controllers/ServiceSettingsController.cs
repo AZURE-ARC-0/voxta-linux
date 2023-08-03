@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Voxta.Abstractions.Repositories;
-using Voxta.Common;
 using Voxta.Server.ViewModels;
 using Voxta.Services.KoboldAI;
 using Voxta.Services.ElevenLabs;
@@ -66,11 +65,17 @@ public class ServiceSettingsController : Controller
     public async Task<IActionResult> VoskSettings(CancellationToken cancellationToken)
     {
         var vosk = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken) ?? new VoskSettings();
-        return View(vosk);
+        var vm = new VoskSettingsViewModel
+        {
+            Model = vosk.Model,
+            ModelHash = vosk.ModelHash,
+            IgnoredWords = string.Join(", ", vosk.IgnoredWords),
+        };
+        return View(vm);
     }
     
     [HttpPost("/settings/vosk")]
-    public async Task<IActionResult> PostVoskSettings([FromForm] VoskSettings value)
+    public async Task<IActionResult> PostVoskSettings([FromForm] VoskSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -82,6 +87,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
             Model = value.Model.TrimCopyPasteArtefacts(),
             ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
+            IgnoredWords = value.IgnoredWords.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
         });
         
         return RedirectToAction("Settings", "Settings");

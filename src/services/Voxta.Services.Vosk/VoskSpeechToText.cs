@@ -27,6 +27,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
+    private string[] _ignoredWords;
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
@@ -59,6 +60,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         await Semaphore.WaitAsync(cancellationToken);
         if (_disposed) return false;
         var model = await _modelDownloader.AcquireModelAsync(settings.Model, settings.ModelHash, cancellationToken);
+        _ignoredWords = settings.IgnoredWords;
         _recognizer = new VoskRecognizer(model, _sampleRate);
         _recognizer.SetWords(true);
         _recordingService.DataAvailable += DataAvailable;
@@ -105,10 +107,9 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         }
     }
 
-    private static bool IsNoise(string text)
+    private bool IsNoise(string word)
     {
-        #warning This might change for different languages
-        return text is "the" or "huh";
+        return _ignoredWords.Contains(word);
     }
 
     public void StartMicrophoneTranscription()
