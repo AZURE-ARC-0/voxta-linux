@@ -1,0 +1,43 @@
+@model ChatViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Chats";
+}
+
+<div class="container py-3">
+    <h1 class="mb-4">Chat</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Chat with @Model.Character.Name, started @Model.Created</h2>
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead>
+                <tr>
+                    <th>Character</th>
+                    <th>Message</th>
+                    <th>Tokens</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var message in Model.Messages)
+                    {
+                        <tr>
+                            <td>
+                                @message.User
+                            </td>
+                            <td>
+                                @message.Text
+                            </td>
+                            <td class="text-end text-muted">
+                                @message.Tokens
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

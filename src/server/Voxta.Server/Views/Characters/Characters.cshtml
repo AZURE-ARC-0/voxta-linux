@@ -1,7 +1,7 @@
 ﻿@model Voxta.Abstractions.Model.ServerCharactersListLoadedMessage.CharactersListItem[]
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Character";
+    ViewBag.Title = "Characters";
 }
 
 <div class="container py-3">
@@ -27,14 +27,7 @@
                     {
                         <tr>
                             <td>
-                                @if (character.ReadOnly)
-                                {
-                                    <a class="btn btn-dark" href="/characters/@character.Id" title="View">@character.Name</a>
-                                }
-                                else
-                                {
-                                    <a class="btn btn-dark" href="/characters/@character.Id" title="Edit">@character.Name</a>
-                                }
+                                @character.Name
                                 @if (character.ReadOnly)
                                 {
                                     <span class="badge badge-secondary">built-in</span>

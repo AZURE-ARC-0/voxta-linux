@@ -1,0 +1,49 @@
+@model List<ChatsListItemViewModel>
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Chats";
+}
+
+<div class="container py-3">
+    <h1 class="mb-4">Chats</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Chats</h2>
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead>
+                <tr>
+                    <th>Character</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var chat in Model.OrderByDescending(x => x.Created))
+                    {
+                        <tr>
+                            <td>
+                                <@chat.Character.Name
+                            </td>
+                            <td>
+                                @chat.Created
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <form action="/chats/delete" method="post">
+                                        <input type="hidden" name="chatId" value="@chat.Id"/>
+                                        <button type="submit" class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                                    </form>
+                                    <a class="btn btn-secondary" href="/chats/@chat.Id" title="View">View</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
