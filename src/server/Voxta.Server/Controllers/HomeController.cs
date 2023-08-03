@@ -20,4 +20,10 @@ public class HomeController : Controller
     {
         return View();
     }
+    
+    [HttpGet("/safety")]
+    public ActionResult Safety()
+    {
+        return View();
+    }
 }
