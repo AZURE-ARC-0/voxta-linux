@@ -23,7 +23,7 @@ public static class TavernCardV2Export
                 PostHistoryInstructions = character.PostHistoryInstructions,
                 Creator = character.Creator,
                 Tags = character.Tags,
-                Extensions = new Dictionary<string, string>
+                Extensions = new Dictionary<string, dynamic>
                 {
                     { "voxta/prerequisites", character.Prerequisites != null ? string.Join(",", character.Prerequisites) : "" },
                     { "voxta/culture", character.Culture },

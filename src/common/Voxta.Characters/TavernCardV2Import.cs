@@ -44,9 +44,17 @@ public static class TavernCardV2Import
 
     public static Character ConvertCardToCharacter(TavernCardData data)
     {
+        var prerequisites = GetPrerequisites(data);
+        var charIdValue =  GetString(data, "voxta/charId", Crypto.CreateCryptographicallySecureGuid().ToString());
+        var cultureValue = GetString(data, "voxta/culture", "en-US");
+        var textGenValue = GetString(data, "voxta/textgen/service", "");
+        var ttsValue = GetString(data, "voxta/tts/service", "");
+        var voiceValue = GetString(data, "voxta/tts/voice", "");
+        var thinkingSpeechValue = GetString(data, "voxta/options/enable_thinking_speech", "true") == "true";
+        
         return new Character
         {
-            Id = data.Extensions.TryGetValue("voxta/charId", out var charId) && !string.IsNullOrEmpty(charId) ? Guid.Parse(charId) : Crypto.CreateCryptographicallySecureGuid(),
+            Id = Guid.Parse(charIdValue),
             Name = data.Name,
             Description = data.Description ?? "",
             Personality = data.Personality ?? "",
@@ -56,25 +64,48 @@ public static class TavernCardV2Import
             PostHistoryInstructions = data.PostHistoryInstructions,
             CreatorNotes = data.CreatorNotes,
             SystemPrompt = data.SystemPrompt,
-            Culture = data.Extensions.TryGetValue("voxta/culture", out var culture) && !string.IsNullOrEmpty(culture) ? culture : "en-US",
-            Prerequisites = data.Extensions.TryGetValue("voxta/prerequisites", out var prerequisites) && !string.IsNullOrEmpty(prerequisites) ? prerequisites.Split(',') : null,
+            Culture = cultureValue,
+            Prerequisites = prerequisites,
             ReadOnly = false,
             Services = new CharacterServicesMap
             {
                 TextGen = new ServiceMap
                 {
-                    Service = data.Extensions.TryGetValue("voxta/textgen/service", out var textGen) && !string.IsNullOrEmpty(textGen) ? textGen : ""
+                    Service = textGenValue
                 },
                 SpeechGen = new VoiceServiceMap
                 {
-                    Service = data.Extensions.TryGetValue("voxta/tts/service", out var ttsService) && !string.IsNullOrEmpty(ttsService) ? ttsService : "",
-                    Voice = data.Extensions.TryGetValue("voxta/tts/voice", out var ttsVoice) && !string.IsNullOrEmpty(ttsVoice) ? ttsVoice : "Naia"
+                    Service = ttsValue,
+                    Voice = voiceValue
                 },
             },
             Options = new()
             {
-                EnableThinkingSpeech = data.Extensions.TryGetValue("voxta/options/enable_thinking_speech", out var enableThinkingSpeech) && enableThinkingSpeech == "true"
+                EnableThinkingSpeech = thinkingSpeechValue
             },
         };
+    }
+
+    private static string GetString(TavernCardData data, string key, string defaultValue)
+    {
+        if (!data.Extensions.TryGetValue(key, out var value))
+            return defaultValue;
+        var valueString = value.ToString();
+        if (string.IsNullOrEmpty(valueString)) return defaultValue;
+        return valueString;
+    }
+
+    private static string[]? GetPrerequisites(TavernCardData data)
+    {
+        if (!data.Extensions.TryGetValue("voxta/prerequisites", out var prerequisites))
+        {
+            if (data.Tags != null && data.Tags.Contains("nsfw", StringComparer.InvariantCultureIgnoreCase))
+                return new[] { ServiceFeatures.NSFW };
+        }
+
+        string? prerequisitesString = prerequisites?.ToString();
+        if (string.IsNullOrEmpty(prerequisitesString))
+            return null;
+        return prerequisitesString.Split(',');
     }
 }

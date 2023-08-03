@@ -61,7 +61,7 @@ public class TavernCardData
     public string? CharacterVersion { get; set; }
 
     [JsonPropertyName("extensions")]
-    public Dictionary<string, string> Extensions { get; set; } = new();
+    public Dictionary<string, dynamic> Extensions { get; set; } = new();
 }
 
 [Serializable]
