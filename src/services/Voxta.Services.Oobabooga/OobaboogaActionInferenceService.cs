@@ -12,22 +12,28 @@ public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInfer
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IPerformanceMetrics _performanceMetrics;
+    private readonly IServiceObserver _serviceObserver;
 
-    public OobaboogaActionInferenceService(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics)
+    public OobaboogaActionInferenceService(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics, IServiceObserver serviceObserver)
         :base(httpClientFactory, settingsRepository)
     {
         _performanceMetrics = performanceMetrics;
+        _serviceObserver = serviceObserver;
     }
 
     public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder(Tokenizer);
         var prompt = builder.BuildActionInferencePrompt(chat);
+        _serviceObserver.Record("Oobabooga.ActionInference.Prompt", prompt);
         
         var actionInferencePerf = _performanceMetrics.Start($"{OobaboogaConstants.ServiceName}.ActionInference");
-        var action = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);
+        var stoppingStrings = new[] { "]" };
+        var action = await SendCompletionRequest(BuildRequestBody(prompt, stoppingStrings), cancellationToken);
         actionInferencePerf.Done();
         
-        return action.TrimContainerAndToLower();
+        var result = action.TrimContainerAndToLower();
+        _serviceObserver.Record("Oobabooga.ActionInference.Value", result);
+        return result;
     }
 }

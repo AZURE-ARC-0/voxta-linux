@@ -1,8 +1,11 @@
-﻿namespace Voxta.Server.ViewModels;
+﻿using Voxta.Abstractions.Services;
+
+namespace Voxta.Server.ViewModels;
 
 public class DiagnosticsViewModel
 {
-    public PerformanceMetricsViewModel[] PerformanceMetrics { get; set; } = Array.Empty<PerformanceMetricsViewModel>();
+    public required PerformanceMetricsViewModel[] PerformanceMetrics { get; init; }
+    public required ServiceObserverRecord[] Records { get; init; }
 
     public class PerformanceMetricsViewModel
     {

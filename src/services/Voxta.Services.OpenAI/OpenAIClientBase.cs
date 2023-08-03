@@ -6,7 +6,6 @@ using AutoMapper;
 using Microsoft.DeepDev;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
-using Voxta.Common;
 
 namespace Voxta.Services.OpenAI;
 
@@ -29,7 +28,7 @@ public abstract class OpenAIClientBase
         Mapper = config.CreateMapper();
     }
 
-    protected int MaxContextTokens { get; set; }
+    protected int MaxContextTokens { get; private set; }
     
     private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
@@ -67,13 +66,17 @@ public abstract class OpenAIClientBase
         MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
-    
-    protected async Task<string> SendChatRequestAsync(List<OpenAIMessage> messages, CancellationToken cancellationToken)
+
+    protected OpenAIRequestBody BuildRequestBody(List<OpenAIMessage> messages)
     {
         var body = Mapper.Map<OpenAIRequestBody>(_parameters);
         body.Messages = messages;
         body.Model = _model;
+        return body;
+    }
 
+    protected async Task<string> SendChatRequestAsync(OpenAIRequestBody body, CancellationToken cancellationToken)
+    {
         var content = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/v1/chat/completions", content, cancellationToken);
 
@@ -85,7 +88,7 @@ public abstract class OpenAIClientBase
 
         if (apiResponse == null) throw new NullReferenceException("OpenAI API response was null");
 
-        return apiResponse.Value.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
+        return apiResponse.Value.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString()?.TrimExcess() ?? throw new OpenAIException("No content in response: " + apiResponse);
     }
 
     public void Dispose()

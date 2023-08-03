@@ -10,20 +10,25 @@ namespace Voxta.Services.NovelAI;
 public class NovelAITextGenService : NovelAIClientBase, ITextGenService
 {
     private readonly IPerformanceMetrics _performanceMetrics;
+    private readonly IServiceObserver _serviceObserver;
 
-    public NovelAITextGenService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
+    public NovelAITextGenService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider, IServiceObserver serviceObserver)
         : base(settingsRepository, httpClientFactory, encryptionProvider)
     {
         _performanceMetrics = performanceMetrics;
+        _serviceObserver = serviceObserver;
     }
 
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new NovelAIPromptBuilder(Tokenizer);
+        var prompt = builder.BuildReplyPrompt(chat, MaxContextTokens, includePostHistoryPrompt: false);
+        _serviceObserver.Record("NovelAI.TextGen.Prompt", prompt);
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
-        var input = builder.BuildReplyPrompt(chat, MaxContextTokens, includePostHistoryPrompt: false);
-        var text = await SendCompletionRequest(input, "special_instruct", cancellationToken);
+        var text = await SendCompletionRequest(BuildRequestBody(prompt, "special_instruct"), cancellationToken);
         textGenPerf.Done();
+        
+        _serviceObserver.Record("NovelAI.TextGen.Reply", text);
         return text;
     }
 }

@@ -35,7 +35,7 @@ public class KoboldAIClientBase
     public string ServiceName => KoboldAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
-    protected int MaxContextTokens { get; set; }
+    protected int MaxContextTokens { get; private set; }
     
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
@@ -70,13 +70,17 @@ public class KoboldAIClientBase
         return 0;
     }
 
-    protected async Task<string> SendCompletionRequest(string prompt, string[] stoppingStrings, CancellationToken cancellationToken)
+    protected KoboldAIRequestBody BuildRequestBody(string prompt, string[] stoppingStrings)
     {
         var body = Mapper.Map<KoboldAIRequestBody>(_parameters);
         body.Prompt = prompt;
         body.StopSequence = stoppingStrings;
         // TODO: We want to add logit bias here to avoid [, ( and OOC from being generated.
+        return body;
+    }
 
+    protected async Task<string> SendCompletionRequest(KoboldAIRequestBody body, CancellationToken cancellationToken)
+    {
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
         request.Content = bodyContent;
@@ -86,7 +90,8 @@ public class KoboldAIClientBase
         if (!response.IsSuccessStatusCode)
             throw new KoboldAIException(await response.Content.ReadAsStringAsync(cancellationToken));
 
-        return await response.ReadEventStream<TextGenEventData>(cancellationToken);
+        var text = await response.ReadEventStream<TextGenEventData>(cancellationToken);
+        return text.TrimExcess();
     }
 
     [Serializable]

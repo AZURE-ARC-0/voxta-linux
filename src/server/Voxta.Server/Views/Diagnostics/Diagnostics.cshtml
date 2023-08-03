@@ -1,0 +1,98 @@
+﻿@using Humanizer
+@model DiagnosticsViewModel;
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Diagnostics";
+}
+
+@section head
+{
+    <style>
+        .pre-container {
+          position: relative;
+          width: 50%;
+          height: 120px;
+        }
+        
+        pre {
+          overflow: auto;
+          position: absolute;
+          left: 0;
+          right: 0;
+          margin: 0;
+          top: 0;
+          bottom: 0;
+          padding:  4px;
+        }
+    </style>
+}
+
+<div class="container">
+    <h1 class="mb-4">Diagnostics</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Performance Metrics</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Metric</th>
+                    <th scope="col">Average Elapsed Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.PerformanceMetrics.Length == 0)
+                {
+                    <tr>
+                        <td colspan="2">No metrics recorded. Run tests or start a chat to generate metrics.</td>
+                    </tr>
+                }
+                @foreach (var m in Model.PerformanceMetrics)
+                {
+                    <tr>
+                        <td>@m.Key</td>
+                        <td>@m.Avg.ToString("g")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Service Observer</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Key</th>
+                    <th scope="col">Timestamp</th>
+                    <th scope="col">Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.Records.Length == 0)
+                {
+                    <tr>
+                        <td colspan="2">No service observations recorded. Start a chat to generate records.</td>
+                    </tr>
+                }
+                @foreach (var m in Model.Records)
+                {
+                    <tr>
+                        <td>@m.Key</td>
+                        <td>@m.Timestamp.Humanize()</td>
+                        <td class="pre-container"><code><pre>@m.Value</pre></code></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -31,7 +31,7 @@ public class OobaboogaClientBase
         Mapper = config.CreateMapper();
     }
 
-    protected int MaxContextTokens { get; set; }
+    protected int MaxContextTokens { get; private set; }
     
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
@@ -66,12 +66,16 @@ public class OobaboogaClientBase
         return 0;
     }
 
-    protected async Task<string> SendCompletionRequest(string prompt, string[] stoppingStrings, CancellationToken cancellationToken)
+    protected OobaboogaRequestBody BuildRequestBody(string prompt, string[] stoppingStrings)
     {
         var body = Mapper.Map<OobaboogaRequestBody>(_parameters);
         body.Prompt = prompt;
         body.StoppingStrings = stoppingStrings;
-        
+        return body;
+    }
+
+    protected async Task<string> SendCompletionRequest(OobaboogaRequestBody body, CancellationToken cancellationToken)
+    {
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/generate");
@@ -86,9 +90,8 @@ public class OobaboogaClientBase
         }
 
         var json = await response.Content.ReadFromJsonAsync<TextGenResponse>(cancellationToken: cancellationToken);
-
-        var text = json?.results?[0].text ?? throw new OobaboogaException("Missing text in response");
-        return text;
+        var text = json?.results?[0].text ?? throw new OobaboogaException("Empty response");
+        return text.TrimExcess();
     }
 
     [Serializable]

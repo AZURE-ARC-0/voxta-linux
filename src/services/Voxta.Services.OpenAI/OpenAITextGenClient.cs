@@ -14,13 +14,15 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     
     private readonly ITokenizer _tokenizer;
     private readonly IPerformanceMetrics _performanceMetrics;
+    private readonly IServiceObserver _serviceObserver;
 
-    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
+    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider, IServiceObserver serviceObserver)
         : base(httpClientFactory, settingsRepository, tokenizer, encryptionProvider)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
         _tokenizer = tokenizer;
         _performanceMetrics = performanceMetrics;
+        _serviceObserver = serviceObserver;
     }
 
     public override Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
@@ -32,17 +34,15 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new OpenAIPromptBuilder(_tokenizer);
-        
         var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
-
         var messages = builder.BuildReplyPrompt(chat, MaxContextTokens);
-
         tokenizePerf.Pause();
 
         var textGenPerf = _performanceMetrics.Start("OpenAI.TextGen");
-        var reply = await SendChatRequestAsync(messages, cancellationToken);
+        var text = await SendChatRequestAsync(BuildRequestBody(messages), cancellationToken);
         textGenPerf.Done();
 
-        return reply;
+        _serviceObserver.Record("OpenAI.TextGen.Reply", text);
+        return text;
     }
 }

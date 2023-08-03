@@ -37,7 +37,7 @@ public class NovelAIClientBase
     public string ServiceName => NovelAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
-    protected int MaxContextTokens { get; set; }
+    protected int MaxContextTokens { get; private set; }
     
     private readonly HttpClient _httpClient;
     private NovelAIParameters? _parameters;
@@ -81,7 +81,7 @@ public class NovelAIClientBase
         return Tokenizer.CountTokens(value);
     }
 
-    protected async ValueTask<string> SendCompletionRequest(string prompt, string prefix, CancellationToken cancellationToken)
+    protected NovelAIRequestBody BuildRequestBody(string prompt, string prefix)
     {
         var parameters = Mapper.Map<NovelAIRequestBodyParameters>(_parameters);
         parameters.Prefix = prefix;
@@ -108,13 +108,18 @@ public class NovelAIClientBase
         bias.AddRange(parameters.LogitBiasExp ?? Array.Empty<LogitBiasExp>());
         parameters.LogitBiasExp = bias.ToArray();
         */
-        
-        var body = new
+
+        var body = new NovelAIRequestBody
         {
-            model = _model,
-            input = prompt,
-            parameters
+            Model = _model,
+            Input = prompt,
+            Parameters = parameters
         };
+        return body;
+    }
+
+    protected async ValueTask<string> SendCompletionRequest(NovelAIRequestBody body, CancellationToken cancellationToken)
+    {
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
@@ -127,7 +132,7 @@ public class NovelAIClientBase
         var text = await response.ReadEventStream<NovelAIEventData>(cancellationToken);
         return text.TrimExcess();
     }
-    
+
     [Serializable]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
