@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Voxta.Server.ViewModels.Playground.TextToSpeechPlaygroundViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Playground - Text To Speech";
@@ -14,24 +15,16 @@
         <div class="card-body">
             <div class="mb-2">
                 <label for="speechTestService">Service</label>
-                <select id="speechTestService" class="form-select">
-                    <option value="NovelAI">NovelAI</option>
-                    <option value="ElevenLabs">ElevenLabs</option>
-                    <option value="AzureSpeechService">AzureSpeechService</option>
-                    <option value="WindowsSpeech">WindowsSpeech</option>
-                </select>
-                <div class="form-text">Make sure the services has been configured and enable.</div>
+                <select id="speechTestService" asp-items="@(new SelectList(Model.Services, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-select"></select>
+                <div class="form-text">Make sure the services has been configured and enabled.</div>
+            </div>
+            <div class="mb-2">
+                <label for="speechTestCulture">Culture</label>
+                <select id="speechTestCulture" asp-items="@(new SelectList(Model.Cultures, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label), "en-US"))" class="form-control"></select>
             </div>
             <div class="mb-2">
                 <label for="speechTestVoice">Voice</label>
                 <select id="speechTestVoice" class="form-select"></select>
-                <div class="form-text">Only a subset of voices are displayed.</div>
-            </div>
-            <div class="mb-2">
-                <label for="speechTestCulture">Culture</label>
-                <select id="speechTestCulture" class="form-select">
-                    <option value="en-US">en-US</option>
-                </select>
                 <div class="form-text">Only a subset of voices are displayed.</div>
             </div>
             <div class="mb-2">
@@ -48,9 +41,9 @@
 
 <script>
     const service = document.getElementById("speechTestService");
+    const culture = document.getElementById("speechTestCulture");
     const voice = document.getElementById("speechTestVoice");
     const text = document.getElementById("speechTestText");
-    const culture = document.getElementById("speechTestCulture");
     
     let audio = null;
     
@@ -82,11 +75,15 @@
         }
     }
 
-    document.getElementById("speechTestService").addEventListener("change", function() {
+    service.addEventListener("change", () => {
         loadVoices();
     });
 
-    window.addEventListener("load", function() {
+    culture.addEventListener("change", () => {
+        loadVoices();
+    });
+
+    window.addEventListener("load", () => {
         loadVoices();
     });
 </script>

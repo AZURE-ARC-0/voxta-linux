@@ -1,4 +1,5 @@
-﻿using Microsoft.CognitiveServices.Speech;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CognitiveServices.Speech;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -13,6 +14,22 @@ namespace Voxta.Services.AzureSpeechService;
 
 public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
 {
+    [SuppressMessage("ReSharper", "StringLiteralTypo")] private static readonly string[] RestrictedVoices = new[]
+    {
+        "de-DE-GiselaNeural",
+        "en-AU-CarlyNeural",
+        "en-GB-MaisieNeural",
+        "en-US-AnaNeural",
+        "es-ES-IreneNeural",
+        "es-MX-MarinaNeural",
+        "fr-FR-EloiseNeural",
+        "it-IT-PierinaNeural",
+        "ja-JP-AoiNeural",
+        "pt-BR-LeticiaNeural",
+        "zh-CN-XiaoshuangNeural",
+        "zh-CN-XiaoyouNeural",
+    };
+    
     public string ServiceName => AzureSpeechServiceConstants.ServiceName;
     
     public string[] Features { get; private set; } = Array.Empty<string>();
@@ -112,7 +129,14 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         if (_speechSynthesizer == null) throw new NullReferenceException("AzureSpeechService is not initialized");
         var response = await _speechSynthesizer.GetVoicesAsync(_culture);
         if (response == null) throw new NullReferenceException("No voices returned");
-        return response.Voices.Select(v => new VoiceInfo { Id = v.ShortName, Label = $"{v.ShortName} ({v.Gender})" }).ToArray();
+        return response.Voices
+            .Where(v => !RestrictedVoices.Contains(v.ShortName))
+            .Select(v => new VoiceInfo
+            {
+                Id = v.ShortName,
+                Label = $"{v.LocalName} ({v.Gender})",
+            })
+            .ToArray();
     }
 
     public void Dispose()
