@@ -25,14 +25,15 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
     {
         var builder = new GenericPromptBuilder(Tokenizer);
         var prompt = builder.BuildReplyPrompt(chat, MaxContextTokens);
-        _serviceObserver.Record("Oobabooga.TextGen.Prompt", prompt);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenService, OobaboogaConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
         var stoppingStrings = new[] { "END_OF_DIALOG", "You:", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n" };
         var text = await SendCompletionRequest(BuildRequestBody(prompt, stoppingStrings), cancellationToken);
         textGenPerf.Done();
         
-        _serviceObserver.Record("Oobabooga.TextGen.Reply", text);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }
 }

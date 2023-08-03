@@ -22,14 +22,15 @@ public class KoboldAITextGenService : KoboldAIClientBase, ITextGenService
     {
         var builder = new GenericPromptBuilder(Tokenizer);
         var prompt = builder.BuildReplyPrompt(chat, MaxContextTokens);
-        _serviceObserver.Record("KoboldAI.TextGen.Prompt", prompt);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenService, KoboldAIConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
         var stoppingStrings = new[] { "END_OF_DIALOG", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n" };
         var text = await SendCompletionRequest(BuildRequestBody(prompt, stoppingStrings), cancellationToken);
         textGenPerf.Done();
         
-        _serviceObserver.Record("KoboldAI.TextGen.Reply", text);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }
 }

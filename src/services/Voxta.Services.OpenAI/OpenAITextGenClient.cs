@@ -36,13 +36,15 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         var builder = new OpenAIPromptBuilder(_tokenizer);
         var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
         var messages = builder.BuildReplyPrompt(chat, MaxContextTokens);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, "");
         tokenizePerf.Pause();
 
         var textGenPerf = _performanceMetrics.Start("OpenAI.TextGen");
         var text = await SendChatRequestAsync(BuildRequestBody(messages), cancellationToken);
         textGenPerf.Done();
 
-        _serviceObserver.Record("OpenAI.TextGen.Reply", text);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }
 }

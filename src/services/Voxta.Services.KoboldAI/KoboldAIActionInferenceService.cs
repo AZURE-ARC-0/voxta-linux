@@ -22,7 +22,8 @@ public class KoboldAIActionInferenceService : KoboldAIClientBase, IActionInferen
     {
         var builder = new GenericPromptBuilder(Tokenizer);
         var prompt = builder.BuildActionInferencePrompt(chat);
-        _serviceObserver.Record("KoboldAI.ActionInference.Prompt", prompt);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, KoboldAIConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);
         
         var actionInferencePerf = _performanceMetrics.Start($"{KoboldAIConstants.ServiceName}.ActionInference");
         var stoppingStrings = new[] { "]" };
@@ -30,7 +31,7 @@ public class KoboldAIActionInferenceService : KoboldAIClientBase, IActionInferen
         actionInferencePerf.Done();
         
         var result = action.TrimContainerAndToLower();
-        _serviceObserver.Record("KoboldAI.ActionInference.Value", result);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceResult, result);
         return result;
     }
 }

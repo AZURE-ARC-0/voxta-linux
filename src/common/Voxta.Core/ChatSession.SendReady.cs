@@ -81,6 +81,7 @@ public partial class ChatSession
             var duration = DateTimeOffset.UtcNow - _chatSessionData.Messages[^1].Timestamp;
             HandleClientMessage(new ClientSendMessage
             {
+                #warning Breaks LLMs
                 Text = $"[OOC: {_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online]"
             });
         }

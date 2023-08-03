@@ -23,12 +23,13 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
     {
         var builder = new NovelAIPromptBuilder(Tokenizer);
         var prompt = builder.BuildReplyPrompt(chat, MaxContextTokens, includePostHistoryPrompt: false);
-        _serviceObserver.Record("NovelAI.TextGen.Prompt", prompt);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenService, NovelAIConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
         var text = await SendCompletionRequest(BuildRequestBody(prompt, "special_instruct"), cancellationToken);
         textGenPerf.Done();
         
-        _serviceObserver.Record("NovelAI.TextGen.Reply", text);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }
 }

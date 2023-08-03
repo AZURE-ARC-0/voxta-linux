@@ -34,15 +34,16 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
         var actionInferencePerf = _performanceMetrics.Start("OpenAI.ActionInference");
         var builder = new OpenAIPromptBuilder(_tokenizer);
         var messages = builder.BuildActionInferencePrompt(chat);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, OpenAIConstants.ServiceName);
         foreach(var message in messages)
         {
-            _serviceObserver.Record($"OpenAI.ActionInference.Message[{message.role}]", message.content);
+            _serviceObserver.Record($"{ServiceObserverKeys.ActionInferencePrompt}[{message.role}]", message.content);
         }
 
         var action = await SendChatRequestAsync(BuildRequestBody(messages), cancellationToken);
         actionInferencePerf.Done();
         var result = action.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
-        _serviceObserver.Record("OpenAI.ActionInference.Value", result);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceResult, result);
         return result;
     }
 }

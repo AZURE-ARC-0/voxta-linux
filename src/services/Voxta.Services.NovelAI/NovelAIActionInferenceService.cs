@@ -28,14 +28,15 @@ public class NovelAIActionInferenceService : NovelAIClientBase, IActionInference
     {
         var builder = new NovelAIPromptBuilder(Tokenizer);
         var prompt = builder.BuildActionInferencePrompt(chat);
-        _serviceObserver.Record("NovelAI.ActionInference.Prompt", prompt);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, NovelAIConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);
 
         var actionInferencePerf = _performanceMetrics.Start($"{NovelAIConstants.ServiceName}.ActionInference");
         var action = await SendCompletionRequest(BuildRequestBody(prompt, "special_instruct"), cancellationToken);
         actionInferencePerf.Done();
 
         var result = action.TrimContainerAndToLower();
-        _serviceObserver.Record("NovelAI.ActionInference.Value", result);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceResult, result);
         return result;
     }
 }

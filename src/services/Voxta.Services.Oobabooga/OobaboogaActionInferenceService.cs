@@ -25,7 +25,8 @@ public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInfer
     {
         var builder = new GenericPromptBuilder(Tokenizer);
         var prompt = builder.BuildActionInferencePrompt(chat);
-        _serviceObserver.Record("Oobabooga.ActionInference.Prompt", prompt);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, OobaboogaConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);
         
         var actionInferencePerf = _performanceMetrics.Start($"{OobaboogaConstants.ServiceName}.ActionInference");
         var stoppingStrings = new[] { "]" };
@@ -33,7 +34,7 @@ public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInfer
         actionInferencePerf.Done();
         
         var result = action.TrimContainerAndToLower();
-        _serviceObserver.Record("Oobabooga.ActionInference.Value", result);
+        _serviceObserver.Record(ServiceObserverKeys.ActionInferenceResult, result);
         return result;
     }
 }

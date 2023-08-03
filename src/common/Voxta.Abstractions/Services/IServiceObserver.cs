@@ -7,9 +7,19 @@ public interface IServiceObserver
     public IEnumerable<ServiceObserverRecord> GetRecords();
 }
 
+public static class ServiceObserverKeys
+{
+    public const string TextGenService = "TextGen.Service";
+    public const string TextGenPrompt = "TextGen.Prompt";
+    public const string TextGenResult = "TextGen.Result";
+    public const string ActionInferenceService = "ActionInference.Service";
+    public const string ActionInferencePrompt = "ActionInference.Prompt";
+    public const string ActionInferenceResult = "ActionInference.Result";
+}
+
 public class ServiceObserverRecord
 {
-    public string Key { get; init; }
-    public string Value { get; init; }
+    public required string Key { get; init; }
+    public required string Value { get; init; }
     public DateTimeOffset Timestamp { get; init; }
 }
