@@ -79,7 +79,11 @@ voxtaClient.addEventListener('onclose', () => {
 voxtaClient.addEventListener('onerror', evt => notifications.notify('Error: ' + evt.detail.message, 'danger'));
 voxtaClient.addEventListener('welcome', evt => {
     getId('username').textContent = evt.detail.username;
-    selectedChatId ? voxtaClient.resumeChat(selectedChatId) : splash.classList.add('voxta_show');
+    if(selectedChatId) {
+        voxtaClient.resumeChat(selectedChatId);
+    } else {
+        splash.classList.add('voxta_show');
+    }
 });
 voxtaClient.addEventListener('charactersListLoaded', evt => {
     removeAllChildNodes(characterButtons);
