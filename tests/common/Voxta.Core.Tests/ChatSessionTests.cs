@@ -1,3 +1,4 @@
+using System.Globalization;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -48,7 +49,7 @@ public class ChatSessionTests
             
         };
         var chatTextProcessor = new Mock<IChatTextProcessor>();
-        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>())).Returns<string?>(text => text ?? "");
+        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>(), It.IsAny<CultureInfo>())).Returns<string?>(text => text ?? "");
         var profile = new ProfileSettings
         {
             Name = "User",

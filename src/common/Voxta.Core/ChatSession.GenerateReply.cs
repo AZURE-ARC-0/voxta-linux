@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Model;
+﻿using System.Globalization;
+using Voxta.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace Voxta.Core;
@@ -28,7 +29,7 @@ public partial class ChatSession
 
         if (_chatSessionState.PendingUserMessage == null)
         {
-            var userText = _chatTextProcessor.ProcessText(text);
+            var userText = _chatTextProcessor.ProcessText(text, CultureInfo.InvariantCulture);
             var userTextData = new TextData
             {
                 Text = userText,
@@ -46,7 +47,7 @@ public partial class ChatSession
         }
 
         _chatSessionData.Actions = clientSendMessage.Actions;
-        _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context);
+        _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context, CultureInfo.InvariantCulture);
 
         string generated;
         try

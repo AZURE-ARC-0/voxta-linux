@@ -1,11 +1,12 @@
 ﻿using System.Globalization;
+using Humanizer;
 using Voxta.Abstractions.Model;
 
 namespace Voxta.Core;
 
 public interface IChatTextProcessor
 {
-    string ProcessText(string? text);
+    string ProcessText(string? text, CultureInfo culture);
 }
 
 public class ChatTextProcessor : IChatTextProcessor
@@ -19,13 +20,13 @@ public class ChatTextProcessor : IChatTextProcessor
         _characterName = characterName;
     }
 
-    public string ProcessText(string? text)
+    public string ProcessText(string? text, CultureInfo culture)
     {
         if (string.IsNullOrEmpty(text)) return "";
-        text = text.Replace("{{Now}}", DateTime.Now.ToString("f", CultureInfo.InvariantCulture));
-        text = text.Replace("{{char}}", _characterName);
-        text = text.Replace("{{user}}", _profile.Name);
-        text = text.Replace("{{UserDescription}}", _profile.Description?.Trim(' ', '\r', '\n') ?? "Not specified");
+        text = text.Replace("{{now}}", DateTime.Now.Humanize(culture: culture), StringComparison.InvariantCultureIgnoreCase);
+        text = text.Replace("{{char}}", _characterName, StringComparison.InvariantCultureIgnoreCase);
+        text = text.Replace("{{user}}", _profile.Name, StringComparison.InvariantCultureIgnoreCase);
+        text = text.Replace("{{user.description}}", _profile.Description?.Trim(' ', '\r', '\n') ?? "Not specified", StringComparison.InvariantCultureIgnoreCase);
         return text.TrimExcess();
     }
 }

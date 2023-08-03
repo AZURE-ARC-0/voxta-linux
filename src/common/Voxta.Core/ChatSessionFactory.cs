@@ -1,4 +1,5 @@
-﻿using System.Runtime.ExceptionServices;
+﻿using System.Globalization;
+using System.Runtime.ExceptionServices;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -82,6 +83,7 @@ public class ChatSessionFactory
 
             speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, character.Services.SpeechGen.Voice, culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
+            var cultureInfo = CultureInfo.GetCultureInfoByIetfLanguageTag(culture);
             var messages = await _chatMessageRepository.GetChatMessagesAsync(chat.Id, cancellationToken);
             
             var chatData = new ChatSessionData
@@ -91,13 +93,13 @@ public class ChatSessionFactory
                 Character = new CharacterCardExtended
                 {
                     Name = character.Name,
-                    Description = textProcessor.ProcessText(character.Description),
-                    Personality = textProcessor.ProcessText(character.Personality),
-                    Scenario = textProcessor.ProcessText(character.Scenario),
-                    FirstMessage = textProcessor.ProcessText(character.FirstMessage),
-                    MessageExamples = textProcessor.ProcessText(character.MessageExamples),
-                    SystemPrompt = textProcessor.ProcessText(character.SystemPrompt),
-                    PostHistoryInstructions = textProcessor.ProcessText(character.PostHistoryInstructions),
+                    Description = textProcessor.ProcessText(character.Description, cultureInfo),
+                    Personality = textProcessor.ProcessText(character.Personality, cultureInfo),
+                    Scenario = textProcessor.ProcessText(character.Scenario, cultureInfo),
+                    FirstMessage = textProcessor.ProcessText(character.FirstMessage, cultureInfo),
+                    MessageExamples = textProcessor.ProcessText(character.MessageExamples, cultureInfo),
+                    SystemPrompt = textProcessor.ProcessText(character.SystemPrompt, cultureInfo),
+                    PostHistoryInstructions = textProcessor.ProcessText(character.PostHistoryInstructions, cultureInfo),
                     Prerequisites = character.Prerequisites,
                     Culture = character.Culture,
                     Services = character.Services
