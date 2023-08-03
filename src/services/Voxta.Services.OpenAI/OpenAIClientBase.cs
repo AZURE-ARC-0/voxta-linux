@@ -28,6 +28,8 @@ public abstract class OpenAIClientBase
         });
         Mapper = config.CreateMapper();
     }
+
+    protected int MaxContextTokens { get; set; }
     
     private readonly ISettingsRepository _settingsRepository;
     private readonly ITokenizer _tokenizer;
@@ -60,6 +62,7 @@ public abstract class OpenAIClientBase
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;
         _parameters = new OpenAIParameters();
+        MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
     

@@ -46,6 +46,12 @@
                     <input asp-for="Model" class="form-control"/>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
+                <div>
+                    <label asp-for="MaxContextTokens">Max Context Tokens</label>
+                    <input asp-for="MaxContextTokens" class="form-control"/>
+                    <div class="form-text">Longer values means more memory but also longer processing.</div>
+                    <span asp-validation-for="MaxContextTokens" class="text-danger"></span>
+                </div>
                 <div class="mb-3">
                     <label asp-for="Parameters">Text generation parameters</label>
                     <input type="hidden" asp-for="Parameters" class="form-control"/>

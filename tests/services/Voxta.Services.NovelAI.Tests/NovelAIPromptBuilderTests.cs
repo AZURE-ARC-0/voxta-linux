@@ -39,8 +39,8 @@ public class NovelAIPromptBuilderTests
                 }
                 .AddMessage("Joe", "Hello")
                 .AddMessage("Jane", "World")
-                .AddMessage("Joe", "Question")
-        );
+                .AddMessage("Joe", "Question"),
+            2000);
 
         Assert.That(actual, Is.EqualTo("""
         Description of Jane: some-description

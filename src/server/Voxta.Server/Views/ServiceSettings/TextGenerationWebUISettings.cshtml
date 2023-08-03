@@ -41,6 +41,12 @@
                     <div class="form-text">Example: http://127.0.0.1:5000. Note that the API URL is different from the web interface URL.</div>
                     <span asp-validation-for="Uri" class="text-danger"></span>
                 </div>
+                <div>
+                    <label asp-for="MaxContextTokens">Max Context Tokens</label>
+                    <input asp-for="MaxContextTokens" class="form-control"/>
+                    <div class="form-text">Longer values means more memory but also longer processing.</div>
+                    <span asp-validation-for="MaxContextTokens" class="text-danger"></span>
+                </div>
                 <div class="mb-3">
                     <label asp-for="Parameters">Text generation parameters</label>
                     <input type="hidden" asp-for="Parameters" class="form-control"/>

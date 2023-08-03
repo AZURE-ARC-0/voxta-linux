@@ -30,6 +30,8 @@ public class OobaboogaClientBase
         });
         Mapper = config.CreateMapper();
     }
+
+    protected int MaxContextTokens { get; set; }
     
     private readonly HttpClient _httpClient;
     private readonly ISettingsRepository _settingsRepository;
@@ -53,6 +55,7 @@ public class OobaboogaClientBase
         if (string.IsNullOrEmpty(uri)) return false;
         _httpClient.BaseAddress = new Uri(uri);
         _parameters = settings.Parameters ?? new OobaboogaParameters();
+        MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
 

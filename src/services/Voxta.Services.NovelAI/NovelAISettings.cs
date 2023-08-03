@@ -9,6 +9,7 @@ public class NovelAISettings : SettingsBase
 
     public required string Token { get; set; }
     public string Model { get; set; } = DefaultModel;
+    public int MaxContextTokens { get; set; } = 1600;
     
     public string[] ThinkingSpeech { get; set; } = {
         "m",

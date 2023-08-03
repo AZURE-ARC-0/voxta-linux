@@ -36,6 +36,8 @@ public class NovelAIClientBase
     
     public string ServiceName => NovelAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
+
+    protected int MaxContextTokens { get; set; }
     
     private readonly HttpClient _httpClient;
     private NovelAIParameters? _parameters;
@@ -63,6 +65,7 @@ public class NovelAIClientBase
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _model = settings.Model;
         _parameters = settings.Parameters ?? NovelAIPresets.DefaultForModel(_model);
+        MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
     
@@ -70,7 +73,7 @@ public class NovelAIClientBase
     {
         return true;
     }
-    
+
     public int GetTokenCount(string value)
     {
         return Tokenizer.CountTokens(value);
@@ -122,7 +125,7 @@ public class NovelAIClientBase
         var text = await response.ReadEventStream<NovelAIEventData>(cancellationToken);
         return text;
     }
-
+    
     [Serializable]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     [SuppressMessage("ReSharper", "UnusedMember.Local")]

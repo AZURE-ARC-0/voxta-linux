@@ -23,7 +23,7 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
     {
         var builder = new GenericPromptBuilder(Tokenizer);
         // TODO: count tokens?
-        var prompt = builder.BuildReplyPrompt(chat, -1);
+        var prompt = builder.BuildReplyPrompt(chat, MaxContextTokens);
         
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
         var text = await SendCompletionRequest(prompt, new[] { "END_OF_DIALOG", "You:", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n", "\"" }, cancellationToken);

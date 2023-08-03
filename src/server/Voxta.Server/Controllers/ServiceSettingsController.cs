@@ -137,6 +137,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = oobabooga.Enabled,
             Uri = oobabooga.Uri,
+            MaxContextTokens = oobabooga.MaxContextTokens,
             Parameters = JsonSerializer.Serialize(oobabooga.Parameters ?? new OobaboogaParameters()),
             UseDefaults = oobabooga.Parameters == null,
         };
@@ -155,6 +156,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
+            MaxContextTokens = value.MaxContextTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OobaboogaParameters>(value.Parameters) ?? new OobaboogaParameters(),
         });
         
@@ -172,6 +174,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = koboldai.Enabled,
             Uri = koboldai.Uri,
+            MaxContextTokens = koboldai.MaxContextTokens,
             Parameters = JsonSerializer.Serialize(koboldai.Parameters ?? new KoboldAIParameters()),
             UseDefaults = koboldai.Parameters == null,
         };
@@ -190,6 +193,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
+            MaxContextTokens = value.MaxContextTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<KoboldAIParameters>(value.Parameters) ?? new KoboldAIParameters(),
         });
         
@@ -208,6 +212,7 @@ public class ServiceSettingsController : Controller
             Enabled = novelai.Enabled,
             Model = novelai.Model,
             Token = !string.IsNullOrEmpty(novelai.Token) ? _encryptionProvider.Decrypt(novelai.Token) : "",
+            MaxContextTokens = novelai.MaxContextTokens,
             Parameters = JsonSerializer.Serialize(novelai.Parameters ?? NovelAIPresets.DefaultForModel(novelai.Model)),
             ThinkingSpeech = string.Join('\n', novelai.ThinkingSpeech),
             UseDefaults = novelai.Parameters == null,
@@ -228,6 +233,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
             Token = string.IsNullOrEmpty(value.Token) ? "" : _encryptionProvider.Encrypt(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
+            MaxContextTokens = value.MaxContextTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? NovelAIPresets.DefaultForModel(value.Model),
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         });
@@ -248,6 +254,7 @@ public class ServiceSettingsController : Controller
             Enabled = openai.Enabled,
             ApiKey = openai.ApiKey,
             Model = openai.Model,
+            MaxContextTokens = openai.MaxContextTokens,
             Parameters = JsonSerializer.Serialize(openai.Parameters ?? new OpenAIParameters()),
             UseDefaults = openai.Parameters == null,
         };
@@ -267,6 +274,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
             ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
+            MaxContextTokens = value.MaxContextTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OpenAIParameters>(value.Parameters) ?? new OpenAIParameters(),
         });
         

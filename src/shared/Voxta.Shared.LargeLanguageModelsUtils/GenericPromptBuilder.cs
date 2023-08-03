@@ -13,7 +13,7 @@ public class GenericPromptBuilder
         _tokenizer = tokenizer;
     }
     
-    public string BuildReplyPrompt(IChatInferenceData chat, int maxTokens = 4096, bool includePostHistoryPrompt = true)
+    public string BuildReplyPrompt(IChatInferenceData chat, int maxTokens, bool includePostHistoryPrompt = true)
     {
         var systemPrompt = MakeSystemPrompt(chat);
         var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chat) : "";

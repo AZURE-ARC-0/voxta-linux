@@ -6,5 +6,6 @@ namespace Voxta.Services.KoboldAI;
 public class KoboldAISettings : SettingsBase
 {
     public required string Uri { get; set; }
+    public int MaxContextTokens { get; set; } = 1600;
     public KoboldAIParameters? Parameters { get; set; }
 }

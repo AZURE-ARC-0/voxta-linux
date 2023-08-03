@@ -1,8 +1,8 @@
 ﻿namespace Voxta.Server.ViewModels;
 
-public class OpenAISettingsViewModel : ServiceSettingsViewModel
+public class ElevenLabsSettingsViewModel : ServiceSettingsViewModel
 {
     public required string ApiKey { get; set; }
     public required string Model { get; set; }
-    public required int MaxContextTokens { get; init; }
+    public required string ThinkingSpeech { get; set; }
 }
