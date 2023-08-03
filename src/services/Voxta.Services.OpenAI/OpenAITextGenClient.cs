@@ -47,4 +47,12 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }
+
+    public ValueTask<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
+    {
+        _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, "");
+        throw new NotSupportedException("Raw prompt generation is not supported by OpenAI TextGen");
+    }
 }

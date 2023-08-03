@@ -36,4 +36,13 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
         _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }
+
+    public async ValueTask<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
+    {
+        _serviceObserver.Record(ServiceObserverKeys.TextGenService, OobaboogaConstants.ServiceName);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
+        var text = await SendCompletionRequest(BuildRequestBody(prompt, new[] { "\n" }), cancellationToken);
+        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
+        return text;
+    }
 }

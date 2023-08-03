@@ -1,0 +1,43 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Voxta.Server.ViewModels.Playground.TextGenPlaygroundViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Playground - Text Generation";
+}
+
+<div class="container">
+    <h1>Text Generation Playground</h1>
+
+    <form method="post" action="/playground/text-gen">
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="mb-2">
+                <label asp-for="Character">Character</label>
+                <select asp-for="Character" asp-items="@(new SelectList(Model.Characters, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
+                <div class="form-text">Make sure the services has been configured and enabled.</div>
+            </div>
+            <div class="mb-2">
+                <label asp-for="Service">Service</label>
+                <select asp-for="Service" asp-items="@(new SelectList(Model.Services, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Prompt">Prompt:</label>
+                <textarea rows="10" asp-for="Prompt" class="form-control"></textarea>
+                <div class="form-text">The service settings will be used.</div>
+                <small class="text-danger">@Html.ValidationMessageFor(m => m.Prompt)</small>
+            </div>
+            <div class="mb-3 text-center">
+                <button class="btn btn-secondary" id="speechTestButton"><i class="bi bi-play"></i> Generate</button>
+                <div class="text-danger mt-3">
+                    @Html.ValidationSummary(false)
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Response">Result: <span class="text-muted">Updated when using Generate</span></label>
+                <textarea rows="10" asp-for="Response" class="form-control"></textarea>
+                <small class="text-danger">@Html.ValidationMessageFor(m => m.Response)</small>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>

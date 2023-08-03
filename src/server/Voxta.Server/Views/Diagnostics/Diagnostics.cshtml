@@ -1,4 +1,5 @@
 ﻿@using Humanizer
+@using Voxta.Abstractions.Services
 @model DiagnosticsViewModel;
 @{
     Layout = "_Layout";
@@ -86,7 +87,13 @@
                 @foreach (var m in Model.Records)
                 {
                     <tr>
-                        <td>@m.Key</td>
+                        <td>
+                            @m.Key
+                            @if (m.Key == ServiceObserverKeys.TextGenPrompt || m.Key == ServiceObserverKeys.ActionInferencePrompt)
+                            {
+                                <a href="/playground/text-gen?observerKey=@m.Key">Playground</a>
+                            }
+                        </td>
                         <td>@m.Timestamp.Humanize()</td>
                         <td class="pre-container"><code><pre>@m.Value</pre></code></td>
                     </tr>

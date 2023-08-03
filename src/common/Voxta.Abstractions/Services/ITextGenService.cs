@@ -4,6 +4,7 @@ namespace Voxta.Abstractions.Services;
 
 public interface ITextGenService : IService
 {
-    ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken);
     int GetTokenCount(string message);
+    ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken);
+    ValueTask<string > GenerateAsync(string prompt, CancellationToken cancellationToken);
 }
