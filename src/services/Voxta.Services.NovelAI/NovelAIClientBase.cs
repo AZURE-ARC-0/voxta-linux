@@ -123,7 +123,7 @@ public class NovelAIClientBase
         if (!response.IsSuccessStatusCode)
             throw new NovelAIException(await response.Content.ReadAsStringAsync(cancellationToken));
         var text = await response.ReadEventStream<NovelAIEventData>(cancellationToken);
-        return text;
+        return text.TrimExcess();
     }
     
     [Serializable]

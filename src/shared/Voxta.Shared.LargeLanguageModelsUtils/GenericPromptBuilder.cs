@@ -16,13 +16,22 @@ public class GenericPromptBuilder
     public string BuildReplyPrompt(IChatInferenceData chat, int maxTokens, bool includePostHistoryPrompt = true)
     {
         var systemPrompt = MakeSystemPrompt(chat);
+        var systemPromptTokens = _tokenizer.CountTokens(systemPrompt);
         var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chat) : "";
+        var postHistoryPromptTokens = _tokenizer.CountTokens(postHistoryPrompt);
+        var query = $"{chat.Character.Name}: ";
+        var queryTokens = _tokenizer.CountTokens(query);
+        var tokens = systemPromptTokens + postHistoryPromptTokens + 1 + queryTokens;
+        
         var sb = new StringBuilder();
         var chatMessages = chat.GetMessages();
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
-            sb.Insert(0, $"{message.User}: {message.Text}\n");
+            var entry = $"{message.User}: {message.Text}\n";
+            var entryTokens = _tokenizer.CountTokens(entry);
+            if (tokens + entryTokens >= maxTokens) break;
+            sb.Insert(0, entry);
         }
 
         sb.Insert(0, '\n');
@@ -33,7 +42,7 @@ public class GenericPromptBuilder
             sb.AppendLineLinux(postHistoryPrompt);
         }
 
-        sb.Append($"{chat.Character.Name}: ");
+        sb.Append(query);
 
         return sb.ToString().TrimExcess();
     }

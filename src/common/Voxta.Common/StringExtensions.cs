@@ -12,9 +12,9 @@ public static class StringExtensions
         return value.Trim('"', ' ');
     }
     
-    public static string TrimContainedToLower(this string value)
+    public static string TrimContainerAndToLower(this string value)
     {
-        return value.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
+        return value.Trim('\'', '"', '.', '[', ']', ' ', '\r', '\n').ToLowerInvariant();
     }
 
     // https://gist.github.com/Davidblkx/e12ab0bb2aff7fd8072632b396538560

@@ -29,6 +29,6 @@ public class NovelAIActionInferenceService : NovelAIClientBase, IActionInference
         var input = builder.BuildActionInferencePrompt(chat);
         var action = await SendCompletionRequest(input, "special_instruct", cancellationToken);
         actionInferencePerf.Done();
-        return action.TrimContainedToLower();
+        return action.TrimContainerAndToLower();
     }
 }

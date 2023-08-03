@@ -28,6 +28,6 @@ public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInfer
         var action = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);
         actionInferencePerf.Done();
         
-        return action.TrimContainedToLower();
+        return action.TrimContainerAndToLower();
     }
 }

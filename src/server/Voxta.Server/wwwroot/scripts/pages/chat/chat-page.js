@@ -34,7 +34,7 @@ const sendChatMessage = text => {
     voxtaClient.send(
         text,
         "Chatting with speech and no webcam.",
-        ['happy', 'intense_love', 'sad', 'angry', 'confused']
+        ['normal', 'happy', 'intense_love', 'sad', 'angry', 'confused']
     );
 }
 
@@ -138,12 +138,13 @@ voxtaClient.addEventListener('reply', evt => {
 });
 voxtaClient.addEventListener('speech', evt => audioVisualizer.play(evt.detail.url, duration => voxtaClient.speechPlaybackStart(duration), () => voxtaClient.speechPlaybackComplete()));
 voxtaClient.addEventListener('action', evt => audioVisualizer.setColor({
-    'happy': 'rgb(215,234,231)',
-    'intense_love': '#e186a4',
-    'sad': '#6d899f',
+    'normal': 'rgb(215,234,231)',
+    'happy': 'rgb(225,195,231)',
+    'intense_love': '#e0678f',
+    'sad': '#87b8de',
     'angry': '#fa2f2a',
-    'confused': '#a774ad'
-}[evt.detail.value] || '#afbcc7'));
+    'confused': '#c27ec7',
+}[evt.detail.value] || '#778085'));
 voxtaClient.addEventListener('speechRecognitionStart', () => {
     audioVisualizer.stop();
     audioVisualizer.listen();

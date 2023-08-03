@@ -25,6 +25,6 @@ public class KoboldAIActionInferenceService : KoboldAIClientBase, IActionInferen
         var action = await SendCompletionRequest(prompt, new[] { "]" }, cancellationToken);
         actionInferencePerf.Done();
         
-        return action.TrimContainedToLower();
+        return action.TrimContainerAndToLower();
     }
 }
