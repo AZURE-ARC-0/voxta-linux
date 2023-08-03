@@ -58,7 +58,7 @@ public class OobaboogaParameters
 
 [Serializable]
 [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
-public class OobaboogaRequestBody
+public class OobaboogaRequestBody : OobaboogaParameters
 {
     [JsonPropertyName("do_sample")]
     public bool DoSample { get; init; } = true;
