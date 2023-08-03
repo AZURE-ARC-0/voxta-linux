@@ -91,13 +91,14 @@ voxtaClient.addEventListener('charactersListLoaded', evt => {
         createElement(characterButtons, 'p', 'text-center text-muted', 'No characters found');
     }
     evt.detail.characters.forEach(character => {
-        createButton(characterButtons, 'btn btn-secondary', character.name, () => {
+        const btn = createButton(characterButtons, 'btn btn-secondary', character.name, () => {
             removeAllChildNodes(chatButtons);
             selectedCharacter = character;
             voxtaClient.loadChatsList(character.id);
             characterButtons.classList.remove('voxta_show');
             chatButtons.classList.add('voxta_show');
         });
+        btn.title = character.description;
     });
     createButton(characterButtons, 'btn btn-secondary colspan', 'Back', () => {
         characterButtons.classList.remove('voxta_show');
