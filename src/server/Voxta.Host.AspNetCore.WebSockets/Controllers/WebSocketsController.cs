@@ -1,7 +1,9 @@
-﻿using System.Net.Sockets;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using Voxta.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Voxta.Host.AspNetCore.WebSockets;
@@ -11,13 +13,15 @@ public class WebSocketsController : ControllerBase
 {
     private readonly ILogger<WebSocketsController> _logger;
     private readonly UserConnectionFactory _chatInstanceFactory;
+    private readonly IHostApplicationLifetime _applicationLifetime;
 
-    public WebSocketsController(ILogger<WebSocketsController> logger, UserConnectionFactory chatInstanceFactory)
+    public WebSocketsController(ILogger<WebSocketsController> logger, UserConnectionFactory chatInstanceFactory, IHostApplicationLifetime applicationLifetime)
     {
         _logger = logger;
         _chatInstanceFactory = chatInstanceFactory;
+        _applicationLifetime = applicationLifetime;
     }
-    
+
     [HttpGet("/ws")]
     public async Task WebSocket(CancellationToken cancellationToken)
     {
@@ -28,6 +32,20 @@ public class WebSocketsController : ControllerBase
         }
         
         using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+        await using var registration = _applicationLifetime.ApplicationStopping.Register([SuppressMessage("ReSharper", "AccessToDisposedClosure")] () =>
+        {
+            try
+            {
+                if (webSocket.State == WebSocketState.Open)
+                {
+                    webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Server shutdown", CancellationToken.None).Wait(cancellationToken);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // ignore
+            }
+        });
         var tunnel = new WebsocketUserConnectionTunnel(webSocket);
         await using var userConnection = _chatInstanceFactory.Create(tunnel);
         _logger.LogInformation("WebSocket connection established");
@@ -47,17 +65,15 @@ public class WebSocketsController : ControllerBase
         }
         catch (WebSocketException exc)
         {
-            if (webSocket.State == WebSocketState.Aborted)
-            {
-                _logger.LogInformation("WebSocket connection aborted");
-                return;
-            }
-
-            _logger.LogWarning(exc, "Unexpected websocket exception");
+            _logger.LogInformation("WebSocket connection closed: {State}", webSocket.State);
         }
         catch (Exception exc)
         {
             _logger.LogError(exc, "Unexpected chat session error: {Message}", exc.Message);
+        }
+        finally
+        {
+            registration.Unregister();
         }
     }
 }
