@@ -7,7 +7,8 @@ namespace Voxta.Abstractions.Services;
 public interface IServiceFactory<TInterface> where TInterface : class
 {
     IEnumerable<string> ServiceNames { get; }
-    Task<TInterface> CreateAsync(ServicesList services, string preferredService, string[] prerequisites, string culture, CancellationToken cancellationToken);
+    Task<TInterface> CreateSpecificAsync(string service, string culture, bool dry, CancellationToken cancellationToken);
+    Task<TInterface> CreateBestMatchAsync(ServicesList services, string preferredService, string[] prerequisites, string culture, CancellationToken cancellationToken);
 }
 
 public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInterface : class, IService
@@ -23,7 +24,18 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         _sp = sp;
     }
 
-    public async Task<TInterface> CreateAsync(ServicesList services, string preferredService, string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<TInterface> CreateSpecificAsync(string service, string culture, bool dry, CancellationToken cancellationToken)
+    {
+        if (!_registry.Types.TryGetValue(service, out var type))
+            throw new NotSupportedException($"Service {service} is not registered");
+        
+        var instance = (TInterface)_sp.GetRequiredService(type);
+        var success = await instance.TryInitializeAsync(Array.Empty<string>(), culture, dry, cancellationToken);
+        if(!success) throw new ServiceDisabledException();
+        return instance;
+    }
+
+    public async Task<TInterface> CreateBestMatchAsync(ServicesList services, string preferredService, string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         var options = string.IsNullOrEmpty(preferredService) ? services.Services : new[] { preferredService };
         foreach (var option in options)
@@ -32,7 +44,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
                 continue;  
 
             var instance = (TInterface)_sp.GetRequiredService(type);
-            var success = await instance.InitializeAsync(prerequisites, culture, cancellationToken);
+            var success = await instance.TryInitializeAsync(prerequisites, culture, false, cancellationToken);
             if (success) return instance;
             if (instance.ServiceName == preferredService) throw new ServiceDisabledException();
         }

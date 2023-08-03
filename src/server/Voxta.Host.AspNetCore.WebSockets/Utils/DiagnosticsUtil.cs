@@ -149,7 +149,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _textGenFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _textGenFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var result = await service.GenerateReplyAsync(new ChatSessionData
@@ -178,7 +178,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _textToSpeechFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _textToSpeechFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var voices = await service.GetVoicesAsync(cancellationToken);
@@ -218,7 +218,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _actionInferenceFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _actionInferenceFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var actions = new[] { "test_successful", "talk_to_user" };
@@ -248,7 +248,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _speechToTextFactory.CreateAsync(ServicesList.For(serviceName), serviceName, Array.Empty<string>(), "en-US", cancellationToken),
+            async () => await _speechToTextFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
             _ => Task.FromResult("Cannot be tested automatically")
         );
     }

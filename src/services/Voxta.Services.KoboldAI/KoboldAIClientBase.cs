@@ -48,7 +48,7 @@ public class KoboldAIClientBase
         _settingsRepository = settingsRepository;
     }
 
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         if (_initialized) return true;
         _initialized = true;
@@ -57,6 +57,8 @@ public class KoboldAIClientBase
         if (!settings.Enabled) return false;
         var uri = settings.Uri;
         if (string.IsNullOrEmpty(uri)) return false;
+        if (dry) return true;
+        
         _httpClient.BaseAddress = new Uri(uri);
         _parameters = settings.Parameters ?? new KoboldAIParameters();
         MaxContextTokens = settings.MaxContextTokens;

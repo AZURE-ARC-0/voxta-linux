@@ -8,7 +8,7 @@ public class MockActionInferenceService : IActionInferenceService
     public string ServiceName => MockConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
-    public Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         return Task.FromResult(true);
     }

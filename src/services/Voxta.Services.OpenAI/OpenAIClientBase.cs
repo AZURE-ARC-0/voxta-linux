@@ -52,12 +52,14 @@ public abstract class OpenAIClientBase
         return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
-    public virtual async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public virtual async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.ApiKey)) return false;
+        if (dry) return true;
+        
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;

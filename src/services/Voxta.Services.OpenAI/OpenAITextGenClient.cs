@@ -23,10 +23,10 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         _performanceMetrics = performanceMetrics;
     }
 
-    public override Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public override Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return Task.FromResult(false);
-        return base.InitializeAsync(prerequisites, culture, cancellationToken);
+        return base.TryInitializeAsync(prerequisites, culture, dry, cancellationToken);
     }
 
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)

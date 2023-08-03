@@ -40,12 +40,14 @@ public class ElevenLabsTextToSpeechService : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.ApiKey)) throw new AuthenticationException("ElevenLabs token is missing.");
+        if (dry) return true;
+        
         _httpClient.BaseAddress = new Uri("https://api.elevenlabs.io");
         _httpClient.DefaultRequestHeaders.Add("xi-api-key", _encryptionProvider.Decrypt(settings.ApiKey));
         _culture = culture;

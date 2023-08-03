@@ -33,7 +33,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceSpeechToText>();
     }
     
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
         if (settings == null) return false;
@@ -41,6 +41,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
+        if (dry) return true;
         
         var config = SpeechConfig.FromSubscription(_encryptionProvider.Decrypt(settings.SubscriptionKey), settings.Region);
         config.SpeechRecognitionLanguage = culture;

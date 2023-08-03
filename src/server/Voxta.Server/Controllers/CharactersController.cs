@@ -139,7 +139,7 @@ public class CharactersController : Controller
         if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
         {
             var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
-            var ttsService = await ttsServiceFactory.CreateAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
+            var ttsService = await ttsServiceFactory.CreateBestMatchAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
             voices = await ttsService.GetVoicesAsync(cancellationToken);
         }
         else

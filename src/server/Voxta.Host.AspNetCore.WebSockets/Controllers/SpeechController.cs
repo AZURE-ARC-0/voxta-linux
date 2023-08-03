@@ -35,7 +35,7 @@ public class SpeechController : ControllerBase
         if (string.IsNullOrEmpty(speechRequest.Service)) throw new InvalidOperationException("TTS service must be resolved prior to adding to pending speech.");
 
         // NOTE: Here we don't specify prerequisites because it's too late anyway.
-        var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(speechRequest.Service), speechRequest.Service, Array.Empty<string>(), speechRequest.Culture, cancellationToken);
+        var textToSpeech = await speechGenFactory.CreateSpecificAsync(speechRequest.Service, speechRequest.Culture, false, cancellationToken);
         audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
         if (speechRequest.Reusable)
         {
@@ -99,7 +99,7 @@ public class SpeechController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(service), service, Array.Empty<string>(), culture, cancellationToken);
+        var textToSpeech = await speechGenFactory.CreateSpecificAsync(service, culture, false, cancellationToken);
         var speechRequest = new SpeechRequest
         {
             Service = service,
@@ -133,7 +133,7 @@ public class SpeechController : ControllerBase
         // NOTE: There is no voices list implementation that require any prerequisites.
         try
         {
-            var textToSpeech = await speechGenFactory.CreateAsync(ServicesList.For(service), service, Array.Empty<string>(), culture, cancellationToken);
+            var textToSpeech = await speechGenFactory.CreateSpecificAsync(service, culture, false, cancellationToken);
             return await textToSpeech.GetVoicesAsync(cancellationToken);
         }
         catch (ServiceDisabledException)

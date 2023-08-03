@@ -52,7 +52,7 @@ public class NovelAIClientBase
         _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
     }
     
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
         if (settings == null) return false;
@@ -61,6 +61,8 @@ public class NovelAIClientBase
         if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
         if (prerequisites.Contains(ServiceFeatures.GPT3)) return false;
         if (!ValidateSettings(settings)) return false;
+        if (dry) return true;
+        
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _model = settings.Model;

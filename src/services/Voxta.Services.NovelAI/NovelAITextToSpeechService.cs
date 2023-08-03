@@ -35,13 +35,15 @@ public class NovelAITextToSpeechService : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en")) return false;
+        if (dry) return true;
+        
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _thinkingSpeech = settings.ThinkingSpeech;

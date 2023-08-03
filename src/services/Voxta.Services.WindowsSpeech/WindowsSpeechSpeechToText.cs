@@ -27,16 +27,17 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         _logger = loggerFactory.CreateLogger<WindowsSpeechSpeechToText>();
     }
     
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
+        if (dry) return true;
+        
         _recognizer = new SpeechRecognitionEngine();
         var grammar = new DictationGrammar();
         _recognizer.LoadGrammar(grammar);
-        var audioStream = new MemoryStream();
         _recognizer.SetInputToDefaultAudioDevice();
 
         _recognizer.SpeechDetected += (_, e) =>

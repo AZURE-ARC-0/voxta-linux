@@ -44,7 +44,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         global::Vosk.Vosk.SetLogLevel(-1);
     }
 
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         if (_initialized) return true;
         _initialized = true;
@@ -53,6 +53,8 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Model)) return false;
         if (!settings.Model.Contains(culture, StringComparison.InvariantCultureIgnoreCase)) return false;
+        if (dry) return true;
+        
         if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         await Semaphore.WaitAsync(cancellationToken);
         if (_disposed) return false;

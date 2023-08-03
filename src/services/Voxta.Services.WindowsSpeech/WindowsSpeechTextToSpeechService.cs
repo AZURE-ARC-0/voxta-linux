@@ -32,11 +32,13 @@ public class WindowsSpeechTextToSpeechService : ITextToSpeechService
         _synthesizer = new SpeechSynthesizer();
     }
     
-    public async Task<bool> InitializeAsync(string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
+        if (dry) return true;
+        
         _culture = CultureInfo.GetCultureInfo(culture);
         _thinkingSpeech = settings.ThinkingSpeech;
         return true;
