@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using Voxta.Abstractions.System;
 using Voxta.Abstractions.Repositories;
 using Voxta.Server.ViewModels;
 using Voxta.Services.KoboldAI;
@@ -7,12 +10,13 @@ using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
-using Microsoft.AspNetCore.Mvc;
-using Voxta.Abstractions.System;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.NovelAI.Presets;
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
+#endif
+#if(!WINDOWS)
+using Voxta.Services.FFmpeg;
 #endif
 
 namespace Voxta.Server.Controllers;
@@ -287,17 +291,20 @@ public class ServiceSettingsController : Controller
         return RedirectToAction("Settings", "Settings");
     }
     
-    #if(WINDOWS)
-    
     [HttpGet("/settings/windowsspeech")]
     public async Task<IActionResult> WindowsSpeechSettings(CancellationToken cancellationToken)
     {
+    
+        #if(WINDOWS)
         var windowsspeech = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
         var vm = new WindowsSpeechSettingsViewModel
         {
             Enabled = windowsspeech.Enabled
         };
         return View(vm);
+        #else
+        throw new PlatformNotSupportedException();
+        #endif
     }
     
     [HttpPost("/settings/windowsspeech")]
@@ -308,13 +315,49 @@ public class ServiceSettingsController : Controller
             return View("WindowsSpeechSettings", value);
         }
 
+        #if(WINDOWS)
         await _settingsRepository.SaveAsync(new WindowsSpeechSettings
         {
             Enabled = value.Enabled,
         });
         
         return RedirectToAction("Settings", "Settings");
+        #else
+        throw new PlatformNotSupportedException();
+        #endif
     }
     
-    #endif
+    [HttpGet("/settings/windowsspeech")]
+    public async Task<IActionResult> FFmpegSettings(CancellationToken cancellationToken)
+    {
+        #if(!WINDOWS)
+        var ffmpeg = await _settingsRepository.GetAsync<FFmpegSettings>(cancellationToken) ?? new FFmpegSettings();
+        var vm = new FFmpegSettingsViewModel
+        {
+            Enabled = ffmpeg.Enabled
+        };
+        return View(vm);
+        #else
+        throw new PlatformNotSupportedException();
+        #endif
+    }
+    
+    [HttpPost("/settings/windowsspeech")]
+    public async Task<IActionResult> PostFFmpegSettings([FromForm] FFmpegSettingsViewModel value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("FFmpegSettings", value);
+        }
+        #if(!WINDOWS)
+        await _settingsRepository.SaveAsync(new FFmpegSettings
+        {
+            Enabled = value.Enabled,
+        });
+        
+        return RedirectToAction("Settings", "Settings");
+        #else
+        throw new PlatformNotSupportedException();
+        #endif
+    }
 }
