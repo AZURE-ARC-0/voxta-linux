@@ -16,4 +16,16 @@ public class ServicesList
         if (index == -1) return int.MaxValue;
         return index;
     }
+
+    public bool SyncWithTemplate(ServicesList template)
+    {
+        var textGenServicesToAdd = template.Services.Except(Services).ToArray();
+        var textGenServicesToRemove = Services.Except(template.Services).ToArray();
+        if (!textGenServicesToAdd.Any() && !textGenServicesToRemove.Any()) return false;
+        
+        var textGenServices = new List<string>(Services);
+        textGenServices.AddRange(textGenServicesToAdd);
+        textGenServices.RemoveAll(x => textGenServicesToRemove.Contains(x));
+        return true;
+    }
 }

@@ -36,11 +36,24 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
             await _charactersRepository.SaveCharacterAsync(GeorgeCharacter.Create());
 
             // Default profile
+            var defaultProfile = ProfileUtils.CreateDefaultProfile();
             var profile = await _profileRepository.GetProfileAsync(CancellationToken.None);
             if (profile == null)
             {
-                profile = ProfileUtils.CreateDefaultProfile();
+                profile = defaultProfile;
                 await _profileRepository.SaveProfileAsync(profile);
+            }
+            else
+            {
+                var modified = false;
+                modified |= profile.TextGen.SyncWithTemplate(defaultProfile.TextGen);
+                modified |= profile.SpeechToText.SyncWithTemplate(defaultProfile.SpeechToText);
+                modified |= profile.TextToSpeech.SyncWithTemplate(defaultProfile.TextToSpeech);
+                modified |= profile.ActionInference.SyncWithTemplate(defaultProfile.ActionInference);
+                if (modified)
+                {
+                    await _profileRepository.SaveProfileAsync(profile);
+                }
             }
             
             // Default services
