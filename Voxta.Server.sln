@@ -92,6 +92,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.TextToSpeechUt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.WindowsSpeech", "src\services\Voxta.Services.WindowsSpeech\Voxta.Services.WindowsSpeech.csproj", "{FBFA24A0-70C3-41A9-A7EF-9A7583CDCB8A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.FFmpeg", "src\services\Voxta.Services.FFmpeg\Voxta.Services.FFmpeg.csproj", "{18C6C14C-7CCD-4C20-AAF2-98A48B55D049}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,6 +215,10 @@ Global
 		{FBFA24A0-70C3-41A9-A7EF-9A7583CDCB8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBFA24A0-70C3-41A9-A7EF-9A7583CDCB8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBFA24A0-70C3-41A9-A7EF-9A7583CDCB8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18C6C14C-7CCD-4C20-AAF2-98A48B55D049}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18C6C14C-7CCD-4C20-AAF2-98A48B55D049}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18C6C14C-7CCD-4C20-AAF2-98A48B55D049}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18C6C14C-7CCD-4C20-AAF2-98A48B55D049}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6A1407C5-B5D2-4651-ADE0-36CAE2C4F66E} = {6AB181C5-92BE-45CB-890F-EF6B60BBA7C0}
@@ -253,5 +259,6 @@ Global
 		{ADA99E97-31DE-4DFA-AF1F-3FA1189B484B} = {09000B64-ABEE-4F4C-B6ED-83091F59EA05}
 		{2D5A5653-A22B-4E12-AB90-C053732BBF58} = {3D101AAD-8BB5-4177-90A3-274CFCB812F0}
 		{FBFA24A0-70C3-41A9-A7EF-9A7583CDCB8A} = {35AF5316-3D66-4671-8BDE-3451123AE7EA}
+		{18C6C14C-7CCD-4C20-AAF2-98A48B55D049} = {35AF5316-3D66-4671-8BDE-3451123AE7EA}
 	EndGlobalSection
 EndGlobal

@@ -38,19 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
     <ProjectReference Include="..\..\common\Voxta.Characters\Voxta.Characters.csproj" />
-    <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.Azure.SpeechService\Voxta.Services.Azure.SpeechService.csproj" />
-    <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.Mocks\Voxta.Services.Mocks.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.Oobabooga\Voxta.Services.Oobabooga.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.OpenAI\Voxta.Services.OpenAI.csproj" />
-    <ProjectReference Include="..\..\services\Voxta.Services.Vosk\Voxta.Services.Vosk.csproj" />
     <ProjectReference Include="..\Voxta.Host.AspNetCore.WebSockets\Voxta.Host.AspNetCore.WebSockets.csproj" />
   </ItemGroup>
 

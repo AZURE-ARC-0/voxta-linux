@@ -28,7 +28,6 @@
         <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Mocks\Voxta.Services.Mocks.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
-        <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Oobabooga\Voxta.Services.Oobabooga.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.OpenAI\Voxta.Services.OpenAI.csproj" />
@@ -37,6 +36,11 @@
     
     <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
         <ProjectReference Include="..\..\services\Voxta.Services.WindowsSpeech\Voxta.Services.WindowsSpeech.csproj" />
+        <ProjectReference Include="..\..\services\Voxta.Services.NAudio\Voxta.Services.NAudio.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+        <ProjectReference Include="..\..\services\Voxta.Services.FFmpeg\Voxta.Services.FFmpeg.csproj" />
     </ItemGroup>
 
 </Project>

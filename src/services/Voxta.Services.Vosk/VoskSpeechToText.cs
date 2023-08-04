@@ -9,7 +9,7 @@ namespace Voxta.Services.Vosk;
 
 public sealed class VoskSpeechToText : ISpeechToTextService
 {
-    private const int _sampleRate = 16000;
+    private const int SampleRate = 16000;
     
     private static readonly SemaphoreSlim Semaphore = new(1, 1);
     private static readonly JsonSerializerOptions SerializeOptions = new()
@@ -27,7 +27,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     private VoskRecognizer? _recognizer;
     private bool _disposed;
     private bool _initialized;
-    private string[] _ignoredWords;
+    private string[]? _ignoredWords;
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
@@ -61,7 +61,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         if (_disposed) return false;
         var model = await _modelDownloader.AcquireModelAsync(settings.Model, settings.ModelHash, cancellationToken);
         _ignoredWords = settings.IgnoredWords;
-        _recognizer = new VoskRecognizer(model, _sampleRate);
+        _recognizer = new VoskRecognizer(model, SampleRate);
         _recognizer.SetWords(true);
         _recordingService.DataAvailable += DataAvailable;
         return true;
@@ -109,7 +109,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
 
     private bool IsNoise(string word)
     {
-        return _ignoredWords.Contains(word);
+        return _ignoredWords?.Contains(word) ?? false;
     }
 
     public void StartMicrophoneTranscription()

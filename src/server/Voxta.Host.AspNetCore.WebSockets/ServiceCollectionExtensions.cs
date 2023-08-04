@@ -79,5 +79,12 @@ public static class ServiceCollectionExtensions
         speechToTextRegistry.RegisterWindowsSpeech();
         
         #endif
+        
+        #if(LINUX)
+        
+        services.AddFFmpeg();
+        speechToTextRegistry.RegisterFFmpeg();
+        
+        #endif
     }
 }
