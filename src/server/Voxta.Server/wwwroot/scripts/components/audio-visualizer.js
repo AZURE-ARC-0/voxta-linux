@@ -100,7 +100,10 @@
                     if(onComplete) onComplete();
                 };
                 source.start(0);
-            }, error => this.handleError(error));
+            }, error => {
+                this.handleError(error);
+                onComplete();
+            });
     }
 
     drawFrame() {
