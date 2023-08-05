@@ -2,7 +2,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Services.OpenSourceLargeLanguageModels;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
-namespace Voxta.Services.OpenAI.Tests;
+namespace Voxta.Services.NovelAI.Tests;
 
 public class NovelAIPromptBuilderTests
 {

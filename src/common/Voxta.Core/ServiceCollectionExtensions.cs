@@ -1,8 +1,10 @@
 ﻿using Voxta.Abstractions.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Voxta.Abstractions.System;
+using Voxta.Core;
 
-namespace Voxta.Core;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

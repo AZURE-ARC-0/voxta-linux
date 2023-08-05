@@ -1,9 +1,10 @@
 ﻿
 using Voxta.Abstractions.Repositories;
 using LiteDB;
-using Microsoft.Extensions.DependencyInjection;
+using Voxta.Data.LiteDB;
 
-namespace Voxta.Data.LiteDB;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

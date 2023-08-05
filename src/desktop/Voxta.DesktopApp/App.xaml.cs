@@ -2,21 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-using System.Windows;
-
 namespace Voxta.DesktopApp
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+    public partial class App
     {
-        public bool newRuntimeEventHandled = false;
-
         public App()
         {
             InitializeComponent();
-            this.Resources["AdditionalArgs"] = "--enable-features=ThirdPartyStoragePartitioning,PartitionedCookies";
+            Resources["AdditionalArgs"] = "--enable-features=ThirdPartyStoragePartitioning,PartitionedCookies";
 
         }
     }

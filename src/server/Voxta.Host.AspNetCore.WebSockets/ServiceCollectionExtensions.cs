@@ -1,15 +1,14 @@
 ﻿using Voxta.Abstractions.Diagnostics;
-using Voxta.Core;
-using Voxta.Data.LiteDB;
 using Microsoft.AspNetCore.WebSockets;
-using Microsoft.Extensions.DependencyInjection;
 using Voxta.Abstractions.Management;
 using Voxta.Abstractions.Services;
 using Voxta.Abstractions.System;
+using Voxta.Host.AspNetCore.WebSockets;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Server.BackgroundServices;
 
-namespace Voxta.Host.AspNetCore.WebSockets;
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {

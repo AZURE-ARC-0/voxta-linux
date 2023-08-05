@@ -40,7 +40,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         _recognizer.LoadGrammar(grammar);
         _recognizer.SetInputToDefaultAudioDevice();
 
-        _recognizer.SpeechDetected += (_, e) =>
+        _recognizer.SpeechDetected += (_, _) =>
         {
             _logger.LogDebug("Speech detected");
             if (_speaking) return;
@@ -62,7 +62,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
                 SpeechRecognitionFinished?.Invoke(this, e.Result.Text);
         };
 
-        _recognizer.SpeechRecognitionRejected += (_, e) => {
+        _recognizer.SpeechRecognitionRejected += (_, _) => {
             _speaking = false;
         };
 

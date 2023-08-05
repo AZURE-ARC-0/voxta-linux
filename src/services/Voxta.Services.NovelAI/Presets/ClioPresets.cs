@@ -20,7 +20,7 @@ public static class ClioPresets
             RepetitionPenaltyRange = 8192,
             RepetitionPenaltySlope = 0.09,
             PhraseRepPen = "very_light",
-            Order = new int[] { 1, 5, 0, 2, 3, 4 },
+            Order = new [] { 1, 5, 0, 2, 3, 4 },
             RepetitionPenaltyWhitelist = new[]
             {
                 49256,

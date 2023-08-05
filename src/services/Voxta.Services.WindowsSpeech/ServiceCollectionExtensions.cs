@@ -3,6 +3,7 @@ using Voxta.Abstractions.Services;
 using Voxta.Services.WindowsSpeech;
 using Voxta.Shared.TextToSpeechUtils;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions

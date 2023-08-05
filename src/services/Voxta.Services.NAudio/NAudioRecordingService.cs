@@ -55,6 +55,7 @@ public class NAudioRecordingService : IRecordingService
         _waveIn.StopRecording();
     }
 
+    // ReSharper disable once UnusedMember.Local
     private static double CalculateRms(byte[] buffer, int bytesRecorded)
     {
         double rms = 0;

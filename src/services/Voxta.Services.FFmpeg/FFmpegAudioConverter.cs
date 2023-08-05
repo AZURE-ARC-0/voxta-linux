@@ -48,5 +48,7 @@ public class FFmpegAudioConverter : IAudioConverter
 
         // Convert from input.ContentType to _outputContentType
         throw new NotImplementedException();
+
+        audioConvPerf.Done();
     }
 }

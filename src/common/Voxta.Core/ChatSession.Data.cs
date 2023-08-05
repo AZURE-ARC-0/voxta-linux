@@ -17,11 +17,10 @@ public partial class ChatSession
         return message;
     }
     
-    private async Task<ChatMessageData> UpdateMessageAsync(ChatMessageData message)
+    private async Task UpdateMessageAsync(ChatMessageData message)
     {
         var perf = _performanceMetrics.Start("Database");
         await _chatMessageRepository.UpdateMessageAsync(message);
         perf.Done();
-        return message;
     }
 }

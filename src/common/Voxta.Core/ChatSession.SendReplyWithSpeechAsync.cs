@@ -13,7 +13,7 @@ public partial class ChatSession
     
     private async Task SendReplyWithSpeechAsync(string text, string speechId, bool reusable, CancellationToken cancellationToken)
     {
-        var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(text, speechId, false, cancellationToken), cancellationToken);
+        var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(text, speechId, reusable, cancellationToken), cancellationToken);
 
         await _tunnel.SendAsync(new ServerReplyMessage
         {

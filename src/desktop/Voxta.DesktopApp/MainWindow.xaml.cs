@@ -46,7 +46,7 @@ public partial class MainWindow
         try
         {
             await Task.Delay(0);
-            var env = await CoreWebView2Environment.CreateAsync(null);
+            var env = await CoreWebView2Environment.CreateAsync();
             await WebView.EnsureCoreWebView2Async(env);
             WebView.CoreWebView2.WebMessageReceived += WebView_CoreWebView2_WebMessageReceived;
             WebView.Visibility = Visibility.Hidden;
