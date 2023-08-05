@@ -15,7 +15,7 @@ namespace Voxta.Services.NovelAI;
 
 public class NovelAIClientBase
 {
-    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -120,7 +120,7 @@ public class NovelAIClientBase
 
     protected async ValueTask<string> SendCompletionRequest(NovelAIRequestBody body, CancellationToken cancellationToken)
     {
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
+        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;

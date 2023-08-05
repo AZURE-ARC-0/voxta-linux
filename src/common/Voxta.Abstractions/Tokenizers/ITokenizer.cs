@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace Voxta.Abstractions.Tokenizers;
+﻿namespace Voxta.Abstractions.Tokenizers;
 
 public interface ITokenizer
 {

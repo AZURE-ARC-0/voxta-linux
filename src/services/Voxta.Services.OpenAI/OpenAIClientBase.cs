@@ -11,7 +11,9 @@ namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase
 {
-    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    protected static readonly ITokenizer Tokenizer = TokenizerBuilder.CreateByModelName("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
+    
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -31,16 +33,14 @@ public abstract class OpenAIClientBase
     protected int MaxContextTokens { get; private set; }
     
     private readonly ISettingsRepository _settingsRepository;
-    private readonly ITokenizer _tokenizer;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
     private OpenAIParameters? _parameters;
     private string _model = "gpt-3.5-turbo";
 
-    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, ILocalEncryptionProvider encryptionProvider)
+    protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
     {
         _settingsRepository = settingsRepository;
-        _tokenizer = tokenizer;
         _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
@@ -48,7 +48,7 @@ public abstract class OpenAIClientBase
     public int GetTokenCount(string message)
     {
         if (string.IsNullOrEmpty(message)) return 0;
-        return _tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
+        return Tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
 
     public virtual async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
@@ -77,7 +77,7 @@ public abstract class OpenAIClientBase
 
     protected async Task<string> SendChatRequestAsync(OpenAIRequestBody body, CancellationToken cancellationToken)
     {
-        var content = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
+        var content = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync("/v1/chat/completions", content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

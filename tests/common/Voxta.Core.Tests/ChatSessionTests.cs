@@ -49,7 +49,7 @@ public class ChatSessionTests
             
         };
         var chatTextProcessor = new Mock<IChatTextProcessor>();
-        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>(), It.IsAny<CultureInfo>())).Returns<string?>(text => text ?? "");
+        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>(), It.IsAny<CultureInfo>())).Returns((string? text, CultureInfo _) => text ?? "");
         var profile = new ProfileSettings
         {
             Name = "User",

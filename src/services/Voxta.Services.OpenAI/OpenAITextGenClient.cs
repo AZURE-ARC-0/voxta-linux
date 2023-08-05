@@ -2,7 +2,6 @@
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
-using Microsoft.DeepDev;
 using Voxta.Abstractions.System;
 
 namespace Voxta.Services.OpenAI;
@@ -12,15 +11,13 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     public string ServiceName => OpenAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.GPT3 };
     
-    private readonly ITokenizer _tokenizer;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IServiceObserver _serviceObserver;
 
-    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ITokenizer tokenizer, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider, IServiceObserver serviceObserver)
-        : base(httpClientFactory, settingsRepository, tokenizer, encryptionProvider)
+    public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider, IServiceObserver serviceObserver)
+        : base(httpClientFactory, settingsRepository, encryptionProvider)
     {
         httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}.TextGen");
-        _tokenizer = tokenizer;
         _performanceMetrics = performanceMetrics;
         _serviceObserver = serviceObserver;
     }
@@ -33,7 +30,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new OpenAIPromptBuilder(_tokenizer);
+        var builder = new OpenAIPromptBuilder(Tokenizer);
         var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
         var messages = builder.BuildReplyPrompt(chat, MaxContextTokens);
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);

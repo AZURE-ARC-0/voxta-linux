@@ -12,7 +12,7 @@ namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaClientBase
 {
-    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -76,7 +76,7 @@ public class OobaboogaClientBase
 
     protected async Task<string> SendCompletionRequest(OobaboogaRequestBody body, CancellationToken cancellationToken)
     {
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
+        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/generate");
         request.Content = bodyContent;

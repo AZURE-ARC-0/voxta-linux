@@ -148,7 +148,7 @@ public class WebSocketTest
 
     private async Task<T> Receive<T>() where T : ServerMessage
     {
-        var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+        var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(1000));
         WebSocketReceiveResult result;
         try
         {

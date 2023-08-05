@@ -13,7 +13,7 @@ namespace Voxta.Services.KoboldAI;
 
 public class KoboldAIClientBase
 {
-    private static readonly JsonSerializerOptions JSONSerializerOptions = new()
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -81,7 +81,7 @@ public class KoboldAIClientBase
 
     protected async Task<string> SendCompletionRequest(KoboldAIRequestBody body, CancellationToken cancellationToken)
     {
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JSONSerializerOptions), Encoding.UTF8, "application/json");
+        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
         request.Content = bodyContent;
         request.ConfigureEvenStream();
