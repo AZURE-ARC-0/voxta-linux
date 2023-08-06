@@ -13,8 +13,10 @@ public class OpenAIPromptBuilder
         _tokenizer = tokenizer;
     }
 
-    public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxTokens)
+    public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxMemoryTokens, int maxTokens)
     {
+        #warning Implement memory
+        
         var systemPrompt = MakeSystemPrompt(chat.Character);
         var systemPromptTokens = _tokenizer?.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count ?? 0;
         var postHistoryPrompt = MakePostHistoryPrompt(chat.Character, chat.Context, chat.Actions);

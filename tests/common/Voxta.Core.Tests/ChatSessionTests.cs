@@ -46,7 +46,6 @@ public class ChatSessionTests
                 Services = new CharacterServicesMap()
             },
             AudioPath = "/audio-path",
-            
         };
         var chatTextProcessor = new Mock<IChatTextProcessor>();
         chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>(), It.IsAny<CultureInfo>())).Returns((string? text, CultureInfo _) => text ?? "");
@@ -63,6 +62,8 @@ public class ChatSessionTests
         var chatMessageRepository = new Mock<IChatMessageRepository>();
         var performanceMetrics = new Mock<IPerformanceMetrics>();
         performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
+        var memoryProvider = new Mock<IMemoryProvider>();
+        memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<IChatInferenceData>(), It.IsAny<List<MemoryItem>>()));
         
         _session = new ChatSession(
             _tunnelMock.Object,
@@ -77,7 +78,8 @@ public class ChatSessionTests
             null,
             null,
             chatRepository.Object,
-            chatMessageRepository.Object
+            chatMessageRepository.Object,
+            memoryProvider.Object
         );
 
         _tunnelMock

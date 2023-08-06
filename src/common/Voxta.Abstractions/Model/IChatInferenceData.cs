@@ -8,4 +8,5 @@ public interface IChatInferenceData
     string[]? Actions { get; }
 
     IReadOnlyList<ChatMessageData> GetMessages();
+    IReadOnlyList<MemoryItem> GetMemories();
 }

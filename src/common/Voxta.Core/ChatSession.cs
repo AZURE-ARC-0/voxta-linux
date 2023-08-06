@@ -30,6 +30,7 @@ public sealed partial class ChatSession : IChatSession
     private readonly ISpeechToTextService? _speechToText;
     private readonly IChatRepository _chatRepository;
     private readonly IChatMessageRepository _chatMessageRepository;
+    private readonly IMemoryProvider _memoryProvider;
     private readonly ISanitizer _sanitizer = new Sanitizer();
 
     public ChatSession(IUserConnectionTunnel tunnel,
@@ -44,7 +45,8 @@ public sealed partial class ChatSession : IChatSession
         IActionInferenceService? actionInference,
         ISpeechToTextService? speechToText,
         IChatRepository chatRepository,
-        IChatMessageRepository chatMessageRepository
+        IChatMessageRepository chatMessageRepository,
+        IMemoryProvider memoryProvider
         )
     {
         _tunnel = tunnel;
@@ -60,6 +62,7 @@ public sealed partial class ChatSession : IChatSession
         _speechToText = speechToText;
         _chatRepository = chatRepository;
         _chatMessageRepository = chatMessageRepository;
+        _memoryProvider = memoryProvider;
 
         if (speechToText != null)
         {

@@ -41,7 +41,7 @@ public class OpenAIPromptBuilderTests
                 .AddMessage("Joe", "Hello")
                 .AddMessage("Jane", "World")
                 .AddMessage("Joe", "Question")
-            , 4096);
+            , 0, 4096);
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
@@ -85,7 +85,7 @@ public class OpenAIPromptBuilderTests
                 .AddMessage("Joe", "Hello")
                 .AddMessage("Jane", "World")
                 .AddMessage("Joe", "Question")
-            , 4096);
+            , 0, 4096);
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""

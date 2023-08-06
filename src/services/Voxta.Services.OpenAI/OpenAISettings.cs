@@ -9,6 +9,7 @@ public class OpenAISettings : SettingsBase
 
     public required string ApiKey { get; set; }
     public string Model { get; set; } = DefaultModel;
+    public int MaxMemoryTokens { get; set; } = 400;
     public int MaxContextTokens { get; set; } = 1600;
     public OpenAIParameters? Parameters { get; set; }
 }

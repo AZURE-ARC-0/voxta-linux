@@ -40,7 +40,7 @@ public class GenericPromptBuilderTests
                 .AddMessage("Joe", "Hello")
                 .AddMessage("Jane", "World")
                 .AddMessage("Joe", "Question")
-            , 4096);
+            , 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
         Description of Jane: some-description
@@ -83,7 +83,7 @@ public class GenericPromptBuilderTests
                 .AddMessage("Joe", "Hello")
                 .AddMessage("Jane", "World")
                 .AddMessage("Joe", "Question")
-            , 4096);
+            , 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
         some-system-prompt

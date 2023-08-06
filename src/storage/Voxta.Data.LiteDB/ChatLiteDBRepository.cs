@@ -7,13 +7,15 @@ namespace Voxta.Data.LiteDB;
 
 public class ChatLiteDBRepository : IChatRepository
 {
-    private readonly IChatMessageRepository _chatMessageRepository;
     private readonly ILiteCollection<Chat> _chatsCollection;
+    private readonly ILiteCollection<ChatMessageData> _chatMessagesRepository;
+    private readonly ILiteCollection<MemoryBook> _memoryBooksRepository;
 
-    public ChatLiteDBRepository(ILiteDatabase db, IChatMessageRepository chatMessageRepository)
+    public ChatLiteDBRepository(ILiteDatabase db, ILiteCollection<MemoryBook> memoryBooksRepository)
     {
-        _chatMessageRepository = chatMessageRepository;
+        _memoryBooksRepository = memoryBooksRepository;
         _chatsCollection = db.GetCollection<Chat>();
+        _chatMessagesRepository = db.GetCollection<ChatMessageData>();
     }
     
     public Task<Chat[]> GetChatsListAsync(Guid charId, CancellationToken cancellationToken)
@@ -28,7 +30,7 @@ public class ChatLiteDBRepository : IChatRepository
         return Task.FromResult(result);
     }
     
-    public Task<Chat?> GetChatAsync(Guid id, CancellationToken cancellationToken)
+    public Task<Chat?> GetChatByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var chat = _chatsCollection.FindOne(x => x.Id == id);
         return Task.FromResult<Chat?>(chat);
@@ -40,9 +42,11 @@ public class ChatLiteDBRepository : IChatRepository
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Guid charId)
+    public Task DeleteChatAsync(Guid chatId)
     {
-        await _chatMessageRepository.DeleteChatMessages(charId);
-        _chatsCollection.Delete(charId);
+        _chatMessagesRepository.DeleteMany(x => x.ChatId == chatId);
+        _memoryBooksRepository.DeleteMany(x => x.ChatId == chatId);
+        _chatsCollection.Delete(chatId);
+        return Task.CompletedTask;
     }
 }

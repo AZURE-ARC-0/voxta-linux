@@ -11,29 +11,15 @@ public class ChatSessionData : IChatInferenceData
     public string[]? ThinkingSpeech { get; init; }
 
     public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();
-
     public List<ChatMessageData> Messages { get; } = new();
-    
+
     public string? AudioPath { get; init; }
+    
+    public IReadOnlyList<MemoryItem> GetMemories() => Memories.AsReadOnly();
+    public List<MemoryItem> Memories { get; init; } = new();
 
     public string GetMessagesAsString()
     {
         return string.Join("\n", Messages.Select(m => $"{m.User}: {m.Text}"));
-    }
-}
-
-public static class ChatSessionDataExtensions
-{
-    public static ChatMessageData AddMessage(this ChatSessionData chat, string user, TextData message)
-    {
-        var msg = ChatMessageData.FromGen(chat.Chat.Id, user, message);
-        chat.Messages.Add(msg);
-        return msg;
-    }
-    
-    public static ChatSessionData AddMessage(this ChatSessionData chat, string user, string message)
-    {
-        chat.Messages.Add(ChatMessageData.FromText(chat.Chat.Id, user, message));
-        return chat;
     }
 }

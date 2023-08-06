@@ -42,14 +42,14 @@ public class ChatsController : Controller
     [HttpPost("/chats/delete")]
     public async Task<IActionResult> Delete([FromForm] Guid chatId)
     {
-        await _chatRepository.DeleteAsync(chatId);
+        await _chatRepository.DeleteChatAsync(chatId);
         return RedirectToAction("Chats");
     }
     
     [HttpGet("/chats/{chatId}")]
     public async Task<IActionResult> Chat([FromRoute] Guid chatId, CancellationToken cancellationToken)
     {
-        var chat = await _chatRepository.GetChatAsync(chatId, cancellationToken);
+        var chat = await _chatRepository.GetChatByIdAsync(chatId, cancellationToken);
         if (chat == null) return NotFound();
         var character = await _characterRepository.GetCharacterAsync(chat.CharacterId, cancellationToken);
         if (character == null) return NotFound();

@@ -38,7 +38,7 @@ public sealed partial class UserConnection
 
         foreach (var c in await _chatRepository.GetChatsListAsync(newChatMessage.CharacterId, CancellationToken.None))
         {
-            await _chatRepository.DeleteAsync(c.Id);
+            await _chatRepository.DeleteChatAsync(c.Id);
             _logger.LogInformation("Deleted previous chat {ChatId}", c.Id);
         }
 
@@ -63,7 +63,7 @@ public sealed partial class UserConnection
         Chat? chat = null;
         if (startChatMessage.ChatId != null)
         {
-            chat = await _chatRepository.GetChatAsync(startChatMessage.ChatId.Value, cancellationToken);
+            chat = await _chatRepository.GetChatByIdAsync(startChatMessage.ChatId.Value, cancellationToken);
         }
 
         chat ??= await CreateNewChatAsync(character);
@@ -77,7 +77,7 @@ public sealed partial class UserConnection
     {
         await DisposeAndLockChatAsync(cancellationToken);
 
-        var chat = await _chatRepository.GetChatAsync(resumeChatMessage.ChatId, cancellationToken);
+        var chat = await _chatRepository.GetChatByIdAsync(resumeChatMessage.ChatId, cancellationToken);
         if (chat == null) throw new InvalidOperationException($"Chat {resumeChatMessage.ChatId} not found");
 
         var character = await _charactersRepository.GetCharacterAsync(chat.CharacterId, cancellationToken);

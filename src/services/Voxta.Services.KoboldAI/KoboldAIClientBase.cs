@@ -35,6 +35,7 @@ public class KoboldAIClientBase
     public string ServiceName => KoboldAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
+    protected int MaxMemoryTokens { get; private set; }
     protected int MaxContextTokens { get; private set; }
     
     private readonly HttpClient _httpClient;
@@ -61,6 +62,7 @@ public class KoboldAIClientBase
         
         _httpClient.BaseAddress = new Uri(uri);
         _parameters = settings.Parameters ?? new KoboldAIParameters();
+        MaxMemoryTokens = settings.MaxMemoryTokens;
         MaxContextTokens = settings.MaxContextTokens;
         return true;
     }

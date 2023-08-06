@@ -23,6 +23,7 @@ public class ChatSessionFactory
     private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
     private readonly IServiceFactory<ISpeechToTextService> _speechToTextServiceFactory;
     private readonly ITimeProvider _timeProvider;
+    private readonly IMemoryProvider _memoryProvider;
 
     public ChatSessionFactory(
         ILoggerFactory loggerFactory,
@@ -35,7 +36,9 @@ public class ChatSessionFactory
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
         IServiceFactory<IActionInferenceService> animationSelectionFactory,
         IServiceFactory<ISpeechToTextService> speechToTextServiceFactory,
-        ITimeProvider timeProvider)
+        ITimeProvider timeProvider,
+        IMemoryProvider memoryProvider
+    )
     {
         _loggerFactory = loggerFactory;
         _performanceMetrics = performanceMetrics;
@@ -48,6 +51,7 @@ public class ChatSessionFactory
         _animationSelectionFactory = animationSelectionFactory;
         _speechToTextServiceFactory = speechToTextServiceFactory;
         _timeProvider = timeProvider;
+        _memoryProvider = memoryProvider;
         _profileRepository = profileRepository;
     }
 
@@ -110,6 +114,8 @@ public class ChatSessionFactory
             chatData.Messages.AddRange(messages);
             // TODO: Optimize by pre-calculating tokens count
 
+            await _memoryProvider.Initialize(chat.CharacterId, chatData, cancellationToken);
+            
             var state = new ChatSessionState(_timeProvider);
 
             return new ChatSession(
@@ -125,7 +131,8 @@ public class ChatSessionFactory
                 actionInference,
                 speechToText,
                 _chatRepository,
-                _chatMessageRepository
+                _chatMessageRepository,
+                _memoryProvider
             );
         }
         catch (Exception exc)

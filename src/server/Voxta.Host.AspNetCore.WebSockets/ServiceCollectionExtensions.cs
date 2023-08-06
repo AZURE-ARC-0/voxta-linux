@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.WebSockets;
 using Voxta.Abstractions.Management;
 using Voxta.Abstractions.Services;
 using Voxta.Abstractions.System;
+using Voxta.Core;
 using Voxta.Host.AspNetCore.WebSockets;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Server.BackgroundServices;
@@ -24,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<DiagnosticsUtil>();
         services.AddSingleton<ILocalEncryptionProvider, DPAPIEncryptionProvider>();
         services.AddSingleton<IServiceObserver, StaticServiceObserver>();
+        services.AddTransient<IMemoryProvider, SimpleMemoryProvider>();
         
         services.AddSingleton<TemporaryFileCleanupService>();
         services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());

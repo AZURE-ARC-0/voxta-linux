@@ -30,6 +30,7 @@ public abstract class OpenAIClientBase
         Mapper = config.CreateMapper();
     }
 
+    protected int MaxMemoryTokens { get; private set; }
     protected int MaxContextTokens { get; private set; }
     
     private readonly ISettingsRepository _settingsRepository;
@@ -63,6 +64,7 @@ public abstract class OpenAIClientBase
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;
         _parameters = new OpenAIParameters();
+        MaxMemoryTokens = settings.MaxMemoryTokens;
         MaxContextTokens = settings.MaxContextTokens;
         return true;
     }

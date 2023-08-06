@@ -54,6 +54,8 @@ public partial class ChatSession
         {
             using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(queueCancellationToken, abortCancellationToken);
             var linkedCancellationToken = linkedCancellationSource.Token;
+            _memoryProvider.QueryMemoryFast(_chatSessionData, _chatSessionData.Memories);
+            linkedCancellationSource.Token.ThrowIfCancellationRequested();
             generated = await _textGen.GenerateReplyAsync(_chatSessionData, linkedCancellationToken);
         }
         catch (OperationCanceledException)

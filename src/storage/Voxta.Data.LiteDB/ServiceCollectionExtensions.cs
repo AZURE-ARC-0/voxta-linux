@@ -17,5 +17,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ICharacterRepository, CharacterLiteDBRepository>();
         services.AddSingleton<IChatRepository, ChatLiteDBRepository>();
         services.AddSingleton<IChatMessageRepository, ChatMessageLiteDBRepository>();
+        services.AddSingleton<IMemoryRepository, MemoryLiteDBRepository>();
     }
 }

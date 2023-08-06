@@ -37,6 +37,7 @@ public class NovelAIClientBase
     public string ServiceName => NovelAIConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
+    protected int MaxMemoryTokens { get; private set; }
     protected int MaxContextTokens { get; private set; }
     
     private readonly HttpClient _httpClient;
@@ -67,6 +68,7 @@ public class NovelAIClientBase
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _model = settings.Model;
         _parameters = settings.Parameters ?? NovelAIPresets.DefaultForModel(_model);
+        MaxMemoryTokens = settings.MaxMemoryTokens;
         MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
