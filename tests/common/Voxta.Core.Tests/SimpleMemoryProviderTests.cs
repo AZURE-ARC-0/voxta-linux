@@ -119,7 +119,7 @@ public class SimpleMemoryProviderTests
                         Id = Guid.Empty,
                         Weight = x.Weight,
                         Keywords = x.Keywords,
-                        Value = x.Value
+                        Text = x.Value
                     }
                 ).ToList()
             }
@@ -130,6 +130,6 @@ public class SimpleMemoryProviderTests
 
     private void AssertMemories(params string[] expected)
     {
-        Assert.That(_chatSessionData.Memories.Select(m => m.Value).ToArray(), Is.EqualTo(expected));
+        Assert.That(_chatSessionData.Memories.Select(m => m.Text).ToArray(), Is.EqualTo(expected));
     }
 }

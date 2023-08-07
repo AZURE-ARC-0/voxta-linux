@@ -18,29 +18,29 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptMinimal()
     {
-        var actual = _builder.BuildReplyPrompt(
-            new ChatSessionData
+        var chat = new ChatSessionData
+            {
+                UserName = "Joe",
+                Chat = new Chat
                 {
-                    UserName = "Joe",
-                    Chat = new Chat
-                    {
-                        Id = Guid.Empty,
-                        CharacterId = Guid.Empty,
-                    },
-                    Character = new()
-                    {
-                        Name = "Jane",
-                        Description = "some-description",
-                        Personality = "some-personality",
-                        Scenario = "some-scenario",
-                        FirstMessage = "some-first-message",
-                        Services = null!,
-                    }
+                    Id = Guid.Empty,
+                    CharacterId = Guid.Empty,
+                },
+                Character = new()
+                {
+                    Name = "Jane",
+                    Description = "some-description",
+                    Personality = "some-personality",
+                    Scenario = "some-scenario",
+                    FirstMessage = "some-first-message",
+                    Services = null!,
                 }
-                .AddMessage("Joe", "Hello")
-                .AddMessage("Jane", "World")
-                .AddMessage("Joe", "Question")
-            , 0, 4096);
+            }
+            .AddMessage("Joe", "Hello")
+            .AddMessage("Jane", "World")
+            .AddMessage("Joe", "Question");
+        
+        var actual = _builder.BuildReplyPrompt(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
         Description of Jane: some-description
@@ -56,34 +56,34 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptFull()
     {
-        var actual = _builder.BuildReplyPrompt(
-            new ChatSessionData
+        var chat = new ChatSessionData
+            {
+                UserName = "Joe",
+                Chat = new Chat
                 {
-                    UserName = "Joe",
-                    Chat = new Chat
-                    {
-                        Id = Guid.Empty,
-                        CharacterId = Guid.Empty,
-                    },
-                    Character = new()
-                    {
-                        Name = "Jane",
-                        Description = "some-description",
-                        Personality = "some-personality",
-                        Scenario = "some-scenario",
-                        FirstMessage = "some-first-message",
-                        SystemPrompt = "some-system-prompt",
-                        PostHistoryInstructions = "some-post-history-instructions",
-                        MessageExamples = "Joe: Request\nJane: Response",
-                        Services = null!,
-                    },
-                    Actions = new[] { "action1", "action2" },
-                    Context = "some-context",
-                }
-                .AddMessage("Joe", "Hello")
-                .AddMessage("Jane", "World")
-                .AddMessage("Joe", "Question")
-            , 0, 4096);
+                    Id = Guid.Empty,
+                    CharacterId = Guid.Empty,
+                },
+                Character = new()
+                {
+                    Name = "Jane",
+                    Description = "some-description",
+                    Personality = "some-personality",
+                    Scenario = "some-scenario",
+                    FirstMessage = "some-first-message",
+                    SystemPrompt = "some-system-prompt",
+                    PostHistoryInstructions = "some-post-history-instructions",
+                    MessageExamples = "Joe: Request\nJane: Response",
+                    Services = null!,
+                },
+                Actions = new[] { "action1", "action2" },
+                Context = "some-context",
+            }
+            .AddMessage("Joe", "Hello")
+            .AddMessage("Jane", "World")
+            .AddMessage("Joe", "Question");
+        
+        var actual = _builder.BuildReplyPrompt(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
         some-system-prompt
@@ -99,37 +99,79 @@ public class GenericPromptBuilderTests
         Jane: 
         """.ReplaceLineEndings("\n").TrimExcess()));
     }
+
+    [Test]
+    public void TestPromptMemory()
+    {
+        var chat = new ChatSessionData
+            {
+                UserName = "Joe",
+                Chat = new Chat
+                {
+                    Id = Guid.Empty,
+                    CharacterId = Guid.Empty,
+                },
+                Character = new()
+                {
+                    Name = "Jane",
+                    Description = "some-description",
+                    Personality = "some-personality",
+                    Scenario = "some-scenario",
+                    FirstMessage = "some-first-message",
+                    Services = null!,
+                }
+            }
+            .AddMessage("Joe", "Hello")
+            .AddMessage("Jane", "World")
+            .AddMessage("Joe", "Question");
+        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-1", Weight = 0 });
+        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-2", Weight = 0 });
+        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-3", Weight = 0 });
+        
+        var actual = _builder.BuildReplyPrompt(chat, 1024, 4096);
+
+        Assert.That(actual, Is.EqualTo("""
+           Description of Jane: some-description
+           Personality of Jane: some-personality
+           Circumstances and context of the dialogue: some-scenario
+           Joe: Hello
+           Jane: World
+           Joe: Question
+           Jane:
+           """.ReplaceLineEndings("\n").TrimExcess()));
+    }
     
     [Test]
     public void TestPromptActionInference()
     {
-        var actual = _builder.BuildActionInferencePrompt(
-            new ChatSessionData
+        var chatInferenceData = new ChatSessionData
+            {
+                UserName = "Joe",
+                Chat = new Chat
                 {
-                    UserName = "Joe",
-                    Chat = new Chat
-                    {
-                        Id = Guid.Empty,
-                        CharacterId = Guid.Empty,
-                    },
-                    Character = new()
-                    {
-                        Name = "Jane",
-                        Description = "some-description",
-                        Personality = "some-personality",
-                        Scenario = "some-scenario",
-                        FirstMessage = "some-first-message",
-                        SystemPrompt = "some-system-prompt",
-                        PostHistoryInstructions = "some-post-history-instructions",
-                        MessageExamples = "Joe: Request\nJane: Response",
-                        Services = null!,
-                    },
-                    Actions = new[] { "action1", "action2" },
-                    Context = "some-context",
-                }
-                .AddMessage("Joe", "Hello")
-                .AddMessage("Jane", "World")
-                .AddMessage("Joe", "Question")
+                    Id = Guid.Empty,
+                    CharacterId = Guid.Empty,
+                },
+                Character = new()
+                {
+                    Name = "Jane",
+                    Description = "some-description",
+                    Personality = "some-personality",
+                    Scenario = "some-scenario",
+                    FirstMessage = "some-first-message",
+                    SystemPrompt = "some-system-prompt",
+                    PostHistoryInstructions = "some-post-history-instructions",
+                    MessageExamples = "Joe: Request\nJane: Response",
+                    Services = null!,
+                },
+                Actions = new[] { "action1", "action2" },
+                Context = "some-context",
+            }
+            .AddMessage("Joe", "Hello")
+            .AddMessage("Jane", "World")
+            .AddMessage("Joe", "Question");
+        var actual = _builder.BuildActionInferencePrompt(
+            chatInferenceData
         );
 
         Assert.That(actual, Is.EqualTo("""

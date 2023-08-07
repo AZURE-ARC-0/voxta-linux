@@ -29,11 +29,10 @@ public class GenericPromptBuilder
         var sb = new StringBuilder();
         
         #warning Test and do the same for OpenAI
-        var memories = chat.GetMessages();
+        var memories = chat.GetMemories();
         var memoryTokens = 0;
-        for (var i = memories.Count - 1; i >= 0; i--)
+        foreach (var memory in memories)
         {
-            var memory = memories[i];
             #warning We should never count tokens here, nor below. Instead keep tokens in the data.
             var entryTokens = _tokenizer.CountTokens(memory.Text);
             memoryTokens += entryTokens + 1;
@@ -52,7 +51,7 @@ public class GenericPromptBuilder
             startAtMessage = i;
         }
         
-        if (chatMessages.Count > 4 && chatMessages.Count - startAtMessage <= 4)
+        if (chatMessages.Count - startAtMessage < Math.Max(chatMessages.Count, 4))
             throw new InvalidOperationException($"Reached {maxTokens} before writing at least two message rounds, which will result in incoherent conversations. Either increase max tokens or reduce memory tokens.");
         
         for (var i = startAtMessage; i < chatMessages.Count; i++)
