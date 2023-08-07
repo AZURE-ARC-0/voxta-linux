@@ -63,7 +63,7 @@ public class ChatSessionTests
         var performanceMetrics = new Mock<IPerformanceMetrics>();
         performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
         var memoryProvider = new Mock<IMemoryProvider>();
-        memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<IChatInferenceData>(), It.IsAny<List<MemoryItem>>()));
+        memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<ChatSessionData>(), It.IsAny<List<MemoryItem>>()));
         
         _session = new ChatSession(
             _tunnelMock.Object,
@@ -176,6 +176,7 @@ public class ChatSessionTests
         _tunnelMock.Setup(m => m.SendAsync(It.IsAny<ServerReplyMessage>(), It.IsAny<CancellationToken>())).Verifiable();
 
         _session.HandleClientMessage(new ClientSendMessage { Text = "Ping 1!" });
+        await Task.Delay(10);
         _session.HandleClientMessage(new ClientSendMessage { Text = "Ping 2!" });
 
         await AssertSession();

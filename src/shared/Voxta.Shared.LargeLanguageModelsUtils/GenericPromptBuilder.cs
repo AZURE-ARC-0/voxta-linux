@@ -49,10 +49,10 @@ public class GenericPromptBuilder
             var entry = $"{message.User}: {message.Text}\n";   
             var entryTokens = _tokenizer.CountTokens(entry);
             if (tokens + entryTokens >= maxTokens) break;
-            startAtMessage++;
+            startAtMessage = i;
         }
         
-        if (chatMessages.Count - startAtMessage <= 4)
+        if (chatMessages.Count > 4 && chatMessages.Count - startAtMessage <= 4)
             throw new InvalidOperationException($"Reached {maxTokens} before writing at least two message rounds, which will result in incoherent conversations. Either increase max tokens or reduce memory tokens.");
         
         for (var i = startAtMessage; i < chatMessages.Count; i++)
@@ -62,7 +62,8 @@ public class GenericPromptBuilder
             sb.Append(": ");
             sb.AppendLineLinux(message.Text);
         }
-        
+
+        sb.Insert(0, '\n');
         sb.Insert(0, systemPrompt);
 
         if (!string.IsNullOrEmpty(postHistoryPrompt))
