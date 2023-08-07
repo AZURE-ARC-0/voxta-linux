@@ -134,6 +134,10 @@ public class GenericPromptBuilderTests
            Description of Jane: some-description
            Personality of Jane: some-personality
            Circumstances and context of the dialogue: some-scenario
+           What Jane knows:
+           memory-1
+           memory-2
+           memory-3
            Joe: Hello
            Jane: World
            Joe: Question

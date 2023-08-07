@@ -11,10 +11,10 @@ public class CharacterLiteDBRepository : ICharacterRepository
     private readonly ILiteCollection<Character> _charactersCollection;
     private readonly ILiteCollection<MemoryBook> _memoryBooksRepository;
 
-    public CharacterLiteDBRepository(ILiteDatabase db, ILiteCollection<Chat> chatCollection, ILiteCollection<MemoryBook> memoryBooksRepository)
+    public CharacterLiteDBRepository(ILiteDatabase db)
     {
-        _chatCollection = chatCollection;
-        _memoryBooksRepository = memoryBooksRepository;
+        _chatCollection = db.GetCollection<Chat>();
+        _memoryBooksRepository = db.GetCollection<MemoryBook>();
         _charactersCollection = db.GetCollection<Character>();
     }
     

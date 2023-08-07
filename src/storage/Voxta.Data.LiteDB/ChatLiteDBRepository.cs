@@ -11,10 +11,10 @@ public class ChatLiteDBRepository : IChatRepository
     private readonly ILiteCollection<ChatMessageData> _chatMessagesRepository;
     private readonly ILiteCollection<MemoryBook> _memoryBooksRepository;
 
-    public ChatLiteDBRepository(ILiteDatabase db, ILiteCollection<MemoryBook> memoryBooksRepository)
+    public ChatLiteDBRepository(ILiteDatabase db)
     {
-        _memoryBooksRepository = memoryBooksRepository;
         _chatsCollection = db.GetCollection<Chat>();
+        _memoryBooksRepository = db.GetCollection<MemoryBook>();
         _chatMessagesRepository = db.GetCollection<ChatMessageData>();
     }
     

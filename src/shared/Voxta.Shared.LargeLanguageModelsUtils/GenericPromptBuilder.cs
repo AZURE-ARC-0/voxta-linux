@@ -24,22 +24,27 @@ public class GenericPromptBuilder
         var postHistoryPromptTokens = _tokenizer.CountTokens(postHistoryPrompt);
         var query = $"{chat.Character.Name}: ";
         var queryTokens = _tokenizer.CountTokens(query);
-        var tokens = systemPromptTokens + postHistoryPromptTokens + 1 + queryTokens;
+        var totalTokens = systemPromptTokens + postHistoryPromptTokens + 1 + queryTokens;
         
         var sb = new StringBuilder();
         
         #warning Test and do the same for OpenAI
-        var memories = chat.GetMemories();
         var memoryTokens = 0;
-        foreach (var memory in memories)
+        if (maxMemoryTokens > 0)
         {
-            #warning We should never count tokens here, nor below. Instead keep tokens in the data.
-            var entryTokens = _tokenizer.CountTokens(memory.Text);
-            memoryTokens += entryTokens + 1;
-            if (memoryTokens >= maxMemoryTokens) break;
-            sb.AppendLineLinux(memory.Text);
+            sb.AppendLineLinux($"What {chat.Character.Name} knows:");
+            var memories = chat.GetMemories();
+            foreach (var memory in memories)
+            {
+                #warning We should never count tokens here, nor below. Instead keep tokens in the data.
+                var entryTokens = _tokenizer.CountTokens(memory.Text);
+                memoryTokens += entryTokens + 1;
+                if (memoryTokens >= maxMemoryTokens) break;
+                sb.AppendLineLinux(memory.Text);
+            }
+            totalTokens += memoryTokens;
         }
-        
+
         var chatMessages = chat.GetMessages();
         var startAtMessage = 0;
         for (var i = chatMessages.Count - 1; i >= 0; i--)
@@ -47,12 +52,12 @@ public class GenericPromptBuilder
             var message = chatMessages[i];
             var entry = $"{message.User}: {message.Text}\n";   
             var entryTokens = _tokenizer.CountTokens(entry);
-            if (tokens + entryTokens >= maxTokens) break;
+            if (totalTokens + entryTokens >= maxTokens) break;
             startAtMessage = i;
         }
         
-        if (chatMessages.Count - startAtMessage < Math.Max(chatMessages.Count, 4))
-            throw new InvalidOperationException($"Reached {maxTokens} before writing at least two message rounds, which will result in incoherent conversations. Either increase max tokens or reduce memory tokens.");
+        if (chatMessages.Count - startAtMessage < Math.Min(chatMessages.Count, 4))
+            throw new InvalidOperationException($"Reached {maxTokens} before writing at least two message rounds, which will result in incoherent conversations. Either increase max tokens ({totalTokens} / {maxTokens}) and/or reduce memory tokens ({memoryTokens} / {maxMemoryTokens}).");
         
         for (var i = startAtMessage; i < chatMessages.Count; i++)
         {
