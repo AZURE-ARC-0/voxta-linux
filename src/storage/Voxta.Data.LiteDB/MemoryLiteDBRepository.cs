@@ -14,12 +14,23 @@ public class MemoryLiteDBRepository : IMemoryRepository
         _memoryBooksRepository = db.GetCollection<MemoryBook>();
     }
 
-    public Task<MemoryBook[]> GetScopeMemoryBooksAsync(Guid charId, CancellationToken cancellationToken)
+    public Task<MemoryBook[]> GetScopeMemoryBooksAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return Task.FromResult(_memoryBooksRepository
             .Query()
-            .Where(x => x.CharacterId == charId)
+            .Where(x => x.CharacterId == characterId)
             .ToArray()
         );
+    }
+
+    public Task<MemoryBook> GetCharacterBookAsync(Guid characterId)
+    {
+        return Task.FromResult(_memoryBooksRepository.FindOne(x => x.CharacterId == characterId));
+    }
+
+    public Task SaveBookAsync(MemoryBook book)
+    {
+        _memoryBooksRepository.Upsert(book);
+        return Task.CompletedTask;
     }
 }

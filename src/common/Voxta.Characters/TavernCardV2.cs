@@ -67,4 +67,43 @@ public class TavernCardData
 [Serializable]
 public class CharacterBook
 {
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+    
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+    
+    [JsonPropertyName("extensions")]
+    public Dictionary<string, dynamic> Extensions { get; set; } = new();
+    
+    [JsonPropertyName("entries")]
+    public CharacterBookEntry[] Entries { get; set; } = Array.Empty<CharacterBookEntry>();
+}
+
+[Serializable]
+public class CharacterBookEntry
+{
+    [JsonPropertyName("keys")]
+    public required string[] Keys { get; set; }
+    
+    [JsonPropertyName("name")]
+    public required string Content { get; set; }
+    
+    [JsonPropertyName("extensions")]
+    public Dictionary<string, dynamic> Extensions { get; set; } = new();
+    
+    [JsonPropertyName("enabled")]
+    public bool Enabled { get; set; } = true;
+
+    [JsonPropertyName("insertion_order")]
+    public int InsertionOrder { get; set; } = 0;
+    
+    [JsonPropertyName("case_sensitive")]
+    public bool CaseSensitive { get; set; } = false;
+    
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("priority")]
+    public int Priority { get; set; } = 0;
 }

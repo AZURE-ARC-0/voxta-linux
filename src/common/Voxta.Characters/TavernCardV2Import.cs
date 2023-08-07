@@ -45,12 +45,12 @@ public static class TavernCardV2Import
     public static Character ConvertCardToCharacter(TavernCardData data)
     {
         var prerequisites = GetPrerequisites(data);
-        var charIdValue =  GetString(data, "voxta/charId", Crypto.CreateCryptographicallySecureGuid().ToString());
-        var cultureValue = GetString(data, "voxta/culture", "en-US");
-        var textGenValue = GetString(data, "voxta/textgen/service", "");
-        var ttsValue = GetString(data, "voxta/tts/service", "");
-        var voiceValue = GetString(data, "voxta/tts/voice", "");
-        var thinkingSpeechValue = GetString(data, "voxta/options/enable_thinking_speech", "true") == "true";
+        var charIdValue =  GetString(data.Extensions, "voxta/charId", Crypto.CreateCryptographicallySecureGuid().ToString());
+        var cultureValue = GetString(data.Extensions, "voxta/culture", "en-US");
+        var textGenValue = GetString(data.Extensions, "voxta/textgen/service", "");
+        var ttsValue = GetString(data.Extensions, "voxta/tts/service", "");
+        var voiceValue = GetString(data.Extensions, "voxta/tts/voice", "");
+        var thinkingSpeechValue = GetString(data.Extensions, "voxta/options/enable_thinking_speech", "true") == "true";
         
         return new Character
         {
@@ -86,9 +86,9 @@ public static class TavernCardV2Import
         };
     }
 
-    private static string GetString(TavernCardData data, string key, string defaultValue)
+    private static string GetString(IReadOnlyDictionary<string, dynamic> data, string key, string defaultValue)
     {
-        if (!data.Extensions.TryGetValue(key, out var value))
+        if (!data.TryGetValue(key, out var value))
             return defaultValue;
         var valueString = value.ToString();
         if (string.IsNullOrEmpty(valueString)) return defaultValue;
@@ -107,5 +107,25 @@ public static class TavernCardV2Import
         if (string.IsNullOrEmpty(prerequisitesString))
             return null;
         return prerequisitesString.Split(',');
+    }
+
+    public static MemoryBook? ConvertBook(Guid characterId, CharacterBook? data)
+    {
+        if (data == null) return null;
+        var bookIdValue =  GetString(data.Extensions, "voxta/bookId", Crypto.CreateCryptographicallySecureGuid().ToString());
+        return new MemoryBook
+        {
+            Id = Guid.Parse(bookIdValue),
+            CharacterId = characterId,
+            Name = data.Name,
+            Description = data.Description,
+            Items = data.Entries.Select(x => new MemoryItem
+            {
+                Id = Guid.NewGuid(),
+                Keywords = x.Keys,
+                Text = x.Content,
+                Weight = x.Priority,
+            }).ToList()
+        };
     }
 }

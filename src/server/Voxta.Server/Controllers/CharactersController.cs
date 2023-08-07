@@ -24,12 +24,14 @@ namespace Voxta.Server.Controllers;
 public class CharactersController : Controller
 {
     private readonly ICharacterRepository _characterRepository;
+    private readonly IMemoryRepository _memoryRepository;
     private readonly IProfileRepository _profileRepository;
 
-    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository)
+    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository)
     {
         _characterRepository = characterRepository;
         _profileRepository = profileRepository;
+        _memoryRepository = memoryRepository;
     }
     
     [HttpGet("/characters")]
@@ -205,9 +207,13 @@ public class CharactersController : Controller
         if (card?.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
 
         var character = TavernCardV2Import.ConvertCardToCharacter(card.Data);
-        character.Id = Crypto.CreateCryptographicallySecureGuid();
-
         await _characterRepository.SaveCharacterAsync(character);
+
+        var book = TavernCardV2Import.ConvertBook(character.Id, card.Data.CharacterBook);
+        if (book != null)
+        {
+            await _memoryRepository.SaveBookAsync(book);
+        }
         
         return RedirectToAction("Character", new { charId = character.Id });
     }
@@ -219,7 +225,8 @@ public class CharactersController : Controller
     {
         var character = await _characterRepository.GetCharacterAsync(charId, cancellationToken);
         if (character == null) return NotFound();
-        var card = TavernCardV2Export.ConvertCharacterToCard(character);
+        var book = await _memoryRepository.GetCharacterBookAsync(character.Id);
+        var card = TavernCardV2Export.ConvertCharacterToCard(character, book);
         // Serialize card to string and download as a json file attachment
         var json = JsonSerializer.Serialize(card, new JsonSerializerOptions
         {

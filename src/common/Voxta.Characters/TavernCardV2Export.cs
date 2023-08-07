@@ -4,7 +4,7 @@ namespace Voxta.Characters;
 
 public static class TavernCardV2Export
 {
-    public static TavernCardV2 ConvertCharacterToCard(Character character)
+    public static TavernCardV2 ConvertCharacterToCard(Character character, MemoryBook book)
     {
         var card = new TavernCardV2
         {
@@ -25,15 +25,36 @@ public static class TavernCardV2Export
                 Tags = character.Tags,
                 Extensions = new Dictionary<string, dynamic>
                 {
+                    { "voxta/charId", character.Id.ToString() },
                     { "voxta/prerequisites", character.Prerequisites != null ? string.Join(",", character.Prerequisites) : "" },
                     { "voxta/culture", character.Culture },
                     { "voxta/textgen/service", character.Services.TextGen.Service ?? "" },
                     { "voxta/tts/service", character.Services.SpeechGen.Service ?? "" },
                     { "voxta/tts/voice", character.Services.SpeechGen.Voice ?? "" },
                     { "voxta/options/enable_thinking_speech", character.Options?.EnableThinkingSpeech ?? true ? "true" : "false" },
-                }
+                },
+                CharacterBook = ConvertBook(book)
             }
         };
         return card;
+    }
+
+    private static CharacterBook? ConvertBook(MemoryBook? book)
+    {
+        if(book == null) return null;
+        return new CharacterBook
+        {
+            Name = book.Name,
+            Description = book.Description,
+            Extensions = new Dictionary<string, dynamic>
+            {
+                { "voxta/bookId", book.Id.ToString() },
+            },
+            Entries = book.Items.Select(x => new CharacterBookEntry
+            {
+                Keys = x.Keywords,
+                Content = x.Text,
+            }).ToArray()
+        };
     }
 }
