@@ -43,7 +43,7 @@ namespace Voxta.Server.BackgroundServices
         {
             if (_isRunning) return;
             if (_filesToDelete.IsEmpty) return;
-            var nextCheck = _filesToDelete.MinBy(f => f.Value);
+            var nextCheck = _filesToDelete.ToArray().MinBy(f => f.Value);
             var dueTime = nextCheck.Value - DateTime.Now;
             if (dueTime.Ticks < 0) dueTime = TimeSpan.Zero;
             _timer.Change(dueTime, TimeSpan.FromMilliseconds(-1));
@@ -53,7 +53,7 @@ namespace Voxta.Server.BackgroundServices
         {
             _isRunning = true;
 
-            foreach (var file in _filesToDelete.OrderBy(f => f.Value).ToList())
+            foreach (var file in _filesToDelete.ToArray().OrderBy(f => f.Value))
             {
                 if (DateTime.Now < file.Value) break;
                 DeleteFile(file.Key);
