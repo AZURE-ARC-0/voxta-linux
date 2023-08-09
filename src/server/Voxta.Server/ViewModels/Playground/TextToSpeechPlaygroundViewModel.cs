@@ -12,7 +12,8 @@ public class TextGenPlaygroundViewModel
     public string? Service { get; set; }
     public required List<OptionViewModel> Characters { get; init; } = new();
     public string? Character { get; init; }
-    public string Prompt { get; set; } = "";
+    public string? Template { get; set; }
+    public string? Prompt { get; set; }
     public string? Response { get; set; }
     public string? Culture { get; init; }
 }

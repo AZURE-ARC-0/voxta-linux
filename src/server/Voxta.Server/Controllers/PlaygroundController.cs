@@ -45,9 +45,10 @@ public class PlaygroundController : Controller
     {
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
         if (profile == null) return RedirectToAction("Settings", "Settings");
-        var vm = await GetTextGenViewModel(profile, characterId, service, cancellationToken);
+        var character = characterId != null ? await _characterRepository.GetCharacterAsync(characterId.Value, cancellationToken) : null;
+        var vm = await GetTextGenViewModel(profile, service, cancellationToken, character);
         if (!string.IsNullOrEmpty(observerKey))
-            vm.Prompt = _serviceObserver.GetRecords().FirstOrDefault(x => x.Key == observerKey)?.Value ?? "";
+            vm.Prompt = _serviceObserver.GetRecord(observerKey)?.Value ?? "";
         return View(vm);
     }
 
@@ -57,30 +58,56 @@ public class PlaygroundController : Controller
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
         if (profile == null) return RedirectToAction("Settings", "Settings");
         if (string.IsNullOrEmpty(data.Character)) return BadRequest("Character is required");
-        var vm = await GetTextGenViewModel(profile, Guid.Parse(data.Character), data.Service, cancellationToken);
-        vm.Prompt = data.Prompt;
+        var characterId = Guid.Parse(data.Character);
+        var character = await _characterRepository.GetCharacterAsync(characterId, cancellationToken);
+        if (character == null) throw new NullReferenceException("Could not find character");
+        var vm = await GetTextGenViewModel(profile, data.Service, cancellationToken, character);
+        vm.Prompt = data.Prompt ?? "";
         
         if (!ModelState.IsValid)
             return View(vm);
         ModelState.Clear();
         
         var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
-        var result = await textGen.GenerateAsync(data.Prompt, cancellationToken);
+        string result;
+        if (data.Template == "Reply")
+        {
+            result = await textGen.GenerateReplyAsync(new ChatSessionData
+            {
+                Chat = null!,
+                UserName = profile.Name,
+                Character = character,
+                Messages =
+                {
+                    ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
+                    ChatMessageData.FromText(Guid.Empty, profile.Name, "Hi! This is a test conversation. Can you tell me something in character?")
+                }
+            }, cancellationToken);
+            vm.Prompt = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenPrompt)?.Value ?? "";
+        }
+        else if (data.Template == "ActionInference")
+        {
+            throw new NotImplementedException("This template was not implemented");
+        }
+        else
+        {
+            result = await textGen.GenerateAsync(vm.Prompt, cancellationToken);
+        }
+
         vm.Response = result;
-        var service = _serviceObserver.GetRecords().FirstOrDefault(r => r.Key == ServiceObserverKeys.TextGenService)?.Value;
+        var service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value;
         if (service != null)
             vm.Service = service;
         return View(vm);
     }
 
-    private async Task<TextGenPlaygroundViewModel> GetTextGenViewModel(ProfileSettings profile, Guid? characterId, string? service, CancellationToken cancellationToken)
+    private async Task<TextGenPlaygroundViewModel> GetTextGenViewModel(ProfileSettings profile, string? service, CancellationToken cancellationToken, Character? character)
     {
         var services = new[] { new OptionViewModel("", "Automatic") }
             .Concat(profile.TextGen.Services.Select(OptionViewModel.Create))
             .ToList();
 
         var characters = await _characterRepository.GetCharactersListAsync(cancellationToken);
-        var character = characterId != null ? await _characterRepository.GetCharacterAsync(characterId.Value, cancellationToken) : null;
 
         return new TextGenPlaygroundViewModel
         {

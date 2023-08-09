@@ -327,7 +327,7 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
-    [HttpGet("/settings/windowsspeech")]
+    [HttpGet("/settings/ffmpeg")]
     public async Task<IActionResult> FFmpegSettings(CancellationToken cancellationToken)
     {
         #if(!WINDOWS)
@@ -342,7 +342,7 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
-    [HttpPost("/settings/windowsspeech")]
+    [HttpPost("/settings/ffmpeg")]
     public async Task<IActionResult> PostFFmpegSettings([FromForm] FFmpegSettingsViewModel value)
     {
         if (!ModelState.IsValid)

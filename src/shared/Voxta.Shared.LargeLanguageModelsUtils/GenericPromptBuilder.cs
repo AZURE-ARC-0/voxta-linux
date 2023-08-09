@@ -32,17 +32,21 @@ public class GenericPromptBuilder
         var memoryTokens = 0;
         if (maxMemoryTokens > 0)
         {
-            sb.AppendLineLinux($"What {chat.Character.Name} knows:");
             var memories = chat.GetMemories();
-            foreach (var memory in memories)
+            if (memories.Count > 0)
             {
-                #warning We should never count tokens here, nor below. Instead keep tokens in the data.
-                var entryTokens = _tokenizer.CountTokens(memory.Text);
-                memoryTokens += entryTokens + 1;
-                if (memoryTokens >= maxMemoryTokens) break;
-                sb.AppendLineLinux(memory.Text);
+                sb.AppendLineLinux($"What {chat.Character.Name} knows:");
+                foreach (var memory in memories)
+                {
+                    #warning We should never count tokens here, nor below. Instead keep tokens in the data.
+                    var entryTokens = _tokenizer.CountTokens(memory.Text);
+                    memoryTokens += entryTokens + 1;
+                    if (memoryTokens >= maxMemoryTokens) break;
+                    sb.AppendLineLinux(memory.Text);
+                }
+
+                totalTokens += memoryTokens;
             }
-            totalTokens += memoryTokens;
         }
 
         var chatMessages = chat.GetMessages();

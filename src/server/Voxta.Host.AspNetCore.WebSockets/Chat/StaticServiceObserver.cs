@@ -16,6 +16,11 @@ public class StaticServiceObserver : IServiceObserver
         };
     }
 
+    public ServiceObserverRecord? GetRecord(string key)
+    {
+        return _records.TryGetValue(key, out var record) ? record : null;
+    }
+
     public void Clear()
     {
         _records.Clear();

@@ -19,6 +19,15 @@
                 <label asp-for="Service">Service</label>
                 <select asp-for="Service" asp-items="@(new SelectList(Model.Services, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
             </div>
+            <div class="mb-2">
+                <label asp-for="Template">Template</label>
+                <select asp-for="Template" class="form-control">
+                    <option>None</option>
+                    <option value="Reply">Reply</option>
+                    <option value="ActionInference">Action Inference</option>
+                </select>
+                <div class="form-text">Selecting a template will overwrite your current prompt</div>
+            </div>
             <div class="mb-3">
                 <label asp-for="Prompt">Prompt:</label>
                 <textarea rows="10" asp-for="Prompt" class="form-control"></textarea>

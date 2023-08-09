@@ -13,7 +13,7 @@ public class LiteDBMigrations
     
     public Task MigrateAsync()
     {
-        if (_db.UserVersion == 3)
+        if (_db.UserVersion < 3)
         {
             Migrate_3_To_4();
             _db.UserVersion = 4;
@@ -31,10 +31,10 @@ public class LiteDBMigrations
             if (id.Type == BsonType.String)
             {
                 characters.Delete(id);
-                id = new BsonValue(Guid.Parse(id.AsString));
-                character["_id"] = id;
-                if (!characters.FindById(id))
-                    characters.Insert(character);
+                // id = new BsonValue(Guid.Parse(id.AsString));
+                // character["_id"] = id;
+                // if (!characters.FindById(id))
+                //     characters.Insert(character);
             }
         }
     }

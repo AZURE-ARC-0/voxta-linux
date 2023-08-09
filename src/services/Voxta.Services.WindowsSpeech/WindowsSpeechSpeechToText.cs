@@ -9,6 +9,8 @@ namespace Voxta.Services.WindowsSpeech;
 
 public class WindowsSpeechSpeechToText : ISpeechToTextService
 {
+    private ManualResetEventSlim _recognitionStopped = new ManualResetEventSlim(true);
+
     public string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features { get; } = Array.Empty<string>();
     
@@ -66,12 +68,19 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
             _speaking = false;
         };
 
+        _recognizer.RecognizeCompleted += (_, _) =>
+        {
+            _recognitionStopped.Set();
+        };
+
         _recognizer.RecognizeAsync(RecognizeMode.Multiple);
         return true;
     }
 
     public void StartMicrophoneTranscription()
     {
+        _recognitionStopped.Wait(); // Wait until the recognizer is stopped
+        _recognitionStopped.Reset(); // Reset the event
         _recognizer?.RecognizeAsync(RecognizeMode.Multiple);
     }
     
@@ -83,8 +92,10 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     public void Dispose()
     {
         _recognizer?.RecognizeAsyncStop();
+        _recognitionStopped.Wait();
         _recognizer?.Dispose();
         _recognizer = null;
+        _recognitionStopped.Dispose();
     }
 }
 #endif

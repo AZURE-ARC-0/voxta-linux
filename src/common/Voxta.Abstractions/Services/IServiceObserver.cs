@@ -4,6 +4,7 @@ public interface IServiceObserver
 {
     public void Record(string key, string value);
     public void Clear();
+    public ServiceObserverRecord? GetRecord(string key);
     public IEnumerable<ServiceObserverRecord> GetRecords();
 }
 
