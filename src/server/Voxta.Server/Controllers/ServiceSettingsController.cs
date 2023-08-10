@@ -325,7 +325,7 @@ public class ServiceSettingsController : Controller
     {
         var settings = await _settingsRepository.GetAsync<TextGenerationInferenceSettings>(cancellationToken) ?? new TextGenerationInferenceSettings
         {
-            Uri = "http://127.0.0.1:5000",
+            Uri = "http://127.0.0.1:8080",
         };
         var vm = new TextGenerationInferenceSettingsViewModel
         {
