@@ -6,23 +6,47 @@ namespace Voxta.Services.OpenAI;
 
 public class OpenAIPromptBuilder
 {
-    private readonly ITokenizer? _tokenizer;
+    private readonly ITokenizer _tokenizer;
 
-    public OpenAIPromptBuilder(ITokenizer? tokenizer)
+    public OpenAIPromptBuilder(ITokenizer tokenizer)
     {
         _tokenizer = tokenizer;
     }
 
     public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxMemoryTokens, int maxTokens)
     {
-        #warning Implement memory
-        
         var systemPrompt = MakeSystemPrompt(chat.Character);
-        var systemPromptTokens = _tokenizer?.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count ?? 0;
+        var systemPromptTokens = _tokenizer.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count;
         var postHistoryPrompt = MakePostHistoryPrompt(chat.Character, chat.Context, chat.Actions);
-        var postHistoryPromptTokens = _tokenizer?.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count ?? 0;
+        var postHistoryPromptTokens = _tokenizer.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count;
 
         var totalTokens = systemPromptTokens + postHistoryPromptTokens;
+
+        var sb = new StringBuilder();
+        var memoryTokens = 0;
+        if (maxMemoryTokens > 0)
+        {
+            var memories = chat.GetMemories();
+            if (memories.Count > 0)
+            {
+                sb.AppendLineLinux($"What {chat.Character.Name} knows:");
+                foreach (var memory in memories)
+                {
+                    #warning We should never count tokens here, nor below. Instead keep tokens in the data.
+                    var entryTokens = _tokenizer.Encode(memory.Text, OpenAISpecialTokens.Keys).Count;
+                    memoryTokens += entryTokens + 1;
+                    if (memoryTokens >= maxMemoryTokens) break;
+                    sb.AppendLineLinux(memory.Text);
+                }
+
+                totalTokens += memoryTokens;
+            }
+        }
+
+        if (memoryTokens > 0)
+        {
+            systemPrompt += "\n" + sb.ToString().TrimEnd('\n');
+        }
         
         var messages = new List<OpenAIMessage> { new() { role = "system", content = systemPrompt } };
         var chatMessages = chat.GetMessages();

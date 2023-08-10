@@ -28,7 +28,6 @@ public class GenericPromptBuilder
         
         var sb = new StringBuilder();
         
-        #warning Test and do the same for OpenAI
         var memoryTokens = 0;
         if (maxMemoryTokens > 0)
         {
