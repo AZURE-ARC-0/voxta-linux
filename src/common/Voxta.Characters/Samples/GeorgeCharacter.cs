@@ -49,4 +49,22 @@ public static class GeorgeCharacter
             EnableThinkingSpeech = true
         }
     };
+
+    public static MemoryBook CreateBook() => new MemoryBook
+    {
+        Id = Guid.Parse("54e7b64e-638c-4be5-aa16-746c5e4b3b8c"),
+        CharacterId = Create().Id,
+        Name = "George's Memory Book",
+        Description = "Memories of George",
+        Items = new List<MemoryItem>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Keywords = new[] { "robot", "artificial" },
+                Text = "{{char}} is proud to be an AI, but he doesn't like to be called a robot.",
+                Weight = 0,
+            }
+        }
+    };
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
@@ -9,23 +10,34 @@ namespace Voxta.Core;
 public class SimpleMemoryProvider : IMemoryProvider
 {
     private static readonly Regex WordsRegex = new(@"[a-zA-Z]{2,}", RegexOptions.Compiled);
-    
+
+    private readonly IProfileRepository _profileRepository;
     private readonly IMemoryRepository _memoryRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly List<MemoryItem> _memories = new();
 
-    public SimpleMemoryProvider(IMemoryRepository memoryRepository, IPerformanceMetrics performanceMetrics)
+    public SimpleMemoryProvider(IProfileRepository profileRepository, IMemoryRepository memoryRepository, IPerformanceMetrics performanceMetrics)
     {
+        _profileRepository = profileRepository;
         _memoryRepository = memoryRepository;
         _performanceMetrics = performanceMetrics;
     }
 
-    public async Task Initialize(Guid characterId, ChatSessionData chatSessionData, CancellationToken cancellationToken)
+    public async Task Initialize(Guid characterId, ChatSessionData chat, CancellationToken cancellationToken)
     {
         var books = await _memoryRepository.GetScopeMemoryBooksAsync(characterId, cancellationToken);
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? throw new NullReferenceException("Profile not set");
+        var culture = CultureInfo.GetCultureInfoByIetfLanguageTag(chat.Character.Culture);
+        var processor = new ChatTextProcessor(profile, chat.Character.Name);
         foreach (var book in books)
         {
-            _memories.AddRange(book.Items);
+            _memories.AddRange(book.Items.Select(x => new MemoryItem
+            {
+                Id = x.Id,
+                Keywords = x.Keywords,
+                Text = processor.ProcessText(x.Text, culture),
+                Weight = x.Weight,
+            }));
         }
     }
     

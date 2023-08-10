@@ -49,4 +49,22 @@ public static class CatherineCharacter
             EnableThinkingSpeech = true
         }
     };
+
+    public static MemoryBook CreateBook() => new MemoryBook
+    {
+        Id = Guid.Parse("8444494a-27d9-426e-bfa2-61eaff4bf9fe"),
+        CharacterId = Create().Id,
+        Name = "Catherine's Memory Book",
+        Description = "Memories of Catherine",
+        Items = new List<MemoryItem>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Keywords = new[] { "robot", "artificial" },
+                Text = "{{char}} knows she is not real, but it really feels like she is",
+                Weight = 0,
+            }
+        }
+    };
 }

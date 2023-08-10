@@ -13,15 +13,17 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
 {
     private readonly LiteDBMigrations _migrations;
     private readonly ICharacterRepository _charactersRepository;
+    private readonly IMemoryRepository _memoryRepository;
     private readonly IProfileRepository _profileRepository;
     private readonly ISettingsRepository _settingsRepository;
 
-    public AutoRequestServicesStartupFilter(LiteDBMigrations migrations, ICharacterRepository charactersRepository, IProfileRepository profileRepository, ISettingsRepository settingsRepository)
+    public AutoRequestServicesStartupFilter(LiteDBMigrations migrations, ICharacterRepository charactersRepository, IProfileRepository profileRepository, ISettingsRepository settingsRepository, IMemoryRepository memoryRepository)
     {
         _migrations = migrations;
         _charactersRepository = charactersRepository;
         _profileRepository = profileRepository;
         _settingsRepository = settingsRepository;
+        _memoryRepository = memoryRepository;
     }
     
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
@@ -33,7 +35,10 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
             
             // Default characters
             await _charactersRepository.SaveCharacterAsync(CatherineCharacter.Create());
+            await _memoryRepository.SaveBookAsync(CatherineCharacter.CreateBook());
+            
             await _charactersRepository.SaveCharacterAsync(GeorgeCharacter.Create());
+            await _memoryRepository.SaveBookAsync(GeorgeCharacter.CreateBook());
 
             // Default profile
             var defaultProfile = ProfileUtils.CreateDefaultProfile();
