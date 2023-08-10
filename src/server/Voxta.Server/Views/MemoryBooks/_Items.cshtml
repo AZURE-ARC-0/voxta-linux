@@ -1,0 +1,24 @@
+﻿@model List<Voxta.Server.ViewModels.MemoryBooks.MemoryItemViewModel>
+
+@for (var i = 0; i < Model.Count; i++)
+{
+    <div class="mb-3">
+        <input type="hidden" name="Items[@i].Id" value="@Model[i].Id" />
+        <div class="row align-items-center">
+            <div class="col-9">
+                <label class="form-label">Keywords</label>
+                <input name="Items[@i].Keywords" value="@string.Join(',', Model[i].Keywords)" class="form-control" />
+            </div>
+            <div class="col-3 text-end">
+                <button type="button" class="btn btn-danger remove-item" data-id="@Model[i].Id">Remove</button>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col">
+                <label class="form-label">Text</label>
+                <input name="Items[@i].Text" class="form-control" value="@Model[i].Text"/>
+            </div>
+        </div>
+    </div>
+    <hr/>
+}

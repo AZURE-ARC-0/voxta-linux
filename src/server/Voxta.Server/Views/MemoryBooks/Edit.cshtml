@@ -1,0 +1,74 @@
+﻿@model Voxta.Server.ViewModels.MemoryBooks.MemoryBookViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = Model.Name ?? "Memory Book";
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container py-3">
+    <h1>@(Model.Name ?? "Memory Book")</h1>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Memory Book Info</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Name">Name</label>
+                    <input asp-for="Name" class="form-control"/>
+                    <div class="form-text">Not used by the AI.</div>
+                </div>
+                <div>
+                    <label asp-for="Description">Description</label>
+                    <input asp-for="Description" class="form-control"/>
+                    <div class="form-text">Not used by the AI.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>Memory Book Info</h2>
+            </div>
+            <div class="card-body">
+                <div id="items-container">
+                    @await Html.PartialAsync("_Items", Model.Items)
+                </div>
+                <button type="button" id="add-item" class="btn btn-secondary me-2">Add Item</button>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+
+        <div class="text-danger mt-3">
+            @Html.ValidationSummary(false)
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        var bookId = '@Model.Id';
+
+        $('#add-item').click(function() {
+            $.post(`/characters/${bookId}/memory/add`, function(data) {
+                $('#items-container').html(data);
+            });
+        });
+
+        $(document).on('click', '.remove-item', function() {
+            var itemId = $(this).data('id');
+            $.post(`/characters/${bookId}/memory/items/${itemId}/remove`, function(data) {
+                $('#items-container').html(data);
+            });
+        });
+
+        // Reorder logic (you could use a library like Sortable.js)
+    });
+</script>
