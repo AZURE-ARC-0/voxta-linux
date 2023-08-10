@@ -5,6 +5,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Abstractions.System;
+using Voxta.Services.AzureSpeechService.Transcribers;
 
 namespace Voxta.Services.AzureSpeechService;
 
@@ -17,7 +18,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     private readonly ISettingsRepository _settingsRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly ILogger<AzureSpeechServiceSpeechToText> _logger;
-    private SpeechRecognizer? _recognizer;
+    private IAzureSpeechTranscriber? _transcriber;
     private PushAudioInputStream? _pushStream;
 
     public event EventHandler? SpeechRecognitionStarted;
@@ -64,39 +65,29 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         
         _pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1));
         var audioInput = AudioConfig.FromStreamInput(_pushStream);
-        _recognizer = new SpeechRecognizer(config, audioInput);
+        _transcriber = new AzureSpeechRecognizer(config, audioInput, _logger);
 
-        _recognizer.Recognizing += (_, e) =>
-        {
-            if (e.Result.Reason != ResultReason.RecognizingSpeech) return;
+        _transcriber.Partial += (_, e) =>
+        {            
             _logger.LogDebug("Speech recognizing");
             if (!_recordingService.Speaking)
             {
                 _recordingService.Speaking = true;
                 SpeechRecognitionStarted?.Invoke(this, EventArgs.Empty);
             }
-            SpeechRecognitionPartial?.Invoke(this, e.Result.Text);
+            SpeechRecognitionPartial?.Invoke(this, e);
         };
 
-        _recognizer.Recognized += (_, e) =>
+        _transcriber.Finished += (_, e) =>
         {
-            if (e.Result.Reason != ResultReason.RecognizedSpeech) return;
             _logger.LogDebug("Speech recognized");
             _recordingService.Speaking = false;
-            if (!string.IsNullOrEmpty(e.Result.Text))
-                SpeechRecognitionFinished?.Invoke(this, e.Result.Text);
+            if (!string.IsNullOrEmpty(e))
+                SpeechRecognitionFinished?.Invoke(this, e);
         };
 
-        _recognizer.Canceled += (_, e) => {
+        _transcriber.Canceled += (_, e) => {
             _recordingService.Speaking = false;
-            if (e.Reason == CancellationReason.Error)
-                _logger.LogError("Error in Azure Speech Service: {ErrorCode} {ErrorDetails}", e.ErrorCode, e.ErrorDetails);
-            else
-                _logger.LogDebug("Session canceled: {Reason}", e.Reason);
-        };
-
-        _recognizer.SessionStopped += (_, _) => {
-            _logger.LogDebug("Session stopped event");
         };
         
         _recordingService.DataAvailable += (_, e) =>
@@ -104,7 +95,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
             _pushStream?.Write(e.Buffer, e.BytesRecorded);
         };
         
-        await _recognizer.StartContinuousRecognitionAsync();
+        await _transcriber.StartContinuousRecognitionAsync();
         return true;
     }
 
@@ -121,9 +112,10 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     public void Dispose()
     {
         _recordingService.StopRecording();
-        _recognizer?.StopContinuousRecognitionAsync().Wait();
-        _recognizer?.Dispose();
-        _recognizer = null;
+        #warning Use AsyncDisposable
+        _transcriber?.StopContinuousRecognitionAsync().Wait();
+        _transcriber?.Dispose();
+        _transcriber = null;
         _pushStream?.Close();
         _pushStream?.Dispose();
         _pushStream = null;
