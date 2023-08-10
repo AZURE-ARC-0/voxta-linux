@@ -1,4 +1,5 @@
 ﻿#if(WINDOWS)
+using System.Globalization;
 using System.Speech.Recognition;
 using Microsoft.Extensions.Logging;
 using Voxta.Abstractions.Model;
@@ -40,7 +41,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
         if (dry) return true;
         
-        _recognizer = new SpeechRecognitionEngine();
+        _recognizer = new SpeechRecognitionEngine(CultureInfo.GetCultureInfoByIetfLanguageTag(culture));
         var grammar = new DictationGrammar();
         _recognizer.LoadGrammar(grammar);
         _recognizer.SetInputToDefaultAudioDevice();
