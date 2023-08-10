@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Voxta.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace Voxta.Core;
@@ -19,38 +18,33 @@ public partial class ChatSession
 
         try
         {
-            var lower = clientSendMessage.Text.ToLower();
             switch (_chatSessionState.State)
             {
                 case ChatSessionStates.Live:
-                    if (lower.Contains("go offline"))
-                        await EnterOfflineMode(queueCancellationToken);
-                    else if (lower.Contains("analysis mode"))
-                        await EnterDiagnosticsMode(queueCancellationToken);
+                    if (clientSendMessage.Text.Contains("go offline", StringComparison.InvariantCultureIgnoreCase))
+                        await EnterPauseMode(queueCancellationToken);
+                    else if (clientSendMessage.Text.Contains("analysis mode", StringComparison.InvariantCultureIgnoreCase))
+                        await EnterAnalysisMode(queueCancellationToken);
                     else
                         await GenerateReplyAsync(clientSendMessage, abortCancellationToken, queueCancellationToken);
                     break;
                 case ChatSessionStates.Paused:
-                    if (lower.Contains("go online"))
-                        await EnterOnlineMode(queueCancellationToken);
-                    else if (lower.Contains("analysis mode"))
-                        await EnterDiagnosticsMode(queueCancellationToken);
+                    if (clientSendMessage.Text.Contains("go online", StringComparison.InvariantCultureIgnoreCase))
+                        await EnterLiveMode(queueCancellationToken);
                     else
                         // TODO: Workaround because the client does not know we are offline and waits for the reply
-                        await SendReusableReplyWithSpeechAsync(".", queueCancellationToken);
+                        await SendReusableReplyWithSpeechAsync("I'm back online.", queueCancellationToken);
                     break;
-                case ChatSessionStates.Diagnostics:
-                    if (lower.Contains("go online"))
-                        await EnterOnlineMode(queueCancellationToken);
-                    else if (lower.Contains("go offline"))
-                        await EnterOfflineMode(queueCancellationToken);
-                    else if (lower.StartsWith("repeat") && lower.Length > 7)
-                        await SendReplyWithSpeechAsync(clientSendMessage.Text[7..], $"diag_{Guid.NewGuid()}", false, queueCancellationToken);
+                case ChatSessionStates.Analysis:
+                    if (clientSendMessage.Text.Contains("go online", StringComparison.InvariantCultureIgnoreCase))
+                        await EnterLiveMode(queueCancellationToken);
+                    else if (clientSendMessage.Text.Contains("go offline", StringComparison.InvariantCultureIgnoreCase))
+                        await EnterPauseMode(queueCancellationToken);
                     else
-                        await SendReusableReplyWithSpeechAsync("Unknown command.", queueCancellationToken);
+                        await HandleAnalysisModeAsync(clientSendMessage, queueCancellationToken);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new NotSupportedException($"Unknown state: {_chatSessionState.State}");
             }
         }
         finally
@@ -59,27 +53,24 @@ public partial class ChatSession
         }
     }
 
-    private async Task EnterDiagnosticsMode(CancellationToken queueCancellationToken)
+    private async Task EnterAnalysisMode(CancellationToken queueCancellationToken)
     {
-        _chatSessionState.State = ChatSessionStates.Diagnostics;
-        var sb = new StringBuilder();
-        sb.AppendLineLinux("Diagnostics for character " + _chatSessionData.Character.Name);
-        sb.AppendLineLinux("Tex Generation: " + _textGen.ServiceName);
-        sb.AppendLineLinux("Text To Speech: " + _speechGenerator.ServiceName + " with voice " + _speechGenerator.Voice);
-        sb.AppendLineLinux("Action Inference: " + (_actionInference?.ServiceName ?? "None"));
-        sb.AppendLineLinux("Speech To Text: " + (_speechToText?.ServiceName ?? "None"));
-        await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, queueCancellationToken);
+        _chatSessionState.State = ChatSessionStates.Analysis;
+        _speechToText?.StartMicrophoneTranscription();
+        await SendReplyWithSpeechAsync("Entering analysis mode.", $"analysis_{Guid.NewGuid()}", false, queueCancellationToken);
     }
 
-    private async Task EnterOnlineMode(CancellationToken queueCancellationToken)
+    private async Task EnterLiveMode(CancellationToken queueCancellationToken)
     {
         _chatSessionState.State = ChatSessionStates.Live;
-        await SendReusableReplyWithSpeechAsync("I'm now online!", queueCancellationToken);
+        _speechToText?.StartMicrophoneTranscription();
+        await SendReusableReplyWithSpeechAsync("Back online.", queueCancellationToken);
     }
 
-    private async Task EnterOfflineMode(CancellationToken queueCancellationToken)
+    private async Task EnterPauseMode(CancellationToken queueCancellationToken)
     {
         _chatSessionState.State = ChatSessionStates.Paused;
+        _speechToText?.StopMicrophoneTranscription();
         await SendReusableReplyWithSpeechAsync("Going offline.", queueCancellationToken);
     }
 }

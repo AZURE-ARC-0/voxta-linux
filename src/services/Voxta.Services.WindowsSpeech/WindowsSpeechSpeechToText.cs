@@ -9,7 +9,7 @@ namespace Voxta.Services.WindowsSpeech;
 
 public class WindowsSpeechSpeechToText : ISpeechToTextService
 {
-    private readonly ManualResetEventSlim _recognitionStopped = new ManualResetEventSlim(true);
+    private static readonly ManualResetEventSlim RecognitionStopped = new(true);
 
     public string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features { get; } = Array.Empty<string>();
@@ -18,6 +18,8 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     private readonly ILogger<WindowsSpeechSpeechToText> _logger;
     private SpeechRecognitionEngine ? _recognizer;
     private bool _speaking;
+    private bool _activated;
+    private bool _cancelling;
     private bool _disposed;
 
     public event EventHandler? SpeechRecognitionStarted;
@@ -42,7 +44,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         var grammar = new DictationGrammar();
         _recognizer.LoadGrammar(grammar);
         _recognizer.SetInputToDefaultAudioDevice();
-
+        
         _recognizer.SpeechDetected += (_, _) =>
         {
             _logger.LogDebug("Speech detected");
@@ -71,34 +73,42 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
 
         _recognizer.RecognizeCompleted += (_, _) =>
         {
-            _recognitionStopped.Set();
+            RecognitionStopped.Set();
         };
 
         _recognizer.RecognizeAsync(RecognizeMode.Multiple);
+        _activated = true;
         return true;
     }
 
     public void StartMicrophoneTranscription()
     {
-        _recognitionStopped.Wait(); // Wait until the recognizer is stopped
-        _recognitionStopped.Reset(); // Reset the event
+        if (_activated) return;
+        RecognitionStopped.Wait(); // Wait until the recognizer is stopped
+        RecognitionStopped.Reset(); // Reset the event
         _recognizer?.RecognizeAsync(RecognizeMode.Multiple);
+        _activated = true;
     }
     
     public void StopMicrophoneTranscription()
     {
-        _recognizer?.RecognizeAsyncStop();
+        if(!_activated) return;
+        _recognizer?.RecognizeAsyncCancel();
+        _activated = false;
     }
     
     public void Dispose()
     {
         if(_disposed) return;
         _disposed = true;
-        _recognizer?.RecognizeAsyncStop();
-        _recognitionStopped.Wait();
+        if (_activated)
+        {
+            _recognizer?.RecognizeAsyncCancel();
+            _activated = false;
+        }
+        RecognitionStopped.Wait();
         _recognizer?.Dispose();
         _recognizer = null;
-        _recognitionStopped.Dispose();
     }
 }
 #endif

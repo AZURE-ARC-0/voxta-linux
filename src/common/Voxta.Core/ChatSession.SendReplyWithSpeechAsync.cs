@@ -10,7 +10,7 @@ public partial class ChatSession
         var speechId = Crypto.CreateSha1Hash($"{_chatSessionData.Character.Services.SpeechGen.Voice ?? "NULL"}::{text}");
         return SendReplyWithSpeechAsync(text, speechId, true, cancellationToken);
     }
-    
+
     private async Task SendReplyWithSpeechAsync(string text, string speechId, bool reusable, CancellationToken cancellationToken)
     {
         var speechTask = Task.Run(() => _speechGenerator.CreateSpeechAsync(text, speechId, reusable, cancellationToken), cancellationToken);

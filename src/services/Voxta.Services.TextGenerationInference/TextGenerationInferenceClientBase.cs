@@ -27,7 +27,7 @@ public class TextGenerationInferenceClientBase
     {
         var config = new MapperConfiguration(cfg =>
         {
-            cfg.CreateMap<TextGenerationInferenceParameters, TextGenerationInferenceRequestBody>();
+            cfg.CreateMap<TextGenerationInferenceParameters, TextGenerationInferenceParametersBody>();
         });
         Mapper = config.CreateMapper();
     }
@@ -74,17 +74,19 @@ public class TextGenerationInferenceClientBase
 
     protected TextGenerationInferenceRequestBody BuildRequestBody(string prompt, string[] stoppingStrings)
     {
-        var body = Mapper.Map<TextGenerationInferenceRequestBody>(_parameters);
-        body.Prompt = prompt;
-        body.StopSequence = stoppingStrings;
-        // TODO: We want to add logit bias here to avoid [, ( and OOC from being generated.
-        return body;
+        var parameters = Mapper.Map<TextGenerationInferenceParametersBody>(_parameters);
+        parameters.Stop = stoppingStrings;
+        return new TextGenerationInferenceRequestBody
+        {
+            Parameters = parameters,
+            Inputs = prompt,
+        };
     }
 
     protected async Task<string> SendCompletionRequest(TextGenerationInferenceRequestBody body, CancellationToken cancellationToken)
     {
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/generate_stream");
         request.Content = bodyContent;
         request.ConfigureEvenStream();
         using var response = await _httpClient.SendAsync(request, cancellationToken);
@@ -101,11 +103,23 @@ public class TextGenerationInferenceClientBase
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private class TextGenEventData : IEventStreamData
     {
-        public required string token { get; init; }
-        public bool final { get; init; }
-        public int ptr { get; init; }
-        public string? error { get; init; }
-        public string GetToken() => token;
+        public required TextGenEventDataToken token { get; init; }
+        public string? generated_text { get; init; }
+        public string? details { get; init; }
+        public string GetToken() => token.GetToken();
+    }
+    
+    [Serializable]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    [SuppressMessage("ReSharper", "IdentifierTypo")]
+    private class TextGenEventDataToken : IEventStreamData
+    {
+        public int id { get; init; }
+        public required string text { get; init; }
+        public double logprob { get; init; }
+        public bool special { get; init; }
+        public string GetToken() => text;
     }
 
     public void Dispose()

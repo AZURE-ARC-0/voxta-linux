@@ -26,11 +26,7 @@ public class Sanitizer : ISanitizer
 
         var lastPunctuationIndex = result.LastIndexOfAny(_punctuation);
     
-        if (lastPunctuationIndex == -1)
-        {
-            result += ".";
-        }
-        else if (lastPunctuationIndex != result.Length - 1)
+        if (lastPunctuationIndex != -1 && lastPunctuationIndex != result.Length - 1)
         {
             result = result[..(lastPunctuationIndex + 1)];
         }

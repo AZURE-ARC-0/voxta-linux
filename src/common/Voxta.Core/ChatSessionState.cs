@@ -92,5 +92,5 @@ public enum ChatSessionStates
 {
     Live,
     Paused,
-    Diagnostics,
+    Analysis,
 }

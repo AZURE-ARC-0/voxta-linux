@@ -26,7 +26,15 @@ public static class HttpClientExtensions
             var line = await reader.ReadLineAsync(cancellationToken);
             if (line == null) break;
             if (!line.StartsWith("data:")) continue;
-            var json = JsonSerializer.Deserialize<TDataMessage>(line[5..]);
+            TDataMessage? json;
+            try
+            {
+                json = JsonSerializer.Deserialize<TDataMessage>(line[5..]);
+            }
+            catch (JsonException exc)
+            {
+                throw new JsonException("Failed to deserialize:\n" + line[5..], exc);
+            }
             if (json == null) break;
             var token = json.GetToken();
             sb.Append(token);

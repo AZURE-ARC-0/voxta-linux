@@ -20,22 +20,42 @@ public class TextGenerationInferenceParameters
     public double TypicalP { get; init; } = 0.95;
     
     [JsonPropertyName("top_p")]
-    public double TopP { get; init; } = 0.95;
+    public double TopP { get; init; } = 0.9;
     
     [JsonPropertyName("top_k")]
     public double TopK { get; init; } = 10;
+    
+    [JsonPropertyName("do_sample")]
+    public bool DoSample { get; init; } = true;
+}
+
+[Serializable]
+[SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
+public class TextGenerationInferenceParametersBody : TextGenerationInferenceParameters
+{
+    [JsonPropertyName("details")]
+    public bool Details { get; init; } = false;
+    
+    [JsonPropertyName("decoder_input_details")]
+    public bool DecoderInputDetails { get; init; } = false;
+    
+    [JsonPropertyName("watermark")]
+    public bool Watermark { get; init; } = false;
+    
+    [JsonPropertyName("stop")]
+    public string[]? Stop { get; set; }
+    
+    [JsonPropertyName("seed")]
+    public double? Seed { get; init; }
 }
 
 [Serializable]
 [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
 public class TextGenerationInferenceRequestBody : TextGenerationInferenceParameters
 {
-    [JsonPropertyName("watermark")]
-    public bool Watermark { get; init; } = false;
-    
-    [JsonPropertyName("stop_sequences")]
-    public string[]? StopSequence { get; set; }
+    [JsonPropertyName("parameters")]
+    public required TextGenerationInferenceParametersBody Parameters { get; init; }
 
-    [JsonPropertyName("prompt")]
-    public string? Prompt { get; set; }
+    [JsonPropertyName("inputs")]
+    public required string Inputs { get; set; }
 }
