@@ -11,6 +11,7 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.Mocks;
 using Voxta.Services.NovelAI.Presets;
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
@@ -33,16 +34,49 @@ public class ServiceSettingsController : Controller
         _encryptionProvider = encryptionProvider;
     }
     
+    [HttpGet("/settings/mocks")]
+    public async Task<IActionResult> MockSettings(CancellationToken cancellationToken)
+    {
+        var settings = await _settingsRepository.GetAsync<MockSettings>(cancellationToken) ?? new MockSettings();
+        return View(settings);
+    }
+    
+    [HttpPost("/settings/mocks")]
+    public async Task<IActionResult> PostMockSettings([FromForm] MockSettings value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("MockSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new MockSettings
+        {
+            Enabled = value.Enabled,
+        });
+        
+        return RedirectToAction("Settings", "Settings");
+    }
+
+    [HttpPost("/settings/mocks/reset")]
+    public async Task<IActionResult> ResetMockSettings()
+    {
+        var current = await _settingsRepository.GetAsync<MockSettings>();
+        if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+
+        return RedirectToAction("MockSettings");
+    }
+    
     [HttpGet("/settings/azurespeechservice")]
     public async Task<IActionResult> AzureSpeechServiceSettings(CancellationToken cancellationToken)
     {
-        var azurespeechservice = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken) ?? new AzureSpeechServiceSettings
+        var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken) ?? new AzureSpeechServiceSettings
         {
             SubscriptionKey = "",
             Region = "",
         };
-        if (!string.IsNullOrEmpty(azurespeechservice.SubscriptionKey)) azurespeechservice.SubscriptionKey = _encryptionProvider.Decrypt(azurespeechservice.SubscriptionKey);  
-        return View(azurespeechservice);
+        settings.SubscriptionKey = _encryptionProvider.SafeDecrypt(settings.SubscriptionKey);  
+        return View(settings);
     }
     
     [HttpPost("/settings/azurespeechservice")]
@@ -126,18 +160,18 @@ public class ServiceSettingsController : Controller
     [HttpGet("/settings/elevenlabs")]
     public async Task<IActionResult> ElevenLabsSettings(CancellationToken cancellationToken)
     {
-        var elevenlabs = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken) ?? new ElevenLabsSettings
+        var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken) ?? new ElevenLabsSettings
         {
             ApiKey = "",
         };
         var vm = new ElevenLabsSettingsViewModel
         {
-            Enabled = elevenlabs.Enabled,
-            Model = elevenlabs.Model,
-            ApiKey = !string.IsNullOrEmpty(elevenlabs.ApiKey) ? _encryptionProvider.Decrypt(elevenlabs.ApiKey) : "",
-            Parameters = JsonSerializer.Serialize(elevenlabs.Parameters ?? new ElevenLabsParameters()),
-            ThinkingSpeech = string.Join('\n', elevenlabs.ThinkingSpeech),
-            UseDefaults = elevenlabs.Parameters == null,
+            Enabled = settings.Enabled,
+            Model = settings.Model,
+            ApiKey = _encryptionProvider.SafeDecrypt(settings.ApiKey),
+            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new ElevenLabsParameters()),
+            ThinkingSpeech = string.Join('\n', settings.ThinkingSpeech),
+            UseDefaults = settings.Parameters == null,
         };   
         return View(vm);
     }
@@ -296,7 +330,7 @@ public class ServiceSettingsController : Controller
         {
             Enabled = settings.Enabled,
             Model = settings.Model,
-            Token = !string.IsNullOrEmpty(settings.Token) ? _encryptionProvider.Decrypt(settings.Token) : "",
+            Token = _encryptionProvider.SafeDecrypt(settings.Token),
             MaxContextTokens = settings.MaxContextTokens,
             MaxMemoryTokens = settings.MaxMemoryTokens,
             Parameters = JsonSerializer.Serialize(settings.Parameters ?? NovelAIPresets.DefaultForModel(settings.Model)),
@@ -350,11 +384,11 @@ public class ServiceSettingsController : Controller
         {
             ApiKey = "",
         };
-        if (!string.IsNullOrEmpty(settings.ApiKey)) settings.ApiKey = _encryptionProvider.Decrypt(settings.ApiKey);  
+        
         var vm = new OpenAISettingsViewModel
         {
             Enabled = settings.Enabled,
-            ApiKey = settings.ApiKey,
+            ApiKey = _encryptionProvider.SafeDecrypt(settings.ApiKey),
             Model = settings.Model,
             MaxContextTokens = settings.MaxContextTokens,
             MaxMemoryTokens = settings.MaxMemoryTokens,
