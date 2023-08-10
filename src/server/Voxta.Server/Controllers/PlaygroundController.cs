@@ -5,6 +5,7 @@ using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Voxta.Server.ViewModels;
 using Voxta.Server.ViewModels.Playground;
+using Voxta.Services.OpenAI;
 
 namespace Voxta.Server.Controllers;
 
@@ -53,7 +54,11 @@ public class PlaygroundController : Controller
     }
 
     [HttpPost("/playground/text-gen")]
-    public async Task<ActionResult> TextGen([FromForm] TextGenPlaygroundViewModel data, [FromServices] IServiceFactory<ITextGenService> textGenFactory, CancellationToken cancellationToken)
+    public async Task<ActionResult> TextGen(
+        [FromForm] TextGenPlaygroundViewModel data,
+        [FromServices] IServiceFactory<ITextGenService> textGenFactory,
+        [FromServices] IServiceFactory<IActionInferenceService> actionInferenceServiceFactory,
+        CancellationToken cancellationToken)
     {
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
         if (profile == null) return RedirectToAction("Settings", "Settings");
@@ -68,10 +73,10 @@ public class PlaygroundController : Controller
             return View(vm);
         ModelState.Clear();
         
-        var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
         string result;
         if (data.Template == "Reply")
         {
+            var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
             result = await textGen.GenerateReplyAsync(new ChatSessionData
             {
                 Chat = null!,
@@ -83,15 +88,38 @@ public class PlaygroundController : Controller
                     ChatMessageData.FromText(Guid.Empty, profile.Name, "Hi! This is a test conversation. Can you tell me something in character?")
                 }
             }, cancellationToken);
+            vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
             vm.Prompt = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenPrompt)?.Value ?? "";
         }
         else if (data.Template == "ActionInference")
         {
-            throw new NotImplementedException("This template was not implemented");
+            var svc = await actionInferenceServiceFactory.CreateBestMatchAsync(profile.ActionInference,
+                vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+            result = await svc.SelectActionAsync(new ChatSessionData
+            {
+                Chat = null!,
+                UserName = profile.Name,
+                Character = character,
+                Actions = new[] { "wave", "sit_down", "stand_up", "break_chair" },
+                Messages =
+                {
+                    ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
+                    ChatMessageData.FromText(Guid.Empty, profile.Name, "Can you please sit down?")
+                }
+            }, cancellationToken);
+            vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferenceService)?.Value ?? data.Service ?? "";
+            vm.Prompt = vm.Service == OpenAIConstants.ServiceName
+                ? "System:\n" +
+                  _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[system]")?.Value +
+                  "\n\nUser:\n" +
+                  _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[user]")?.Value
+                : _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferencePrompt)?.Value ?? "";
         }
         else
         {
+            var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
             result = await textGen.GenerateAsync(vm.Prompt, cancellationToken);
+            vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
         }
 
         vm.Response = result;
