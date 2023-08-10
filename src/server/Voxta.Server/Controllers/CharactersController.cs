@@ -25,13 +25,15 @@ public class CharactersController : Controller
 {
     private readonly ICharacterRepository _characterRepository;
     private readonly IMemoryRepository _memoryRepository;
+    private readonly ILogger<CharactersController> _logger;
     private readonly IProfileRepository _profileRepository;
 
-    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository)
+    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository, ILogger<CharactersController> logger)
     {
         _characterRepository = characterRepository;
         _profileRepository = profileRepository;
         _memoryRepository = memoryRepository;
+        _logger = logger;
     }
     
     [HttpGet("/characters")]
@@ -140,18 +142,22 @@ public class CharactersController : Controller
 
         if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
         {
-            var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
-            var ttsService = await ttsServiceFactory.CreateBestMatchAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
-            voices = await ttsService.GetVoicesAsync(cancellationToken);
+            try
+            {
+                var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
+                var ttsService = await ttsServiceFactory.CreateBestMatchAsync(profile.TextToSpeech, character.Services.SpeechGen.Service,
+                    character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
+                voices = await ttsService.GetVoicesAsync(cancellationToken);
+            }
+            catch (Exception exc)
+            {
+                _logger.LogError(exc, "Failed to get voices");
+                voices = VoiceInfo.DefaultVoices;
+            }
         }
         else
         {
-            voices = new VoiceInfo[]
-            {
-                new() { Id = "", Label = "Unspecified" },
-                new() { Id = SpecialVoices.Male, Label = "Male" },
-                new() { Id = SpecialVoices.Female, Label = "Female" },
-            };
+            voices = VoiceInfo.DefaultVoices;
         }
 
         var vm = new CharacterViewModelWithOptions

@@ -122,12 +122,7 @@ public class SpeechController : ControllerBase
     {
         if (service == "None")
         {
-            return new VoiceInfo[]
-            {
-                new() { Id = "", Label = "Unspecified" },
-                new() { Id = SpecialVoices.Male, Label = "Male" },
-                new() { Id = SpecialVoices.Female, Label = "Female" },
-            };
+            return VoiceInfo.DefaultVoices;
         }
         // NOTE: There is no voices list implementation that require any prerequisites.
         try
