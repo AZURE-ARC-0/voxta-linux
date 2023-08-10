@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Repositories;
 using Voxta.Server.ViewModels;
+using Voxta.Server.ViewModels.Chats;
 
 namespace Voxta.Server.Controllers;
 

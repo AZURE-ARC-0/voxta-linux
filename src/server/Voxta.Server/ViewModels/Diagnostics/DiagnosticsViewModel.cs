@@ -1,6 +1,6 @@
 ﻿using Voxta.Abstractions.Services;
 
-namespace Voxta.Server.ViewModels;
+namespace Voxta.Server.ViewModels.Diagnostics;
 
 public class DiagnosticsViewModel
 {

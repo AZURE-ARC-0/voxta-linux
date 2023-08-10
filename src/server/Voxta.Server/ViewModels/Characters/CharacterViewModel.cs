@@ -1,6 +1,6 @@
 ﻿using Voxta.Abstractions.Model;
 
-namespace Voxta.Server.ViewModels;
+namespace Voxta.Server.ViewModels.Characters;
 
 public class CharacterViewModel
 {

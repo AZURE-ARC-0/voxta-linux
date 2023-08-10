@@ -4,6 +4,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Server.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
+using Voxta.Server.ViewModels.Settings;
 #if(WINDOWS)
 #endif
 

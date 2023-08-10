@@ -13,6 +13,7 @@ using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Server.ViewModels.Characters;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.TextGenerationInference;
 #if(WINDOWS)

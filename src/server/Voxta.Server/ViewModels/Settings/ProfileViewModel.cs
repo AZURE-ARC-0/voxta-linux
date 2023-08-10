@@ -1,4 +1,4 @@
-﻿namespace Voxta.Server.ViewModels;
+﻿namespace Voxta.Server.ViewModels.Settings;
 
 public class ProfileViewModel
 {

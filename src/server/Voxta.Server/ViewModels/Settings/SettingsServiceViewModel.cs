@@ -1,6 +1,6 @@
 ﻿using Voxta.Host.AspNetCore.WebSockets.Utils;
 
-namespace Voxta.Server.ViewModels;
+namespace Voxta.Server.ViewModels.Settings;
 
 public class SettingsServiceViewModel
 {

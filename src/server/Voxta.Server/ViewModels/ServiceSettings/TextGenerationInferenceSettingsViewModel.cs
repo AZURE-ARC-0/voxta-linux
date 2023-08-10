@@ -1,6 +1,6 @@
-﻿namespace Voxta.Server.ViewModels;
+﻿namespace Voxta.Server.ViewModels.ServiceSettings;
 
-public class KoboldAISettingsViewModel : ServiceSettingsViewModel
+public class TextGenerationInferenceSettingsViewModel : ServiceSettingsViewModel
 {
     public required string Uri { get; set; }
     public required int MaxContextTokens { get; init; }

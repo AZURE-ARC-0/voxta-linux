@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Repositories;
-using Voxta.Server.ViewModels;
+using Voxta.Server.ViewModels.ServiceSettings;
 using Voxta.Services.KoboldAI;
 using Voxta.Services.ElevenLabs;
 using Voxta.Services.NovelAI;
@@ -13,6 +13,7 @@ using Voxta.Services.Vosk;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.Mocks;
 using Voxta.Services.NovelAI.Presets;
+using Voxta.Services.TextGenerationInference;
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
 #endif
@@ -317,6 +318,60 @@ public class ServiceSettingsController : Controller
             await _settingsRepository.DeleteAsync(current);
         
         return RedirectToAction("KoboldAISettings");
+    }
+
+    [HttpGet("/settings/textgenerationinference")]
+    public async Task<IActionResult> TextGenerationInferenceSettings(CancellationToken cancellationToken)
+    {
+        var settings = await _settingsRepository.GetAsync<TextGenerationInferenceSettings>(cancellationToken) ?? new TextGenerationInferenceSettings
+        {
+            Uri = "http://127.0.0.1:5000",
+        };
+        var vm = new TextGenerationInferenceSettingsViewModel
+        {
+            Enabled = settings.Enabled,
+            Uri = settings.Uri,
+            MaxContextTokens = settings.MaxContextTokens,
+            MaxMemoryTokens = settings.MaxMemoryTokens,
+            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new TextGenerationInferenceParameters()),
+            UseDefaults = settings.Parameters == null,
+        };
+        return View(vm);
+    }
+    
+    [HttpPost("/settings/textgenerationinference")]
+    public async Task<IActionResult> PostTextGenerationInferenceSettings([FromForm] TextGenerationInferenceSettingsViewModel value)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("TextGenerationInferenceSettings", value);
+        }
+
+        await _settingsRepository.SaveAsync(new TextGenerationInferenceSettings
+        {
+            Enabled = value.Enabled,
+            Uri = value.Uri.TrimCopyPasteArtefacts(),
+            MaxContextTokens = value.MaxContextTokens,
+            MaxMemoryTokens = value.MaxMemoryTokens,
+            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<TextGenerationInferenceParameters>(value.Parameters) ?? new TextGenerationInferenceParameters(),
+        });
+        
+        return RedirectToAction("Settings", "Settings");
+    }
+    
+    [HttpPost("/settings/textgenerationinference/reset")]
+    public async Task<IActionResult> ResetTextGenerationInferenceSettings()
+    {
+        var current = await _settingsRepository.GetAsync<TextGenerationInferenceSettings>();
+        if (!string.IsNullOrEmpty(current?.Uri))
+            await _settingsRepository.SaveAsync(new TextGenerationInferenceSettings
+            {
+                Uri = current.Uri,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        
+        return RedirectToAction("TextGenerationInferenceSettings");
     }
     
     [HttpGet("/settings/novelai")]

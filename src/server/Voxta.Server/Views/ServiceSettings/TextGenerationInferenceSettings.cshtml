@@ -1,32 +1,31 @@
-﻿@model Voxta.Server.ViewModels.ServiceSettings.NovelAISettingsViewModel
+﻿@model Voxta.Server.ViewModels.ServiceSettings.TextGenerationInferenceSettingsViewModel
 @{
     Layout = "_Layout";
-    ViewBag.Title = "Settings - NovelAI";
+    ViewBag.Title = "Settings - Text Generation Inference";
 }
 
 @section head {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.css" integrity="sha512-brXxIa/fpMfluh8HUWyrNssKy/H0oRzA0HhmipgfVwbXPamMUTZn1jEsvoGGwJYCRpSx4idujdul4vFwWgPROA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/styles/jsoneditor-dark.css" asp-append-version="true" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor-minimalist.js" integrity="sha512-H0X4c02ARmY4wCJ2CzRFfKWnB6ZrLFqsD9JYB3ljTOCtjSJB63Nfq/GUumYW3NMQRX3R2B8BH56DAywT4tQv6w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="~/scripts/components/json-editor.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor-minimalist.js" integrity="sha512-H0X4c02ARmY4wCJ2CzRFfKWnB6ZrLFqsD9JYB3ljTOCtjSJB63Nfq/GUumYW3NMQRX3R2B8BH56DAywT4tQv6w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>  <script src="~/scripts/components/json-editor.js" asp-append-version="true"></script>
 }
 
 <div class="container">
-    <h1>NovelAI Settings</h1>
+    <h1>Text Generation Inference Settings</h1>
     
     <div class="card mb-3">
         <div class="card-header">
             <h2>Help</h2>
         </div>
         <div class="card-body">
-            <p>Login to <a href="https://novelai.net/" target="_blank">novelai.net</a>, go to settings, Account, and Get Persistent API Token.</p>
+            <p>Install <a href="https://github.com/huggingface/text-generation-inference" target="_blank">github.com/huggingface/text-generation-inference</a> and make sure it runs correctly.</p>
         </div>
     </div>
     
-    <form id="configureForm" method="post" asp-action="PostNovelAISettings">
+    <form id="configureForm" method="post" asp-action="PostTextGenerationWebUISettings">
         <div class="card mb-3">
             <div class="card-header">
-                <h2>General Configuration</h2>
+                <h2>Configuration</h2>
             </div>
             <div class="card-body">
                 <div class="form-check mb-3">
@@ -36,25 +35,10 @@
                     <span asp-validation-for="Enabled" class="text-danger"></span>
                 </div>
                 <div>
-                    <label asp-for="Token">API Key</label>
-                    <input asp-for="Token" class="form-control"/>
-                    <span asp-validation-for="Token" class="text-danger"></span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card mb-3">
-            <div class="card-header">
-                <h2>Text Configuration</h2>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label asp-for="Model">Model</label>
-                    <select asp-for="Model" class="form-select">
-                        <option value="clio-v1">Clio</option>
-                        <option value="kayra-v1">Kayra</option>
-                    </select>
-                    <span asp-validation-for="Model" class="text-danger"></span>
+                    <label asp-for="Uri">Text generation inference URI</label>
+                    <input asp-for="Uri" class="form-control"/>
+                    <div class="form-text">Example: http://127.0.0.1:8080. Note that the API URL is different from the web interface URL.</div>
+                    <span asp-validation-for="Uri" class="text-danger"></span>
                 </div>
                 <div>
                     <label asp-for="MaxContextTokens">Max Context Tokens</label>
@@ -81,21 +65,6 @@
                 </div>
             </div>
         </div>
-        
-
-        <div class="card mb-3">
-            <div class="card-header">
-                <h2>Speech Configuration</h2>
-            </div>
-            <div class="card-body">
-                <div>
-                    <label asp-for="ThinkingSpeech">Thinking speech</label>
-                    <textarea rows="6" asp-for="ThinkingSpeech" class="form-control"></textarea>
-                    <div class="form-text">Those are generated sounds while the AI thinks and speech gets generated. One per line.</div>
-                    <span asp-validation-for="ThinkingSpeech" class="text-danger"></span>
-                </div>
-            </div>
-        </div>
 
         <div class="d-flex justify-content-end mt-3">
             <button id="resetBtn" class="btn btn-secondary me-2">Reset</button>
@@ -111,7 +80,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         initJsonEditor(document.getElementById("configureForm"), document.getElementById("Parameters"), document.getElementById("UseDefaults"));
-        
+            
         document.getElementById('resetBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             if (!confirm('Are you sure you want to reset the settings?')) { return; }
@@ -120,4 +89,3 @@
         });
     });
 </script>
-
