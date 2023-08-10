@@ -65,7 +65,9 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         
         _pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1));
         var audioInput = AudioConfig.FromStreamInput(_pushStream);
-        _transcriber = new AzureSpeechRecognizer(config, audioInput, _logger);
+        _transcriber = settings.Diarization
+            ? new AzureSpeechConversationTranscriber(config, audioInput, _logger)
+            : new AzureSpeechRecognizer(config, audioInput, _logger);
 
         _transcriber.Partial += (_, e) =>
         {            

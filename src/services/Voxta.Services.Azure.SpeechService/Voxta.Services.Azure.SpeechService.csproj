@@ -10,7 +10,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.30.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.31.0" />
     </ItemGroup>
 
     <ItemGroup>

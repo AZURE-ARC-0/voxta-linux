@@ -9,4 +9,5 @@ public class AzureSpeechServiceSettings : SettingsBase
     public required string Region { get; set; }
     public string? LogFilename { get; set; }
     public bool FilterProfanity { get; set; }
+    public bool Diarization { get; set; }
 }

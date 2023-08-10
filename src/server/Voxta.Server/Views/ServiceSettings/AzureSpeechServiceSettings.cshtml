@@ -50,6 +50,12 @@
                     <div class="form-text">Whether to remove profanity from tts and stt.</div>
                     <span asp-validation-for="FilterProfanity" class="text-danger"></span>
                 </div>
+                <div class="form-check">
+                    <input type="checkbox" asp-for="Diarization" class="form-check-input"/>
+                    <label asp-for="Diarization">Diarization</label>
+                    <div class="form-text">Uses the conversation transcriber. Much slower than the normal recognizer, but can filter out other speakers.</div>
+                    <span asp-validation-for="Diarization" class="text-danger"></span>
+                </div>
             </div>
         </div>
 
