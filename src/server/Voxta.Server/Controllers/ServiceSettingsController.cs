@@ -64,7 +64,23 @@ public class ServiceSettingsController : Controller
         
         return RedirectToAction("Settings", "Settings");
     }
-    
+
+    [HttpPost("/settings/azurespeechservice/reset")]
+    public async Task<IActionResult> ResetAzureSpeechServiceSettings()
+    {
+        var current = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>();
+        if (!string.IsNullOrEmpty(current?.SubscriptionKey))
+            await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
+            {
+                SubscriptionKey = current.SubscriptionKey,
+                Region = current.Region,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+
+        return RedirectToAction("AzureSpeechServiceSettings");
+    }
+
     [HttpGet("/settings/vosk")]
     public async Task<IActionResult> VoskSettings(CancellationToken cancellationToken)
     {
@@ -95,6 +111,16 @@ public class ServiceSettingsController : Controller
         });
         
         return RedirectToAction("Settings", "Settings");
+    }
+    
+    [HttpPost("/settings/vosk/reset")]
+    public async Task<IActionResult> ResetVoskSettings()
+    {
+        var current = await _settingsRepository.GetAsync<VoskSettings>();
+        if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        
+        return RedirectToAction("VoskSettings");
     }
     
     [HttpGet("/settings/elevenlabs")]
@@ -135,7 +161,22 @@ public class ServiceSettingsController : Controller
         
         return RedirectToAction("Settings", "Settings");
     }
-    
+
+    [HttpPost("/settings/elevenlabs/reset")]
+    public async Task<IActionResult> ResetElevenLabsSettings()
+    {
+        var current = await _settingsRepository.GetAsync<ElevenLabsSettings>();
+        if (!string.IsNullOrEmpty(current?.ApiKey))
+            await _settingsRepository.SaveAsync(new ElevenLabsSettings
+            {
+                ApiKey = current.ApiKey,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+
+        return RedirectToAction("ElevenLabsSettings");
+    }
+
     [HttpGet("/settings/textgenerationwebui")]
     public async Task<IActionResult> TextGenerationWebUISettings(CancellationToken cancellationToken)
     {
@@ -175,6 +216,21 @@ public class ServiceSettingsController : Controller
         return RedirectToAction("Settings", "Settings");
     }
     
+    [HttpPost("/settings/textgenerationwebui/reset")]
+    public async Task<IActionResult> ResetTextGenerationWebUISettings()
+    {
+        var current = await _settingsRepository.GetAsync<OobaboogaSettings>();
+        if (!string.IsNullOrEmpty(current?.Uri))
+            await _settingsRepository.SaveAsync(new OobaboogaSettings
+            {
+                Uri = current.Uri,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        
+        return RedirectToAction("TextGenerationWebUISettings");
+    }
+    
     [HttpGet("/settings/koboldai")]
     public async Task<IActionResult> KoboldAISettings(CancellationToken cancellationToken)
     {
@@ -212,6 +268,21 @@ public class ServiceSettingsController : Controller
         });
         
         return RedirectToAction("Settings", "Settings");
+    }
+    
+    [HttpPost("/settings/koboldai/reset")]
+    public async Task<IActionResult> ResetKoboldAISettings()
+    {
+        var current = await _settingsRepository.GetAsync<KoboldAISettings>();
+        if (!string.IsNullOrEmpty(current?.Uri))
+            await _settingsRepository.SaveAsync(new KoboldAISettings
+            {
+                Uri = current.Uri,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        
+        return RedirectToAction("KoboldAISettings");
     }
     
     [HttpGet("/settings/novelai")]
@@ -256,19 +327,22 @@ public class ServiceSettingsController : Controller
         
         return RedirectToAction("Settings", "Settings");
     }
-    
+
     [HttpPost("/settings/novelai/reset")]
     public async Task<IActionResult> ResetNovelAISettings()
     {
         var current = await _settingsRepository.GetAsync<NovelAISettings>();
-        await _settingsRepository.SaveAsync(new NovelAISettings
-        {
-            Token = string.IsNullOrEmpty(current?.Token) ? "" : _encryptionProvider.Encrypt(current.Token.TrimCopyPasteArtefacts()),
-        });
-        
+        if (!string.IsNullOrEmpty(current?.Token))
+            await _settingsRepository.SaveAsync(new NovelAISettings
+            {
+                Token = current.Token,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+
         return RedirectToAction("NovelAISettings");
     }
-    
+
     [HttpGet("/settings/openai")]
     public async Task<IActionResult> OpenAISettings(CancellationToken cancellationToken)
     {
@@ -311,6 +385,21 @@ public class ServiceSettingsController : Controller
         return RedirectToAction("Settings", "Settings");
     }
     
+    [HttpPost("/settings/openai/reset")]
+    public async Task<IActionResult> ResetOpenAISettings()
+    {
+        var current = await _settingsRepository.GetAsync<OpenAISettings>();
+        if (!string.IsNullOrEmpty(current?.ApiKey))
+            await _settingsRepository.SaveAsync(new OpenAISettings
+            {
+                ApiKey = current.ApiKey,
+            });
+        else if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        
+        return RedirectToAction("OpenAISettings");
+    }
+    
     [HttpGet("/settings/windowsspeech")]
     public async Task<IActionResult> WindowsSpeechSettings(CancellationToken cancellationToken)
     {
@@ -347,6 +436,19 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
+    [HttpPost("/settings/windowsspeech/reset")]
+    public async Task<IActionResult> ResetWindowsSpeechSettings()
+    {
+        #if(WINDOWS)
+        var current = await _settingsRepository.GetAsync<WindowsSpeechSettings>();
+        if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        return RedirectToAction("WindowsSpeechSettings");
+        #else
+        throw new PlatformNotSupportedException();
+        #endif
+    }
+    
     [HttpGet("/settings/ffmpeg")]
     public async Task<IActionResult> FFmpegSettings(CancellationToken cancellationToken)
     {
@@ -376,6 +478,20 @@ public class ServiceSettingsController : Controller
         });
         
         return RedirectToAction("Settings", "Settings");
+        #else
+        throw new PlatformNotSupportedException();
+        #endif
+    }
+    
+    [HttpPost("/settings/ffmpeg/reset")]
+    public async Task<IActionResult> ResetFFmpegSettings()
+    {
+        #if(!WINDOWS)
+        var current = await _settingsRepository.GetAsync<FFmpegSettings>();
+        if (current != null)
+            await _settingsRepository.DeleteAsync(current);
+        
+        return RedirectToAction("FFmpegSettings");
         #else
         throw new PlatformNotSupportedException();
         #endif

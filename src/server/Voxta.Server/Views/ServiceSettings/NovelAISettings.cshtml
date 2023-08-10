@@ -112,7 +112,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         initJsonEditor(document.getElementById("configureForm"), document.getElementById("Parameters"), document.getElementById("UseDefaults"));
         
-    document.getElementById('resetBtn').addEventListener('click', async (e) => {
+        document.getElementById('resetBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             if (!confirm('Are you sure you want to reset the settings?')) { return; }
             await fetch('@Url.Action("ResetNovelAISettings")', { method: 'POST' });

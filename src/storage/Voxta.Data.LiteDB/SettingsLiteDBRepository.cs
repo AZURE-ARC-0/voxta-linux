@@ -25,4 +25,11 @@ public class SettingsLiteDBRepository : ISettingsRepository
         collection.Upsert(value);
         return Task.CompletedTask;
     }
+
+    public Task DeleteAsync<T>(T current) where T : SettingsBase
+    {
+        var collection = _db.GetCollection<T>();
+        collection.Delete(current.Id);
+        return Task.CompletedTask;
+    }
 }
