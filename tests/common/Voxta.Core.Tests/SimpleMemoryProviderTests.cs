@@ -7,7 +7,8 @@ namespace Voxta.Core.Tests;
 
 public class SimpleMemoryProviderTests
 {
-    private Mock<IMemoryRepository> _repository = null!;
+    private Mock<IMemoryRepository> _memoryRepository = null!;
+    private Mock<IProfileRepository> _profileRepository = null!;
     private SimpleMemoryProvider _provider = null!;
     private ChatSessionData _chatSessionData = null!;
 
@@ -35,10 +36,15 @@ public class SimpleMemoryProviderTests
             AudioPath = "/audio-path",
             
         };
-        _repository = new Mock<IMemoryRepository>();
+        _profileRepository = new Mock<IProfileRepository>();
+        _profileRepository.Setup(m => m.GetProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(new ProfileSettings
+        {
+            Name = "User"
+        });
+        _memoryRepository = new Mock<IMemoryRepository>();
         var performanceMetrics = new Mock<IPerformanceMetrics>();
         performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
-        _provider = new SimpleMemoryProvider(_repository.Object, performanceMetrics.Object);
+        _provider = new SimpleMemoryProvider(_profileRepository.Object, _memoryRepository.Object, performanceMetrics.Object);
     }
 
     [Test]
@@ -124,7 +130,7 @@ public class SimpleMemoryProviderTests
                 ).ToList()
             }
         };
-        _repository.Setup(mock => mock.GetScopeMemoryBooksAsync(It.IsAny<Guid>(),It.IsAny<CancellationToken>())).ReturnsAsync(books);
+        _memoryRepository.Setup(mock => mock.GetScopeMemoryBooksAsync(It.IsAny<Guid>(),It.IsAny<CancellationToken>())).ReturnsAsync(books);
         await _provider.Initialize(Guid.Empty, _chatSessionData, CancellationToken.None);
     }
 

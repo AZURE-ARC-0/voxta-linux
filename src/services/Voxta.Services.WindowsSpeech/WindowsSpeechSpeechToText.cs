@@ -9,7 +9,7 @@ namespace Voxta.Services.WindowsSpeech;
 
 public class WindowsSpeechSpeechToText : ISpeechToTextService
 {
-    private ManualResetEventSlim _recognitionStopped = new ManualResetEventSlim(true);
+    private readonly ManualResetEventSlim _recognitionStopped = new ManualResetEventSlim(true);
 
     public string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features { get; } = Array.Empty<string>();
@@ -18,6 +18,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     private readonly ILogger<WindowsSpeechSpeechToText> _logger;
     private SpeechRecognitionEngine ? _recognizer;
     private bool _speaking;
+    private bool _disposed;
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
@@ -91,6 +92,8 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     
     public void Dispose()
     {
+        if(_disposed) return;
+        _disposed = true;
         _recognizer?.RecognizeAsyncStop();
         _recognitionStopped.Wait();
         _recognizer?.Dispose();

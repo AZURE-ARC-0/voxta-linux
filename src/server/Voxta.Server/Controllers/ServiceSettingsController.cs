@@ -139,17 +139,18 @@ public class ServiceSettingsController : Controller
     [HttpGet("/settings/textgenerationwebui")]
     public async Task<IActionResult> TextGenerationWebUISettings(CancellationToken cancellationToken)
     {
-        var oobabooga = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken) ?? new OobaboogaSettings
+        var settings = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken) ?? new OobaboogaSettings
         {
             Uri = "http://127.0.0.1:5000",
         };
         var vm = new OobaboogaSettingsViewModel
         {
-            Enabled = oobabooga.Enabled,
-            Uri = oobabooga.Uri,
-            MaxContextTokens = oobabooga.MaxContextTokens,
-            Parameters = JsonSerializer.Serialize(oobabooga.Parameters ?? new OobaboogaParameters()),
-            UseDefaults = oobabooga.Parameters == null,
+            Enabled = settings.Enabled,
+            Uri = settings.Uri,
+            MaxContextTokens = settings.MaxContextTokens,
+            MaxMemoryTokens = settings.MaxMemoryTokens,
+            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new OobaboogaParameters()),
+            UseDefaults = settings.Parameters == null,
         };
         return View(vm);
     }
@@ -167,6 +168,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
             MaxContextTokens = value.MaxContextTokens,
+            MaxMemoryTokens = value.MaxMemoryTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OobaboogaParameters>(value.Parameters) ?? new OobaboogaParameters(),
         });
         
@@ -176,17 +178,18 @@ public class ServiceSettingsController : Controller
     [HttpGet("/settings/koboldai")]
     public async Task<IActionResult> KoboldAISettings(CancellationToken cancellationToken)
     {
-        var koboldai = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken) ?? new KoboldAISettings
+        var settings = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken) ?? new KoboldAISettings
         {
             Uri = "http://127.0.0.1:5001",
         };
         var vm = new KoboldAISettingsViewModel
         {
-            Enabled = koboldai.Enabled,
-            Uri = koboldai.Uri,
-            MaxContextTokens = koboldai.MaxContextTokens,
-            Parameters = JsonSerializer.Serialize(koboldai.Parameters ?? new KoboldAIParameters()),
-            UseDefaults = koboldai.Parameters == null,
+            Enabled = settings.Enabled,
+            Uri = settings.Uri,
+            MaxContextTokens = settings.MaxContextTokens,
+            MaxMemoryTokens = settings.MaxMemoryTokens,
+            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new KoboldAIParameters()),
+            UseDefaults = settings.Parameters == null,
         };
         return View(vm);
     }
@@ -204,6 +207,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
             Uri = value.Uri.TrimCopyPasteArtefacts(),
             MaxContextTokens = value.MaxContextTokens,
+            MaxMemoryTokens = value.MaxMemoryTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<KoboldAIParameters>(value.Parameters) ?? new KoboldAIParameters(),
         });
         
@@ -213,19 +217,20 @@ public class ServiceSettingsController : Controller
     [HttpGet("/settings/novelai")]
     public async Task<IActionResult> NovelAISettings(CancellationToken cancellationToken)
     {
-        var novelai = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken) ?? new NovelAISettings
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken) ?? new NovelAISettings
         {
             Token = "",
         };
         var vm = new NovelAISettingsViewModel
         {
-            Enabled = novelai.Enabled,
-            Model = novelai.Model,
-            Token = !string.IsNullOrEmpty(novelai.Token) ? _encryptionProvider.Decrypt(novelai.Token) : "",
-            MaxContextTokens = novelai.MaxContextTokens,
-            Parameters = JsonSerializer.Serialize(novelai.Parameters ?? NovelAIPresets.DefaultForModel(novelai.Model)),
-            ThinkingSpeech = string.Join('\n', novelai.ThinkingSpeech),
-            UseDefaults = novelai.Parameters == null,
+            Enabled = settings.Enabled,
+            Model = settings.Model,
+            Token = !string.IsNullOrEmpty(settings.Token) ? _encryptionProvider.Decrypt(settings.Token) : "",
+            MaxContextTokens = settings.MaxContextTokens,
+            MaxMemoryTokens = settings.MaxMemoryTokens,
+            Parameters = JsonSerializer.Serialize(settings.Parameters ?? NovelAIPresets.DefaultForModel(settings.Model)),
+            ThinkingSpeech = string.Join('\n', settings.ThinkingSpeech),
+            UseDefaults = settings.Parameters == null,
         };   
         return View(vm);
     }
@@ -244,6 +249,7 @@ public class ServiceSettingsController : Controller
             Token = string.IsNullOrEmpty(value.Token) ? "" : _encryptionProvider.Encrypt(value.Token.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
             MaxContextTokens = value.MaxContextTokens,
+            MaxMemoryTokens = value.MaxMemoryTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? NovelAIPresets.DefaultForModel(value.Model),
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         });
@@ -251,22 +257,35 @@ public class ServiceSettingsController : Controller
         return RedirectToAction("Settings", "Settings");
     }
     
+    [HttpPost("/settings/novelai/reset")]
+    public async Task<IActionResult> ResetNovelAISettings()
+    {
+        var current = await _settingsRepository.GetAsync<NovelAISettings>();
+        await _settingsRepository.SaveAsync(new NovelAISettings
+        {
+            Token = string.IsNullOrEmpty(current?.Token) ? "" : _encryptionProvider.Encrypt(current.Token.TrimCopyPasteArtefacts()),
+        });
+        
+        return RedirectToAction("NovelAISettings");
+    }
+    
     [HttpGet("/settings/openai")]
     public async Task<IActionResult> OpenAISettings(CancellationToken cancellationToken)
     {
-        var openai = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken) ?? new OpenAISettings
+        var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken) ?? new OpenAISettings
         {
             ApiKey = "",
         };
-        if (!string.IsNullOrEmpty(openai.ApiKey)) openai.ApiKey = _encryptionProvider.Decrypt(openai.ApiKey);  
+        if (!string.IsNullOrEmpty(settings.ApiKey)) settings.ApiKey = _encryptionProvider.Decrypt(settings.ApiKey);  
         var vm = new OpenAISettingsViewModel
         {
-            Enabled = openai.Enabled,
-            ApiKey = openai.ApiKey,
-            Model = openai.Model,
-            MaxContextTokens = openai.MaxContextTokens,
-            Parameters = JsonSerializer.Serialize(openai.Parameters ?? new OpenAIParameters()),
-            UseDefaults = openai.Parameters == null,
+            Enabled = settings.Enabled,
+            ApiKey = settings.ApiKey,
+            Model = settings.Model,
+            MaxContextTokens = settings.MaxContextTokens,
+            MaxMemoryTokens = settings.MaxMemoryTokens,
+            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new OpenAIParameters()),
+            UseDefaults = settings.Parameters == null,
         };
         return View(vm);
     }
@@ -285,6 +304,7 @@ public class ServiceSettingsController : Controller
             ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
             Model = value.Model.TrimCopyPasteArtefacts(),
             MaxContextTokens = value.MaxContextTokens,
+            MaxMemoryTokens = value.MaxMemoryTokens,
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OpenAIParameters>(value.Parameters) ?? new OpenAIParameters(),
         });
         
