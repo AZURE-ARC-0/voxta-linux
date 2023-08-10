@@ -5,6 +5,7 @@ using Voxta.Services.KoboldAI;
 using Voxta.Services.NovelAI;
 using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
+using Voxta.Services.TextGenerationInference;
 using Voxta.Services.Vosk;
 #if(DEBUG)
 using Voxta.Services.Mocks;
@@ -26,6 +27,7 @@ public static class ProfileUtils
             {
                 Services = new[]
                 {
+                    TextGenerationInferenceConstants.ServiceName,
                     OobaboogaConstants.ServiceName,
                     KoboldAIConstants.ServiceName,
                     NovelAIConstants.ServiceName,
@@ -69,6 +71,7 @@ public static class ProfileUtils
                 Services = new[]
                 {
                     OpenAIConstants.ServiceName,
+                    TextGenerationInferenceConstants.ServiceName,
                     OobaboogaConstants.ServiceName,
                     KoboldAIConstants.ServiceName,
                     NovelAIConstants.ServiceName,

@@ -62,6 +62,10 @@ public static class ServiceCollectionExtensions
         services.AddOobabooga();
         textGenRegistry.RegisterOobabooga();
         actionInferenceRegistry.RegisterOobabooga();
+        
+        services.AddTextGenerationInference();
+        textGenRegistry.RegisterTextGenerationInference();
+        actionInferenceRegistry.RegisterTextGenerationInference();
 
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();

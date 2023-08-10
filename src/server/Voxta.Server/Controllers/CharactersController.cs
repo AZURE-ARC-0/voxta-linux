@@ -14,6 +14,7 @@ using Voxta.Services.Oobabooga;
 using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Services.AzureSpeechService;
+using Voxta.Services.TextGenerationInference;
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
 #endif
@@ -171,6 +172,7 @@ public class CharactersController : Controller
                 new OptionViewModel("", "Select automatically"),
                 OptionViewModel.Create(OpenAIConstants.ServiceName),
                 OptionViewModel.Create(NovelAIConstants.ServiceName),
+                OptionViewModel.Create(TextGenerationInferenceConstants.ServiceName),
                 OptionViewModel.Create(OobaboogaConstants.ServiceName),
                 OptionViewModel.Create(KoboldAIConstants.ServiceName),
                 #if(DEBUG)

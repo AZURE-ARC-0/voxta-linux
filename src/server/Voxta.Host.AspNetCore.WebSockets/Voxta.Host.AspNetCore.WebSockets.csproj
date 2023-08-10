@@ -30,6 +30,7 @@
         <ProjectReference Include="..\..\services\Voxta.Services.KoboldAI\Voxta.Services.KoboldAI.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.NovelAI\Voxta.Services.NovelAI.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Oobabooga\Voxta.Services.Oobabooga.csproj" />
+        <ProjectReference Include="..\..\services\Voxta.Services.TextGenerationInference\Voxta.Services.TextGenerationInference.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.OpenAI\Voxta.Services.OpenAI.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Vosk\Voxta.Services.Vosk.csproj" />
     </ItemGroup>
