@@ -55,7 +55,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("MockSettings");
     }
 
     [HttpPost("/settings/mocks/reset")]
@@ -97,7 +97,7 @@ public class ServiceSettingsController : Controller
             FilterProfanity = value.FilterProfanity,
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("AzureSpeechServiceSettings");
     }
 
     [HttpPost("/settings/azurespeechservice/reset")]
@@ -145,7 +145,7 @@ public class ServiceSettingsController : Controller
             IgnoredWords = value.IgnoredWords.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("VoskSettings");
     }
     
     [HttpPost("/settings/vosk/reset")]
@@ -194,7 +194,7 @@ public class ServiceSettingsController : Controller
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("ElevenLabsSettings");
     }
 
     [HttpPost("/settings/elevenlabs/reset")]
@@ -248,7 +248,7 @@ public class ServiceSettingsController : Controller
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OobaboogaParameters>(value.Parameters) ?? new OobaboogaParameters(),
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("TextGenerationWebUISettings");
     }
     
     [HttpPost("/settings/textgenerationwebui/reset")]
@@ -302,7 +302,7 @@ public class ServiceSettingsController : Controller
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<KoboldAIParameters>(value.Parameters) ?? new KoboldAIParameters(),
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("KoboldAISettings");
     }
     
     [HttpPost("/settings/koboldai/reset")]
@@ -356,7 +356,7 @@ public class ServiceSettingsController : Controller
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<TextGenerationInferenceParameters>(value.Parameters) ?? new TextGenerationInferenceParameters(),
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("TextGenerationInferenceSettings");
     }
     
     [HttpPost("/settings/textgenerationinference/reset")]
@@ -414,7 +414,7 @@ public class ServiceSettingsController : Controller
             ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("NovelAISettings");
     }
 
     [HttpPost("/settings/novelai/reset")]
@@ -471,7 +471,7 @@ public class ServiceSettingsController : Controller
             Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OpenAIParameters>(value.Parameters) ?? new OpenAIParameters(),
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("OpenAISettings");
     }
     
     [HttpPost("/settings/openai/reset")]
@@ -521,7 +521,7 @@ public class ServiceSettingsController : Controller
             MinimumConfidence = value.MinimumConfidence,
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("WindowsSpeechSettings");
         #else
         throw new PlatformNotSupportedException();
         #endif
@@ -568,7 +568,7 @@ public class ServiceSettingsController : Controller
             Enabled = value.Enabled,
         });
         
-        return RedirectToAction("Settings", "Settings");
+        return RedirectToAction("FFmpegSettings");
         #else
         throw new PlatformNotSupportedException();
         #endif

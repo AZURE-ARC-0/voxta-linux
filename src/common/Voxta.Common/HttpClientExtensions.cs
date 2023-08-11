@@ -11,7 +11,7 @@ public interface IEventStreamData
 
 public static class HttpClientExtensions
 {
-    public static void ConfigureEvenStream(this HttpRequestMessage request)
+    public static void ConfigureEventStream(this HttpRequestMessage request)
     {
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
     }

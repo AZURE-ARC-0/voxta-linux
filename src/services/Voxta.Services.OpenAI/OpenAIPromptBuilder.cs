@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Voxta.Abstractions.Model;
 using Microsoft.DeepDev;
 
@@ -15,9 +16,9 @@ public class OpenAIPromptBuilder
 
     public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxMemoryTokens, int maxTokens)
     {
-        var systemPrompt = MakeSystemPrompt(chat.Character);
+        var systemPrompt = MakeSystemPrompt(chat);
         var systemPromptTokens = _tokenizer.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count;
-        var postHistoryPrompt = MakePostHistoryPrompt(chat.Character, chat.Context, chat.Actions);
+        var postHistoryPrompt = MakePostHistoryPrompt(chat.Character);
         var postHistoryPromptTokens = _tokenizer.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count;
 
         var totalTokens = systemPromptTokens + postHistoryPromptTokens;
@@ -105,30 +106,37 @@ public class OpenAIPromptBuilder
         return messages;
     }
 
-    private static string MakeSystemPrompt(CharacterCard character)
+    private static string MakeSystemPrompt(IChatInferenceData chat)
     {
+        var character = chat.Character;
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.SystemPrompt))
             sb.AppendLineLinux(character.SystemPrompt);
+        else
+            sb.AppendLineLinux($"This is a conversation between {chat.UserName} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", CultureInfo.GetCultureInfoByIetfLanguageTag(chat.Character.Culture))}.  Keep the conversation flowing, actively engage with {chat.UserName}. Stay in character.");
+        
+        sb.AppendLineLinux();
+        
         if (!string.IsNullOrEmpty(character.Description))
             sb.AppendLineLinux($"Description of {character.Name}: {character.Description}");
         if (!string.IsNullOrEmpty(character.Personality))
             sb.AppendLineLinux($"Personality of {character.Name}: {character.Personality}");
         if (!string.IsNullOrEmpty(character.Scenario))
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
+        if (!string.IsNullOrEmpty(chat.Context))
+            sb.AppendLineLinux(chat.Context);
+        if (chat.Actions is { Length: > 1 })
+            sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
         sb.AppendLineLinux($"Only write a single reply from {character.Name} for natural speech.");
         return sb.ToString().TrimExcess();
     }
 
-    private static string MakePostHistoryPrompt(CharacterCard character, string? context, string[]? actions)
+    private static string MakePostHistoryPrompt(CharacterCard character)
     {
+        if (string.IsNullOrEmpty(character.PostHistoryInstructions)) return "";
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.PostHistoryInstructions))
             sb.AppendLineLinux(character.PostHistoryInstructions);
-        if (!string.IsNullOrEmpty(context))
-            sb.AppendLineLinux($"Current context: {context}");
-        if (actions is { Length: > 1 })
-            sb.AppendLineLinux($"Available actions to be inferred after the response: {string.Join(", ", actions)}");
         return sb.ToString().TrimExcess();
     }
 }

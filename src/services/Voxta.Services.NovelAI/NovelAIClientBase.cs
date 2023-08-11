@@ -126,7 +126,7 @@ public class NovelAIClientBase
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/ai/generate-stream");
         request.Content = bodyContent;
-        request.ConfigureEvenStream();
+        request.ConfigureEventStream();
 
         using var response = await _httpClient.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)

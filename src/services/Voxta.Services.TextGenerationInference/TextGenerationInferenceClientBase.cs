@@ -88,7 +88,7 @@ public class TextGenerationInferenceClientBase
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/generate_stream");
         request.Content = bodyContent;
-        request.ConfigureEvenStream();
+        request.ConfigureEventStream();
         using var response = await _httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -117,9 +117,9 @@ public class TextGenerationInferenceClientBase
     {
         public int id { get; init; }
         public required string text { get; init; }
-        public double logprob { get; init; }
+        public double? logprob { get; init; }
         public bool special { get; init; }
-        public string GetToken() => text;
+        public string GetToken() => special ? "" : text;
     }
 
     public void Dispose()

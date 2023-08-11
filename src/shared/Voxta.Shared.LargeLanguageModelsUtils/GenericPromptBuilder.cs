@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Tokenizers;
 
@@ -48,6 +49,10 @@ public class GenericPromptBuilder
 
                 totalTokens += memoryTokens;
             }
+
+            memoryTokens++;
+            totalTokens++;
+            sb.AppendLineLinux();
         }
 
         var chatMessages = chat.GetMessages();
@@ -126,6 +131,11 @@ public class GenericPromptBuilder
         var sb = new StringBuilder();
         if (!string.IsNullOrEmpty(character.SystemPrompt))
             sb.AppendLineLinux(character.SystemPrompt);
+        else
+            sb.AppendLineLinux($"This is a conversation between {chat.UserName} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", CultureInfo.GetCultureInfoByIetfLanguageTag(chat.Character.Culture))}.  Keep the conversation flowing, actively engage with {chat.UserName}. Stay in character.");
+        
+        sb.AppendLineLinux();
+        
         if (!string.IsNullOrEmpty(character.Description))
             sb.AppendLineLinux($"Description of {character.Name}: {character.Description}");
         if (!string.IsNullOrEmpty(character.Personality))
@@ -135,7 +145,7 @@ public class GenericPromptBuilder
         if (!string.IsNullOrEmpty(chat.Context))
             sb.AppendLineLinux(chat.Context);
         if (chat.Actions is { Length: > 1 })
-            sb.AppendLineLinux($"Potential actions you will be able to do after you respond: {string.Join(", ", chat.Actions)}");
+            sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
         return sb.ToString().TrimExcess();
     }
 

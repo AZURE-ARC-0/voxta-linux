@@ -86,7 +86,7 @@ public class KoboldAIClientBase
         var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
         request.Content = bodyContent;
-        request.ConfigureEvenStream();
+        request.ConfigureEventStream();
         using var response = await _httpClient.SendAsync(request, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

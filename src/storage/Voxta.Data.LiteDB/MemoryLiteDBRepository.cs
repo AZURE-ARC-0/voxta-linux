@@ -23,9 +23,9 @@ public class MemoryLiteDBRepository : IMemoryRepository
         );
     }
 
-    public Task<MemoryBook> GetCharacterBookAsync(Guid characterId)
+    public Task<MemoryBook?> GetCharacterBookAsync(Guid characterId)
     {
-        return Task.FromResult(_memoryBooksRepository.FindOne(x => x.CharacterId == characterId));
+        return Task.FromResult<MemoryBook?>(_memoryBooksRepository.FindOne(x => x.CharacterId == characterId));
     }
 
     public Task SaveBookAsync(MemoryBook book)

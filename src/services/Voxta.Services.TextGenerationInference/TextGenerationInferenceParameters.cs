@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Voxta.Services.TextGenerationInference;
@@ -14,9 +15,11 @@ public class TextGenerationInferenceParameters
     public double RepetitionPenalty { get; init; } = 1.08;
     
     [JsonPropertyName("temperature")]
+    [Range(0.0001, 100)]
     public double Temperature { get; init; } = 0.65;
     
     [JsonPropertyName("typical_p")]
+    [Range(0.0001, 0.9999)]
     public double TypicalP { get; init; } = 0.95;
     
     [JsonPropertyName("top_p")]
@@ -51,7 +54,7 @@ public class TextGenerationInferenceParametersBody : TextGenerationInferencePara
 
 [Serializable]
 [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
-public class TextGenerationInferenceRequestBody : TextGenerationInferenceParameters
+public class TextGenerationInferenceRequestBody
 {
     [JsonPropertyName("parameters")]
     public required TextGenerationInferenceParametersBody Parameters { get; init; }
