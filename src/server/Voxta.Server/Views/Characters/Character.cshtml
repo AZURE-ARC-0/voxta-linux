@@ -21,12 +21,14 @@
                     <label asp-for="Character.Name">Name</label>
                     <input asp-for="Character.Name" class="form-control"/>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Name)</small>
+                    <div class="form-text">Used in the <code>{{char}}</code> field.</div>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Character.CreatorNotes">Creator Notes: <span class="text-muted">Only for display</span></label>
+                    <label asp-for="Character.CreatorNotes">Creator Notes</label>
                     <input asp-for="Character.CreatorNotes" class="form-control"/>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.CreatorNotes)</small>
+                    <div class="form-text">Only for display, not used by the AI</div>
                 </div>
                 
                 <div class="mb-3">

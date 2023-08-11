@@ -14,6 +14,8 @@ public partial class ChatSession
             await ListServicesAsync(cancellationToken);
         else if (text.StartsWith("list commands", StringComparison.InvariantCultureIgnoreCase))
             await ListCommandsAsync(cancellationToken);
+        else if (text.StartsWith("reset chat", StringComparison.InvariantCultureIgnoreCase))
+            await ResetChatAsync(cancellationToken);
         else if (text.StartsWith("repeat", StringComparison.InvariantCultureIgnoreCase) && text.Length > 7)
             await RepeatAsync(text, cancellationToken);
         else
@@ -34,6 +36,7 @@ public partial class ChatSession
         sb.AppendLineLinux("repeat");
         sb.AppendLineLinux("list services");
         sb.AppendLineLinux("list commands");
+        sb.AppendLineLinux("reset chat");
         await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, cancellationToken);
     }
 
@@ -46,6 +49,16 @@ public partial class ChatSession
         sb.AppendLineLinux("Action Inference: " + (_actionInference?.ServiceName ?? "None"));
         sb.AppendLineLinux("Speech To Text: " + (_speechToText?.ServiceName ?? "None"));
         await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, cancellationToken);
+    }
+
+    private async Task ResetChatAsync(CancellationToken cancellationToken)
+    {
+        _chatSessionData.Actions = null;
+        _chatSessionData.Context = null;
+        _chatSessionData.Memories.Clear();
+        _chatSessionData.Messages.Clear();
+        _chatSessionState.State = ChatSessionStates.Live;
+        await SendFirstMessageAsync(cancellationToken);
     }
 
     private async Task RepeatAsync(string text, CancellationToken cancellationToken)

@@ -50,6 +50,7 @@
 
     play(url, onStart, onComplete) {
         this.tryInitialize();
+        this.stop();
         if (this.audioContext) {
             this.playAnalyzerAudio(url, onStart, onComplete);
         } else {

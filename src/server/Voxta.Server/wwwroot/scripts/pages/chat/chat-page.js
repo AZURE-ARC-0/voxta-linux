@@ -23,7 +23,9 @@ const playThinkingSpeech = () => {
     if (!thinkingSpeechUrls.length) return;
     const audioUrl = thinkingSpeechUrls[Math.floor(Math.random() * thinkingSpeechUrls.length)];
     audioVisualizer.play(audioUrl, () => {
+        // Start
     }, () => {
+        // Complete
     });
 }
 
@@ -71,12 +73,19 @@ const createButton = (parent, className, textContent, onClick) => {
     return button;
 };
 
-voxtaClient.addEventListener('onopen', () => notifications.notify('Connected', 'success'));
+voxtaClient.addEventListener('onopen', () => {
+    notifications.notify('Connected', 'success');
+});
+
 voxtaClient.addEventListener('onclose', () => {
     notifications.notify('Disconnected', 'danger');
     resetUI();
 });
-voxtaClient.addEventListener('onerror', evt => notifications.notify('Error: ' + evt.detail.message, 'danger'));
+
+voxtaClient.addEventListener('onerror', evt => {
+    notifications.notify('Error: ' + evt.detail.message, 'danger');
+});
+
 voxtaClient.addEventListener('welcome', evt => {
     getId('username').textContent = evt.detail.username;
     if(selectedChatId) {
@@ -85,6 +94,7 @@ voxtaClient.addEventListener('welcome', evt => {
         splash.classList.add('voxta_show');
     }
 });
+
 voxtaClient.addEventListener('charactersListLoaded', evt => {
     removeAllChildNodes(characterButtons);
     if (evt.detail.characters.length === 0) {
@@ -105,6 +115,7 @@ voxtaClient.addEventListener('charactersListLoaded', evt => {
         splash.classList.add('voxta_show');
     });
 });
+
 voxtaClient.addEventListener('chatsListLoaded', evt => {
     removeAllChildNodes(chatButtons);
     createElement(chatButtons, 'h2', 'text-center colspan', selectedCharacter.name);
@@ -129,6 +140,7 @@ voxtaClient.addEventListener('chatsListLoaded', evt => {
         splash.classList.add('voxta_show');
     });
 });
+
 voxtaClient.addEventListener('ready', evt => {
     selectedChatId = evt.detail.chatId;
     thinkingSpeechUrls = evt.detail.thinkingSpeechUrls || [];
@@ -136,30 +148,45 @@ voxtaClient.addEventListener('ready', evt => {
     canvas.classList.add('voxta_show');
     promptBox.classList.add('voxta_show');
 });
+
 voxtaClient.addEventListener('reply', evt => {
     messageBox.classList.add('voxta_show');
     messageBox.innerText = evt.detail.text;
     prompt.disabled = false;
 });
-voxtaClient.addEventListener('speech', evt => audioVisualizer.play(evt.detail.url, duration => voxtaClient.speechPlaybackStart(duration), () => voxtaClient.speechPlaybackComplete()));
-voxtaClient.addEventListener('action', evt => audioVisualizer.setColor({
-    'normal': 'rgb(215,234,231)',
-    'happy': 'rgb(225,195,231)',
-    'intense_love': '#e0678f',
-    'sad': '#87b8de',
-    'angry': '#fa2f2a',
-    'confused': '#c27ec7',
-}[evt.detail.value] || '#778085'));
+
+voxtaClient.addEventListener('speech', evt => {
+    audioVisualizer.play(
+        evt.detail.url,
+            duration => voxtaClient.speechPlaybackStart(duration),
+        () => voxtaClient.speechPlaybackComplete()
+    );
+});
+
+voxtaClient.addEventListener('action', evt => {
+    audioVisualizer.setColor({
+        'normal': 'rgb(215,234,231)',
+        'happy': 'rgb(225,195,231)',
+        'intense_love': '#e0678f',
+        'sad': '#87b8de',
+        'angry': '#fa2f2a',
+        'confused': '#c27ec7',
+    }[evt.detail.value] || '#778085')
+});
+
 voxtaClient.addEventListener('speechRecognitionStart', () => {
     audioVisualizer.stop();
     audioVisualizer.listen();
 });
+
 voxtaClient.addEventListener('speechRecognitionPartial', evt => prompt.value = evt.detail.text);
+
 voxtaClient.addEventListener('speechRecognitionEnd', evt => {
     sendChatMessage(evt.detail.text);
     prompt.value = evt.detail.text;
     prompt.disabled = true;
 });
+
 voxtaClient.addEventListener('error', evt => {
     notifications.notify('Server error: ' + evt.detail.message, 'danger');
     audioVisualizer.stop();

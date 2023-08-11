@@ -23,10 +23,16 @@
             </div>
             <div class="card-body">
                 <div class="form-check mb-3">
-                    <input type="checkbox" asp-for="Enabled" class="form-check-input"/>
                     <label asp-for="Enabled">Enabled</label>
+                    <input type="checkbox" asp-for="Enabled" class="form-check-input"/>
                     <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
                     <span asp-validation-for="Enabled" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="MinimumConfidence">Minimum Confidence</label>
+                    <input asp-for="MinimumConfidence" class="form-control"/>
+                    <div class="form-text">Value between 0 and 1, filters low confidence results.</div>
+                    <span asp-validation-for="MinimumConfidence" class="text-danger"></span>
                 </div>
             </div>
         </div>

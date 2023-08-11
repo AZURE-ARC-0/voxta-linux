@@ -41,7 +41,7 @@ public class SimpleMemoryProvider : IMemoryProvider
         }
     }
     
-    public void QueryMemoryFast(ChatSessionData chat, List<MemoryItem> items)
+    public void QueryMemoryFast(ChatSessionData chat)
     {
         var perf = _performanceMetrics.Start("SimpleMemoryProvider");
         
@@ -51,6 +51,7 @@ public class SimpleMemoryProvider : IMemoryProvider
         #warning We can stop as soon as we have enough tokens instead of always doing them all
         foreach (var msg in chat.GetMessages())
         {
+            if (string.IsNullOrEmpty(msg.Text)) continue;
             var messageWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             foreach (Match word in WordsRegex.Matches(msg.Text))
             {

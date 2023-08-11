@@ -12,6 +12,8 @@ public class ChatMessageData : TextData
 
     public static ChatMessageData FromText(Guid chatId, string user, string message)
     {
+        if (string.IsNullOrEmpty(message)) throw new ArgumentException("Cannot create empty message", nameof(message));
+        
         return new ChatMessageData
         {
             ChatId = chatId,
@@ -25,6 +27,8 @@ public class ChatMessageData : TextData
 
     public static ChatMessageData FromGen(Guid chatId, string user, TextData gen)
     {
+        if (string.IsNullOrEmpty(gen.Text)) throw new ArgumentException("Cannot create empty message", nameof(gen));
+        
         return new ChatMessageData
         {
             ChatId = chatId,

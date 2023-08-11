@@ -42,10 +42,10 @@ public static class ProfileUtils
                 Services = new[]
                 {
                     AzureSpeechServiceConstants.ServiceName,
+                    VoskConstants.ServiceName,
 #if(WINDOWS)
                     WindowsSpeechConstants.ServiceName,
 #endif
-                    VoskConstants.ServiceName,
 #if(DEBUG)
                     MockConstants.ServiceName,
 #endif

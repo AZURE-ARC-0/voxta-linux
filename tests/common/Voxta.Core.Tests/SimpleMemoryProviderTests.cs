@@ -55,7 +55,7 @@ public class SimpleMemoryProviderTests
             (Keywords: new[] { "apples" }, Value: "Assistant likes apples", Weight: 0)
         );
         
-        _provider.QueryMemoryFast(_chatSessionData, _chatSessionData.Memories);
+        _provider.QueryMemoryFast(_chatSessionData);
 
         AssertMemories(
             "Assistant likes apples"
@@ -73,7 +73,7 @@ public class SimpleMemoryProviderTests
             (Keywords: new[] { "affection", "hugs", "hug" }, Value: "Assistant is afraid of physical contact", Weight: 0)
         );
         
-        _provider.QueryMemoryFast(_chatSessionData, _chatSessionData.Memories);
+        _provider.QueryMemoryFast(_chatSessionData);
 
         AssertMemories(
             "Assistant is afraid of physical contact",
@@ -91,7 +91,7 @@ public class SimpleMemoryProviderTests
             (Keywords: new[] { "talk" }, Value: "Assistant likes listening more than speaking", Weight: 0)
         );
         
-        _provider.QueryMemoryFast(_chatSessionData, _chatSessionData.Memories);
+        _provider.QueryMemoryFast(_chatSessionData);
 
         AssertMemories(
             "Assistant can barely play chess",
@@ -101,7 +101,7 @@ public class SimpleMemoryProviderTests
         _chatSessionData.AddMessage(_chatSessionData.Character.Name, "I'd love to, by I can barely play!");
         _chatSessionData.AddMessage(_chatSessionData.UserName, "Do you want to talk about it?");
 
-        _provider.QueryMemoryFast(_chatSessionData, _chatSessionData.Memories);
+        _provider.QueryMemoryFast(_chatSessionData);
     
         AssertMemories(
             "Assistant likes listening more than speaking",

@@ -494,10 +494,11 @@ public class ServiceSettingsController : Controller
     {
     
         #if(WINDOWS)
-        var windowsspeech = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
+        var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
         var vm = new WindowsSpeechSettingsViewModel
         {
-            Enabled = windowsspeech.Enabled
+            Enabled = settings.Enabled,
+            MinimumConfidence = settings.MinimumConfidence,
         };
         return View(vm);
         #else
@@ -517,6 +518,7 @@ public class ServiceSettingsController : Controller
         await _settingsRepository.SaveAsync(new WindowsSpeechSettings
         {
             Enabled = value.Enabled,
+            MinimumConfidence = value.MinimumConfidence,
         });
         
         return RedirectToAction("Settings", "Settings");

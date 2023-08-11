@@ -63,7 +63,7 @@ public class ChatSessionTests
         var performanceMetrics = new Mock<IPerformanceMetrics>();
         performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
         var memoryProvider = new Mock<IMemoryProvider>();
-        memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<ChatSessionData>(), It.IsAny<List<MemoryItem>>()));
+        memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<ChatSessionData>()));
         
         _session = new ChatSession(
             _tunnelMock.Object,

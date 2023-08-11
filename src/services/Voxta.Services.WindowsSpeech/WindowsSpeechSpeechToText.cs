@@ -10,8 +10,6 @@ namespace Voxta.Services.WindowsSpeech;
 
 public class WindowsSpeechSpeechToText : ISpeechToTextService
 {
-    private static readonly ManualResetEventSlim RecognitionStopped = new(true);
-
     public string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features { get; } = Array.Empty<string>();
     
@@ -20,7 +18,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     private SpeechRecognitionEngine ? _recognizer;
     private bool _speaking;
     private bool _activated;
-    private bool _cancelling;
+    private bool _stopping;
     private bool _disposed;
 
     public event EventHandler? SpeechRecognitionStarted;
@@ -40,7 +38,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         if (!settings.Enabled) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
         if (dry) return true;
-        
+
         _recognizer = new SpeechRecognitionEngine(CultureInfo.GetCultureInfoByIetfLanguageTag(culture));
         var grammar = new DictationGrammar();
         _recognizer.LoadGrammar(grammar);
@@ -64,7 +62,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         {
             _logger.LogDebug("Speech recognized");
             _speaking = false;
-            if (!string.IsNullOrEmpty(e.Result.Text))
+            if (!string.IsNullOrEmpty(e.Result.Text) && e.Result.Confidence > settings.MinimumConfidence)
                 SpeechRecognitionFinished?.Invoke(this, e.Result.Text);
         };
 
@@ -74,7 +72,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
 
         _recognizer.RecognizeCompleted += (_, _) =>
         {
-            RecognitionStopped.Set();
+            _stopping = false;
         };
 
         _recognizer.RecognizeAsync(RecognizeMode.Multiple);
@@ -85,8 +83,7 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     public void StartMicrophoneTranscription()
     {
         if (_activated) return;
-        RecognitionStopped.Wait(); // Wait until the recognizer is stopped
-        RecognitionStopped.Reset(); // Reset the event
+        if (_stopping) throw new InvalidOperationException("Cannot restart, recognizer wasn't stopped yet.");
         _recognizer?.RecognizeAsync(RecognizeMode.Multiple);
         _activated = true;
     }
@@ -104,10 +101,16 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         _disposed = true;
         if (_activated)
         {
-            _recognizer?.RecognizeAsyncCancel();
+            try
+            {
+                _recognizer?.RecognizeAsyncCancel();
+            }
+            catch
+            {
+                // ignored
+            }
             _activated = false;
         }
-        RecognitionStopped.Wait();
         _recognizer?.Dispose();
         _recognizer = null;
     }

@@ -64,6 +64,11 @@ public partial class ChatSession
         
         _logger.LogInformation("Chat ready!");
 
+        await SendFirstMessageAsync(cancellationToken);
+    }
+
+    private async Task SendFirstMessageAsync(CancellationToken cancellationToken)
+    {
         if (_chatSessionData.Messages.Count == 0 && !string.IsNullOrEmpty(_chatSessionData.Character.FirstMessage))
         {
             var textData = new TextData

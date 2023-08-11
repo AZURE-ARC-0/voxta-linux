@@ -20,11 +20,13 @@ public class GenericPromptBuilder
         
         var systemPrompt = MakeSystemPrompt(chat);
         var systemPromptTokens = _tokenizer.CountTokens(systemPrompt);
+        /*
         var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chat) : "";
         var postHistoryPromptTokens = _tokenizer.CountTokens(postHistoryPrompt);
+        */
         var query = $"{chat.Character.Name}: ";
         var queryTokens = _tokenizer.CountTokens(query);
-        var totalTokens = systemPromptTokens + postHistoryPromptTokens + 1 + queryTokens;
+        var totalTokens = systemPromptTokens /*+ postHistoryPromptTokens + 1*/ + queryTokens;
         
         var sb = new StringBuilder();
         
@@ -73,10 +75,12 @@ public class GenericPromptBuilder
         sb.Insert(0, '\n');
         sb.Insert(0, systemPrompt);
 
+        /*
         if (!string.IsNullOrEmpty(postHistoryPrompt))
         {
             sb.AppendLineLinux(postHistoryPrompt);
         }
+        */
 
         sb.Append(query);
 

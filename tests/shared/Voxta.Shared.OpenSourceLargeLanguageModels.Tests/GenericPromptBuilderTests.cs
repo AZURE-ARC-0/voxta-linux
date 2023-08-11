@@ -95,7 +95,6 @@ public class GenericPromptBuilderTests
         Joe: Hello
         Jane: World
         Joe: Question
-        (some-post-history-instructions)
         Jane: 
         """.ReplaceLineEndings("\n").TrimExcess()));
     }

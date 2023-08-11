@@ -23,13 +23,13 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label asp-for="IsAdult">You certify you are 18 years old or more.</label>
                     <input asp-for="IsAdult" type="checkbox" class="form-check-input"/>
+                    <label asp-for="IsAdult">You certify you are 18 years old or more.</label>
                     <span asp-validation-for="IsAdult" class="text-danger"></span>
                 </div>
                 <div>
-                    <label asp-for="AgreesToTerms">You have read and agree to the <a href="/legal/tos">terms and conditions</a>.</label>
                     <input asp-for="AgreesToTerms" type="checkbox" class="form-check-input"/>
+                    <label asp-for="AgreesToTerms">You have read and agree to the <a href="/legal/tos">terms and conditions</a>.</label>
                     <span asp-validation-for="AgreesToTerms" class="text-danger"></span>
                 </div>
             </div>
@@ -40,15 +40,18 @@
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="mb-3">
+                <p>This is what the AI will call you, and how it will "see" you.</p>
+                <div class="form-check mb-3">
                     <label asp-for="Name">Profile name</label>
                     <input asp-for="Name" class="form-control"/>
                     <span asp-validation-for="Name" class="text-danger"></span>
+                    <div class="form-text">Used in the <code>{{user}}</code> field.</div>
                 </div>
-                <div>
+                <div class="form-check">
                     <label asp-for="Description">Profile description</label>
                     <input asp-for="Description" class="form-control"/>
                     <span asp-validation-for="Description" class="text-danger"></span>
+                    <div class="form-text">Used in the <code>{{user.description}}</code> field.</div>
                 </div>
             </div>
         </div>
