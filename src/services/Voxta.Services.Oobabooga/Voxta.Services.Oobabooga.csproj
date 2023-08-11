@@ -15,6 +15,7 @@
       <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
       <ProjectReference Include="..\..\common\Voxta.Common\Voxta.Common.csproj" />
       <ProjectReference Include="..\..\shared\Voxta.Shared.LargeLanguageModelsUtils\Voxta.Shared.LargeLanguageModelsUtils.csproj" />
+      <ProjectReference Include="..\..\shared\Voxta.Shared.RemoteServicesUtils\Voxta.Shared.RemoteServicesUtils.csproj" />
     </ItemGroup>
 
 </Project>

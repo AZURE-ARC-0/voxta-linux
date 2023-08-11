@@ -1,12 +1,8 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.KoboldAI;
 
 [Serializable]
-public class KoboldAISettings : SettingsBase
+public class KoboldAISettings : RemoteServiceSettingsBase<KoboldAIParameters>
 {
-    public required string Uri { get; set; }
-    public int MaxMemoryTokens { get; set; } = 400;
-    public int MaxContextTokens { get; set; } = 1600;
-    public KoboldAIParameters? Parameters { get; set; }
 }

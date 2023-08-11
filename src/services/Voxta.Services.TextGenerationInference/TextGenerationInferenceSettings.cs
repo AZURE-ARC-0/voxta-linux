@@ -1,12 +1,8 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.TextGenerationInference;
 
 [Serializable]
-public class TextGenerationInferenceSettings : SettingsBase
+public class TextGenerationInferenceSettings : RemoteServiceSettingsBase<TextGenerationInferenceParameters>
 {
-    public required string Uri { get; set; }
-    public int MaxMemoryTokens { get; set; } = 400;
-    public int MaxContextTokens { get; set; } = 1600;
-    public TextGenerationInferenceParameters? Parameters { get; set; }
 }

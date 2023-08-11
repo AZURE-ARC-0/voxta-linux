@@ -1,12 +1,8 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.Oobabooga;
 
 [Serializable]
-public class OobaboogaSettings : SettingsBase
+public class OobaboogaSettings : RemoteServiceSettingsBase<OobaboogaParameters>
 {
-    public required string Uri { get; set; }
-    public int MaxMemoryTokens { get; set; } = 400;
-    public int MaxContextTokens { get; set; } = 1600;
-    public OobaboogaParameters? Parameters { get; set; }
 }

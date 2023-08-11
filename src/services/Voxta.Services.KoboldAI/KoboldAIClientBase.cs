@@ -1,80 +1,24 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using AutoMapper;
-using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
-using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
-using Voxta.Shared.LargeLanguageModelsUtils;
+using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.KoboldAI;
 
-public class KoboldAIClientBase
-{
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
-    {
-        WriteIndented = false,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    };
-    
-    private static readonly IMapper Mapper;
-    
-    protected static readonly ITokenizer Tokenizer = TokenizerFactory.GetDefault();
-    
-    static KoboldAIClientBase()
-    {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<KoboldAIParameters, KoboldAIRequestBody>();
-        });
-        Mapper = config.CreateMapper();
-    }
-    
-    public string ServiceName => KoboldAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
-
-    protected int MaxMemoryTokens { get; private set; }
-    protected int MaxContextTokens { get; private set; }
-    
-    private readonly HttpClient _httpClient;
-    private readonly ISettingsRepository _settingsRepository;
-    private KoboldAIParameters? _parameters;
-    private bool _initialized;
+public class KoboldAIClientBase : RemoteServiceClientBase<KoboldAISettings, KoboldAIParameters, KoboldAIRequestBody>
+{   protected override bool Streaming => true;
+    protected override string GenerateRequestPath => "/api/extra/generate/stream";
 
     protected KoboldAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
-    {
-        _httpClient = httpClientFactory.CreateClient(KoboldAIConstants.ServiceName);
-        _settingsRepository = settingsRepository;
-    }
+        : base(KoboldAIConstants.ServiceName, httpClientFactory, settingsRepository)
 
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        if (_initialized) return true;
-        _initialized = true;
-        var settings = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
-        var uri = settings.Uri;
-        if (string.IsNullOrEmpty(uri)) return false;
-        if (dry) return true;
-        
-        _httpClient.BaseAddress = new Uri(uri);
-        _parameters = settings.Parameters ?? new KoboldAIParameters();
-        MaxMemoryTokens = settings.MaxMemoryTokens;
-        MaxContextTokens = settings.MaxContextTokens;
-        return true;
-    }
-
-    public int GetTokenCount(string message)
-    {
-        return 0;
+        httpClientFactory.CreateClient(KoboldAIConstants.ServiceName);
     }
 
     protected KoboldAIRequestBody BuildRequestBody(string prompt, string[] stoppingStrings)
     {
-        var body = Mapper.Map<KoboldAIRequestBody>(_parameters);
+        var body = CreateParameters();
         body.Prompt = prompt;
         body.StopSequence = stoppingStrings;
         // TODO: We want to add logit bias here to avoid [, ( and OOC from being generated.
@@ -83,17 +27,7 @@ public class KoboldAIClientBase
 
     protected async Task<string> SendCompletionRequest(KoboldAIRequestBody body, CancellationToken cancellationToken)
     {
-        var bodyContent = new StringContent(JsonSerializer.Serialize(body, JsonSerializerOptions), Encoding.UTF8, "application/json");
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/extra/generate/stream");
-        request.Content = bodyContent;
-        request.ConfigureEventStream();
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-            throw new KoboldAIException(await response.Content.ReadAsStringAsync(cancellationToken));
-
-        var text = await response.ReadEventStream<TextGenEventData>(cancellationToken);
-        return text.TrimExcess();
+        return await SendStreamingCompletionRequest<TextGenEventData>(body, cancellationToken);
     }
 
     [Serializable]
@@ -106,9 +40,5 @@ public class KoboldAIClientBase
         public int ptr { get; init; }
         public string? error { get; init; }
         public string GetToken() => token;
-    }
-
-    public void Dispose()
-    {
     }
 }
