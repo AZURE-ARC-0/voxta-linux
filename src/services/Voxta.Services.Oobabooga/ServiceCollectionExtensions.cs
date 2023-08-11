@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<OobaboogaTextGenService>();
         services.AddTransient<OobaboogaActionInferenceService>();
+        services.AddTransient<OobaboogaSummarizationService>();
     }
     
     public static void RegisterOobabooga(this IServiceRegistry<ITextGenService> registry)
@@ -20,5 +21,10 @@ public static class ServiceCollectionExtensions
     public static void RegisterOobabooga(this IServiceRegistry<IActionInferenceService> registry)
     {
         registry.Add<OobaboogaActionInferenceService>(OobaboogaConstants.ServiceName);
+    }
+    
+    public static void RegisterOobabooga(this IServiceRegistry<ISummarizationService> registry)
+    {
+        registry.Add<OobaboogaSummarizationService>(OobaboogaConstants.ServiceName);
     }
 }

@@ -46,4 +46,11 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IServiceFactory<IActionInferenceService>>(sp => new ServiceFactory<IActionInferenceService>(registry, sp));
         return registry;
     }
+    
+    public static IServiceRegistry<ISummarizationService> AddSummarizationRegistry(this IServiceCollection services)
+    {
+        var registry = new ServiceRegistry<ISummarizationService>();
+        services.AddTransient<IServiceFactory<ISummarizationService>>(sp => new ServiceFactory<ISummarizationService>(registry, sp));
+        return registry;
+    }
 }

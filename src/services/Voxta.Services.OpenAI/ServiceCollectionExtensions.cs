@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<OpenAITextGenClient>();
         services.AddTransient<OpenAIActionInferenceClient>();
+        services.AddTransient<OpenAISummarizationService>();
     }
     
     public static void RegisterOpenAI(this IServiceRegistry<ITextGenService> registry)
@@ -20,5 +21,10 @@ public static class ServiceCollectionExtensions
     public static void RegisterOpenAI(this IServiceRegistry<IActionInferenceService> registry)
     {
         registry.Add<OpenAIActionInferenceClient>(OpenAIConstants.ServiceName);
+    }
+    
+    public static void RegisterOpenAI(this IServiceRegistry<ISummarizationService> registry)
+    {
+        registry.Add<OpenAISummarizationService>(OpenAIConstants.ServiceName);
     }
 }

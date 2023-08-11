@@ -110,6 +110,12 @@ public class OpenAIPromptBuilder
         return messages;
     }
 
+    public List<OpenAIMessage> BuildSummarizationPrompt(IChatInferenceData chat)
+    {
+        #warning TODO
+        throw new NotImplementedException();
+    }
+
     private static string MakeSystemPrompt(IChatInferenceData chat)
     {
         var character = chat.Character;

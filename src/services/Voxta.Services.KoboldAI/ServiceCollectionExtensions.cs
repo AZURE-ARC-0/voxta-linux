@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<KoboldAITextGenService>();
         services.AddTransient<KoboldAIActionInferenceService>();
+        services.AddTransient<KoboldAISummarizationService>();
     }
     
     public static void RegisterKoboldAI(this IServiceRegistry<ITextGenService> registry)
@@ -20,5 +21,10 @@ public static class ServiceCollectionExtensions
     public static void RegisterKoboldAI(this IServiceRegistry<IActionInferenceService> registry)
     {
         registry.Add<KoboldAIActionInferenceService>(KoboldAIConstants.ServiceName);
+    }
+    
+    public static void RegisterKoboldAI(this IServiceRegistry<ISummarizationService> registry)
+    {
+        registry.Add<KoboldAISummarizationService>(KoboldAIConstants.ServiceName);
     }
 }

@@ -40,11 +40,13 @@ public static class ServiceCollectionExtensions
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
         var actionInferenceRegistry = services.AddActionInferenceRegistry();
+        var summarizationRegistry = services.AddSummarizationRegistry();
 
         services.AddMocks();
         textGenRegistry.RegisterMocks();
         textToSpeechRegistry.RegisterMocks();
         actionInferenceRegistry.RegisterMocks();
+        summarizationRegistry.RegisterMocks();
 
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
@@ -58,10 +60,12 @@ public static class ServiceCollectionExtensions
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();
         actionInferenceRegistry.RegisterKoboldAI();
+        summarizationRegistry.RegisterKoboldAI();
         
         services.AddOobabooga();
         textGenRegistry.RegisterOobabooga();
         actionInferenceRegistry.RegisterOobabooga();
+        summarizationRegistry.RegisterOobabooga();
         
         services.AddTextGenerationInference();
         textGenRegistry.RegisterTextGenerationInference();

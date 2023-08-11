@@ -8,9 +8,6 @@ namespace Voxta.Services.OpenAI;
 
 public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceService
 {
-    public string ServiceName => OpenAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.GPT3 };
-    
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IServiceObserver _serviceObserver;
 

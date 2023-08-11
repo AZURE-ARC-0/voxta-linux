@@ -8,9 +8,6 @@ namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInferenceService
 {
-    public string ServiceName => OobaboogaConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
-    
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IServiceObserver _serviceObserver;
 

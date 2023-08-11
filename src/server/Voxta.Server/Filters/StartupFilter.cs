@@ -55,6 +55,7 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
                 modified |= profile.SpeechToText.SyncWithTemplate(defaultProfile.SpeechToText);
                 modified |= profile.TextToSpeech.SyncWithTemplate(defaultProfile.TextToSpeech);
                 modified |= profile.ActionInference.SyncWithTemplate(defaultProfile.ActionInference);
+                modified |= profile.Summarization.SyncWithTemplate(defaultProfile.Summarization);
                 if (modified)
                 {
                     await _profileRepository.SaveProfileAsync(profile);

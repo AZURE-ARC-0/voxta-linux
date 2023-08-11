@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.DeepDev;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 
@@ -51,6 +52,9 @@ public abstract class OpenAIClientBase
         if (string.IsNullOrEmpty(message)) return 0;
         return Tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
     }
+    
+    public string ServiceName => OpenAIConstants.ServiceName;
+    public string[] Features => new[] { ServiceFeatures.GPT3 };
 
     public virtual async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {

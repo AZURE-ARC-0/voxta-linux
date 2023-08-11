@@ -13,9 +13,14 @@ public static class ServiceObserverKeys
     public const string TextGenService = "TextGen.Service";
     public const string TextGenPrompt = "TextGen.Prompt";
     public const string TextGenResult = "TextGen.Result";
+    
     public const string ActionInferenceService = "ActionInference.Service";
     public const string ActionInferencePrompt = "ActionInference.Prompt";
     public const string ActionInferenceResult = "ActionInference.Result";
+    
+    public const string SummarizationService = "Summarization.Service";
+    public const string SummarizationPrompt = "Summarization.Prompt";
+    public const string SummarizationResult = "Summarization.Result";
 }
 
 public class ServiceObserverRecord

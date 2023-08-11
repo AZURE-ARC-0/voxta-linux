@@ -7,10 +7,7 @@ using Voxta.Abstractions.System;
 namespace Voxta.Services.OpenAI;
 
 public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
-{
-    public string ServiceName => OpenAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.GPT3 };
-    
+{   
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IServiceObserver _serviceObserver;
 

@@ -16,6 +16,7 @@ public class DiagnosticsResult
     public required ServiceDiagnosticsResult[] TextToSpeechServices { get; init; }
     public required ServiceDiagnosticsResult[] ActionInferenceServices { get; init; }
     public required ServiceDiagnosticsResult[] SpeechToTextServices { get; init; }
+    public required ServiceDiagnosticsResult[] SummarizationServices { get; init; }
 }
 
 [Serializable]
@@ -42,20 +43,22 @@ public class DiagnosticsUtil
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly IServiceFactory<ISpeechToTextService> _speechToTextFactory;
     private readonly IServiceFactory<IActionInferenceService> _actionInferenceFactory;
+    private readonly IServiceFactory<ISummarizationService> _summarizationFactory;
 
     public DiagnosticsUtil(
         IProfileRepository profileRepository,
         IServiceFactory<ITextGenService> textGenFactory,
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
         IServiceFactory<ISpeechToTextService> speechToTextFactory,
-        IServiceFactory<IActionInferenceService> actionInferenceFactory
-        )
+        IServiceFactory<IActionInferenceService> actionInferenceFactory,
+        IServiceFactory<ISummarizationService> summarizationFactory)
     {
         _profileRepository = profileRepository;
         _textGenFactory = textGenFactory;
         _textToSpeechFactory = textToSpeechFactory;
         _speechToTextFactory = speechToTextFactory;
         _actionInferenceFactory = actionInferenceFactory;
+        _summarizationFactory = summarizationFactory;
     }
 
     public Task<DiagnosticsResult> GetAllServicesAsync(CancellationToken cancellationToken)
@@ -107,6 +110,7 @@ public class DiagnosticsUtil
                 TextGenServices = Array.Empty<ServiceDiagnosticsResult>(),
                 TextToSpeechServices = Array.Empty<ServiceDiagnosticsResult>(),
                 SpeechToTextServices = Array.Empty<ServiceDiagnosticsResult>(),
+                SummarizationServices = Array.Empty<ServiceDiagnosticsResult>(),
             };
         }
 
@@ -121,6 +125,10 @@ public class DiagnosticsUtil
         var actionInference = _actionInferenceFactory.ServiceNames.Select(serviceName =>
             Task.Run(async () => await TryActionInferenceAsync(serviceName, runTests, cancellationToken), cancellationToken)
         ).ToArray();
+        
+        var summarization = _summarizationFactory.ServiceNames.Select(serviceName =>
+            Task.Run(async () => await TrySummarizationAsync(serviceName, runTests, cancellationToken), cancellationToken)
+        ).ToArray();
 
         var sttNames = _speechToTextFactory.ServiceNames.ToArray();
         var stt = new ServiceDiagnosticsResult[sttNames.Length];
@@ -132,7 +140,7 @@ public class DiagnosticsUtil
             }
         }, cancellationToken);
 
-        await Task.WhenAll(textGen.Concat(tts).Concat(actionInference).Concat(new[] { sttTask }));
+        await Task.WhenAll(textGen.Concat(tts).Concat(actionInference).Concat(summarization).Concat(new[] { sttTask }));
 
         return new DiagnosticsResult
         {
@@ -140,6 +148,7 @@ public class DiagnosticsUtil
             TextGenServices = textGen.Select(t => t.Result).OrderBy(x => profile.TextGen.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
             TextToSpeechServices = tts.Select(t => t.Result).OrderBy(x => profile.TextToSpeech.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
             ActionInferenceServices = actionInference.Select(t => t.Result).OrderBy(x => profile.ActionInference.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
+            SummarizationServices = summarization.Select(t => t.Result).OrderBy(x => profile.Summarization.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
             SpeechToTextServices = stt.OrderBy(x => profile.SpeechToText.Order(x.ServiceName)).ThenBy(x => x.ServiceName).ToArray(),
         };
     }
@@ -152,7 +161,7 @@ public class DiagnosticsUtil
             async () => await _textGenFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
             async service =>
             {
-                var result = await service.GenerateReplyAsync(new ChatSessionData
+                var chat = new ChatSessionData
                 {
                     UserName = "User",
                     Chat = null!,
@@ -167,7 +176,10 @@ public class DiagnosticsUtil
                         FirstMessage = "Beginning test.",
                         Services = null!,
                     }
-                }, cancellationToken);
+                };
+                chat.AddMessage(chat.Character.Name, chat.Character.FirstMessage);
+                chat.AddMessage(chat.UserName, "Are you working correctly?");
+                var result = await service.GenerateReplyAsync(chat, cancellationToken);
                 return "Response: " + result;
             }
         );
@@ -221,8 +233,8 @@ public class DiagnosticsUtil
             async () => await _actionInferenceFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
             async service =>
             {
-                var actions = new[] { "test_successful", "talk_to_user" };
-                var result = await service.SelectActionAsync(new ChatSessionData
+                var actions = new[] { "test_successful", "test_failed" };
+                var chat = new ChatSessionData
                 {
                     UserName = "User",
                     Chat = null!,
@@ -237,8 +249,43 @@ public class DiagnosticsUtil
                         Services = null!
                     },
                     Actions = actions
-                }, cancellationToken);
+                };
+                chat.AddMessage(chat.Character.Name, "Yep, looks like this is working!");
+                var result = await service.SelectActionAsync(chat, cancellationToken);
                 return "Action: " + result;
+            }
+        );
+    }
+    
+    private async Task<ServiceDiagnosticsResult> TrySummarizationAsync(string serviceName, bool runTests, CancellationToken cancellationToken)
+    {
+        return await TestServiceAsync(
+            serviceName,
+            runTests,
+            async () => await _summarizationFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
+            async service =>
+            {
+                var actions = new[] { "test_successful", "talk_to_user" };
+                var chat = new ChatSessionData
+                {
+                    UserName = "User",
+                    Chat = null!,
+                    Character = new CharacterCardExtended
+                    {
+                        Name = "Assistant",
+                        SystemPrompt = "You are a test assistant",
+                        Description = "",
+                        Personality = "",
+                        Scenario = "This is a test",
+                        FirstMessage = "Beginning test.",
+                        Services = null!
+                    },
+                    Actions = actions
+                };
+                chat.AddMessage(chat.Character.Name, "I like apples. Do you like apples?");
+                chat.AddMessage(chat.UserName, "No, I don't like them at all.");
+                var result = await service.SummarizeAsync(chat, cancellationToken);
+                return "Summary: " + result;
             }
         );
     }

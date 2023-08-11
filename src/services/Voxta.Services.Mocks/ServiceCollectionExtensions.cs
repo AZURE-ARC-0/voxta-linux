@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<MockTextGenService>();
         services.AddTransient<MockTextToSpeechService>();
         services.AddTransient<MockActionInferenceService>();
+        services.AddTransient<MockSummarizationService>();
     }
     
     public static void RegisterMocks(this IServiceRegistry<ITextGenService> registry)
@@ -26,5 +27,10 @@ public static class ServiceCollectionExtensions
     public static void RegisterMocks(this IServiceRegistry<IActionInferenceService> registry)
     {
         registry.Add<MockActionInferenceService>(MockConstants.ServiceName);
+    }
+    
+    public static void RegisterMocks(this IServiceRegistry<ISummarizationService> registry)
+    {
+        registry.Add<MockSummarizationService>(MockConstants.ServiceName);
     }
 }

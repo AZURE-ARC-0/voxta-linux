@@ -30,4 +30,5 @@ public class ProfileSettings
     public ServicesList SpeechToText { get; set; } = new();
     public ServicesList TextToSpeech { get; set; } = new();
     public ServicesList TextGen { get; set; } = new();
+    public ServicesList Summarization { get; set; } = new();
 }

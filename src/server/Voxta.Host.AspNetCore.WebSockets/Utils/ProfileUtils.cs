@@ -79,6 +79,16 @@ public static class ProfileUtils
                     MockConstants.ServiceName,
 #endif
                 }
+            },
+            Summarization = 
+            {
+                Services = new[]
+                {
+                    TextGenerationInferenceConstants.ServiceName,
+#if(DEBUG)
+                    MockConstants.ServiceName,
+#endif
+                }
             }
         };
     }

@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<TextGenerationInferenceTextGenService>();
         services.AddTransient<TextGenerationInferenceActionInferenceService>();
+        services.AddTransient<TextGenerationInferenceSummarizationService>();
     }
     
     public static void RegisterTextGenerationInference(this IServiceRegistry<ITextGenService> registry)
@@ -20,5 +21,10 @@ public static class ServiceCollectionExtensions
     public static void RegisterTextGenerationInference(this IServiceRegistry<IActionInferenceService> registry)
     {
         registry.Add<TextGenerationInferenceActionInferenceService>(TextGenerationInferenceConstants.ServiceName);
+    }
+    
+    public static void RegisterTextGenerationInference(this IServiceRegistry<ISummarizationService> registry)
+    {
+        registry.Add<TextGenerationInferenceSummarizationService>(TextGenerationInferenceConstants.ServiceName);
     }
 }

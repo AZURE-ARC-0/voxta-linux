@@ -37,6 +37,7 @@ public class SettingsController : Controller
         return View("Settings", vm);
     }
 
+    [SuppressMessage("ReSharper", "RawStringCanBeSimplified")]
     private async Task<SettingsViewModel> GetSettingsViewModel(Func<Task<DiagnosticsResult>> getServices, CancellationToken cancellationToken)
     {
         var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? ProfileUtils.CreateDefaultProfile();
@@ -119,6 +120,15 @@ public class SettingsController : Controller
                         <p>You should use OpenAI, even for NSFW, unless you want to experiment with other LLMs. Keep in mind, the LLM must be good to do action inference correctly.</p>
                         """
                 },
+                new()
+                {
+                    Name = "summarization",
+                    Title = "Summarization Services",
+                    Services = services.SummarizationServices,
+                    Help = """
+                           <p>Summarization is used to replace long chat history by summaries. This results in a stronger character adherence and faster inference.</p>
+                           """
+                },
             }
         };
         return vm;
@@ -141,6 +151,9 @@ public class SettingsController : Controller
                 break;
             case "textgen":
                 profile.TextGen = Reorder(profile.TextGen, name, direction);
+                break;
+            case "summarization":
+                profile.Summarization = Reorder(profile.Summarization, name, direction);
                 break;
             default:
                 throw new NotSupportedException($"Cannot reorder {type}");
