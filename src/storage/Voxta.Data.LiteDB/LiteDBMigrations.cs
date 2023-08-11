@@ -18,6 +18,12 @@ public class LiteDBMigrations
             Migrate_3_To_4();
             _db.UserVersion = 4;
         }
+        
+        if (_db.UserVersion == 4)
+        {
+            Migrate_4_To_5();
+            _db.UserVersion = 5;
+        }
 
         return Task.CompletedTask;
     }
@@ -31,10 +37,23 @@ public class LiteDBMigrations
             if (id.Type == BsonType.String)
             {
                 characters.Delete(id);
-                // id = new BsonValue(Guid.Parse(id.AsString));
-                // character["_id"] = id;
-                // if (!characters.FindById(id))
-                //     characters.Insert(character);
+            }
+        }
+    }
+    
+
+
+    private void Migrate_4_To_5()
+    {
+        var messages = _db.GetCollection("ChatMessageData");
+        foreach (var message in messages.FindAll())
+        {
+            var id = message["_id"];
+            if (id.Type == BsonType.String)
+            {
+                messages.Delete(id);
+                message["_id"] = new BsonValue(Guid.Parse(id.AsString));
+                messages.Insert(message);
             }
         }
     }

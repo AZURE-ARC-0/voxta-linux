@@ -9,6 +9,17 @@
     
     <div class="card mb-3">
         <div class="card-header">
+            <h2>Help</h2>
+        </div>
+        <div class="card-body">
+            <p>This is your chat history. You can double-click on a message to edit it, but the tokens count will not be updated. You can delete all the text of a message to delete it.</p>
+            <p>If the chat is live, you'll need to reload to get the updated history.</p>
+            <p>Editing the chat history will not update memory.</p>
+        </div>
+    </div>
+    
+    <div class="card mb-3">
+        <div class="card-header">
             <h2>Chat with @Model.Character.Name, started @Model.Created</h2>
         </div>
         <div class="card-body p-0">
@@ -29,7 +40,7 @@
                                 @message.User
                             </td>
                             <td>
-                                @message.Text
+                                <span class="editable" data-message-id="@message.Id">@message.Text</span>
                             </td>
                             <td class="text-end text-muted">
                                 @message.Tokens
@@ -41,3 +52,67 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.editable').forEach(function (editable) {
+        editable.addEventListener('dblclick', function () {
+            const originalText = editable.textContent;
+            const messageId = editable.getAttribute('data-message-id');
+
+            // Create Input
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = originalText.trim();
+            input.className = 'form-control'; // Bootstrap class for input styling
+
+            // Create Checkmark Button
+            const checkmark = document.createElement('button');
+            checkmark.className = 'btn btn-success'; // Bootstrap class for button styling
+            checkmark.innerHTML = '<i class="bi bi-check"></i>'; // Bootstrap icon for checkmark
+            checkmark.addEventListener('click', function () {
+                const newText = input.value;
+                fetch('/chat/@Model.Id/messages/' + messageId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: newText })
+                })
+                .then(() => {
+                    editable.innerHTML = '';
+                    if (newText)
+                        editable.textContent = newText;
+                    else
+                        editable.textContent = 'DELETED';
+                }, e => {
+                    editable.innerHTML = '';
+                    editable.textContent = e.toString();
+                });
+            });
+
+            // Create Cancel Button
+            const cancel = document.createElement('button');
+            cancel.className = 'btn btn-danger'; // Bootstrap class for button styling
+            cancel.innerHTML = '<i class="bi bi-x"></i>'; // Bootstrap icon for cancel
+            cancel.addEventListener('click', function () {
+                editable.textContent = originalText;
+            });
+
+            // Create a container to hold input and buttons
+            const container = document.createElement('div');
+            container.className = 'd-flex'; // Bootstrap class for flexbox layout
+            container.appendChild(input);
+            container.appendChild(checkmark);
+            container.appendChild(cancel);
+
+            editable.innerHTML = '';
+            editable.appendChild(container);
+            
+            input.focus();
+            input.select();
+        });
+    });
+});
+
+</script>

@@ -63,4 +63,29 @@ public class ChatsController : Controller
             Messages = messages,
         });
     }
+    
+    [HttpPost("/chat/{id}/messages/{messageId}")]
+    public async Task<IActionResult> Chat([FromRoute] Guid messageId, [FromBody] UpdateMessage value, CancellationToken cancellationToken)
+    {
+        
+        var message = await _messageRepository.GetChatMessageAsync(messageId, cancellationToken);
+        if (message == null) return NotFound();
+        if (string.IsNullOrEmpty(value.Text))
+        {
+            _messageRepository.DeleteMessageAsync(messageId);
+        }
+        else
+        {
+            message.Text = value.Text;
+            await _messageRepository.UpdateMessageAsync(message);
+        }
+
+        return Ok();
+    }
+
+    [Serializable]
+    public class UpdateMessage
+    {
+        public required string Text { get; init; }
+    }
 }

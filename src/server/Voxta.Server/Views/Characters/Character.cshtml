@@ -7,7 +7,6 @@
 
 <div class="container py-3">
     <h1>@(Model.Character.ReadOnly ? "View" : "Edit") Character</h1>
-
     
     <form method="post" action="/characters/@Model.Character.Id">
         <input type="hidden" asp-for="Character.Id" class="form-control" readonly="readonly"/>

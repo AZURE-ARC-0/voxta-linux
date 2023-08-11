@@ -24,6 +24,11 @@ public class ChatMessageLiteDBRepository : IChatMessageRepository
         return Task.FromResult(messages);
     }
 
+    public Task<ChatMessageData?> GetChatMessageAsync(Guid messageId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<ChatMessageData?>(_chatMessagesCollection.FindOne(x => x.Id == messageId));
+    }
+
     public Task SaveMessageAsync(ChatMessageData message)
     {
         _chatMessagesCollection.Insert(message);
@@ -39,6 +44,12 @@ public class ChatMessageLiteDBRepository : IChatMessageRepository
     public Task DeleteChatMessages(Guid chatId)
     {
         _chatMessagesCollection.DeleteMany(x => x.ChatId == chatId);
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteMessageAsync(Guid messageId)
+    {
+        _chatMessagesCollection.Delete(messageId);
         return Task.CompletedTask;
     }
 }

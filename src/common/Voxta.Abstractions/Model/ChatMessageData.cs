@@ -5,8 +5,8 @@ namespace Voxta.Abstractions.Model;
 [Serializable]
 public class ChatMessageData : TextData
 {
+    [BsonId] public required Guid Id { get; set; }
     public required Guid ChatId { get; init; }
-    [BsonId] public required string Id { get; set; }
     public required string User { get; init; }
     public required DateTimeOffset Timestamp { get; init; }
 
@@ -17,7 +17,7 @@ public class ChatMessageData : TextData
         return new ChatMessageData
         {
             ChatId = chatId,
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             User = user,
             Timestamp = DateTimeOffset.UtcNow,
             Text = message,
@@ -32,7 +32,7 @@ public class ChatMessageData : TextData
         return new ChatMessageData
         {
             ChatId = chatId,
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             User = user,
             Timestamp = DateTimeOffset.UtcNow,
             Text = gen.Text,
