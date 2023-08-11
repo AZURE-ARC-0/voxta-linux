@@ -11,7 +11,7 @@ public class HomeController : Controller
     {
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
         return profile == null
-            ? RedirectToAction("Settings", "Settings")
+            ? RedirectToAction("ProfileSettings", "Settings")
             : RedirectToAction("Chat", "Chat");
     }
     

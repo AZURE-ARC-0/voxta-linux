@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
-using Voxta.Server.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Server.ViewModels.Settings;
@@ -174,12 +173,16 @@ public class SettingsController : Controller
     [HttpGet("/settings/profile")]
     public async Task<IActionResult> ProfileSettings(CancellationToken cancellationToken)
     {
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? ProfileUtils.CreateDefaultProfile();
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken);
+        var exists = profile != null;
+        profile ??= ProfileUtils.CreateDefaultProfile();
         var vm = new ProfileViewModel
         {
             Name = profile.Name,
             Description = profile.Description ?? "",
             PauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback,
+            IsAdult = exists,
+            AgreesToTerms = exists,
         };
         return View(vm);
     }

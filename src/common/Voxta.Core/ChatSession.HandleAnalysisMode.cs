@@ -23,7 +23,7 @@ public partial class ChatSession
     private async Task HelpAsync(CancellationToken cancellationToken)
     {
         var sb = new StringBuilder();
-        sb.AppendLineLinux("You are in analysis mode. Use list commands to hear available commands, go online to go back online and go offline to stop transcription.");
+        sb.AppendLineLinux("You are in analysis mode. Say \"list commands\" to hear available commands, say \"go online\" to resume conversation or \"go offline\" to pause transcription.");
         await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, cancellationToken);
     }
 

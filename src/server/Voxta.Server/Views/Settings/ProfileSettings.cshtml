@@ -19,6 +19,24 @@
     <form id="configureForm" method="post" asp-action="PostProfileSettings">
         <div class="card mb-3">
             <div class="card-header">
+                <h2>Terms</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="IsAdult">You certify you are 18 years old or more.</label>
+                    <input asp-for="IsAdult" type="checkbox" class="form-check-input"/>
+                    <span asp-validation-for="IsAdult" class="text-danger"></span>
+                </div>
+                <div>
+                    <label asp-for="AgreesToTerms">You have read and agree to the <a href="/legal/tos">terms and conditions</a>.</label>
+                    <input asp-for="AgreesToTerms" type="checkbox" class="form-check-input"/>
+                    <span asp-validation-for="AgreesToTerms" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
@@ -37,7 +55,7 @@
 
         <div class="card mb-3">
             <div class="card-header">
-                <h2>Default Services</h2>
+                <h2>Options</h2>
             </div>
             <div class="card-body">
                 <h3>Speech To Text Options</h3>
