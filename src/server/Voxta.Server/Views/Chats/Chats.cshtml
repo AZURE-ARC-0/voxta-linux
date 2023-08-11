@@ -33,7 +33,7 @@
                             </td>
                             <td class="text-end">
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <form action="/chats/delete" method="post">
+                                    <form action="/chats/delete" method="post" onsubmit="return confirm('Are you sure you want to delete this chat?');">
                                         <input type="hidden" name="chatId" value="@chat.Id"/>
                                         <button type="submit" class="btn btn-danger" title="Delete"><i class="bi bi-trash"></i> Delete</button>
                                     </form>
