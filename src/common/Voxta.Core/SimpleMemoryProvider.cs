@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Text.RegularExpressions;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
@@ -9,8 +8,6 @@ namespace Voxta.Core;
 
 public class SimpleMemoryProvider : IMemoryProvider
 {
-    private static readonly Regex WordsRegex = new(@"[a-zA-Z]{2,}", RegexOptions.Compiled);
-
     private readonly IProfileRepository _profileRepository;
     private readonly IMemoryRepository _memoryRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
@@ -49,18 +46,13 @@ public class SimpleMemoryProvider : IMemoryProvider
         #warning Improve perf, e.g. by keeping a set per message. Note that if messages are updated, we should clear the words.
         #warning Memory relevance should be higher for more recent messages
         #warning We can stop as soon as we have enough tokens instead of always doing them all
+        #warning Do not re-process messages every time. Once processed, we're fine.
         foreach (var msg in chat.GetMessages())
         {
             if (string.IsNullOrEmpty(msg.Text)) continue;
-            var messageWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            foreach (Match word in WordsRegex.Matches(msg.Text))
-            {
-                messageWords.Add(word.Value);
-            }
-
             foreach (var memory in _memories)
             {
-                if (memory.Keywords.Any(k => messageWords.Contains(k)))
+                if (memory.Keywords.Any(k => msg.Text.Contains(k, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     var indexOfMemory = chat.Memories.IndexOf(memory);
                     if (indexOfMemory == 0)

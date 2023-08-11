@@ -74,52 +74,59 @@ public class PlaygroundController : Controller
         ModelState.Clear();
         
         string result;
-        if (data.Template == "Reply")
+        try
         {
-            var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
-            result = await textGen.GenerateReplyAsync(new ChatSessionData
+            if (data.Template == "Reply")
             {
-                Chat = null!,
-                UserName = profile.Name,
-                Character = character,
-                Messages =
+                var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                result = await textGen.GenerateReplyAsync(new ChatSessionData
                 {
-                    ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
-                    ChatMessageData.FromText(Guid.Empty, profile.Name, "Hi! This is a test conversation. Can you tell me something in character?")
-                }
-            }, cancellationToken);
-            vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
-            vm.Prompt = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenPrompt)?.Value ?? "";
-        }
-        else if (data.Template == "ActionInference")
-        {
-            var svc = await actionInferenceServiceFactory.CreateBestMatchAsync(profile.ActionInference,
-                vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
-            result = await svc.SelectActionAsync(new ChatSessionData
+                    Chat = null!,
+                    UserName = profile.Name,
+                    Character = character,
+                    Messages =
+                    {
+                        ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
+                        ChatMessageData.FromText(Guid.Empty, profile.Name, "Hi! This is a test conversation. Can you tell me something in character?")
+                    }
+                }, cancellationToken);
+                vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
+                vm.Prompt = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenPrompt)?.Value ?? "";
+            }
+            else if (data.Template == "ActionInference")
             {
-                Chat = null!,
-                UserName = profile.Name,
-                Character = character,
-                Actions = new[] { "wave", "sit_down", "stand_up", "break_chair" },
-                Messages =
+                var svc = await actionInferenceServiceFactory.CreateBestMatchAsync(profile.ActionInference,
+                    vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                result = await svc.SelectActionAsync(new ChatSessionData
                 {
-                    ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
-                    ChatMessageData.FromText(Guid.Empty, profile.Name, "Can you please sit down?")
-                }
-            }, cancellationToken);
-            vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferenceService)?.Value ?? data.Service ?? "";
-            vm.Prompt = vm.Service == OpenAIConstants.ServiceName
-                ? "System:\n" +
-                  _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[system]")?.Value +
-                  "\n\nUser:\n" +
-                  _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[user]")?.Value
-                : _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferencePrompt)?.Value ?? "";
+                    Chat = null!,
+                    UserName = profile.Name,
+                    Character = character,
+                    Actions = new[] { "wave", "sit_down", "stand_up", "break_chair" },
+                    Messages =
+                    {
+                        ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
+                        ChatMessageData.FromText(Guid.Empty, profile.Name, "Can you please sit down?")
+                    }
+                }, cancellationToken);
+                vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferenceService)?.Value ?? data.Service ?? "";
+                vm.Prompt = vm.Service == OpenAIConstants.ServiceName
+                    ? "System:\n" +
+                      _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[system]")?.Value +
+                      "\n\nUser:\n" +
+                      _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[user]")?.Value
+                    : _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferencePrompt)?.Value ?? "";
+            }
+            else
+            {
+                var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                result = await textGen.GenerateAsync(vm.Prompt, cancellationToken);
+                vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
+            }
         }
-        else
+        catch (Exception exc)
         {
-            var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
-            result = await textGen.GenerateAsync(vm.Prompt, cancellationToken);
-            vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
+            result = exc.ToString();
         }
 
         vm.Response = result;

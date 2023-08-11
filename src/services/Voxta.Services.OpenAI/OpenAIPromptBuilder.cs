@@ -97,7 +97,11 @@ public class OpenAIPromptBuilder
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
         sb.AppendLineLinux();
-        sb.AppendLineLinux($"Based on the last message, which of the following actions is the most applicable for {chat.Character.Name}: {string.Join(", ", chat.Actions.Select(a => $"[{a}]"))}"); 
+        sb.AppendLineLinux($"Which of the following actions should be executed to match {chat.Character.Name}'s last message?");
+        foreach (var action in chat.Actions)
+        {
+            sb.AppendLineLinux($"- [{action}]");
+        }
         sb.AppendLineLinux();
         sb.AppendLineLinux("Only write the action.");
         

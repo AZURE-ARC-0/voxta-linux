@@ -117,7 +117,11 @@ public class GenericPromptBuilder
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
         sb.AppendLineLinux();
-        sb.AppendLineLinux($"Based on the last message, which of the following actions is the most applicable for {chatSessionData.Character.Name}: {string.Join(", ", chatSessionData.Actions.Select(a => $"[{a}]"))}"); 
+        sb.AppendLineLinux($"Which of the following actions should be executed to match {chatSessionData.Character.Name}'s last message?");
+        foreach (var action in chatSessionData.Actions)
+        {
+            sb.AppendLineLinux($"- [{action}]");
+        }
         sb.AppendLineLinux();
         sb.AppendLineLinux("Only write the action.");
         sb.AppendLineLinux();
