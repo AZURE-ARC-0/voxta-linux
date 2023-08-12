@@ -8,9 +8,9 @@ public sealed class TestHttpClientFactory : IHttpClientFactory, IDisposable
 
     public void Dispose()
     {
-        // if (_handlerLazy.IsValueCreated)
-        // {
-        //     _handlerLazy.Value.Dispose();
-        // }
+        if (_handlerLazy.IsValueCreated)
+        {
+            _handlerLazy.Value.Dispose();
+        }
     }
 }

@@ -129,7 +129,7 @@ public class OpenAIPromptBuilder
             Use as few words as possible.
             Write from the point of view of {chat.Character.Name}.
             Use telegraphic dense notes style.
-            Associate memory with the right person.
+            Name the person associated with the memory.
             Only write useful and high confidence memories.
             These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
 

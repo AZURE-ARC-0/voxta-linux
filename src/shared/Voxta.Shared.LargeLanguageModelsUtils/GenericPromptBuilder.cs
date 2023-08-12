@@ -129,21 +129,18 @@ public class GenericPromptBuilder
         return sb.ToString().TrimExcess();
     }
 
+    public string[] SummarizationStopTokens => new string[] { "\n\n" }; 
+
     public string BuildSummarizationPrompt(IChatInferenceData chat)
     {
         var sb = new StringBuilder();
         sb.AppendLineLinux($"""
-            Memorize new knowledge {chat.Character.Name} learned in the conversation.
-
-            Use as few words as possible.
-            Write from the point of view of {chat.Character.Name}.
-            Use telegraphic dense notes style.
-            Associate memory with the right person.
-            Only write useful and high confidence memories.
-            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
-
+            You must write facts about {chat.Character.Name} and {chat.UserName} from their conversation.
+            Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
+            Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
+            
+            Conversation:
             <START>
-
             """.ReplaceLineEndings("\n"));
         
         foreach (var message in chat.GetMessages().Take(10))
@@ -151,8 +148,9 @@ public class GenericPromptBuilder
             sb.AppendLineLinux($"{message.User}: {message.Text}");
         }
         
+        sb.AppendLineLinux("<END>");
         sb.AppendLineLinux();
-        sb.AppendLineLinux($"What {chat.Character.Name} learned:");
+        sb.AppendLineLinux("Facts learned:");
         return sb.ToString();
     }
 

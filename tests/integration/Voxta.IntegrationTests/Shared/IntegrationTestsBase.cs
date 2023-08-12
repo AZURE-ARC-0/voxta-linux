@@ -7,7 +7,6 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Abstractions.System;
-using Voxta.Characters.Samples;
 using Voxta.Core;
 using Voxta.Data.LiteDB;
 using Voxta.Security.Windows;
@@ -16,34 +15,37 @@ namespace Voxta.IntegrationTests.Shared;
 
 public abstract class IntegrationTestsBase
 {
-    protected TestServiceObserver ServiceObserver { get; set; } = null!;
+    private static readonly LiteDatabase Db;
+    private static readonly TestHttpClientFactory HttpClientFactory = new TestHttpClientFactory();
+
+    static IntegrationTestsBase()
+    {
+        Db = new LiteDatabase(@"../../../../../../../src/server/Voxta.Server/Data/Voxta.db");
+    }
+    
+    ~IntegrationTestsBase()
+    {
+        Db.Dispose();
+        HttpClientFactory.Dispose();
+    }
+    
+    protected TestServiceObserver ServiceObserver { get; private set; } = null!;
 
     [SetUp]
     public void Setup()
     {
+        ServiceObserver = new TestServiceObserver();
     }
 
     protected async Task<TClient> CreateClientAsync<TClient>() where TClient : class, IService
     {
         var services = new ServiceCollection();
-        using var httpClientFactory = new TestHttpClientFactory();
-        services.AddSingleton<IHttpClientFactory>(httpClientFactory);
-        
-        var db = new LiteDatabase(@"../../../../../../../src/server/Voxta.Server/Data/Voxta.db");
-        services.AddSingleton(db);
-        
-        var settingsRepository = new SettingsLiteDBRepository(db);
-        services.AddSingleton<ISettingsRepository>(settingsRepository);
-        
-        var metrics = new TestPerformanceMetrics();
-        services.AddSingleton<IPerformanceMetrics>(metrics);
-        
-        ServiceObserver = new TestServiceObserver();
+        services.AddSingleton<IHttpClientFactory>(_ => HttpClientFactory);
+        services.AddSingleton(Db);
+        services.AddSingleton<ISettingsRepository>(_ => new SettingsLiteDBRepository(Db));
+        services.AddSingleton<IPerformanceMetrics>(_ => new TestPerformanceMetrics());
         services.AddSingleton<IServiceObserver>(ServiceObserver);
-        
-        var encryptionProvider = new DPAPIEncryptionProvider();
-        services.AddSingleton<ILocalEncryptionProvider>(encryptionProvider);
-
+        services.AddSingleton<ILocalEncryptionProvider>(_ => new DPAPIEncryptionProvider());
         services.AddSingleton<TClient>();
 
         var sp = services.BuildServiceProvider();
