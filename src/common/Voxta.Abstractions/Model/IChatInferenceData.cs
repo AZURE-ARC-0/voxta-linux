@@ -1,12 +1,16 @@
-﻿namespace Voxta.Abstractions.Model;
+﻿using System.Globalization;
+
+namespace Voxta.Abstractions.Model;
 
 public interface IChatInferenceData
 {
-    string UserName { get; }
-    CharacterCardExtended Character { get; }
-    string? Context { get; }
+    ChatSessionDataUser User { get; }
+    ChatSessionDataCharacter Character { get; }
+    string Culture { get; }
+    CultureInfo CultureInfo { get; }
+    TextData? Context { get; }
     string[]? Actions { get; }
 
     IReadOnlyList<ChatMessageData> GetMessages();
-    IReadOnlyList<MemoryItem> GetMemories();
+    IReadOnlyList<ChatSessionDataMemory> GetMemories();
 }

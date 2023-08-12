@@ -20,7 +20,8 @@ public class GenericPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser { Name = "Joe" },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -33,7 +34,6 @@ public class GenericPromptBuilderTests
                     Personality = "some-personality",
                     Scenario = "some-scenario",
                     FirstMessage = "some-first-message",
-                    Services = null!,
                 }
             }
             .AddMessage("Joe", "Hello")
@@ -58,7 +58,8 @@ public class GenericPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser { Name = "Joe" },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -74,7 +75,6 @@ public class GenericPromptBuilderTests
                     SystemPrompt = "some-system-prompt",
                     PostHistoryInstructions = "some-post-history-instructions",
                     MessageExamples = "Joe: Request\nJane: Response",
-                    Services = null!,
                 },
                 Actions = new[] { "action1", "action2" },
                 Context = "some-context",
@@ -105,7 +105,8 @@ public class GenericPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser { Name = "Joe" },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -118,15 +119,14 @@ public class GenericPromptBuilderTests
                     Personality = "some-personality",
                     Scenario = "some-scenario",
                     FirstMessage = "some-first-message",
-                    Services = null!,
                 }
             }
             .AddMessage("Joe", "Hello")
             .AddMessage("Jane", "World")
             .AddMessage("Joe", "Question");
-        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-1", Weight = 0 });
-        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-2", Weight = 0 });
-        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-3", Weight = 0 });
+        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-1" });
+        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-2" });
+        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-3" });
         
         var actual = _builder.BuildReplyPrompt(chat, 1024, 4096);
 
@@ -150,7 +150,8 @@ public class GenericPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser { Name = "Joe" },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -166,7 +167,6 @@ public class GenericPromptBuilderTests
                     SystemPrompt = "some-system-prompt",
                     PostHistoryInstructions = "some-post-history-instructions",
                     MessageExamples = "Joe: Request\nJane: Response",
-                    Services = null!,
                 },
                 Actions = new[] { "action1", "action2" },
                 Context = "some-context",
@@ -203,7 +203,8 @@ public class GenericPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser { Name = "Joe" },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -219,7 +220,6 @@ public class GenericPromptBuilderTests
                     SystemPrompt = "some-system-prompt",
                     PostHistoryInstructions = "some-post-history-instructions",
                     MessageExamples = "Joe: Request\nJane: Response",
-                    Services = null!,
                 },
                 Actions = new[] { "action1", "action2" },
                 Context = "some-context",

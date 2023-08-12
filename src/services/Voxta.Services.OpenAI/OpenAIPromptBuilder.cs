@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using Voxta.Abstractions.Model;
 using Microsoft.DeepDev;
 
@@ -18,7 +17,7 @@ public class OpenAIPromptBuilder
     {
         var systemPrompt = MakeSystemPrompt(chat);
         var systemPromptTokens = _tokenizer.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count;
-        var postHistoryPrompt = MakePostHistoryPrompt(chat.Character);
+        var postHistoryPrompt = MakePostHistoryPrompt(chat);
         var postHistoryPromptTokens = _tokenizer.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count;
 
         var totalTokens = systemPromptTokens + postHistoryPromptTokens;
@@ -56,7 +55,7 @@ public class OpenAIPromptBuilder
             var message = chatMessages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= maxTokens) break;
-            var role = message.User == chat.Character.Name ? "assistant" : "user";
+            var role = message.User == chat.Character.Name.Text ? "assistant" : "user";
             messages.Insert(1, new() { role = role, content = message.Text });
         }
 
@@ -87,7 +86,7 @@ public class OpenAIPromptBuilder
         sb.AppendLineLinux("Conversation Context:");
         sb.AppendLineLinux(chat.Character.Name + "'s Personality: " + chat.Character.Personality);
         sb.AppendLineLinux("Scenario: " + chat.Character.Scenario);
-        if (!string.IsNullOrEmpty(chat.Context))
+        if (chat.Context?.HasValue == true)
             sb.AppendLineLinux($"Context: {chat.Context}");
         sb.AppendLineLinux();
 
@@ -154,33 +153,34 @@ public class OpenAIPromptBuilder
     {
         var character = chat.Character;
         var sb = new StringBuilder();
-        if (!string.IsNullOrEmpty(character.SystemPrompt))
-            sb.AppendLineLinux(character.SystemPrompt);
+        if (character.SystemPrompt.HasValue)
+            sb.AppendLineLinux(character.SystemPrompt.Text);
         else
-            sb.AppendLineLinux($"This is a conversation between {chat.UserName} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", CultureInfo.GetCultureInfoByIetfLanguageTag(chat.Character.Culture))}.  Keep the conversation flowing, actively engage with {chat.UserName}. Stay in character.");
+            sb.AppendLineLinux($"This is a conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", chat.CultureInfo)}.  Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character.");
         
         sb.AppendLineLinux();
         
-        if (!string.IsNullOrEmpty(character.Description))
+        if (character.Description.HasValue)
             sb.AppendLineLinux($"Description of {character.Name}: {character.Description}");
-        if (!string.IsNullOrEmpty(character.Personality))
+        if (character.Personality.HasValue)
             sb.AppendLineLinux($"Personality of {character.Name}: {character.Personality}");
-        if (!string.IsNullOrEmpty(character.Scenario))
+        if (character.Scenario.HasValue)
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
-        if (!string.IsNullOrEmpty(chat.Context))
-            sb.AppendLineLinux(chat.Context);
+        if (chat.Context?.HasValue == true)
+            sb.AppendLineLinux(chat.Context.Text);
         if (chat.Actions is { Length: > 1 })
             sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
         sb.AppendLineLinux($"Only write a single reply from {character.Name} for natural speech.");
         return sb.ToString().TrimExcess();
     }
 
-    private static string MakePostHistoryPrompt(CharacterCard character)
+    private static string MakePostHistoryPrompt(IChatInferenceData chat)
     {
-        if (string.IsNullOrEmpty(character.PostHistoryInstructions)) return "";
+        var character = chat.Character;
+        if (!character.PostHistoryInstructions.HasValue) return "";
         var sb = new StringBuilder();
-        if (!string.IsNullOrEmpty(character.PostHistoryInstructions))
-            sb.AppendLineLinux(character.PostHistoryInstructions);
+        if (!character.PostHistoryInstructions.HasValue)
+            sb.AppendLineLinux(character.PostHistoryInstructions.Text);
         return sb.ToString().TrimExcess();
     }
 }

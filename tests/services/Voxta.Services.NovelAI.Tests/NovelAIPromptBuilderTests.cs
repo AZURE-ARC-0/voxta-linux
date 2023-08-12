@@ -21,7 +21,8 @@ public class NovelAIPromptBuilderTests
         var actual = _builder.BuildReplyPrompt(
             new ChatSessionData
                 {
-                    UserName = "Joe",
+                    Culture = "en-US",
+                    User = new ChatSessionDataUser { Name = "Joe" },
                     Chat = new Chat
                     {
                         Id = Guid.NewGuid(),
@@ -34,7 +35,6 @@ public class NovelAIPromptBuilderTests
                         Personality = "some-personality",
                         Scenario = "some-scenario",
                         FirstMessage = "some-first-message",
-                        Services = null!,
                     }
                 }
                 .AddMessage("Joe", "Hello")

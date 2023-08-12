@@ -65,23 +65,26 @@ public abstract class IntegrationTestsBase
             Name = "User"
         };
         var culture = CultureInfo.GetCultureInfoByIetfLanguageTag(character.Culture);
-        var processor = new ChatTextProcessor(profile, character.Name);
+        var processor = new ChatTextProcessor(profile, character.Name, culture, new NullTokenCounter());
         var chat = new ChatSessionData
         {
-            UserName = "User",
+            Culture = character.Culture,
+            User = new ChatSessionDataUser
+            {
+                Name = profile.Name,
+            },
             Chat = new Chat
             {
                 Id = Guid.NewGuid(),
                 CharacterId = Guid.NewGuid(),
             },
-            Character = new CharacterCardExtended
+            Character = new ChatSessionDataCharacter
             {
                 Name = character.Name,
-                Description = processor.ProcessText(character.Description, culture),
-                Personality = processor.ProcessText(character.Personality, culture),
-                Scenario = processor.ProcessText(character.Scenario, culture),
-                FirstMessage = processor.ProcessText(character.FirstMessage, culture),
-                Services = null!,
+                Description = processor.ProcessText(character.Description),
+                Personality = processor.ProcessText(character.Personality),
+                Scenario = processor.ProcessText(character.Scenario),
+                FirstMessage = processor.ProcessText(character.FirstMessage),
             },
         };
         chat.AddMessage(chat.Character.Name, chat.Character.FirstMessage);

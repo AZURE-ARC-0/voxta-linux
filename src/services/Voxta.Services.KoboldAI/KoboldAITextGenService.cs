@@ -26,7 +26,7 @@ public class KoboldAITextGenService : KoboldAIClientBase, ITextGenService
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
-        var stoppingStrings = new[] { "END_OF_DIALOG", $"{chat.UserName}:", $"{chat.Character.Name}:", "\n" };
+        var stoppingStrings = new[] { "END_OF_DIALOG", $"{chat.User.Name}:", $"{chat.Character.Name}:", "\n" };
         var text = await SendCompletionRequest(BuildRequestBody(prompt, stoppingStrings), cancellationToken);
         textGenPerf.Done();
         

@@ -27,7 +27,7 @@ public partial class ChatSession
         {
             foreach (var thinkingSpeech in _chatSessionData.ThinkingSpeech)
             {
-                var thinkingSpeechId = Crypto.CreateSha1Hash($"{_chatSessionData.Character.Services.SpeechGen?.Voice ?? "NULL"}::{thinkingSpeech}");
+                var thinkingSpeechId = Crypto.CreateSha1Hash($"{_speechGenerator.Voice ?? "NULL"}::{thinkingSpeech}");
                 var thinkingSpeechUrl = await _speechGenerator.CreateSpeechAsync(thinkingSpeech, thinkingSpeechId, true, cancellationToken);
                 if (thinkingSpeechUrl != null)
                     thinkingSpeechUrls.Add(thinkingSpeechUrl);
@@ -69,14 +69,9 @@ public partial class ChatSession
 
     private async Task SendFirstMessageAsync(CancellationToken cancellationToken)
     {
-        if (_chatSessionData.Messages.Count == 0 && !string.IsNullOrEmpty(_chatSessionData.Character.FirstMessage))
+        if (_chatSessionData.Messages.Count == 0 && _chatSessionData.Character.FirstMessage?.HasValue == true)
         {
-            var textData = new TextData
-            {
-                Text = _chatSessionData.Character.FirstMessage,
-                Tokens = _textGen.GetTokenCount(_chatSessionData.Character.FirstMessage)
-            };
-            var reply = await SaveMessageAsync(_chatSessionData.Character.Name, textData);
+            var reply = await SaveMessageAsync(_chatSessionData.Character.Name.Text, _chatSessionData.Character.FirstMessage);
             _logger.LogInformation("Sending first message: {Message}", reply.Text);
             await SendReusableReplyWithSpeechAsync(reply.Text, cancellationToken);
         }
@@ -86,7 +81,7 @@ public partial class ChatSession
             var duration = DateTimeOffset.UtcNow - _chatSessionData.Messages[^1].Timestamp;
             HandleClientMessage(new ClientSendMessage
             {
-                Text = $"[OOC: {_chatSessionData.UserName} disconnects for {duration.Humanize()} and comes back online]"
+                Text = $"[OOC: {_chatSessionData.User.Name} disconnects for {duration.Humanize()} and comes back online]"
             });
         }
     }

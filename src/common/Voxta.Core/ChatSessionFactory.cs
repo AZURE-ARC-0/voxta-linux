@@ -80,33 +80,35 @@ public class ChatSessionFactory
                 ? await _animationSelectionFactory.CreateBestMatchAsync(profile.ActionInference, character.Services.ActionInference.Service ?? "", prerequisites, culture, cancellationToken)
                 : null;
 
-            var textProcessor = new ChatTextProcessor(profile, character.Name);
+            var cultureInfo = CultureInfo.GetCultureInfoByIetfLanguageTag(culture);
+            var textProcessor = new ChatTextProcessor(profile, character.Name, cultureInfo, textGen);
             
             var textToSpeechGen = await _textToSpeechFactory.CreateBestMatchAsync(profile.TextToSpeech, character.Services.SpeechGen.Service ?? "", prerequisites, culture, cancellationToken);
             var thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
 
             speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, character.Services.SpeechGen.Voice, culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
-            var cultureInfo = CultureInfo.GetCultureInfoByIetfLanguageTag(culture);
             var messages = await _chatMessageRepository.GetChatMessagesAsync(chat.Id, cancellationToken);
-            
+
             var chatData = new ChatSessionData
             {
                 Chat = chat,
-                UserName = profile.Name,
-                Character = new CharacterCardExtended
+                Culture = character.Culture,
+                User = new ChatSessionDataUser
                 {
-                    Name = character.Name,
-                    Description = textProcessor.ProcessText(character.Description, cultureInfo),
-                    Personality = textProcessor.ProcessText(character.Personality, cultureInfo),
-                    Scenario = textProcessor.ProcessText(character.Scenario, cultureInfo),
-                    FirstMessage = textProcessor.ProcessText(character.FirstMessage, cultureInfo),
-                    MessageExamples = textProcessor.ProcessText(character.MessageExamples, cultureInfo),
-                    SystemPrompt = textProcessor.ProcessText(character.SystemPrompt, cultureInfo),
-                    PostHistoryInstructions = textProcessor.ProcessText(character.PostHistoryInstructions, cultureInfo),
-                    Prerequisites = character.Prerequisites,
-                    Culture = character.Culture,
-                    Services = character.Services
+                    Name = textProcessor.ProcessText(profile.Name),
+                    Description = textProcessor.ProcessText(profile.Description)
+                },
+                Character = new ChatSessionDataCharacter
+                {
+                    Name = textProcessor.ProcessText(character.Name),
+                    Description = textProcessor.ProcessText(character.Description),
+                    Personality = textProcessor.ProcessText(character.Personality),
+                    Scenario = textProcessor.ProcessText(character.Scenario),
+                    FirstMessage = textProcessor.ProcessText(character.FirstMessage),
+                    MessageExamples = textProcessor.ProcessText(character.MessageExamples),
+                    SystemPrompt = textProcessor.ProcessText(character.SystemPrompt),
+                    PostHistoryInstructions = textProcessor.ProcessText(character.PostHistoryInstructions),
                 },
                 ThinkingSpeech = thinkingSpeech,
                 AudioPath = startChatMessage.AudioPath,
@@ -114,7 +116,7 @@ public class ChatSessionFactory
             chatData.Messages.AddRange(messages);
             // TODO: Optimize by pre-calculating tokens count
 
-            await _memoryProvider.Initialize(chat.CharacterId, chatData, cancellationToken);
+            await _memoryProvider.Initialize(chat.CharacterId, textProcessor, cancellationToken);
             
             var state = new ChatSessionState(_timeProvider);
 

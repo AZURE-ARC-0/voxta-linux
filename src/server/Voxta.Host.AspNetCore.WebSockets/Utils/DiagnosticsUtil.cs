@@ -178,7 +178,7 @@ public class DiagnosticsUtil
                     }
                 };
                 chat.AddMessage(chat.Character.Name, chat.Character.FirstMessage);
-                chat.AddMessage(chat.UserName, "Are you working correctly?");
+                chat.AddMessage(chat.User.Name, "Are you working correctly?");
                 var result = await service.GenerateReplyAsync(chat, cancellationToken);
                 return "Response: " + result;
             }
@@ -283,7 +283,7 @@ public class DiagnosticsUtil
                     Actions = actions
                 };
                 chat.AddMessage(chat.Character.Name, "I like apples. Do you like apples?");
-                chat.AddMessage(chat.UserName, "No, I don't like them at all.");
+                chat.AddMessage(chat.User.Name, "No, I don't like them at all.");
                 var result = await service.SummarizeAsync(chat, cancellationToken);
                 return "Summary: " + result;
             }

@@ -21,7 +21,12 @@ public class OpenAIPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser
+                {
+                    Name = "Joe",
+                    Description = "",
+                },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -34,7 +39,6 @@ public class OpenAIPromptBuilderTests
                     Personality = "some-personality",
                     Scenario = "some-scenario",
                     FirstMessage = "some-first-message",
-                    Services = null!,
                 }
             }
             .AddMessage("Joe", "Hello")
@@ -59,7 +63,12 @@ public class OpenAIPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser
+                {
+                    Name = "Joe",
+                    Description = "",
+                },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -74,8 +83,7 @@ public class OpenAIPromptBuilderTests
                     FirstMessage = "some-first-message",
                     SystemPrompt = "some-system-prompt",
                     PostHistoryInstructions = "some-post-history-instructions",
-                    MessageExamples = "Joe: Request\nJane: Response",
-                    Services = null!,
+                    MessageExamples = "Joe: Request\nJane: Response"
                 },
                 Actions = new[] { "action1", "action2" },
                 Context = "some-context",
@@ -106,7 +114,12 @@ public class OpenAIPromptBuilderTests
     {
         var chat = new ChatSessionData
             {
-                UserName = "Joe",
+                Culture = "en-US",
+                User = new ChatSessionDataUser
+                {
+                    Name = "Joe",
+                    Description = "",
+                },
                 Chat = new Chat
                 {
                     Id = Guid.Empty,
@@ -118,15 +131,14 @@ public class OpenAIPromptBuilderTests
                     Description = "some-description",
                     Personality = "some-personality",
                     Scenario = "some-scenario",
-                    FirstMessage = "some-first-message",
-                    Services = null!,
+                    FirstMessage = "some-first-message"
                 }
             }
             .AddMessage("Joe", "Hello")
             .AddMessage("Jane", "World")
             .AddMessage("Joe", "Question");
-        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-1", Weight = 0 });
-        chat.Memories.Add(new MemoryItem { Id = Guid.Empty, Keywords = Array.Empty<string>(), Text = "memory-2", Weight = 0 });
+        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-1" });
+        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-2" });
         var messages = _builder.BuildReplyPrompt(chat, 1024, 4096);
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
@@ -150,7 +162,11 @@ public class OpenAIPromptBuilderTests
         var messages = _builder.BuildActionInferencePrompt(
             new ChatSessionData
                 {
-                    UserName = "Joe",
+                    Culture = "en-US",
+                    User = new ChatSessionDataUser
+                    {
+                        Name = "Joe",
+                    },
                     Chat = new Chat
                     {
                         Id = Guid.Empty,
@@ -166,7 +182,6 @@ public class OpenAIPromptBuilderTests
                         SystemPrompt = "some-system-prompt",
                         PostHistoryInstructions = "some-post-history-instructions",
                         MessageExamples = "Joe: Request\nJane: Response",
-                        Services = null!,
                     },
                     Actions = new[] { "action1", "action2" },
                     Context = "some-context",
@@ -203,7 +218,11 @@ public class OpenAIPromptBuilderTests
         var messages = _builder.BuildSummarizationPrompt(
             new ChatSessionData
                 {
-                    UserName = "Joe",
+                    Culture = "en-US",
+                    User = new ChatSessionDataUser
+                    {
+                        Name = "Joe",
+                    },
                     Chat = new Chat
                     {
                         Id = Guid.Empty,
@@ -219,7 +238,6 @@ public class OpenAIPromptBuilderTests
                         SystemPrompt = "some-system-prompt",
                         PostHistoryInstructions = "some-post-history-instructions",
                         MessageExamples = "Joe: Request\nJane: Response",
-                        Services = null!,
                     },
                     Actions = new[] { "action1", "action2" },
                     Context = "some-context",

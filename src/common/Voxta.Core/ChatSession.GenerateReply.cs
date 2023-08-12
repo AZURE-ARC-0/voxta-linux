@@ -15,7 +15,7 @@ public partial class ChatSession
         if (speechInterruptionRatio is > 0.05f and < 0.95f)
         {
             var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
-            if (lastCharacterMessage?.User == _chatSessionData.Character.Name)
+            if (lastCharacterMessage?.User == _chatSessionData.Character.Name.Text)
             {
                 var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
                 lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
@@ -29,13 +29,8 @@ public partial class ChatSession
 
         if (_chatSessionState.PendingUserMessage == null)
         {
-            var userText = _chatTextProcessor.ProcessText(text, CultureInfo.InvariantCulture);
-            var userTextData = new TextData
-            {
-                Text = userText,
-                Tokens = _textGen.GetTokenCount(userText)
-            };
-            var userMessageData = await SaveMessageAsync(_chatSessionData.UserName, userTextData);
+            var userText = _chatTextProcessor.ProcessText(text);
+            var userMessageData = await SaveMessageAsync(_chatSessionData.User.Name.Text, userText);
             _chatSessionState.PendingUserMessage = userMessageData;
         }
         else
@@ -47,7 +42,7 @@ public partial class ChatSession
         }
 
         _chatSessionData.Actions = clientSendMessage.Actions;
-        _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context, CultureInfo.InvariantCulture);
+        _chatSessionData.Context = _chatTextProcessor.ProcessText(clientSendMessage.Context);
 
         string generated;
         try
@@ -76,7 +71,7 @@ public partial class ChatSession
 
         _chatSessionState.PendingUserMessage = null;
         var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
-        var reply = await SaveMessageAsync(_chatSessionData.Character.Name, genData);
+        var reply = await SaveMessageAsync(_chatSessionData.Character.Name.Text, genData);
         
         _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Text);
 
