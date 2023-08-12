@@ -1,6 +1,7 @@
 using Voxta.Abstractions.Model;
 using Microsoft.DeepDev;
 using Moq;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Services.OpenAI.Tests;
 
@@ -13,7 +14,9 @@ public class OpenAIPromptBuilderTests
     {
         var tokenizer = new Mock<ITokenizer>();
         tokenizer.Setup(m => m.Encode(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>())).Returns(new List<int>());
-        _builder = new OpenAIPromptBuilder(tokenizer.Object);
+        var timeProvider = new Mock<ITimeProvider>();
+        timeProvider.Setup(m => m.LocalNow).Returns(new DateTimeOffset(2001, 2, 3, 4, 5, 6, TimeSpan.Zero));
+        _builder = new OpenAIPromptBuilder(tokenizer.Object, timeProvider.Object);
     }
 
     [Test]
@@ -48,14 +51,16 @@ public class OpenAIPromptBuilderTests
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
-        system: Description of Jane: some-description
-        Personality of Jane: some-personality
-        Circumstances and context of the dialogue: some-scenario
-        Only write a single reply from Jane for natural speech.
-        user: Hello
-        assistant: World
-        user: Question
-        """.ReplaceLineEndings("\n").TrimExcess()));
+            system: This is a conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM.  Keep the conversation flowing, actively engage with Joe. Stay in character.
+
+            Description of Jane: some-description
+            Personality of Jane: some-personality
+            Circumstances and context of the dialogue: some-scenario
+            Only write a single reply from Jane for natural speech.
+            user: Hello
+            assistant: World
+            user: Question
+            """.ReplaceLineEndings("\n").TrimExcess()));
     }
     
     [Test]
@@ -95,18 +100,18 @@ public class OpenAIPromptBuilderTests
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
-        system: some-system-prompt
-        Description of Jane: some-description
-        Personality of Jane: some-personality
-        Circumstances and context of the dialogue: some-scenario
-        Only write a single reply from Jane for natural speech.
-        user: Hello
-        assistant: World
-        user: Question
-        system: some-post-history-instructions
-        Current context: some-context
-        Available actions to be inferred after the response: action1, action2
-        """.ReplaceLineEndings("\n").TrimExcess()));
+            system: some-system-prompt
+
+            Description of Jane: some-description
+            Personality of Jane: some-personality
+            Circumstances and context of the dialogue: some-scenario
+            some-context
+            Optional actions Jane can do: [action1], [action2]
+            Only write a single reply from Jane for natural speech.
+            user: Hello
+            assistant: World
+            user: Question
+            """.ReplaceLineEndings("\n").TrimExcess()));
     }
 
     [Test]
@@ -143,17 +148,19 @@ public class OpenAIPromptBuilderTests
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
-                                       system: Description of Jane: some-description
-                                       Personality of Jane: some-personality
-                                       Circumstances and context of the dialogue: some-scenario
-                                       Only write a single reply from Jane for natural speech.
-                                       What Jane knows:
-                                       memory-1
-                                       memory-2
-                                       user: Hello
-                                       assistant: World
-                                       user: Question
-                                       """.ReplaceLineEndings("\n").TrimExcess()));
+            system: This is a conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM.  Keep the conversation flowing, actively engage with Joe. Stay in character.
+
+            Description of Jane: some-description
+            Personality of Jane: some-personality
+            Circumstances and context of the dialogue: some-scenario
+            Only write a single reply from Jane for natural speech.
+            What Jane knows:
+            memory-1
+            memory-2
+            user: Hello
+            assistant: World
+            user: Question
+            """.ReplaceLineEndings("\n").TrimExcess()));
     }
     
     [Test]
@@ -193,23 +200,25 @@ public class OpenAIPromptBuilderTests
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
-        system: You are tasked with inferring the best action from a list based on the content of a sample chat.
+            system: You are tasked with inferring the best action from a list based on the content of a sample chat.
 
-        Actions: [action1], [action2]
-        user: Conversation Context:
-        Jane's Personality: some-personality
-        Scenario: some-scenario
-        Context: some-context
+            Actions: [action1], [action2]
+            user: Conversation Context:
+            Jane's Personality: some-personality
+            Scenario: some-scenario
+            Context: some-context
 
-        Conversation:
-        Joe: Hello
-        Jane: World
-        Joe: Question
+            Conversation:
+            Joe: Hello
+            Jane: World
+            Joe: Question
 
-        Based on the last message, which of the following actions is the most applicable for Jane: [action1], [action2]
+            Which of the following actions should be executed to match Jane's last message?
+            - [action1]
+            - [action2]
 
-        Only write the action.
-        """.ReplaceLineEndings("\n").TrimExcess()));
+            Only write the action.
+            """.ReplaceLineEndings("\n").TrimExcess()));
     }
     
     [Test]
@@ -255,7 +264,7 @@ public class OpenAIPromptBuilderTests
             Use as few words as possible.
             Write from the point of view of Jane.
             Use telegraphic dense notes style.
-            Associate memory with the right person.
+            Name the person associated with the memory.
             Only write useful and high confidence memories.
             These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
 
@@ -266,7 +275,7 @@ public class OpenAIPromptBuilderTests
             Joe: Question
 
             What Jane learned:
-            
+             
             """.ReplaceLineEndings("\n").TrimExcess()));
     }
 }

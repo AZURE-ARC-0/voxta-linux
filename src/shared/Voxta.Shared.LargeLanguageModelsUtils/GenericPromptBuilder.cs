@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Voxta.Abstractions.Model;
+using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 
 namespace Voxta.Shared.LargeLanguageModelsUtils;
@@ -7,10 +8,17 @@ namespace Voxta.Shared.LargeLanguageModelsUtils;
 public class GenericPromptBuilder
 {
     private readonly ITokenizer _tokenizer;
+    private readonly ITimeProvider _timeProvider;
 
     public GenericPromptBuilder(ITokenizer tokenizer)
+        : this(tokenizer, TimeProvider.Current)
+    {
+    }
+
+    public GenericPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
     {
         _tokenizer = tokenizer;
+        _timeProvider = timeProvider;
     }
     
     public string BuildReplyPrompt(IChatInferenceData chat, int maxMemoryTokens, int maxTokens, bool includePostHistoryPrompt = true)
@@ -160,7 +168,7 @@ public class GenericPromptBuilder
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Text);
         else
-            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", chat.CultureInfo)}.  Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Only use spoken words. Avoid making up facts about {chat.User.Name}.");
+            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Only use spoken words. Avoid making up facts about {chat.User.Name}.");
         
         sb.AppendLineLinux();
         

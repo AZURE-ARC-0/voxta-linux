@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Voxta.Abstractions.Model;
+﻿using Voxta.Abstractions.Model;
 using Microsoft.Extensions.Logging;
 
 namespace Voxta.Core;

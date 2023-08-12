@@ -1,4 +1,3 @@
-using System.Globalization;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -29,13 +28,14 @@ public class ChatSessionTests
         _textGen = new Mock<ITextGenService>();
         _chatSessionData = new ChatSessionData
         {
-            UserName = "User",
+            Culture = "en-US",
+            User = new ChatSessionDataUser { Name = "User" },
             Chat = new Chat
             {
                 Id = Guid.NewGuid(),
                 CharacterId = Guid.NewGuid(),
             },
-            Character = new CharacterCardExtended
+            Character = new ChatSessionDataCharacter
             {
                 Name = "Assistant",
                 SystemPrompt = "You are a test assistant",
@@ -43,12 +43,11 @@ public class ChatSessionTests
                 Personality = "",
                 Scenario = "This is a test",
                 FirstMessage = "Ready.",
-                Services = new CharacterServicesMap()
             },
             AudioPath = "/audio-path",
         };
         var chatTextProcessor = new Mock<IChatTextProcessor>();
-        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>(), It.IsAny<CultureInfo>())).Returns((string? text, CultureInfo _) => text ?? "");
+        chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>())).Returns((string? text) => text ?? "");
         var profile = new ProfileSettings
         {
             Name = "User",

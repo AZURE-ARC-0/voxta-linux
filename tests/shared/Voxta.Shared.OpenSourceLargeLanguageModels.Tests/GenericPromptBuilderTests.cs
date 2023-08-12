@@ -1,5 +1,7 @@
+using Moq;
 using NUnit.Framework;
 using Voxta.Abstractions.Model;
+using Voxta.Abstractions.System;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Shared.OpenSourceLargeLanguageModels.Tests;
@@ -12,7 +14,9 @@ public class GenericPromptBuilderTests
     public void Setup()
     {
         var tokenizer = new AverageTokenizer();
-        _builder = new GenericPromptBuilder(tokenizer);
+        var timeProvider = new Mock<ITimeProvider>();
+        timeProvider.Setup(m => m.LocalNow).Returns(new DateTimeOffset(2001, 2, 3, 4, 5, 6, TimeSpan.Zero));
+        _builder = new GenericPromptBuilder(tokenizer, timeProvider.Object);
     }
 
     [Test]
@@ -43,6 +47,8 @@ public class GenericPromptBuilderTests
         var actual = _builder.BuildReplyPrompt(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
+        This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Only use spoken words. Avoid making up facts about Joe.
+        
         Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
@@ -131,6 +137,8 @@ public class GenericPromptBuilderTests
         var actual = _builder.BuildReplyPrompt(chat, 1024, 4096);
 
         Assert.That(actual, Is.EqualTo("""
+           This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Only use spoken words. Avoid making up facts about Joe.
+           
            Description of Jane: some-description
            Personality of Jane: some-personality
            Circumstances and context of the dialogue: some-scenario
@@ -138,6 +146,7 @@ public class GenericPromptBuilderTests
            memory-1
            memory-2
            memory-3
+           
            Joe: Hello
            Jane: World
            Joe: Question
@@ -190,7 +199,9 @@ public class GenericPromptBuilderTests
         Jane: World
         Joe: Question
         
-        Based on the last message, which of the following actions is the most applicable for Jane: [action1], [action2]
+        Which of the following actions should be executed to match Jane's last message?
+        - [action1]
+        - [action2]
 
         Only write the action.
 
@@ -230,23 +241,19 @@ public class GenericPromptBuilderTests
         var actual = _builder.BuildSummarizationPrompt(chat);
 
         Assert.That(actual, Is.EqualTo("""
-            Memorize new knowledge Jane learned in the conversation.
+           You must write facts about Jane and Joe from their conversation.
+           Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
+           Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
 
-            Use as few words as possible.
-            Write from the point of view of Jane.
-            Use telegraphic dense notes style.
-            Associate memory with the right person.
-            Only write useful and high confidence memories.
-            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
+           Conversation:
+           <START>
+           Joe: Hello
+           Jane: World
+           Joe: Question
+           <END>
 
-            <START>
-
-            Joe: Hello
-            Jane: World
-            Joe: Question
-
-            What Jane learned:
-
-           """.ReplaceLineEndings("\n").TrimExcess()));
+           Facts learned:
+           
+           """.ReplaceLineEndings("\n")));
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Voxta.Abstractions.Diagnostics;
-using Voxta.Server.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Services;
 using Voxta.Server.ViewModels.Diagnostics;

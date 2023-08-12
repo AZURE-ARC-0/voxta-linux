@@ -1,4 +1,5 @@
 ﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
@@ -8,6 +9,11 @@ public class NovelAIPromptBuilder : GenericPromptBuilder
 {
     public NovelAIPromptBuilder(ITokenizer tokenizer)
         : base(tokenizer)
+    {
+    }
+
+    public NovelAIPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
+        : base(tokenizer, timeProvider)
     {
     }
 

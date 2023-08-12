@@ -1,6 +1,5 @@
 ﻿using Voxta.Abstractions.Services;
 using Voxta.Services.NovelAI;
-using Voxta.Shared.TextToSpeechUtils;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;

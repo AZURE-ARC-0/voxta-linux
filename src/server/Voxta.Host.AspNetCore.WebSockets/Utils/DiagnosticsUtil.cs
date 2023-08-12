@@ -163,18 +163,17 @@ public class DiagnosticsUtil
             {
                 var chat = new ChatSessionData
                 {
-                    UserName = "User",
+                    Culture = "en-US",
+                    User = new ChatSessionDataUser { Name = "User" },
                     Chat = null!,
-                    Character = new Character
+                    Character = new ChatSessionDataCharacter
                     {
-                        Id = Guid.NewGuid(),
                         Name = "Assistant",
                         SystemPrompt = "You are a test assistant",
                         Description = "",
                         Personality = "",
                         Scenario = "This is a test",
                         FirstMessage = "Beginning test.",
-                        Services = null!,
                     }
                 };
                 chat.AddMessage(chat.Character.Name, chat.Character.FirstMessage);
@@ -236,9 +235,10 @@ public class DiagnosticsUtil
                 var actions = new[] { "test_successful", "test_failed" };
                 var chat = new ChatSessionData
                 {
-                    UserName = "User",
+                    Culture = "en-US",
+                    User = new ChatSessionDataUser { Name = "User" },
                     Chat = null!,
-                    Character = new CharacterCardExtended
+                    Character = new ChatSessionDataCharacter
                     {
                         Name = "Assistant",
                         SystemPrompt = "You are a test assistant",
@@ -246,7 +246,6 @@ public class DiagnosticsUtil
                         Personality = "",
                         Scenario = "This is a test",
                         FirstMessage = "Beginning test.",
-                        Services = null!
                     },
                     Actions = actions
                 };
@@ -268,9 +267,10 @@ public class DiagnosticsUtil
                 var actions = new[] { "test_successful", "talk_to_user" };
                 var chat = new ChatSessionData
                 {
-                    UserName = "User",
+                    Culture = "en-US",
+                    User = new ChatSessionDataUser { Name = "User" },
                     Chat = null!,
-                    Character = new CharacterCardExtended
+                    Character = new ChatSessionDataCharacter
                     {
                         Name = "Assistant",
                         SystemPrompt = "You are a test assistant",
@@ -278,7 +278,6 @@ public class DiagnosticsUtil
                         Personality = "",
                         Scenario = "This is a test",
                         FirstMessage = "Beginning test.",
-                        Services = null!
                     },
                     Actions = actions
                 };

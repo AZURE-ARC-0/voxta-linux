@@ -1,16 +1,24 @@
 ﻿using System.Text;
 using Voxta.Abstractions.Model;
 using Microsoft.DeepDev;
+using Voxta.Abstractions.System;
 
 namespace Voxta.Services.OpenAI;
 
 public class OpenAIPromptBuilder
 {
+    private readonly ITimeProvider _timeProvider;
     private readonly ITokenizer _tokenizer;
 
     public OpenAIPromptBuilder(ITokenizer tokenizer)
+        : this(tokenizer, TimeProvider.Current)
+    {
+    }
+
+    public OpenAIPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
     {
         _tokenizer = tokenizer;
+        _timeProvider = timeProvider;
     }
 
     public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxMemoryTokens, int maxTokens)
@@ -149,14 +157,14 @@ public class OpenAIPromptBuilder
         return messages;
     }
 
-    private static string MakeSystemPrompt(IChatInferenceData chat)
+    private string MakeSystemPrompt(IChatInferenceData chat)
     {
         var character = chat.Character;
         var sb = new StringBuilder();
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Text);
         else
-            sb.AppendLineLinux($"This is a conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", chat.CultureInfo)}.  Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character.");
+            sb.AppendLineLinux($"This is a conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}.  Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character.");
         
         sb.AppendLineLinux();
         

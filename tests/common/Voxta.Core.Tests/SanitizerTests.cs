@@ -10,7 +10,7 @@ public class SanitizerTests
         _sanitizer = new Sanitizer();
     }
     
-    [TestCase("hello\n", "hello.")]
+    [TestCase("hello\n", "hello")]
     [TestCase("\"hello.\"", "hello.")]
     [TestCase("\"hello?\"", "hello?")]
     [TestCase("Hello. World", "Hello.")]

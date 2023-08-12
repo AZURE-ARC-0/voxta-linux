@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Common;
+using Voxta.Core;
 using Voxta.Server.ViewModels;
 using Voxta.Server.ViewModels.Playground;
 using Voxta.Services.OpenAI;
@@ -79,11 +81,19 @@ public class PlaygroundController : Controller
             if (data.Template == "Reply")
             {
                 var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var processor = new ChatTextProcessor(profile, character.Name, CultureInfo.GetCultureInfoByIetfLanguageTag(character.Culture), textGen);
                 result = await textGen.GenerateReplyAsync(new ChatSessionData
                 {
                     Chat = null!,
-                    UserName = profile.Name,
-                    Character = character,
+                    Culture = character.Culture,
+                    User = new ChatSessionDataUser { Name = profile.Name },
+                    Character = new ChatSessionDataCharacter
+                    {
+                        Name = processor.ProcessText(character.Name),
+                        Description = processor.ProcessText(character.Description),
+                        Personality = processor.ProcessText(character.Personality),
+                        Scenario = processor.ProcessText(character.Scenario),
+                    },
                     Messages =
                     {
                         ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
@@ -100,8 +110,15 @@ public class PlaygroundController : Controller
                 result = await svc.SelectActionAsync(new ChatSessionData
                 {
                     Chat = null!,
-                    UserName = profile.Name,
-                    Character = character,
+                    Culture = character.Culture,
+                    User = new ChatSessionDataUser { Name = profile.Name },
+                    Character = new ChatSessionDataCharacter
+                    {
+                        Name = character.Name,
+                        Description = character.Description,
+                        Personality = character.Personality,
+                        Scenario = character.Scenario,
+                    },
                     Actions = new[] { "wave", "sit_down", "stand_up", "break_chair" },
                     Messages =
                     {

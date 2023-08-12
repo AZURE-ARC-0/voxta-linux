@@ -1,4 +1,6 @@
+using Moq;
 using Voxta.Abstractions.Model;
+using Voxta.Abstractions.System;
 using Voxta.Services.OpenSourceLargeLanguageModels;
 using Voxta.Shared.LargeLanguageModelsUtils;
 
@@ -12,7 +14,9 @@ public class NovelAIPromptBuilderTests
     public void Setup()
     {
         var tokenizer = new AverageTokenizer();
-        _builder = new NovelAIPromptBuilder(tokenizer);
+        var timeProvider = new Mock<ITimeProvider>();
+        timeProvider.Setup(m => m.LocalNow).Returns(new DateTimeOffset(2001, 2, 3, 4, 5, 6, TimeSpan.Zero));
+        _builder = new NovelAIPromptBuilder(tokenizer, timeProvider.Object);
     }
 
     [Test]
@@ -43,6 +47,8 @@ public class NovelAIPromptBuilderTests
             0, 2000);
 
         Assert.That(actual, Is.EqualTo("""
+        This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Only use spoken words. Avoid making up facts about Joe.
+        
         Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
