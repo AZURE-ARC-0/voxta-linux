@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<NovelAITextGenService>();
         services.AddTransient<NovelAITextToSpeechService>();
         services.AddTransient<NovelAIActionInferenceService>();
+        services.AddTransient<NovelAISummarizationService>();
     }
     
     public static void RegisterNovelAI(this IServiceRegistry<ITextGenService> registry)
@@ -28,5 +29,10 @@ public static class ServiceCollectionExtensions
     public static void RegisterNovelAI(this IServiceRegistry<IActionInferenceService> registry)
     {
         registry.Add<NovelAIActionInferenceService>(NovelAIConstants.ServiceName);
+    }
+    
+    public static void RegisterNovelAI(this IServiceRegistry<ISummarizationService> registry)
+    {
+        registry.Add<NovelAISummarizationService>(NovelAIConstants.ServiceName);
     }
 }

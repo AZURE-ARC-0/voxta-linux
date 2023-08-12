@@ -3,7 +3,7 @@ using Voxta.Abstractions.System;
 using System.Security.Cryptography;
 #endif
 
-namespace Voxta.Host.AspNetCore.WebSockets.Utils;
+namespace Voxta.Security.Windows;
 
 public class DPAPIEncryptionProvider : ILocalEncryptionProvider
 {

@@ -112,8 +112,42 @@ public class OpenAIPromptBuilder
 
     public List<OpenAIMessage> BuildSummarizationPrompt(IChatInferenceData chat)
     {
-        #warning TODO
-        throw new NotImplementedException();
+        var messages = new List<OpenAIMessage>
+        {
+            new() {
+                role = "system",
+                content = """
+                  You are tasked with extracting knowledge from a conversation for reminiscing.
+                  """.ReplaceLineEndings("\n")
+            },
+        };
+        
+        var sb = new StringBuilder();
+        sb.AppendLineLinux($"""
+            Memorize new knowledge {chat.Character.Name} learned in the conversation.
+
+            Use as few words as possible.
+            Write from the point of view of {chat.Character.Name}.
+            Use telegraphic dense notes style.
+            Associate memory with the right person.
+            Only write useful and high confidence memories.
+            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
+
+            <START>
+
+            """.ReplaceLineEndings("\n"));
+        
+        foreach (var message in chat.GetMessages().TakeLast(8))
+        {
+            sb.AppendLineLinux($"{message.User}: {message.Text}");
+        }
+        
+        sb.AppendLineLinux();
+        sb.AppendLineLinux($"What {chat.Character.Name} learned:");
+        
+        messages.Add(new OpenAIMessage { role = "user", content = sb.ToString().TrimExcess() });
+
+        return messages;
     }
 
     private static string MakeSystemPrompt(IChatInferenceData chat)

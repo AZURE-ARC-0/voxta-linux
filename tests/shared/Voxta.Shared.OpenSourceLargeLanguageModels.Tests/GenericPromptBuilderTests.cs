@@ -87,11 +87,12 @@ public class GenericPromptBuilderTests
 
         Assert.That(actual, Is.EqualTo("""
         some-system-prompt
+        
         Description of Jane: some-description
         Personality of Jane: some-personality
         Circumstances and context of the dialogue: some-scenario
         some-context
-        Potential actions you will be able to do after you respond: action1, action2
+        Optional actions Jane can do: [action1], [action2]
         Joe: Hello
         Jane: World
         Joe: Question
@@ -147,7 +148,7 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptActionInference()
     {
-        var chatInferenceData = new ChatSessionData
+        var chat = new ChatSessionData
             {
                 UserName = "Joe",
                 Chat = new Chat
@@ -173,9 +174,7 @@ public class GenericPromptBuilderTests
             .AddMessage("Joe", "Hello")
             .AddMessage("Jane", "World")
             .AddMessage("Joe", "Question");
-        var actual = _builder.BuildActionInferencePrompt(
-            chatInferenceData
-        );
+        var actual = _builder.BuildActionInferencePrompt(chat);
 
         Assert.That(actual, Is.EqualTo("""
         You are tasked with inferring the best action from a list based on the content of a sample chat.
@@ -197,5 +196,57 @@ public class GenericPromptBuilderTests
 
         Action: [
         """.ReplaceLineEndings("\n").TrimExcess()));
+    }
+    
+    [Test]
+    public void TestPromptSummarization()
+    {
+        var chat = new ChatSessionData
+            {
+                UserName = "Joe",
+                Chat = new Chat
+                {
+                    Id = Guid.Empty,
+                    CharacterId = Guid.Empty,
+                },
+                Character = new()
+                {
+                    Name = "Jane",
+                    Description = "some-description",
+                    Personality = "some-personality",
+                    Scenario = "some-scenario",
+                    FirstMessage = "some-first-message",
+                    SystemPrompt = "some-system-prompt",
+                    PostHistoryInstructions = "some-post-history-instructions",
+                    MessageExamples = "Joe: Request\nJane: Response",
+                    Services = null!,
+                },
+                Actions = new[] { "action1", "action2" },
+                Context = "some-context",
+            }
+            .AddMessage("Joe", "Hello")
+            .AddMessage("Jane", "World")
+            .AddMessage("Joe", "Question");
+        var actual = _builder.BuildSummarizationPrompt(chat);
+
+        Assert.That(actual, Is.EqualTo("""
+            Memorize new knowledge Jane learned in the conversation.
+
+            Use as few words as possible.
+            Write from the point of view of Jane.
+            Use telegraphic dense notes style.
+            Associate memory with the right person.
+            Only write useful and high confidence memories.
+            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
+
+            <START>
+
+            Joe: Hello
+            Jane: World
+            Joe: Question
+
+            What Jane learned:
+
+           """.ReplaceLineEndings("\n").TrimExcess()));
     }
 }

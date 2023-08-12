@@ -23,7 +23,7 @@ public class KoboldAIParameters
     public double Tfs { get; init; } = 0.9;
     
     [JsonPropertyName("temperature")]
-    public double Temperature { get; init; } = 0.65;
+    public double Temperature { get; set; } = 0.65;
     
     [JsonPropertyName("top_p")]
     public double TopP { get; init; } = 0.9;

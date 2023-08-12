@@ -16,7 +16,7 @@ public class TextGenerationInferenceParameters
     
     [JsonPropertyName("temperature")]
     [Range(0.0001, 100)]
-    public double Temperature { get; init; } = 0.65;
+    public double Temperature { get; set; } = 0.65;
     
     [JsonPropertyName("typical_p")]
     [Range(0.0001, 0.9999)]

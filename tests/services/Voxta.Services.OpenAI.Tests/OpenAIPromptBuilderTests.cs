@@ -196,4 +196,59 @@ public class OpenAIPromptBuilderTests
         Only write the action.
         """.ReplaceLineEndings("\n").TrimExcess()));
     }
+    
+    [Test]
+    public void TestPromptSummarization()
+    {
+        var messages = _builder.BuildSummarizationPrompt(
+            new ChatSessionData
+                {
+                    UserName = "Joe",
+                    Chat = new Chat
+                    {
+                        Id = Guid.Empty,
+                        CharacterId = Guid.Empty,
+                    },
+                    Character = new()
+                    {
+                        Name = "Jane",
+                        Description = "some-description",
+                        Personality = "some-personality",
+                        Scenario = "some-scenario",
+                        FirstMessage = "some-first-message",
+                        SystemPrompt = "some-system-prompt",
+                        PostHistoryInstructions = "some-post-history-instructions",
+                        MessageExamples = "Joe: Request\nJane: Response",
+                        Services = null!,
+                    },
+                    Actions = new[] { "action1", "action2" },
+                    Context = "some-context",
+                }
+                .AddMessage("Joe", "Hello")
+                .AddMessage("Jane", "World")
+                .AddMessage("Joe", "Question")
+        );
+
+        var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
+        Assert.That(actual, Is.EqualTo("""
+            system: You are tasked with extracting knowledge from a conversation for reminiscing.
+            user: Memorize new knowledge Jane learned in the conversation.
+
+            Use as few words as possible.
+            Write from the point of view of Jane.
+            Use telegraphic dense notes style.
+            Associate memory with the right person.
+            Only write useful and high confidence memories.
+            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
+
+            <START>
+
+            Joe: Hello
+            Jane: World
+            Joe: Question
+
+            What Jane learned:
+            
+            """.ReplaceLineEndings("\n").TrimExcess()));
+    }
 }

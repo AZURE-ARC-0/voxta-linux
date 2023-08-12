@@ -29,8 +29,10 @@ public class OpenAISummarizationService : OpenAIClientBase, ISummarizationServic
         {
             _serviceObserver.Record($"{ServiceObserverKeys.SummarizationPrompt}[{message.role}]", message.content);
         }
-        
-        var result = await SendChatRequestAsync(BuildRequestBody(messages), cancellationToken);
+
+        var body = BuildRequestBody(messages);
+        body.Temperature = 0.1;
+        var result = await SendChatRequestAsync(body, cancellationToken);
         perf.Done();
         _serviceObserver.Record(ServiceObserverKeys.SummarizationResult, result);
         return result;

@@ -10,7 +10,7 @@ public class OpenAIParameters
     public int MaxTokens { get; init; } = 80;
     
     [JsonPropertyName("temperature")]
-    public double Temperature { get; init; } = 0.8;
+    public double Temperature { get; set; } = 0.8;
     
     [JsonPropertyName("presence_penalty")]
     [Range(-2, 2)]

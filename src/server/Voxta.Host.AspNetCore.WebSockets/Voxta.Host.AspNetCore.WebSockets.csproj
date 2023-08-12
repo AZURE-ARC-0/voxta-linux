@@ -17,12 +17,12 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />
-        <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
         <ProjectReference Include="..\..\common\Voxta.Core\Voxta.Core.csproj" />
+        <ProjectReference Include="..\..\common\Voxta.Security.Windows\Voxta.Security.Windows.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.Azure.SpeechService\Voxta.Services.Azure.SpeechService.csproj" />
         <ProjectReference Include="..\..\storage\Voxta.Data.LiteDB\Voxta.Data.LiteDB.csproj" />
         <ProjectReference Include="..\..\services\Voxta.Services.ElevenLabs\Voxta.Services.ElevenLabs.csproj" />

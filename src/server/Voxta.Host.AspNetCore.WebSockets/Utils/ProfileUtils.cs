@@ -84,7 +84,11 @@ public static class ProfileUtils
             {
                 Services = new[]
                 {
+                    OpenAIConstants.ServiceName,
                     TextGenerationInferenceConstants.ServiceName,
+                    OobaboogaConstants.ServiceName,
+                    KoboldAIConstants.ServiceName,
+                    NovelAIConstants.ServiceName,
 #if(DEBUG)
                     MockConstants.ServiceName,
 #endif

@@ -6,6 +6,7 @@ using Voxta.Abstractions.System;
 using Voxta.Core;
 using Voxta.Host.AspNetCore.WebSockets;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
+using Voxta.Security.Windows;
 using Voxta.Server.BackgroundServices;
 
 // ReSharper disable once CheckNamespace
@@ -51,11 +52,13 @@ public static class ServiceCollectionExtensions
         services.AddOpenAI();
         textGenRegistry.RegisterOpenAI();
         actionInferenceRegistry.RegisterOpenAI();
+        summarizationRegistry.RegisterOpenAI();
 
         services.AddNovelAI();
         textGenRegistry.RegisterNovelAI();
         textToSpeechRegistry.RegisterNovelAI();
         actionInferenceRegistry.RegisterNovelAI();
+        summarizationRegistry.RegisterNovelAI();
 
         services.AddKoboldAI();
         textGenRegistry.RegisterKoboldAI();
@@ -70,6 +73,7 @@ public static class ServiceCollectionExtensions
         services.AddTextGenerationInference();
         textGenRegistry.RegisterTextGenerationInference();
         actionInferenceRegistry.RegisterTextGenerationInference();
+        summarizationRegistry.RegisterTextGenerationInference();
 
         services.AddElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();

@@ -26,7 +26,9 @@ public class KoboldAISummarizationService : KoboldAIClientBase, ISummarizationSe
         _serviceObserver.Record(ServiceObserverKeys.SummarizationPrompt, prompt);
         
         var actionInferencePerf = _performanceMetrics.Start($"{KoboldAIConstants.ServiceName}.Summarization");
-        var action = await SendCompletionRequest(BuildRequestBody(prompt, Array.Empty<string>()), cancellationToken);
+        var body = BuildRequestBody(prompt, Array.Empty<string>());
+        body.Temperature = 0.1;
+        var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 
         var result = action.TrimExcess();

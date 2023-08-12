@@ -31,7 +31,10 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
         var messages = builder.BuildReplyPrompt(chat, MaxMemoryTokens, MaxContextTokens);
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, "");
+        foreach(var message in messages)
+        {
+            _serviceObserver.Record($"{ServiceObserverKeys.TextGenPrompt}[{message.role}]", message.content);
+        }
         tokenizePerf.Pause();
 
         var textGenPerf = _performanceMetrics.Start("OpenAI.TextGen");

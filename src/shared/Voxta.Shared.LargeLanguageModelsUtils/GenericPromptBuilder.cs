@@ -131,11 +131,6 @@ public class GenericPromptBuilder
 
     public string BuildSummarizationPrompt(IChatInferenceData chat)
     {
-        #warning TEST
-        
-        if (chat.Actions == null || chat.Actions.Length < 1)
-            throw new ArgumentException("No actions provided.", nameof(chat));
-        
         var sb = new StringBuilder();
         sb.AppendLineLinux($"""
             Memorize new knowledge {chat.Character.Name} learned in the conversation.
