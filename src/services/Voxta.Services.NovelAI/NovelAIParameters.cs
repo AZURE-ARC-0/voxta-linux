@@ -6,6 +6,12 @@ namespace Voxta.Services.NovelAI;
 [Serializable]
 public class NovelAIParameters
 {
+    [JsonPropertyName("cfg")]
+    public double? Cfg { get; set; }
+    
+    [JsonPropertyName("cfg_uc")]
+    public string? CfgUc { get; set; }
+    
     [JsonPropertyName("temperature")]
     public double Temperature { get; set; }
 

@@ -19,7 +19,7 @@ public static class KayraPresets
 		    RepetitionPenaltyPresence = 0.001,
 		    RepetitionPenaltyRange = 768,
 		    RepetitionPenaltySlope = 1,
-		    PhraseRepPen = "aggressive",
+		    PhraseRepPen = "medium",
 		    Order = new[] {
 			    6,
 			    0,

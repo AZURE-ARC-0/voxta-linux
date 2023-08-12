@@ -161,7 +161,7 @@ public class GenericPromptBuilder
         if (!string.IsNullOrEmpty(character.SystemPrompt))
             sb.AppendLineLinux(character.SystemPrompt);
         else
-            sb.AppendLineLinux($"This is a conversation between {chat.UserName} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", CultureInfo.GetCultureInfoByIetfLanguageTag(chat.Character.Culture))}.  Keep the conversation flowing, actively engage with {chat.UserName}. Stay in character.");
+            sb.AppendLineLinux($"This is a spoken conversation between {chat.UserName} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {DateTime.Now.ToString("f", CultureInfo.GetCultureInfoByIetfLanguageTag(chat.Character.Culture))}.  Keep the conversation flowing, actively engage with {chat.UserName}. Stay in character. Only use spoken words. Avoid making up facts about {chat.UserName}.");
         
         sb.AppendLineLinux();
         
