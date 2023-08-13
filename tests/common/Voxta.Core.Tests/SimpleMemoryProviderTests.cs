@@ -133,6 +133,6 @@ public class SimpleMemoryProviderTests
 
     private void AssertMemories(params string[] expected)
     {
-        Assert.That(_chatSessionData.Memories.Select(m => m.Text.Text).ToArray(), Is.EqualTo(expected));
+        Assert.That(_chatSessionData.Memories.Select(m => m.Text.Value).ToArray(), Is.EqualTo(expected));
     }
 }

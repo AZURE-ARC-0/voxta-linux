@@ -13,11 +13,11 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
     public async Task TestChat()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User.Name, "oh wow, I did not expect you to be so...");
-        chat.AddMessage(chat.Character.Name, "So... what? You'll make me blush!");
-        chat.AddMessage(chat.User.Name, "so beautiful, I am sorry I am just a bit nervous");
-        chat.AddMessage(chat.Character.Name, "No worries, I'm nervous too! I'm just glad you're here. So, what do you want to talk about?");
-        chat.AddMessage(chat.User.Name, "well it's the first time I talk with a computer, I am not sure what to say");
+        chat.AddMessage(chat.User.Name, "I wanted to know more about you.");
+        chat.AddMessage(chat.Character.Name, "I'm all yours!");
+        chat.AddMessage(chat.User.Name, "What would be the perfect date for you?");
+        chat.AddMessage(chat.Character.Name, "Oh, I think I'm blushing... that would be anything, as long as I'm with you!");
+        chat.AddMessage(chat.User.Name, "You're cute, you know that?");
 
         var client = await CreateClientAsync<OobaboogaTextGenService>();
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);

@@ -14,12 +14,12 @@ public partial class ChatSession
         if (speechInterruptionRatio is > 0.05f and < 0.95f)
         {
             var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
-            if (lastCharacterMessage?.User == _chatSessionData.Character.Name.Text)
+            if (lastCharacterMessage?.User == _chatSessionData.Character.Name.Value)
             {
-                var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Text.Length * speechInterruptionRatio), 1, lastCharacterMessage.Text.Length - 2);
-                lastCharacterMessage.Text = lastCharacterMessage.Text[..cutoff] + "...";
-                lastCharacterMessage.Tokens = _textGen.GetTokenCount(lastCharacterMessage.Text);
-                _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Text);
+                var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Value.Length * speechInterruptionRatio), 1, lastCharacterMessage.Value.Length - 2);
+                lastCharacterMessage.Value = lastCharacterMessage.Value[..cutoff] + "...";
+                lastCharacterMessage.Tokens = _textGen.GetTokenCount(lastCharacterMessage.Value);
+                _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Value);
             }
 
             text = "*interrupts {{char}}* " + text;
@@ -29,13 +29,13 @@ public partial class ChatSession
         if (_chatSessionState.PendingUserMessage == null)
         {
             var userText = _chatTextProcessor.ProcessText(text);
-            var userMessageData = await SaveMessageAsync(_chatSessionData.User.Name.Text, userText);
+            var userMessageData = await SaveMessageAsync(_chatSessionData.User.Name.Value, userText);
             _chatSessionState.PendingUserMessage = userMessageData;
         }
         else
         {
             var append = "; " + text;
-            _chatSessionState.PendingUserMessage.Text += append;
+            _chatSessionState.PendingUserMessage.Value += append;
             _chatSessionState.PendingUserMessage.Tokens += _textGen.GetTokenCount(append);
             await UpdateMessageAsync(_chatSessionState.PendingUserMessage);
         }
@@ -69,13 +69,13 @@ public partial class ChatSession
         }
 
         _chatSessionState.PendingUserMessage = null;
-        var genData = new TextData { Text = _sanitizer.Sanitize(generated) };
-        var reply = await SaveMessageAsync(_chatSessionData.Character.Name.Text, genData);
+        var genData = new TextData { Value = _sanitizer.Sanitize(generated) };
+        var reply = await SaveMessageAsync(_chatSessionData.Character.Name.Value, genData);
         
-        _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Text);
+        _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Value);
 
         var speechId = $"speech_{_chatSessionData.Chat.Id}_{reply.Id}";
-        await SendReplyWithSpeechAsync(reply.Text, speechId, false, queueCancellationToken);
+        await SendReplyWithSpeechAsync(reply.Value, speechId, false, queueCancellationToken);
         await GenerationActionInference(queueCancellationToken);
     }
 }

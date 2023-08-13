@@ -164,7 +164,10 @@ public class DiagnosticsUtil
                 var chat = new ChatSessionData
                 {
                     Culture = "en-US",
-                    User = new ChatSessionDataUser { Name = "User" },
+                    User = new ChatSessionDataUser
+                    {
+                        Name = "User"
+                    },
                     Chat = null!,
                     Character = new ChatSessionDataCharacter
                     {

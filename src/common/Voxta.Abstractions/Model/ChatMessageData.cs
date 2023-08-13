@@ -20,14 +20,14 @@ public class ChatMessageData : TextData
             Id = Guid.NewGuid(),
             User = user,
             Timestamp = DateTimeOffset.UtcNow,
-            Text = message,
+            Value = message,
             Tokens = 0,
         };
     }
 
     public static ChatMessageData FromGen(Guid chatId, string user, TextData gen)
     {
-        if (string.IsNullOrEmpty(gen.Text)) throw new ArgumentException("Cannot create empty message", nameof(gen));
+        if (string.IsNullOrEmpty(gen.Value)) throw new ArgumentException("Cannot create empty message", nameof(gen));
         
         return new ChatMessageData
         {
@@ -35,7 +35,7 @@ public class ChatMessageData : TextData
             Id = Guid.NewGuid(),
             User = user,
             Timestamp = DateTimeOffset.UtcNow,
-            Text = gen.Text,
+            Value = gen.Value,
             Tokens = gen.Tokens,
         };
     }

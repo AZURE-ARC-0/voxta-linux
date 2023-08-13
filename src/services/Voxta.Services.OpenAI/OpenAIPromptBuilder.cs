@@ -63,8 +63,8 @@ public class OpenAIPromptBuilder
             var message = chatMessages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= maxTokens) break;
-            var role = message.User == chat.Character.Name.Text ? "assistant" : "user";
-            messages.Insert(1, new() { role = role, content = message.Text });
+            var role = message.User == chat.Character.Name.Value ? "assistant" : "user";
+            messages.Insert(1, new() { role = role, content = message.Value });
         }
 
         if (!string.IsNullOrEmpty(postHistoryPrompt))
@@ -101,7 +101,7 @@ public class OpenAIPromptBuilder
         sb.AppendLineLinux("Conversation:");
         foreach (var message in chat.GetMessages().TakeLast(8))
         {
-            sb.AppendLineLinux($"{message.User}: {message.Text}");
+            sb.AppendLineLinux($"{message.User}: {message.Value}");
         }
         sb.AppendLineLinux();
         sb.AppendLineLinux($"Which of the following actions should be executed to match {chat.Character.Name}'s last message?");
@@ -146,7 +146,7 @@ public class OpenAIPromptBuilder
         
         foreach (var message in chat.GetMessages().TakeLast(8))
         {
-            sb.AppendLineLinux($"{message.User}: {message.Text}");
+            sb.AppendLineLinux($"{message.User}: {message.Value}");
         }
         
         sb.AppendLineLinux();
@@ -162,7 +162,7 @@ public class OpenAIPromptBuilder
         var character = chat.Character;
         var sb = new StringBuilder();
         if (character.SystemPrompt.HasValue)
-            sb.AppendLineLinux(character.SystemPrompt.Text);
+            sb.AppendLineLinux(character.SystemPrompt.Value);
         else
             sb.AppendLineLinux($"This is a conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}.  Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character.");
         
@@ -175,7 +175,7 @@ public class OpenAIPromptBuilder
         if (character.Scenario.HasValue)
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
         if (chat.Context?.HasValue == true)
-            sb.AppendLineLinux(chat.Context.Text);
+            sb.AppendLineLinux(chat.Context.Value);
         if (chat.Actions is { Length: > 1 })
             sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
         sb.AppendLineLinux($"Only write a single reply from {character.Name} for natural speech.");
@@ -188,7 +188,7 @@ public class OpenAIPromptBuilder
         if (!character.PostHistoryInstructions.HasValue) return "";
         var sb = new StringBuilder();
         if (!character.PostHistoryInstructions.HasValue)
-            sb.AppendLineLinux(character.PostHistoryInstructions.Text);
+            sb.AppendLineLinux(character.PostHistoryInstructions.Value);
         return sb.ToString().TrimExcess();
     }
 }

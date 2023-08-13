@@ -67,7 +67,7 @@ public class GenericPromptBuilder
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
-            var entry = $"{message.User}: {message.Text}\n";   
+            var entry = $"{message.User}: {message.Value}\n";   
             var entryTokens = _tokenizer.CountTokens(entry);
             if (totalTokens + entryTokens >= maxTokens) break;
             startAtMessage = i;
@@ -81,7 +81,7 @@ public class GenericPromptBuilder
             var message = chatMessages[i];
             sb.Append(message.User);
             sb.Append(": ");
-            sb.AppendLineLinux(message.Text);
+            sb.AppendLineLinux(message.Value);
         }
 
         sb.Insert(0, '\n');
@@ -121,7 +121,7 @@ public class GenericPromptBuilder
         sb.AppendLineLinux("Conversation:");
         foreach (var message in chat.GetMessages().TakeLast(8))
         {
-            sb.AppendLineLinux($"{message.User}: {message.Text}");
+            sb.AppendLineLinux($"{message.User}: {message.Value}");
         }
         sb.AppendLineLinux();
         sb.AppendLineLinux($"Which of the following actions should be executed to match {chat.Character.Name}'s last message?");
@@ -152,7 +152,7 @@ public class GenericPromptBuilder
         
         foreach (var message in chat.GetMessages().Take(10))
         {
-            sb.AppendLineLinux($"{message.User}: {message.Text}");
+            sb.AppendLineLinux($"{message.User}: {message.Value}");
         }
         
         sb.AppendLineLinux("<END>");
@@ -166,7 +166,7 @@ public class GenericPromptBuilder
         var character = chat.Character;
         var sb = new StringBuilder();
         if (character.SystemPrompt.HasValue)
-            sb.AppendLineLinux(character.SystemPrompt.Text);
+            sb.AppendLineLinux(character.SystemPrompt.Value);
         else
             sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Only use spoken words. Avoid making up facts about {chat.User.Name}.");
         
@@ -179,7 +179,7 @@ public class GenericPromptBuilder
         if (character.Scenario.HasValue)
             sb.AppendLineLinux($"Circumstances and context of the dialogue: {character.Scenario}");
         if (chat.Context?.HasValue == true)
-            sb.AppendLineLinux(chat.Context.Text);
+            sb.AppendLineLinux(chat.Context.Value);
         if (chat.Actions is { Length: > 1 })
             sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
         return sb.ToString().TrimExcess();
@@ -190,7 +190,7 @@ public class GenericPromptBuilder
         var character = chat.Character;
         var sb = new StringBuilder();
         if (character.PostHistoryInstructions.HasValue)
-            sb.AppendLineLinux(string.Join("\n", character.PostHistoryInstructions.Text.Split(new[]{'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).Select(x => $"({x})")));
+            sb.AppendLineLinux(string.Join("\n", character.PostHistoryInstructions.Value.Split(new[]{'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).Select(x => $"({x})")));
         return sb.ToString().TrimExcess();
     }
 }

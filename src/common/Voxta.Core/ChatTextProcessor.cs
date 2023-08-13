@@ -31,7 +31,7 @@ public class ChatTextProcessor : IChatTextProcessor
         var tokens = _tokenCounter.GetTokenCount(result);
         return new TextData
         {
-            Text = result,
+            Value = result,
             Tokens = tokens
         };
     }

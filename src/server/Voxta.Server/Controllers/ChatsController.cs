@@ -75,7 +75,7 @@ public class ChatsController : Controller
         }
         else
         {
-            message.Text = value.Text;
+            message.Value = value.Text;
             await _messageRepository.UpdateMessageAsync(message);
         }
 

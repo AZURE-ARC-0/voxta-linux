@@ -11,6 +11,8 @@ public class SimpleMemoryProvider : IMemoryProvider
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly List<(MemoryItem Source, ChatSessionDataMemory Data)> _memories = new();
 
+    private Guid _lastProcessedMessageId = Guid.Empty;
+    
     public SimpleMemoryProvider(IMemoryRepository memoryRepository, IPerformanceMetrics performanceMetrics)
     {
         _memoryRepository = memoryRepository;
@@ -34,17 +36,12 @@ public class SimpleMemoryProvider : IMemoryProvider
     {
         var perf = _performanceMetrics.Start("SimpleMemoryProvider");
         
-        // Create words index
-        #warning Improve perf, e.g. by keeping a set per message. Note that if messages are updated, we should clear the words.
-        #warning Memory relevance should be higher for more recent messages
-        #warning We can stop as soon as we have enough tokens instead of always doing them all
-        #warning Do not re-process messages every time. Once processed, we're fine.
-        foreach (var msg in chat.GetMessages())
+        foreach (var msg in chat.GetMessages().SkipWhile(m => m.Id != _lastProcessedMessageId || _lastProcessedMessageId == Guid.Empty).Skip(_lastProcessedMessageId == Guid.Empty ? 0 : 1))
         {
-            if (string.IsNullOrEmpty(msg.Text)) continue;
+            if (string.IsNullOrEmpty(msg.Value)) continue;
             foreach (var memory in _memories)
             {
-                if (memory.Source.Keywords.Any(k => msg.Text.Contains(k, StringComparison.InvariantCultureIgnoreCase)))
+                if (memory.Source.Keywords.Any(k => msg.Value.Contains(k, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     var indexOfMemory = chat.Memories.FindIndex(m => m.Id == memory.Data.Id);
                     if (indexOfMemory == 0)
@@ -54,6 +51,7 @@ public class SimpleMemoryProvider : IMemoryProvider
                     chat.Memories.Insert(0, memory.Data);
                 }
             }
+            _lastProcessedMessageId = msg.Id;
         }
 
         perf.Done();

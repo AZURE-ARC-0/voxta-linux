@@ -25,7 +25,7 @@ public class ChatSessionData : IChatInferenceData
 
     public string GetMessagesAsString()
     {
-        return string.Join("\n", Messages.Select(m => $"{m.User}: {m.Text}"));
+        return string.Join("\n", Messages.Select(m => $"{m.User}: {m.Value}"));
     }
 }
 
