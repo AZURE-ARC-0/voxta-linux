@@ -36,7 +36,7 @@ public class SimpleMemoryProvider : IMemoryProvider
     {
         var perf = _performanceMetrics.Start("SimpleMemoryProvider");
         
-        foreach (var msg in chat.GetMessages().SkipWhile(m => m.Id != _lastProcessedMessageId || _lastProcessedMessageId == Guid.Empty).Skip(_lastProcessedMessageId == Guid.Empty ? 0 : 1))
+        foreach (var msg in chat.GetMessages().SkipWhile(m => _lastProcessedMessageId != Guid.Empty && m.Id != _lastProcessedMessageId).Skip(_lastProcessedMessageId == Guid.Empty ? 0 : 1))
         {
             if (string.IsNullOrEmpty(msg.Value)) continue;
             foreach (var memory in _memories)

@@ -117,7 +117,7 @@ public class SimpleMemoryProviderTests
                 Items = memories.Select(x =>
                     new MemoryItem
                     {
-                        Id = Guid.Empty,
+                        Id = Guid.NewGuid(),
                         Weight = x.Weight,
                         Keywords = x.Keywords,
                         Text = x.Value
