@@ -170,7 +170,9 @@ public class GenericPromptBuilder
             sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about {chat.User.Name}.");
         
         sb.AppendLineLinux();
-        
+
+        if (chat.User.Description.HasValue)
+            sb.AppendLineLinux($"Description of {chat.User.Name}: {chat.User.Description}");
         if (character.Description.HasValue)
             sb.AppendLineLinux($"Description of {character.Name}: {character.Description}");
         if (character.Personality.HasValue)

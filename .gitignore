@@ -3,5 +3,6 @@ obj/
 publish/
 src/server/Voxta.Server/Data/*
 !src/server/Voxta.Server/Data/README.txt
+!src/server/Voxta.Server/Data/Audio
 src/server/Voxta.Server/Models/*
 *.db

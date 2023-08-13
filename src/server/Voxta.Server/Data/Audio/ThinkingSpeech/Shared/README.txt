@@ -1,0 +1,1 @@
+﻿You can put audio files here, and they will be included in the thinking speech sounds.

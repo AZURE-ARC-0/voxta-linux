@@ -163,6 +163,8 @@ public class OpenAIPromptBuilder
         
         sb.AppendLineLinux();
         
+        if (chat.User.Description.HasValue)
+            sb.AppendLineLinux($"Description of {chat.User.Name}: {chat.User.Description}");
         if (character.Description.HasValue)
             sb.AppendLineLinux($"Description of {character.Name}: {character.Description}");
         if (character.Personality.HasValue)
