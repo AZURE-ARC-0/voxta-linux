@@ -29,7 +29,7 @@ public class GenericPromptBuilder
         var sb = new StringBuilderWithTokens(_tokenizer, maxTokens);
         var systemPrompt = MakeSystemPrompt(chat);
         sb.AppendLineLinux(systemPrompt);
-        var query = $"{chat.Character.Name}: ";
+        var query = $"{chat.Character.Name}:";
         var queryTokens = _tokenizer.CountTokens(query);
         var userSuffix = new TextData
         {
@@ -167,7 +167,7 @@ public class GenericPromptBuilder
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Value);
         else
-            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Only use spoken words. Avoid making up facts about {chat.User.Name}.");
+            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about {chat.User.Name}.");
         
         sb.AppendLineLinux();
         

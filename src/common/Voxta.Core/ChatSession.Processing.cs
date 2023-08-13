@@ -26,7 +26,7 @@ public partial class ChatSession
     {
         try
         {
-            var task = fn(_messageQueueCancellationTokenSource.Token);
+            var _ = fn(_messageQueueCancellationTokenSource.Token);
         }
         catch (OperationCanceledException)
         {
@@ -49,7 +49,7 @@ public partial class ChatSession
                 }
                 catch (Exception exc)
                 {
-                    _logger.LogError(exc, "Error processing message {MessageType}", message.GetType().Name);
+                    _logger.LogError(exc, "Error processing queued message");
                     await _tunnel.SendAsync(new ServerErrorMessage(exc), cancellationToken);
                 }
                 finally
