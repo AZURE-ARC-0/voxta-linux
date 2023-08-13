@@ -47,6 +47,7 @@ public abstract class ClientDoChatMessageBase : ClientMessage
 {
     public string? AudioPath { get; init; }
     public bool UseServerSpeechRecognition { get; init; }
+    public bool UseActionInference { get; init; }
     public string[] AcceptedAudioContentTypes { get; set; } = { "audio/x-wav", "audio/mpeg" };
 }
 

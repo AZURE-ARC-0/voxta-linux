@@ -76,7 +76,7 @@ public class ChatSessionFactory
             var culture = character.Culture;
             textGen = await _textGenFactory.CreateBestMatchAsync(profile.TextGen, character.Services.TextGen.Service ?? "", prerequisites, culture, cancellationToken);
             speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateBestMatchAsync(profile.SpeechToText, "", prerequisites, culture, cancellationToken) : null;
-            actionInference = profile.ActionInference.Services.Any()
+            actionInference = startChatMessage.UseActionInference && profile.ActionInference.Services.Any()
                 ? await _animationSelectionFactory.CreateBestMatchAsync(profile.ActionInference, character.Services.ActionInference.Service ?? "", prerequisites, culture, cancellationToken)
                 : null;
 

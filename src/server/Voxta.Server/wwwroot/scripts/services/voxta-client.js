@@ -127,6 +127,7 @@
             $type: "newChat",
             characterId: params.characterId,
             useServerSpeechRecognition: true,
+            useActionInference: false,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });
         this.socket.send(msg);
@@ -137,6 +138,7 @@
             $type: "resumeChat",
             chatId: chatId,
             useServerSpeechRecognition: true,
+            useActionInference: false,
             acceptedAudioContentTypes: ["audio/x-wav", "audio/mpeg"],
         });
         this.socket.send(msg);
