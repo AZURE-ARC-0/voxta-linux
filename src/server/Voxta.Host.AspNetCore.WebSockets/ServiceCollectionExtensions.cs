@@ -19,6 +19,10 @@ public static class ServiceCollectionExtensions
         services.AddWebSockets(_ => { });
         services.AddHttpClient();
         
+        #if (WINDOWS)
+        services.AddNAudio();
+        #endif
+        
         services.AddVoxta();
         
         services.AddLiteDBRepositories();
