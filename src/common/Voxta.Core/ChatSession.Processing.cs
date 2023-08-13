@@ -21,6 +21,17 @@ public partial class ChatSession
         {
         }
     }
+    
+    private void EnqueueNow(Func<CancellationToken, ValueTask> fn)
+    {
+        try
+        {
+            var task = fn(_messageQueueCancellationTokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
 
     private async Task ProcessQueueAsync(CancellationToken cancellationToken)
     {

@@ -1,7 +1,8 @@
 ﻿using System.Text;
 using Voxta.Abstractions.Model;
-using Microsoft.DeepDev;
 using Voxta.Abstractions.System;
+using Voxta.Abstractions.Tokenizers;
+using Voxta.Shared.LargeLanguageModelsUtils;
 
 namespace Voxta.Services.OpenAI;
 
@@ -24,36 +25,30 @@ public class OpenAIPromptBuilder
     public List<OpenAIMessage> BuildReplyPrompt(IChatInferenceData chat, int maxMemoryTokens, int maxTokens)
     {
         var systemPrompt = MakeSystemPrompt(chat);
-        var systemPromptTokens = _tokenizer.Encode(systemPrompt, OpenAISpecialTokens.Keys).Count;
         var postHistoryPrompt = MakePostHistoryPrompt(chat);
-        var postHistoryPromptTokens = _tokenizer.Encode(postHistoryPrompt, OpenAISpecialTokens.Keys).Count;
 
-        var totalTokens = systemPromptTokens + postHistoryPromptTokens;
+        var totalTokens = systemPrompt.Tokens + postHistoryPrompt.Tokens;
 
-        var sb = new StringBuilder();
-        var memoryTokens = 0;
+        var memorySb = new StringBuilderWithTokens(_tokenizer, maxMemoryTokens);
         if (maxMemoryTokens > 0)
         {
             var memories = chat.GetMemories();
             if (memories.Count > 0)
             {
-                sb.AppendLineLinux($"What {chat.Character.Name} knows:");
+                memorySb.AppendLineLinux();
+                memorySb.AppendLineLinux($"What {chat.Character.Name} knows:");
                 foreach (var memory in memories)
                 {
-                    #warning We should never count tokens here, nor below. Instead keep tokens in the data.
-                    var entryTokens = _tokenizer.Encode(memory.Text, OpenAISpecialTokens.Keys).Count;
-                    memoryTokens += entryTokens + 1;
-                    if (memoryTokens >= maxMemoryTokens) break;
-                    sb.AppendLineLinux(memory.Text);
+                    if (!memorySb.AppendLineLinux(memory.Text)) break;
                 }
-
-                totalTokens += memoryTokens;
             }
         }
 
-        if (memoryTokens > 0)
+        if (memorySb.Tokens > 0)
         {
-            systemPrompt += "\n" + sb.ToString().TrimEnd('\n');
+            var memoryData = memorySb.ToTextData();
+            systemPrompt += memoryData.Value;
+            totalTokens += memoryData.Tokens;
         }
         
         var messages = new List<OpenAIMessage> { new() { role = "system", content = systemPrompt } };
@@ -157,10 +152,10 @@ public class OpenAIPromptBuilder
         return messages;
     }
 
-    private string MakeSystemPrompt(IChatInferenceData chat)
+    private TextData MakeSystemPrompt(IChatInferenceData chat)
     {
         var character = chat.Character;
-        var sb = new StringBuilder();
+        var sb = new StringBuilderWithTokens(_tokenizer);
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Value);
         else
@@ -179,16 +174,16 @@ public class OpenAIPromptBuilder
         if (chat.Actions is { Length: > 1 })
             sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
         sb.AppendLineLinux($"Only write a single reply from {character.Name} for natural speech.");
-        return sb.ToString().TrimExcess();
+        return sb.ToTextData();
     }
 
-    private static string MakePostHistoryPrompt(IChatInferenceData chat)
+    private TextData MakePostHistoryPrompt(IChatInferenceData chat)
     {
         var character = chat.Character;
-        if (!character.PostHistoryInstructions.HasValue) return "";
-        var sb = new StringBuilder();
+        if (!character.PostHistoryInstructions.HasValue) return TextData.Empty;
+        var sb = new StringBuilderWithTokens(_tokenizer);
         if (!character.PostHistoryInstructions.HasValue)
             sb.AppendLineLinux(character.PostHistoryInstructions.Value);
-        return sb.ToString().TrimExcess();
+        return sb.ToTextData();
     }
 }

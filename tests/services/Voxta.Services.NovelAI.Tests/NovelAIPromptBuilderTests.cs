@@ -58,6 +58,6 @@ public class NovelAIPromptBuilderTests
         Jane: World
         Joe: Question
         Jane: 
-        """.ReplaceLineEndings("\n").TrimExcess()));
+        """.ReplaceLineEndings("\n")));
     }
 }

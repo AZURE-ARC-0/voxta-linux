@@ -56,7 +56,7 @@ public class GenericPromptBuilderTests
         Jane: World
         Joe: Question
         Jane: 
-        """.ReplaceLineEndings("\n").TrimExcess()));
+        """.ReplaceLineEndings("\n")));
     }
     
     [Test]
@@ -103,7 +103,7 @@ public class GenericPromptBuilderTests
         Jane: World
         Joe: Question
         Jane: 
-        """.ReplaceLineEndings("\n").TrimExcess()));
+        """.ReplaceLineEndings("\n")));
     }
 
     [Test]
@@ -150,8 +150,8 @@ public class GenericPromptBuilderTests
            Joe: Hello
            Jane: World
            Joe: Question
-           Jane:
-           """.ReplaceLineEndings("\n").TrimExcess()));
+           Jane: 
+           """.ReplaceLineEndings("\n")));
     }
     
     [Test]
@@ -206,7 +206,7 @@ public class GenericPromptBuilderTests
         Only write the action.
 
         Action: [
-        """.ReplaceLineEndings("\n").TrimExcess()));
+        """.ReplaceLineEndings("\n")));
     }
     
     [Test]

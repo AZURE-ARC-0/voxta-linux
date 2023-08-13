@@ -3,16 +3,16 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Microsoft.DeepDev;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
+using Voxta.Abstractions.Tokenizers;
 
 namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase
 {
-    protected static readonly ITokenizer Tokenizer = TokenizerBuilder.CreateByModelName("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
+    protected static readonly ITokenizer Tokenizer = DeepDevTokenizer.Create();
     
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
@@ -30,6 +30,9 @@ public abstract class OpenAIClientBase
         });
         Mapper = config.CreateMapper();
     }
+    
+    public string ServiceName => OpenAIConstants.ServiceName;
+    public string[] Features => new[] { ServiceFeatures.GPT3 };
 
     protected int MaxMemoryTokens { get; private set; }
     protected int MaxContextTokens { get; private set; }
@@ -49,12 +52,8 @@ public abstract class OpenAIClientBase
 
     public int GetTokenCount(string message)
     {
-        if (string.IsNullOrEmpty(message)) return 0;
-        return Tokenizer.Encode(message, OpenAISpecialTokens.Keys).Count;
+        return Tokenizer.CountTokens(message);
     }
-    
-    public string ServiceName => OpenAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.GPT3 };
 
     public virtual async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {

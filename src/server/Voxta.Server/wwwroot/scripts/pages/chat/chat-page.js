@@ -179,7 +179,9 @@ voxtaClient.addEventListener('speechRecognitionStart', () => {
     audioVisualizer.listen();
 });
 
-voxtaClient.addEventListener('speechRecognitionPartial', evt => prompt.value = evt.detail.text);
+voxtaClient.addEventListener('speechRecognitionPartial', evt => {
+    prompt.value = evt.detail.text;
+});
 
 voxtaClient.addEventListener('speechRecognitionEnd', evt => {
     sendChatMessage(evt.detail.text);

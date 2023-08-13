@@ -1,7 +1,7 @@
 using Voxta.Abstractions.Model;
-using Microsoft.DeepDev;
 using Moq;
 using Voxta.Abstractions.System;
+using Voxta.Abstractions.Tokenizers;
 
 namespace Voxta.Services.OpenAI.Tests;
 
@@ -13,7 +13,7 @@ public class OpenAIPromptBuilderTests
     public void Setup()
     {
         var tokenizer = new Mock<ITokenizer>();
-        tokenizer.Setup(m => m.Encode(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>())).Returns(new List<int>());
+        tokenizer.Setup(m => m.CountTokens(It.IsAny<string>())).Returns(0);
         var timeProvider = new Mock<ITimeProvider>();
         timeProvider.Setup(m => m.LocalNow).Returns(new DateTimeOffset(2001, 2, 3, 4, 5, 6, TimeSpan.Zero));
         _builder = new OpenAIPromptBuilder(tokenizer.Object, timeProvider.Object);

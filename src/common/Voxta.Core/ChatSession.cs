@@ -88,16 +88,19 @@ public sealed partial class ChatSession : IChatSession
     private void OnSpeechRecognitionStarted(object? sender, EventArgs e)
     {
         _logger.LogInformation("Speech recognition started");
-        Enqueue(async ct =>
+        EnqueueNow(async _ =>
         {
             await _chatSessionState.AbortGeneratingReplyAsync();
-            await _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), ct);
+            Enqueue(async ct =>
+            {
+                await _tunnel.SendAsync(new ServerSpeechRecognitionStartMessage(), ct);
+            });
         });
     }
     
     private void OnSpeechRecognitionPartial(object? sender, string e)
     {
-        Enqueue(async ct =>
+        EnqueueNow(async ct =>
         {
             await _tunnel.SendAsync(new ServerSpeechRecognitionPartialMessage
             {

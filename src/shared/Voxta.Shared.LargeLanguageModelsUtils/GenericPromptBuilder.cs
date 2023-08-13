@@ -26,77 +26,76 @@ public class GenericPromptBuilder
         if (maxTokens <= 0) throw new ArgumentException("Max tokens must be larger than zero.", nameof(maxTokens));
         if (maxMemoryTokens >= maxTokens) throw new ArgumentException("Cannot have more memory tokens than the max tokens.", nameof(maxMemoryTokens));
         
+        var sb = new StringBuilderWithTokens(_tokenizer, maxTokens);
         var systemPrompt = MakeSystemPrompt(chat);
-        var systemPromptTokens = _tokenizer.CountTokens(systemPrompt);
-        /*
-        var postHistoryPrompt = includePostHistoryPrompt ? MakePostHistoryPrompt(chat) : "";
-        var postHistoryPromptTokens = _tokenizer.CountTokens(postHistoryPrompt);
-        */
+        sb.AppendLineLinux(systemPrompt);
         var query = $"{chat.Character.Name}: ";
         var queryTokens = _tokenizer.CountTokens(query);
-        var totalTokens = systemPromptTokens /*+ postHistoryPromptTokens + 1*/ + queryTokens;
-        
-        var sb = new StringBuilder();
-        
-        var memoryTokens = 0;
+        var userSuffix = new TextData
+        {
+            Value = ": ",
+            Tokens = _tokenizer.CountTokens(": "),
+        };
+        sb.Reserve(queryTokens);
+        var tokensPerUser = new Dictionary<string, TextData>();
+
+        var memorySb = new StringBuilderWithTokens(_tokenizer, maxMemoryTokens);
         if (maxMemoryTokens > 0)
         {
             var memories = chat.GetMemories();
             if (memories.Count > 0)
             {
-                sb.AppendLineLinux($"What {chat.Character.Name} knows:");
+                memorySb.AppendLineLinux($"What {chat.Character.Name} knows:");
                 foreach (var memory in memories)
                 {
-                    #warning We should never count tokens here, nor below. Instead keep tokens in the data.
-                    var entryTokens = _tokenizer.CountTokens(memory.Text);
-                    memoryTokens += entryTokens + 1;
-                    if (memoryTokens >= maxMemoryTokens) break;
-                    sb.AppendLineLinux(memory.Text);
+                    if (!memorySb.AppendLineLinux(memory.Text)) break;
                 }
-
-                totalTokens += memoryTokens;
             }
+            memorySb.AppendLineLinux();
+        }
 
-            memoryTokens++;
-            totalTokens++;
-            sb.AppendLineLinux();
+        if (memorySb.Tokens > 0)
+        {
+            sb.AppendLineLinux(memorySb.ToTextData());
         }
 
         var chatMessages = chat.GetMessages();
-        var startAtMessage = 0;
+        var includedMessages = new List<TextData>();
+        var tokensBudget = maxTokens - sb.Tokens;
         for (var i = chatMessages.Count - 1; i >= 0; i--)
         {
             var message = chatMessages[i];
-            var entry = $"{message.User}: {message.Value}\n";   
-            var entryTokens = _tokenizer.CountTokens(entry);
-            if (totalTokens + entryTokens >= maxTokens) break;
-            startAtMessage = i;
+            if (!tokensPerUser.TryGetValue(message.User, out var userData))
+            {
+                userData = new TextData
+                {
+                    Value = message.User,
+                    Tokens = _tokenizer.CountTokens(message.User),
+                };
+                tokensPerUser.Add(message.User, userData);
+            }
+            var messageData = new TextData
+            {
+                Value = message.User + userSuffix + message.Value + '\n',
+                Tokens = userData.Tokens + userSuffix.Tokens + _tokenizer.CountTokens(message.Value) + 1,
+            };
+            tokensBudget -= messageData.Tokens;
+            if(tokensBudget < 0) break;
+            includedMessages.Insert(0, messageData);
         }
         
-        if (chatMessages.Count - startAtMessage < Math.Min(chatMessages.Count, 4))
-            throw new InvalidOperationException($"Reached {maxTokens} before writing at least two message rounds, which will result in incoherent conversations. Either increase max tokens ({totalTokens} / {maxTokens}) and/or reduce memory tokens ({memoryTokens} / {maxMemoryTokens}).");
-        
-        for (var i = startAtMessage; i < chatMessages.Count; i++)
+        if (includedMessages.Count < Math.Min(chatMessages.Count, 4))
+            throw new InvalidOperationException($"Reached {maxTokens} before writing at least two message rounds, which will result in incoherent conversations. Either increase max tokens ({sb.Tokens} / {maxTokens}) and/or reduce memory tokens ({memorySb.Tokens} / {maxMemoryTokens}).");
+
+        foreach(var messageData in includedMessages)
         {
-            var message = chatMessages[i];
-            sb.Append(message.User);
-            sb.Append(": ");
-            sb.AppendLineLinux(message.Value);
+            sb.Append(messageData);
         }
 
-        sb.Insert(0, '\n');
-        sb.Insert(0, systemPrompt);
-
-        /*
-        if (!string.IsNullOrEmpty(postHistoryPrompt))
-        {
-            sb.AppendLineLinux(postHistoryPrompt);
-        }
-        */
-
+        sb.Release(queryTokens);
         sb.Append(query);
 
-        return sb.ToString().TrimExcess();
+        return sb.ToTextData().Value;
     }
 
     public string BuildActionInferencePrompt(IChatInferenceData chat)
@@ -136,7 +135,7 @@ public class GenericPromptBuilder
         return sb.ToString().TrimExcess();
     }
 
-    public string[] SummarizationStopTokens => new string[] { "\n\n" }; 
+    public string[] SummarizationStopTokens => new[] { "\n\n" }; 
 
     public string BuildSummarizationPrompt(IChatInferenceData chat)
     {
@@ -161,10 +160,10 @@ public class GenericPromptBuilder
         return sb.ToString();
     }
 
-    protected virtual string MakeSystemPrompt(IChatInferenceData chat)
+    protected virtual TextData MakeSystemPrompt(IChatInferenceData chat)
     {
         var character = chat.Character;
-        var sb = new StringBuilder();
+        var sb = new StringBuilderWithTokens(_tokenizer);
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Value);
         else
@@ -182,15 +181,15 @@ public class GenericPromptBuilder
             sb.AppendLineLinux(chat.Context.Value);
         if (chat.Actions is { Length: > 1 })
             sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
-        return sb.ToString().TrimExcess();
+        return sb.ToTextData();
     }
 
-    private static string MakePostHistoryPrompt(IChatInferenceData chat)
+    private TextData MakePostHistoryPrompt(IChatInferenceData chat)
     {
         var character = chat.Character;
-        var sb = new StringBuilder();
+        var sb = new StringBuilderWithTokens(_tokenizer);
         if (character.PostHistoryInstructions.HasValue)
             sb.AppendLineLinux(string.Join("\n", character.PostHistoryInstructions.Value.Split(new[]{'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries).Select(x => $"({x})")));
-        return sb.ToString().TrimExcess();
+        return sb.ToTextData();
     }
 }
