@@ -1,9 +1,9 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.NovelAI;
 
 [Serializable]
-public class NovelAISettings : SettingsBase
+public class NovelAISettings : LLMSettingsBase<NovelAIParameters>
 {
     public const string ClioV1 = "clio-v1";
     public const string KayraV1 = "kayra-v1";
@@ -12,8 +12,6 @@ public class NovelAISettings : SettingsBase
 
     public required string Token { get; set; }
     public string Model { get; set; } = DefaultModel;
-    public int MaxMemoryTokens { get; set; } = 400;
-    public int MaxContextTokens { get; set; } = 1600;
     
     public string[] ThinkingSpeech { get; set; } = {
         "m",
@@ -27,6 +25,4 @@ public class NovelAISettings : SettingsBase
         "??",
         "o",
     };
-    
-    public NovelAIParameters? Parameters { get; set; }
 }

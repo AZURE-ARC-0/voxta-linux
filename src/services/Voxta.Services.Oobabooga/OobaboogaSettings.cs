@@ -3,6 +3,6 @@
 namespace Voxta.Services.Oobabooga;
 
 [Serializable]
-public class OobaboogaSettings : RemoteServiceSettingsBase<OobaboogaParameters>
+public class OobaboogaSettings : RemoteLLMServiceSettingsBase<OobaboogaParameters>
 {
 }

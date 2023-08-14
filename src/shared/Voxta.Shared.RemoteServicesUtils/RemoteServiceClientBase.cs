@@ -9,13 +9,13 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
 using Voxta.Services.KoboldAI;
-using Voxta.Shared.LargeLanguageModelsUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Shared.RemoteServicesUtils;
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 public abstract class RemoteServiceClientBase<TSettings, TInputParameters, TOutputParameters>
-    where TSettings : RemoteServiceSettingsBase<TInputParameters> where TInputParameters : new()
+    where TSettings : RemoteLLMServiceSettingsBase<TInputParameters> where TInputParameters : new()
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {

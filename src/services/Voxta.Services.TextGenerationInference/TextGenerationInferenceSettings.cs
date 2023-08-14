@@ -3,6 +3,6 @@
 namespace Voxta.Services.TextGenerationInference;
 
 [Serializable]
-public class TextGenerationInferenceSettings : RemoteServiceSettingsBase<TextGenerationInferenceParameters>
+public class TextGenerationInferenceSettings : RemoteLLMServiceSettingsBase<TextGenerationInferenceParameters>
 {
 }

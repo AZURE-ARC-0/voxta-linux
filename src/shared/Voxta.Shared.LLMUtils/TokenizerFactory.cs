@@ -1,6 +1,6 @@
 ﻿using Voxta.Abstractions.Tokenizers;
 
-namespace Voxta.Shared.LargeLanguageModelsUtils;
+namespace Voxta.Shared.LLMUtils;
 
 public static class TokenizerFactory
 {

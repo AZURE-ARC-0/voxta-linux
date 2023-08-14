@@ -1,15 +1,12 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.OpenAI;
 
 [Serializable]
-public class OpenAISettings : SettingsBase
+public class OpenAISettings : LLMSettingsBase<OpenAIParameters>
 {
     public const string DefaultModel = "gpt-3.5-turbo";
 
     public required string ApiKey { get; set; }
     public string Model { get; set; } = DefaultModel;
-    public int MaxMemoryTokens { get; set; } = 400;
-    public int MaxContextTokens { get; set; } = 1600;
-    public OpenAIParameters? Parameters { get; set; }
 }

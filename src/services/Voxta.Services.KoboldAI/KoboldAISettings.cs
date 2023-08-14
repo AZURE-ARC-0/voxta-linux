@@ -3,6 +3,6 @@
 namespace Voxta.Services.KoboldAI;
 
 [Serializable]
-public class KoboldAISettings : RemoteServiceSettingsBase<KoboldAIParameters>
+public class KoboldAISettings : RemoteLLMServiceSettingsBase<KoboldAIParameters>
 {
 }

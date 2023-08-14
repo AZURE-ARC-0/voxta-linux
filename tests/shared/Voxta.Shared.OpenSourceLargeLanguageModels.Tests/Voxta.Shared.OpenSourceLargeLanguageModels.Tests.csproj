@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\shared\Voxta.Shared.LargeLanguageModelsUtils\Voxta.Shared.LargeLanguageModelsUtils.csproj" />
+      <ProjectReference Include="..\..\..\src\shared\Voxta.Shared.LLMUtils\Voxta.Shared.LLMUtils.csproj" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
-using Voxta.Shared.LargeLanguageModelsUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.TextGenerationInference;
 

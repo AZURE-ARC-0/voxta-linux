@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\common\Voxta.Abstractions\Voxta.Abstractions.csproj" />
-      <ProjectReference Include="..\Voxta.Shared.LargeLanguageModelsUtils\Voxta.Shared.LargeLanguageModelsUtils.csproj" />
+      <ProjectReference Include="..\Voxta.Shared.LLMUtils\Voxta.Shared.LLMUtils.csproj" />
     </ItemGroup>
 
     <ItemGroup>

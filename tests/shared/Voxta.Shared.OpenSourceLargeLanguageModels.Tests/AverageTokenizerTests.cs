@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using Voxta.Shared.LargeLanguageModelsUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Shared.OpenSourceLargeLanguageModels.Tests;
 

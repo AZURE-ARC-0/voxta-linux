@@ -10,7 +10,6 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 {   
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IServiceObserver _serviceObserver;
-    private Dictionary<string, int>? _logitBias;
 
     public OpenAITextGenClient(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider, IServiceObserver serviceObserver)
         : base(httpClientFactory, settingsRepository, encryptionProvider)

@@ -3,7 +3,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 
-namespace Voxta.Shared.LargeLanguageModelsUtils;
+namespace Voxta.Shared.LLMUtils;
 
 public class GenericPromptBuilder
 {

@@ -80,7 +80,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Services.NovelAI.Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{09000B64-ABEE-4F4C-B6ED-83091F59EA05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.LargeLanguageModelsUtils", "src\shared\Voxta.Shared.LargeLanguageModelsUtils\Voxta.Shared.LargeLanguageModelsUtils.csproj", "{DF14CAA7-732C-40DC-B5DA-0C858BBE0FE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.LLMUtils", "src\shared\Voxta.Shared.LLMUtils\Voxta.Shared.LLMUtils.csproj", "{DF14CAA7-732C-40DC-B5DA-0C858BBE0FE9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{3D101AAD-8BB5-4177-90A3-274CFCB812F0}"
 EndProject

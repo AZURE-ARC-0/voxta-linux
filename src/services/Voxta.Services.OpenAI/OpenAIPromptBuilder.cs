@@ -2,7 +2,7 @@
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
-using Voxta.Shared.LargeLanguageModelsUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.OpenAI;
 

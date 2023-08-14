@@ -2,7 +2,7 @@ using Moq;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Services.OpenSourceLargeLanguageModels;
-using Voxta.Shared.LargeLanguageModelsUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.NovelAI.Tests;
 

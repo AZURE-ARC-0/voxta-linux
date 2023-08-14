@@ -1,4 +1,4 @@
-﻿using Voxta.Shared.LargeLanguageModelsUtils;
+﻿using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.NovelAI;
 
