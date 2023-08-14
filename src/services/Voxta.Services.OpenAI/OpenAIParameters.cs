@@ -7,10 +7,13 @@ namespace Voxta.Services.OpenAI;
 public class OpenAIParameters
 {
     [JsonPropertyName("max_tokens")]
-    public int MaxTokens { get; init; } = 80;
+    public int MaxTokens { get; set; } = 80;
     
     [JsonPropertyName("temperature")]
     public double Temperature { get; set; } = 0.8;
+    
+    [JsonPropertyName("top_p")]
+    public double TopP { get; set; } = 1;
     
     [JsonPropertyName("presence_penalty")]
     [Range(-2, 2)]
@@ -21,7 +24,7 @@ public class OpenAIParameters
     public double FrequencyPenalty { get; init; } = 0.5;
     
     [JsonPropertyName("logit_bias")]
-    public Dictionary<string, double> LogitBias { get; init; } = new();
+    public Dictionary<string, int>? LogitBias { get; set; }
 }
 
 [Serializable]

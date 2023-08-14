@@ -3,4 +3,5 @@
 public interface ITokenizer
 {
     int CountTokens(string value);
+    IList<int> Tokenize(string value);
 }

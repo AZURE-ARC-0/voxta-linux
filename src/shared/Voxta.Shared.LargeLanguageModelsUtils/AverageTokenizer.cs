@@ -11,4 +11,9 @@ public class AverageTokenizer : ITokenizer
         var count = (int)Math.Ceiling(value.Length * AverageTokenPerCharacter);
         return count;
     }
+
+    public IList<int> Tokenize(string value)
+    {
+        throw new NotSupportedException("Cannot tokenize using the average tokenizer");
+    }
 }

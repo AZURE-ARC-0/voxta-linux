@@ -22,4 +22,9 @@ public class DeepDevTokenizer : Voxta.Abstractions.Tokenizers.ITokenizer
         if (string.IsNullOrEmpty(value)) return 0;
         return _deepDevTokenizer.Encode(value, OpenAISpecialTokens.Keys).Count;
     }
+
+    public IList<int> Tokenize(string value)
+    {
+        return _deepDevTokenizer.Encode(value, OpenAISpecialTokens.Keys);
+    }
 }
