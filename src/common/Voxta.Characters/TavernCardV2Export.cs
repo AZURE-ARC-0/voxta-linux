@@ -4,7 +4,7 @@ namespace Voxta.Characters;
 
 public static class TavernCardV2Export
 {
-    public static TavernCardV2 ConvertCharacterToCard(Character character, MemoryBook book)
+    public static TavernCardV2 ConvertCharacterToCard(Character character, MemoryBook? book)
     {
         var card = new TavernCardV2
         {

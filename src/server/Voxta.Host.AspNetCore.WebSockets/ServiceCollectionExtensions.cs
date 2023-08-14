@@ -17,20 +17,26 @@ public static class ServiceCollectionExtensions
     public static void AddVoxtaServer(this IServiceCollection services)
     {
         services.AddWebSockets(_ => { });
-        
         services.AddHttpClient();
-        services.AddNAudio();
+        
         services.AddVoxta();
-        services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
+        
         services.AddLiteDBRepositories();
+        
+        services.AddSingleton<IPerformanceMetrics, StaticPerformanceMetrics>();
         services.AddTransient<DiagnosticsUtil>();
-        services.AddSingleton<ILocalEncryptionProvider, DPAPIEncryptionProvider>();
         services.AddSingleton<IServiceObserver, StaticServiceObserver>();
         services.AddTransient<IMemoryProvider, SimpleMemoryProvider>();
         
         services.AddSingleton<TemporaryFileCleanupService>();
         services.AddSingleton<ITemporaryFileCleanup>(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
         services.AddHostedService(sp => sp.GetRequiredService<TemporaryFileCleanupService>());
+        
+        #if(WINDOWS)
+        services.AddSingleton<ILocalEncryptionProvider, DPAPIEncryptionProvider>();
+        #else
+        services.AddSingleton<ILocalEncryptionProvider, NullEncryptionProvider>();
+        #endif
 
         AddAllServices(services);
     }
@@ -87,13 +93,13 @@ public static class ServiceCollectionExtensions
 
         #if(WINDOWS)
         
+        services.AddNAudio();
+        
         services.AddWindowsSpeech();
         textToSpeechRegistry.RegisterWindowsSpeech();
         speechToTextRegistry.RegisterWindowsSpeech();
         
-        #endif
-        
-        #if(LINUX)
+        #else
         
         services.AddFFmpeg();
         speechToTextRegistry.RegisterFFmpeg();

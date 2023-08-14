@@ -39,16 +39,18 @@ public class FFmpegAudioConverter : IAudioConverter
 
     public Task<AudioData> ConvertAudioAsync(AudioData input, CancellationToken cancellationToken)
     {
+        if (_outputContentType == null)
+            throw new NullReferenceException("Call SelectOutputContentType() first.");
         if (_outputContentType == input.ContentType)
             return Task.FromResult(input);
-        if (_outputContentType == null)
-            throw new NullReferenceException("Call SelectContentType first.");
         
         var audioConvPerf = _performanceMetrics.Start("FFmpeg.AudioConversion");
 
         // Convert from input.ContentType to _outputContentType
-        throw new NotImplementedException();
 
         audioConvPerf.Done();
+        
+        // Remove this line once implemented
+        throw new NotImplementedException();
     }
 }

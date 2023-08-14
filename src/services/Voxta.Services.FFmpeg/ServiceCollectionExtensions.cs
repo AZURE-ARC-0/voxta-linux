@@ -8,9 +8,9 @@ public static class ServiceCollectionExtensions
 {
     public static void AddFFmpeg(this IServiceCollection services)
     {
-        services.AddScoped<FFmpegAudioConverter>();
+        services.AddScoped<IAudioConverter, FFmpegAudioConverter>();
+        services.AddSingleton<IRecordingService, FFmpegRecordingService>();
         
-        services.AddSingleton<FFmpegRecordingService>();
         services.AddTransient<FFmpegSpeechToText>();
     }
     

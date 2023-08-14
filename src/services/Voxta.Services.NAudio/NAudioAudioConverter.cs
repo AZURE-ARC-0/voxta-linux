@@ -46,10 +46,10 @@ public class NAudioAudioConverter : IAudioConverter
 
     public async Task<AudioData> ConvertAudioAsync(AudioData input, CancellationToken cancellationToken)
     {
+        if (_outputContentType == null)
+            throw new NullReferenceException("Call SelectOutputContentType() first.");
         if (_outputContentType == input.ContentType)
             return input;
-        if (_outputContentType == null)
-            throw new NullReferenceException("Call SelectContentType first.");
         
         var audioConvPerf = _performanceMetrics.Start("NAudio.AudioConversion");
 

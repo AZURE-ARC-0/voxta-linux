@@ -229,7 +229,7 @@ public class CharactersController : Controller
 
 
 
-    [HttpGet("/characters/{charId}/download")]
+    [HttpGet("/characters/{charId:guid}/download")]
     public async Task<IActionResult> Download([FromRoute] Guid charId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterAsync(charId, cancellationToken);

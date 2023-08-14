@@ -6,6 +6,19 @@ public interface ILocalEncryptionProvider
     string Decrypt(string value);
 }
 
+public class NullEncryptionProvider : ILocalEncryptionProvider
+{
+    public string Encrypt(string value)
+    {
+        return value;
+    }
+
+    public string Decrypt(string value)
+    {
+        return value;
+    }
+}
+
 public static class LocalEncryptionProviderExtensions
 {
     public static string SafeDecrypt(this ILocalEncryptionProvider provider, string? value)
