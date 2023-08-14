@@ -6,8 +6,8 @@ public static class NovelAIPresets
     {
         return model switch
         {
-            "clio-v1" => ClioPresets.TalkerC(),
-            "kayra-v1" => KayraPresets.FreshCoffee(),
+            NovelAISettings.ClioV1 => ClioPresets.TalkerC(),
+            NovelAISettings.KayraV1 => KayraPresets.FreshCoffee(),
             _ => throw new NotSupportedException("Model {model} not supported")
         };
     }

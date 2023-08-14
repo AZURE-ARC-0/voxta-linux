@@ -1,4 +1,5 @@
-﻿@model Voxta.Server.ViewModels.ServiceSettings.NovelAISettingsViewModel
+﻿@using Voxta.Services.NovelAI
+@model Voxta.Server.ViewModels.ServiceSettings.NovelAISettingsViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - NovelAI";
@@ -51,8 +52,8 @@
                 <div class="mb-3">
                     <label asp-for="Model">Model</label>
                     <select asp-for="Model" class="form-select">
-                        <option value="clio-v1">Clio</option>
-                        <option value="kayra-v1">Kayra</option>
+                        <option value="@NovelAISettings.ClioV1">Clio</option>
+                        <option value="@NovelAISettings.KayraV1">Kayra</option>
                     </select>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>

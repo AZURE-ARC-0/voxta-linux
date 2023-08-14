@@ -21,7 +21,7 @@ public class NovelAISummarizationService : NovelAIClientBase, ISummarizationServ
 
     protected override bool ValidateSettings(NovelAISettings settings)
     {
-        return settings.Model != "clio-v1";
+        return settings.Model != NovelAISettings.ClioV1;
     }
 
     public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, CancellationToken cancellationToken)

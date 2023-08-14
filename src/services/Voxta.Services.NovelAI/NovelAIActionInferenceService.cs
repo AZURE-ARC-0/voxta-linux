@@ -21,7 +21,7 @@ public class NovelAIActionInferenceService : NovelAIClientBase, IActionInference
 
     protected override bool ValidateSettings(NovelAISettings settings)
     {
-        return settings.Model != "clio-v1";
+        return settings.Model != NovelAISettings.ClioV1;
     }
 
     public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)

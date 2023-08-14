@@ -44,7 +44,7 @@ public class NovelAIClientBase
     private NovelAIParameters? _parameters;
     private readonly ISettingsRepository _settingsRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
-    private string _model = "clio-v1";
+    private string _model = NovelAISettings.KayraV1;
 
     protected NovelAIClientBase(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILocalEncryptionProvider encryptionProvider)
     {
@@ -60,7 +60,7 @@ public class NovelAIClientBase
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
-        if (prerequisites.Contains(ServiceFeatures.GPT3)) return false;
+        if (prerequisites.Contains(ServiceFeatures.GPT3)) return settings.Model != NovelAISettings.ClioV1;
         if (!ValidateSettings(settings)) return false;
         if (dry) return true;
         
