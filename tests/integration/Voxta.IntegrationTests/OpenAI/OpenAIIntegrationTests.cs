@@ -51,11 +51,15 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
     public async Task TestSummarization()
     {
         var chat = CreateChat(CatherineCharacter.Create());
+        chat.AddMessage(chat.User.Name, "I have nothing to do right now, I thought we could chat?");
+        chat.AddMessage(chat.Character.Name, "Yes! That would be nice, I was lonely. Tell me something about you!");
         chat.AddMessage(chat.User.Name, "I love apples, they taste delicious!");
         chat.AddMessage(chat.Character.Name, "Yeah? Personally, I hate them.");
+        chat.AddMessage(chat.User.Name, "Really? That's uncommon!");
+        chat.AddMessage(chat.Character.Name, "I guess I'm not your typical girl!");
 
         var client = await CreateClientAsync<OpenAISummarizationService>();
-        var action = await client.SummarizeAsync(chat, CancellationToken.None);
+        var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");
         Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.SummarizationPrompt}[system]")?.Value);

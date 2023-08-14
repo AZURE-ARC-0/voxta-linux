@@ -9,6 +9,7 @@ public class ChatMessageData : TextData
     public required Guid ChatId { get; init; }
     public required string User { get; init; }
     public required DateTimeOffset Timestamp { get; init; }
+    public Guid? SummarizedBy { get; set; }
 
     public static ChatMessageData FromText(Guid chatId, string user, string message)
     {

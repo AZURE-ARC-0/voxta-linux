@@ -60,7 +60,7 @@ public class NovelAIClientBase
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
-        if (prerequisites.Contains(ServiceFeatures.GPT3)) return settings.Model != NovelAISettings.ClioV1;
+        if (prerequisites.Contains(ServiceFeatures.GPT3) && settings.Model == NovelAISettings.ClioV1) return false;
         if (!ValidateSettings(settings)) return false;
         if (dry) return true;
         

@@ -53,7 +53,7 @@ public class ChatsController : Controller
         if (chat == null) return NotFound();
         var character = await _characterRepository.GetCharacterAsync(chat.CharacterId, cancellationToken);
         if (character == null) return NotFound();
-        var messages = await _messageRepository.GetChatMessagesAsync(chat.Id, cancellationToken);
+        var messages = await _messageRepository.GetChatMessagesAsync(chat.Id, true, cancellationToken);
         return View(new ChatViewModel
         {
             Id = chat.Id,

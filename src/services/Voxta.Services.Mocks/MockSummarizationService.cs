@@ -13,7 +13,7 @@ public class MockSummarizationService : ISummarizationService
         return Task.FromResult(true);
     }
 
-    public ValueTask<string> SummarizeAsync(IChatInferenceData chat, CancellationToken cancellationToken)
+    public ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
         return new ValueTask<string>($"Chat had {chat.GetMessages().Count} messages.");
     }

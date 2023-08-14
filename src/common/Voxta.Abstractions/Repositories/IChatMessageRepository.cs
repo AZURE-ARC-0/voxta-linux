@@ -4,7 +4,7 @@ namespace Voxta.Abstractions.Repositories;
 
 public interface IChatMessageRepository
 {
-    Task<ChatMessageData[]> GetChatMessagesAsync(Guid chatId, CancellationToken cancellationToken);
+    Task<ChatMessageData[]> GetChatMessagesAsync(Guid chatId, bool includeSummarizedMessages, CancellationToken cancellationToken);
     Task<ChatMessageData?> GetChatMessageAsync(Guid messageId, CancellationToken cancellationToken);
     Task SaveMessageAsync(ChatMessageData message);
     Task UpdateMessageAsync(ChatMessageData message);

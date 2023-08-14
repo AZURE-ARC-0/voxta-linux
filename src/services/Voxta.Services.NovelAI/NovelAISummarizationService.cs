@@ -24,15 +24,18 @@ public class NovelAISummarizationService : NovelAIClientBase, ISummarizationServ
         return settings.Model != NovelAISettings.ClioV1;
     }
 
-    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, CancellationToken cancellationToken)
+    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
         var builder = new NovelAIPromptBuilder(Tokenizer);
-        var prompt = builder.BuildSummarizationPrompt(chat);
+        var prompt = builder.BuildSummarizationPrompt(chat, messagesToSummarize);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationService, NovelAIConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationPrompt, prompt);
 
         var actionInferencePerf = _performanceMetrics.Start($"{NovelAIConstants.ServiceName}.Summarization");
         var body = BuildRequestBody(prompt, "special_instruct");
+        #warning Move this value elsewhere
+        const int summarizeToMaxTokens = 60;
+        body.Parameters.MaxLength = summarizeToMaxTokens;
         body.Parameters.Temperature = 0.1;
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();

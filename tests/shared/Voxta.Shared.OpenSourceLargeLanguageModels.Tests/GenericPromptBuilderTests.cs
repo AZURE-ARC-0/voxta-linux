@@ -238,7 +238,7 @@ public class GenericPromptBuilderTests
             .AddMessage("Joe", "Hello")
             .AddMessage("Jane", "World")
             .AddMessage("Joe", "Question");
-        var actual = _builder.BuildSummarizationPrompt(chat);
+        var actual = _builder.BuildSummarizationPrompt(chat, chat.Messages);
 
         Assert.That(actual, Is.EqualTo("""
            You must write facts about Jane and Joe from their conversation.

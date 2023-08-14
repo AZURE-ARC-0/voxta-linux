@@ -63,7 +63,7 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character.Name, "I like you! ... I hope that's okay with you?");
 
         var client = await CreateClientAsync<OobaboogaSummarizationService>();
-        var action = await client.SummarizeAsync(chat, CancellationToken.None);
+        var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
         Console.WriteLine(ServiceObserver.GetRecord(ServiceObserverKeys.SummarizationPrompt)?.Value);

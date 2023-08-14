@@ -224,41 +224,40 @@ public class OpenAIPromptBuilderTests
     [Test]
     public void TestPromptSummarization()
     {
-        var messages = _builder.BuildSummarizationPrompt(
-            new ChatSessionData
+        var chat = new ChatSessionData
+            {
+                Culture = "en-US",
+                User = new ChatSessionDataUser
                 {
-                    Culture = "en-US",
-                    User = new ChatSessionDataUser
-                    {
-                        Name = "Joe",
-                    },
-                    Chat = new Chat
-                    {
-                        Id = Guid.Empty,
-                        CharacterId = Guid.Empty,
-                    },
-                    Character = new()
-                    {
-                        Name = "Jane",
-                        Description = "some-description",
-                        Personality = "some-personality",
-                        Scenario = "some-scenario",
-                        FirstMessage = "some-first-message",
-                        SystemPrompt = "some-system-prompt",
-                        PostHistoryInstructions = "some-post-history-instructions",
-                        MessageExamples = "Joe: Request\nJane: Response",
-                    },
-                    Actions = new[] { "action1", "action2" },
-                    Context = "some-context",
-                }
-                .AddMessage("Joe", "Hello")
-                .AddMessage("Jane", "World")
-                .AddMessage("Joe", "Question")
-        );
+                    Name = "Joe",
+                },
+                Chat = new Chat
+                {
+                    Id = Guid.Empty,
+                    CharacterId = Guid.Empty,
+                },
+                Character = new()
+                {
+                    Name = "Jane",
+                    Description = "some-description",
+                    Personality = "some-personality",
+                    Scenario = "some-scenario",
+                    FirstMessage = "some-first-message",
+                    SystemPrompt = "some-system-prompt",
+                    PostHistoryInstructions = "some-post-history-instructions",
+                    MessageExamples = "Joe: Request\nJane: Response",
+                },
+                Actions = new[] { "action1", "action2" },
+                Context = "some-context",
+            }
+            .AddMessage("Joe", "Hello")
+            .AddMessage("Jane", "World")
+            .AddMessage("Joe", "Question");
+        var messages = _builder.BuildSummarizationPrompt(chat, chat.Messages);
 
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
-            system: You are tasked with extracting knowledge from a conversation for reminiscing.
+            system: You are tasked with extracting knowledge from a conversation for memorization.
             user: Memorize new knowledge Jane learned in the conversation.
 
             Use as few words as possible.

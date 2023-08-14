@@ -1,7 +1,26 @@
+@using Humanizer
 @model Voxta.Server.ViewModels.Chats.ChatViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Chats";
+}
+
+@section Head {
+    <style>
+        .summarized > td {
+            color: #4f5864;
+        }
+        
+        @@keyframes pulse {
+          0% { background-color: transparent; }
+          50% { background-color: rgb(80, 106, 110, 0.5); }
+          100% { background-color: transparent; }
+        }
+    
+        .pulse > td {
+          animation: pulse 1s linear 3;
+        }
+    </style>
 }
 
 <div class="container py-3">
@@ -28,18 +47,28 @@
                 <tr>
                     <th>Character</th>
                     <th>Message</th>
-                    <th>Tokens</th>
+                    <th class="text-end">Tokens (@Model.Messages.Where(m => m.SummarizedBy == null).Sum(m => m.Tokens))</th>
                 </tr>
                 </thead>
 
                 <tbody>
                     @foreach (var message in Model.Messages)
                     {
-                        <tr>
+                        <tr id="message-@message.Id" class="@(message.SummarizedBy != null ? "summarized" : "")">
                             <td>
-                                @message.User
+                                <b>@message.User</b>
                             </td>
                             <td>
+                                <div class="text-muted">
+                                    @message.Timestamp.Humanize()
+                                @if (message.SummarizedBy != null)
+                                {
+                                    <i>
+                                        <span class="badge badge-dark">Summarized</span>
+                                        <a class="summarized-by-link" href="#message-@message.SummarizedBy">Click to the the summary.</a>
+                                    </i>
+                                }
+                                </div>
                                 <span class="editable" data-message-id="@message.Id">@message.Value</span>
                             </td>
                             <td class="text-end text-muted">
@@ -111,6 +140,21 @@ document.addEventListener("DOMContentLoaded", function () {
             
             input.focus();
             input.select();
+        });
+    });
+    
+    const links = document.querySelectorAll('.summarized-by-link');
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+        
+            const anchorID = this.getAttribute('href').substring(1);
+            const anchor = document.getElementById(anchorID);
+        
+            anchor.classList.add('pulse');
+        
+            setTimeout(() => anchor.classList.remove('pulse'), 1000);
+            window.location.hash = anchorID;
         });
     });
 });

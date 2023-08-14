@@ -37,10 +37,11 @@ public abstract class OpenAIClientBase
     protected int MaxMemoryTokens { get; private set; }
     protected int MaxContextTokens { get; private set; }
     
+    protected OpenAIParameters? Parameters;
+    
     private readonly ISettingsRepository _settingsRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
-    private OpenAIParameters? _parameters;
     private string _model = "gpt-3.5-turbo";
 
     protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
@@ -66,7 +67,7 @@ public abstract class OpenAIClientBase
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;
-        _parameters = new OpenAIParameters();
+        Parameters = new OpenAIParameters();
         MaxMemoryTokens = settings.MaxMemoryTokens;
         MaxContextTokens = settings.MaxContextTokens;
         return true;
@@ -74,7 +75,7 @@ public abstract class OpenAIClientBase
 
     protected OpenAIRequestBody BuildRequestBody(List<OpenAIMessage> messages)
     {
-        var body = Mapper.Map<OpenAIRequestBody>(_parameters);
+        var body = Mapper.Map<OpenAIRequestBody>(Parameters);
         body.Messages = messages;
         body.Model = _model;
         return body;

@@ -89,6 +89,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
         };
 
         _transcriber.Canceled += (_, e) => {
+            #warning Here we should notify the UI to stop the loading indicator
             _recordingService.Speaking = false;
         };
         

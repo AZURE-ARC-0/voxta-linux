@@ -22,6 +22,7 @@ public class ChatSessionFactory
     private readonly IServiceFactory<ITextToSpeechService> _textToSpeechFactory;
     private readonly IServiceFactory<IActionInferenceService> _animationSelectionFactory;
     private readonly IServiceFactory<ISpeechToTextService> _speechToTextServiceFactory;
+    private readonly IServiceFactory<ISummarizationService> _summarizationServiceFactory;
     private readonly ITimeProvider _timeProvider;
     private readonly IMemoryProvider _memoryProvider;
 
@@ -36,9 +37,9 @@ public class ChatSessionFactory
         IServiceFactory<ITextToSpeechService> textToSpeechFactory,
         IServiceFactory<IActionInferenceService> animationSelectionFactory,
         IServiceFactory<ISpeechToTextService> speechToTextServiceFactory,
+        IServiceFactory<ISummarizationService> summarizationServiceFactory,
         ITimeProvider timeProvider,
-        IMemoryProvider memoryProvider
-    )
+        IMemoryProvider memoryProvider)
     {
         _loggerFactory = loggerFactory;
         _performanceMetrics = performanceMetrics;
@@ -50,9 +51,9 @@ public class ChatSessionFactory
         _textToSpeechFactory = textToSpeechFactory;
         _animationSelectionFactory = animationSelectionFactory;
         _speechToTextServiceFactory = speechToTextServiceFactory;
+        _summarizationServiceFactory = summarizationServiceFactory;
         _timeProvider = timeProvider;
         _memoryProvider = memoryProvider;
-        _profileRepository = profileRepository;
     }
 
     public async Task<IChatSession> CreateAsync(IUserConnectionTunnel tunnel, Chat chat, CharacterCardExtended character, ClientDoChatMessageBase startChatMessage, CancellationToken cancellationToken)
@@ -61,6 +62,7 @@ public class ChatSessionFactory
         ISpeechToTextService? speechToText = null;
         IActionInferenceService? actionInference = null;
         ISpeechGenerator? speechGenerator = null;
+        ISummarizationService? summarizationService = null;
 
         try
         {
@@ -79,6 +81,7 @@ public class ChatSessionFactory
             actionInference = startChatMessage.UseActionInference && profile.ActionInference.Services.Any()
                 ? await _animationSelectionFactory.CreateBestMatchAsync(profile.ActionInference, character.Services.ActionInference.Service ?? "", prerequisites, culture, cancellationToken)
                 : null;
+            summarizationService = await _summarizationServiceFactory.CreateBestMatchAsync(profile.Summarization, "", Array.Empty<string>(), character.Culture, cancellationToken);
 
             var cultureInfo = CultureInfo.GetCultureInfoByIetfLanguageTag(culture);
             var textProcessor = new ChatTextProcessor(profile, character.Name, cultureInfo, textGen);
@@ -88,7 +91,7 @@ public class ChatSessionFactory
 
             speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, character.Services.SpeechGen.Voice, culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 
-            var messages = await _chatMessageRepository.GetChatMessagesAsync(chat.Id, cancellationToken);
+            var messages = await _chatMessageRepository.GetChatMessagesAsync(chat.Id, false, cancellationToken);
 
             var chatData = new ChatSessionData
             {
@@ -132,6 +135,7 @@ public class ChatSessionFactory
                 speechGenerator,
                 actionInference,
                 speechToText,
+                summarizationService,
                 _chatRepository,
                 _chatMessageRepository,
                 _memoryProvider
@@ -143,6 +147,7 @@ public class ChatSessionFactory
             speechToText?.Dispose();
             actionInference?.Dispose();
             speechGenerator?.Dispose();
+            summarizationService?.Dispose();
             ExceptionDispatchInfo.Capture(exc).Throw();
             throw;
         }

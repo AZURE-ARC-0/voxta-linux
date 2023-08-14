@@ -19,11 +19,11 @@ public class OpenAISummarizationService : OpenAIClientBase, ISummarizationServic
         _serviceObserver = serviceObserver;
     }
 
-    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, CancellationToken cancellationToken)
+    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
         var perf = _performanceMetrics.Start($"{OpenAIConstants.ServiceName}.Summarization");
         var builder = new OpenAIPromptBuilder(Tokenizer);
-        var messages = builder.BuildSummarizationPrompt(chat);
+        var messages = builder.BuildSummarizationPrompt(chat, messagesToSummarize);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationService, OpenAIConstants.ServiceName);
         foreach(var message in messages)
         {
@@ -31,7 +31,11 @@ public class OpenAISummarizationService : OpenAIClientBase, ISummarizationServic
         }
 
         var body = BuildRequestBody(messages);
-        body.Temperature = 0.1;
+        body.Stop = Array.Empty<string>();
+        #warning Move this value elsewhere
+        const int summarizeToMaxTokens = 60;
+        body.MaxTokens = summarizeToMaxTokens;
+        body.Temperature = 0;
         var result = await SendChatRequestAsync(body, cancellationToken);
         perf.Done();
         _serviceObserver.Record(ServiceObserverKeys.SummarizationResult, result);

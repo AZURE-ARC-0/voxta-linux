@@ -63,6 +63,7 @@ public class ChatSessionTests
         performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
         var memoryProvider = new Mock<IMemoryProvider>();
         memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<ChatSessionData>()));
+        var summarizer = new Mock<ISummarizationService>();
         
         _session = new ChatSession(
             _tunnelMock.Object,
@@ -76,6 +77,7 @@ public class ChatSessionTests
             _speechGenerator.Object,
             null,
             null,
+            summarizer.Object,
             chatRepository.Object,
             chatMessageRepository.Object,
             memoryProvider.Object

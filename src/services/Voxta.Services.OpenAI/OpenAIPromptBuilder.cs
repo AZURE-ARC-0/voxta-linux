@@ -112,14 +112,14 @@ public class OpenAIPromptBuilder
         return messages;
     }
 
-    public List<OpenAIMessage> BuildSummarizationPrompt(IChatInferenceData chat)
+    public List<OpenAIMessage> BuildSummarizationPrompt(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize)
     {
         var messages = new List<OpenAIMessage>
         {
             new() {
                 role = "system",
                 content = """
-                  You are tasked with extracting knowledge from a conversation for reminiscing.
+                  You are tasked with extracting knowledge from a conversation for memorization.
                   """.ReplaceLineEndings("\n")
             },
         };
@@ -139,7 +139,7 @@ public class OpenAIPromptBuilder
 
             """.ReplaceLineEndings("\n"));
         
-        foreach (var message in chat.GetMessages().TakeLast(8))
+        foreach (var message in messagesToSummarize)
         {
             sb.AppendLineLinux($"{message.User}: {message.Value}");
         }

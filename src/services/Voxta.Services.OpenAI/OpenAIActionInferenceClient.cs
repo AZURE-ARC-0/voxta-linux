@@ -34,7 +34,9 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
             _serviceObserver.Record($"{ServiceObserverKeys.ActionInferencePrompt}[{message.role}]", message.content);
         }
 
-        var action = await SendChatRequestAsync(BuildRequestBody(messages), cancellationToken);
+        var body = BuildRequestBody(messages);
+        body.Stop = new[] { "]" };
+        var action = await SendChatRequestAsync(body, cancellationToken);
         actionInferencePerf.Done();
         var result = action.Trim('\'', '"', '.', '[', ']', ' ').ToLowerInvariant();
         _serviceObserver.Record(ServiceObserverKeys.ActionInferenceResult, result);

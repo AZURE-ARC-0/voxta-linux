@@ -286,7 +286,7 @@ public class DiagnosticsUtil
                 };
                 chat.AddMessage(chat.Character.Name, "I like apples. Do you like apples?");
                 chat.AddMessage(chat.User.Name, "No, I don't like them at all.");
-                var result = await service.SummarizeAsync(chat, cancellationToken);
+                var result = await service.SummarizeAsync(chat, chat.Messages, cancellationToken);
                 return "Summary: " + result;
             }
         );

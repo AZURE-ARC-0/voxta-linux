@@ -137,7 +137,7 @@ public class GenericPromptBuilder
 
     public string[] SummarizationStopTokens => new[] { "\n\n" }; 
 
-    public string BuildSummarizationPrompt(IChatInferenceData chat)
+    public string BuildSummarizationPrompt(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize)
     {
         var sb = new StringBuilder();
         sb.AppendLineLinux($"""

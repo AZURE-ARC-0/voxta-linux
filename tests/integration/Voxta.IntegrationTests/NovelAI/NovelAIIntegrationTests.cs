@@ -51,7 +51,7 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character.Name, "Yeah? Personally, I hate them.");
 
         var client = await CreateClientAsync<NovelAISummarizationService>();
-        var action = await client.SummarizeAsync(chat, CancellationToken.None);
+        var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
         Console.WriteLine(ServiceObserver.GetRecord(ServiceObserverKeys.SummarizationPrompt)?.Value);

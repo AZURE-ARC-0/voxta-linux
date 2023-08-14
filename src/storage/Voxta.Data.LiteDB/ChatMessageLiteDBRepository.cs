@@ -14,10 +14,11 @@ public class ChatMessageLiteDBRepository : IChatMessageRepository
         _chatMessagesCollection = db.GetCollection<ChatMessageData>();
     }
     
-    public Task<ChatMessageData[]> GetChatMessagesAsync(Guid chatId, CancellationToken cancellationToken)
+    public Task<ChatMessageData[]> GetChatMessagesAsync(Guid chatId, bool includeSummarizedMessages, CancellationToken cancellationToken)
     {
         var messages = _chatMessagesCollection.Query()
             .Where(c => c.ChatId == chatId)
+            .Where(c => includeSummarizedMessages || c.SummarizedBy == null)
             .OrderBy(c => c.Timestamp)
             .ToArray();
 
