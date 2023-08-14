@@ -71,18 +71,32 @@ public partial class ChatSession
     {
         if (_chatSessionData.Messages.Count == 0 && _chatSessionData.Character.FirstMessage?.HasValue == true)
         {
-            var reply = await SaveMessageAsync(_chatSessionData.Character.Name.Value, _chatSessionData.Character.FirstMessage);
+            var reply = await AppendMessageAsync(_chatSessionData.Character.Name.Value, _chatSessionData.Character.FirstMessage);
             _logger.LogInformation("Sending first message: {Message}", reply.Value);
             await SendReusableReplyWithSpeechAsync(reply.Value, cancellationToken);
         }
-        else if (_chatSessionData.Messages.Count > 0)
+        else
         {
             // TODO: Externalize these messages into a dedicated, localizable class
-            var duration = DateTimeOffset.UtcNow - _chatSessionData.Messages[^1].Timestamp;
+            var duration = DateTimeOffset.UtcNow - await GetLastUpdateAsync();
             HandleClientMessage(new ClientSendMessage
             {
                 Text = $"[OOC: {_chatSessionData.User.Name} disconnects for {duration.Humanize()} and comes back online]"
             });
+        }
+    }
+
+    private async Task<DateTimeOffset> GetLastUpdateAsync()
+    {
+        while (true)
+        {
+            if (_chatSessionData.Messages.Count == 0) return _chatSessionData.Chat.CreatedAt;
+            #warning This is not tested, and should use a flag on the message instead of checking for the string.
+            var lastMessage = _chatSessionData.Messages[^1];
+            if (!lastMessage.Value.StartsWith("[OOC: ")) return lastMessage.Timestamp;
+
+            _chatSessionData.Messages.Remove(lastMessage);
+            await _chatMessageRepository.DeleteMessageAsync(lastMessage.Id);
         }
     }
 
