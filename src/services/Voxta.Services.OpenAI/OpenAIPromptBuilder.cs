@@ -126,17 +126,12 @@ public class OpenAIPromptBuilder
         
         var sb = new StringBuilder();
         sb.AppendLineLinux($"""
-            Memorize new knowledge {chat.Character.Name} learned in the conversation.
-
-            Use as few words as possible.
-            Write from the point of view of {chat.Character.Name}.
-            Use telegraphic dense notes style.
-            Name the person associated with the memory.
-            Only write useful and high confidence memories.
-            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
+            You must write facts about {chat.Character.Name} and {chat.User.Name} from their conversation.
+            Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
+            Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
+            Write the most useful facts first.
 
             <START>
-
             """.ReplaceLineEndings("\n"));
         
         foreach (var message in messagesToSummarize)
@@ -144,8 +139,9 @@ public class OpenAIPromptBuilder
             sb.AppendLineLinux($"{message.User}: {message.Value}");
         }
         
+        sb.AppendLineLinux("<END>");
         sb.AppendLineLinux();
-        sb.AppendLineLinux($"What {chat.Character.Name} learned:");
+        sb.AppendLineLinux("Facts learned:");
         
         messages.Add(new OpenAIMessage { role = "user", content = sb.ToString().TrimExcess() });
 

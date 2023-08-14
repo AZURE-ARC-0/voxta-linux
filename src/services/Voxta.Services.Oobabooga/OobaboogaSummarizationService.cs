@@ -28,6 +28,7 @@ public class OobaboogaSummarizationService : OobaboogaClientBase, ISummarization
         var actionInferencePerf = _performanceMetrics.Start($"{OobaboogaConstants.ServiceName}.Summarization");
         var body = BuildRequestBody(prompt, builder.SummarizationStopTokens);
         body.Temperature = 0.1;
+        body.StoppingStrings = Array.Empty<string>();
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 

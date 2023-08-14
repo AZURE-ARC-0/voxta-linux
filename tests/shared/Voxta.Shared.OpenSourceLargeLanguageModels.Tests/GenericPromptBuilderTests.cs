@@ -244,6 +244,7 @@ public class GenericPromptBuilderTests
            You must write facts about Jane and Joe from their conversation.
            Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
            Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
+           Write the most useful facts first.
 
            Conversation:
            <START>

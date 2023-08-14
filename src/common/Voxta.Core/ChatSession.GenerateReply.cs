@@ -120,6 +120,12 @@ public partial class ChatSession
             throw new InvalidOperationException("Cannot summarize, not enough tokens for a single message");
 
         var summaryText = await _summarizationService.SummarizeAsync(_chatSessionData, messagesToSummarize, cancellationToken);
+        if (string.IsNullOrEmpty(summaryText))
+        {
+            _logger.LogWarning("Empty summarization returned from the service");
+            return;
+        }
+        summaryText = _sanitizer.StripUnfinishedSentence(summaryText);
         var summaryTokens = _textGen.GetTokenCount(summaryText);
 
         #warning There is a risk of canceling here and having partially updated data. Use a transaction.

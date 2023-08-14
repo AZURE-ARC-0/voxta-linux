@@ -37,6 +37,7 @@ public class NovelAISummarizationService : NovelAIClientBase, ISummarizationServ
         const int summarizeToMaxTokens = 60;
         body.Parameters.MaxLength = summarizeToMaxTokens;
         body.Parameters.Temperature = 0.1;
+        body.Parameters.StopSequences = Array.Empty<int[]>();
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 

@@ -258,22 +258,18 @@ public class OpenAIPromptBuilderTests
         var actual = string.Join("\n", messages.Select(x => $"{x.role}: {x.content}"));
         Assert.That(actual, Is.EqualTo("""
             system: You are tasked with extracting knowledge from a conversation for memorization.
-            user: Memorize new knowledge Jane learned in the conversation.
-
-            Use as few words as possible.
-            Write from the point of view of Jane.
-            Use telegraphic dense notes style.
-            Name the person associated with the memory.
-            Only write useful and high confidence memories.
-            These categories are the most useful: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events, state of the participants.
+            user: You must write facts about {chat.Character.Name} and {chat.User.Name} from their conversation.
+            Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
+            Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
+            Write the most useful facts first.
 
             <START>
-
             Joe: Hello
             Jane: World
             Joe: Question
+            <END>
 
-            What Jane learned:
+            Facts learned:
              
             """.ReplaceLineEndings("\n").TrimExcess()));
     }

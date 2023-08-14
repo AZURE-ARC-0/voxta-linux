@@ -28,6 +28,7 @@ public class TextGenerationInferenceSummarizationService : TextGenerationInferen
         var actionInferencePerf = _performanceMetrics.Start($"{TextGenerationInferenceConstants.ServiceName}.Summarization");
         var body = BuildRequestBody(prompt, builder.SummarizationStopTokens);
         body.Parameters.Temperature = 0.1;
+        body.Parameters.Stop = Array.Empty<string>();
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 

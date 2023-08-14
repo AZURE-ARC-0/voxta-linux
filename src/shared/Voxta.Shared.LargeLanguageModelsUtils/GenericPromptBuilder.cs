@@ -144,6 +144,7 @@ public class GenericPromptBuilder
             You must write facts about {chat.Character.Name} and {chat.User.Name} from their conversation.
             Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
             Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
+            Write the most useful facts first.
             
             Conversation:
             <START>

@@ -24,13 +24,20 @@ public class Sanitizer : ISanitizer
         result = result.Trim('\"', '\'', ' ');
         if (result == "") return "...";
 
+        result = StripUnfinishedSentence(result);
+
+        return result;
+    }
+
+    public string StripUnfinishedSentence(string result)
+    {
         var lastPunctuationIndex = result.LastIndexOfAny(_punctuation);
-    
+
         if (lastPunctuationIndex != -1 && lastPunctuationIndex != result.Length - 1)
         {
             result = result[..(lastPunctuationIndex + 1)];
         }
-        
+
         return result;
     }
 }

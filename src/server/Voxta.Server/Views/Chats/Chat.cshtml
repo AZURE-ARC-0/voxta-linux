@@ -47,7 +47,7 @@
                 <tr>
                     <th>Character</th>
                     <th>Message</th>
-                    <th class="text-end">Tokens (@Model.Messages.Where(m => m.SummarizedBy == null).Sum(m => m.Tokens))</th>
+                    <th class="text-end">Tokens (@Model.Messages.Where(m => m.SummarizedBy == null).Sum(m => m.Tokens) / @Model.Messages.Sum(m => m.Tokens))</th>
                 </tr>
                 </thead>
 
