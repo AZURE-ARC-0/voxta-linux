@@ -13,7 +13,7 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
     public async Task TestChat()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User.Name, "Tell me, how do you feel about this?");
+        chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
 
         var client = await CreateClientAsync<OpenAITextGenClient>();
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
@@ -31,8 +31,8 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
     public async Task TestActionInference()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User.Name, "Tell me, how do you feel about this?");
-        chat.AddMessage(chat.Character.Name, "This fills me with joy!");
+        chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
+        chat.AddMessage(chat.Character, "This fills me with joy!");
         chat.Actions = new[] { "cry", "think", "leave", "smile", "frown" };
 
         var client = await CreateClientAsync<OpenAIActionInferenceClient>();
@@ -51,12 +51,12 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
     public async Task TestSummarization()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User.Name, "I have nothing to do right now, I thought we could chat?");
-        chat.AddMessage(chat.Character.Name, "Yes! That would be nice, I was lonely. Tell me something about you!");
-        chat.AddMessage(chat.User.Name, "I love apples, they taste delicious!");
-        chat.AddMessage(chat.Character.Name, "Yeah? Personally, I hate them.");
-        chat.AddMessage(chat.User.Name, "Really? That's uncommon!");
-        chat.AddMessage(chat.Character.Name, "I guess I'm not your typical girl!");
+        chat.AddMessage(chat.User, "I have nothing to do right now, I thought we could chat?");
+        chat.AddMessage(chat.Character, "Yes! That would be nice, I was lonely. Tell me something about you!");
+        chat.AddMessage(chat.User, "I love apples, they taste delicious!");
+        chat.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
+        chat.AddMessage(chat.User, "Really? That's uncommon!");
+        chat.AddMessage(chat.Character, "I guess I'm not your typical girl!");
 
         var client = await CreateClientAsync<OpenAISummarizationService>();
         var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);

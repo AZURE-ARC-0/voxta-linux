@@ -4,7 +4,12 @@ namespace Voxta.Core;
 
 public partial class ChatSession
 {
-    private Task<ChatMessageData> AppendMessageAsync(string user, TextData gen)
+    private Task<ChatMessageData> AppendMessageAsync(ChatSessionDataCharacter character, TextData gen)
+    {
+        return SaveMessageAsync(_chatSessionData.AddMessage(character, gen));
+    }
+    
+    private Task<ChatMessageData> AppendMessageAsync(ChatSessionDataUser user, TextData gen)
     {
         return SaveMessageAsync(_chatSessionData.AddMessage(user, gen));
     }

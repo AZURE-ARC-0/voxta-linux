@@ -39,7 +39,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);
         foreach(var message in messages)
         {
-            _serviceObserver.Record($"{ServiceObserverKeys.TextGenPrompt}[{message.role}]", message.content);
+            _serviceObserver.Record($"{ServiceObserverKeys.TextGenPrompt}[{message.Role}]", message.Value);
         }
         tokenizePerf.Pause();
 

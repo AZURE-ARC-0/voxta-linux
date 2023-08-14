@@ -31,7 +31,7 @@ public partial class ChatSession
         if (_chatSessionState.PendingUserMessage == null)
         {
             var userText = _chatTextProcessor.ProcessText(text);
-            var userMessageData = await AppendMessageAsync(_chatSessionData.User.Name.Value, userText);
+            var userMessageData = await AppendMessageAsync(_chatSessionData.User, userText);
             _chatSessionState.PendingUserMessage = userMessageData;
         }
         else
@@ -81,7 +81,7 @@ public partial class ChatSession
 
         _chatSessionState.PendingUserMessage = null;
         var genData = new TextData { Value = generated, Tokens = _textGen.GetTokenCount(generated) };
-        var reply = await AppendMessageAsync(_chatSessionData.Character.Name.Value, genData);
+        var reply = await AppendMessageAsync(_chatSessionData.Character, genData);
 
         await LaunchMemorySummarizationAsync(queueCancellationToken);
         
@@ -121,7 +121,7 @@ public partial class ChatSession
         var summarizedMessage = new ChatMessageData
         {
             Id = summaryId,
-            User = "System",
+            Role = ChatMessageRole.System,
             ChatId = _chatSessionData.Chat.Id,
             Tokens = summaryTokens,
             Value = summaryText,

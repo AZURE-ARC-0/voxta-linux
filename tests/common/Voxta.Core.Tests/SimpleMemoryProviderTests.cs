@@ -45,7 +45,7 @@ public class SimpleMemoryProviderTests
     [Test]
     public async Task MatchMemoryByWord()
     {
-        _chatSessionData.AddMessage(_chatSessionData.User.Name, "I like apples.");
+        _chatSessionData.AddMessage(_chatSessionData.User, "I like apples.");
         await ArrangeMemoryBooksAsync(
             (Keywords: new[] { "apples" }, Value: "Assistant likes apples", Weight: 0)
         );
@@ -60,9 +60,9 @@ public class SimpleMemoryProviderTests
     [Test]
     public async Task RecentMessagesGetPriority()
     {
-        _chatSessionData.AddMessage(_chatSessionData.User.Name, "I like apples.");
-        _chatSessionData.AddMessage(_chatSessionData.Character.Name, "What else do you like?");
-        _chatSessionData.AddMessage(_chatSessionData.User.Name, "I really like hugs!");
+        _chatSessionData.AddMessage(_chatSessionData.User, "I like apples.");
+        _chatSessionData.AddMessage(_chatSessionData.Character, "What else do you like?");
+        _chatSessionData.AddMessage(_chatSessionData.User, "I really like hugs!");
         await ArrangeMemoryBooksAsync(
             (Keywords: new[] { "apples", "fruit" }, Value: "Assistant likes apples", Weight: 0),
             (Keywords: new[] { "affection", "hugs", "hug" }, Value: "Assistant is afraid of physical contact", Weight: 0)
@@ -79,7 +79,7 @@ public class SimpleMemoryProviderTests
     [Test]
     public async Task MatchesAreReordered()
     {
-        _chatSessionData.AddMessage(_chatSessionData.User.Name, "You want to play chess?");
+        _chatSessionData.AddMessage(_chatSessionData.User, "You want to play chess?");
         await ArrangeMemoryBooksAsync(
             (Keywords: new[] { "play" }, Value: "Assistant loves playing games", Weight: 0),
             (Keywords: new[] { "chess" }, Value: "Assistant can barely play chess", Weight: 0),
@@ -93,8 +93,8 @@ public class SimpleMemoryProviderTests
             "Assistant loves playing games"
         );
         
-        _chatSessionData.AddMessage(_chatSessionData.Character.Name, "I'd love to, by I can barely play!");
-        _chatSessionData.AddMessage(_chatSessionData.User.Name, "Do you want to talk about it?");
+        _chatSessionData.AddMessage(_chatSessionData.Character, "I'd love to, by I can barely play!");
+        _chatSessionData.AddMessage(_chatSessionData.User, "Do you want to talk about it?");
 
         _provider.QueryMemoryFast(_chatSessionData);
     

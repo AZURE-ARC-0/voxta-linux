@@ -21,7 +21,7 @@ public class TextGenerationInferenceActionInferenceService : TextGenerationInfer
     public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder(Tokenizer);
-        var prompt = builder.BuildActionInferencePrompt(chat);
+        var prompt = builder.BuildActionInferencePromptString(chat);
         _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, TextGenerationInferenceConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);
         

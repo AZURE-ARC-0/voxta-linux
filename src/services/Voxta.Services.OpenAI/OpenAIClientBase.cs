@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
@@ -47,10 +48,20 @@ public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, Op
         return true;
     }
 
-    protected OpenAIRequestBody BuildRequestBody(List<OpenAIMessage> messages)
+    protected OpenAIRequestBody BuildRequestBody(IEnumerable<MessageData> messages)
     {
         var body = CreateParameters();
-        body.Messages = messages;
+        body.Messages = messages.Select(m => new OpenAIMessage
+        {
+            role = m.Role switch
+            {
+                ChatMessageRole.System => "system",
+                ChatMessageRole.Assistant => "assistant",
+                ChatMessageRole.User => "user",
+                _ => throw new ArgumentOutOfRangeException(null, $"Unknown role: {m.Role}")
+            },
+            content = m.Value
+        }).ToList();
         body.Model = _model;
         return body;
     }

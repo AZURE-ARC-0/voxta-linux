@@ -31,7 +31,7 @@ public class OpenAIActionInferenceClient : OpenAIClientBase, IActionInferenceSer
         _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, OpenAIConstants.ServiceName);
         foreach(var message in messages)
         {
-            _serviceObserver.Record($"{ServiceObserverKeys.ActionInferencePrompt}[{message.role}]", message.content);
+            _serviceObserver.Record($"{ServiceObserverKeys.ActionInferencePrompt}[{message.Role}]", message.Value);
         }
 
         var body = BuildRequestBody(messages);

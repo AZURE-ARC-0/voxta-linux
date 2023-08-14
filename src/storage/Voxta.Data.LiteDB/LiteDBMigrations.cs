@@ -24,6 +24,12 @@ public class LiteDBMigrations
             Migrate_4_To_5();
             _db.UserVersion = 5;
         }
+        
+        if (_db.UserVersion == 5)
+        {
+            Migrate_5_To_6();
+            _db.UserVersion = 6;
+        }
 
         return Task.CompletedTask;
     }
@@ -41,8 +47,6 @@ public class LiteDBMigrations
         }
     }
     
-
-
     private void Migrate_4_To_5()
     {
         var messages = _db.GetCollection("ChatMessageData");
@@ -56,5 +60,31 @@ public class LiteDBMigrations
                 messages.Insert(message);
             }
         }
+    }
+
+    private void Migrate_5_To_6()
+    {
+        var messages = _db.GetCollection("ChatMessageData");
+        messages.DeleteAll();
+        UpdateCollection("OobaboogaSettings");
+    }
+
+    private void UpdateCollection(string name)
+    {
+        var collection = _db.GetCollection(name);
+        foreach (var settings in collection.FindAll())
+        {
+            SetIntIfMissing(settings, "MaxMemoryTokens", 400);
+            SetIntIfMissing(settings, "SummarizationTriggerTokens", 1000);
+            SetIntIfMissing(settings, "SummarizationDigestTokens", 500);
+            SetIntIfMissing(settings, "SummaryMaxTokens", 200);
+            SetIntIfMissing(settings, "MaxContextTokens", 1600);
+            collection.Update(settings);
+        }
+    }
+
+    private static void SetIntIfMissing(BsonDocument settings, string fieldName, int defaultValue)
+    {
+        settings[fieldName] = settings.ContainsKey(fieldName) && settings[fieldName].AsInt32 > 0 ? settings[fieldName].AsInt32 : defaultValue;
     }
 }

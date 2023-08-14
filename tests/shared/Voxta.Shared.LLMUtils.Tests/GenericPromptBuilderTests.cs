@@ -21,29 +21,31 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptMinimal()
     {
+        var character = new ChatSessionDataCharacter
+        {
+            Name = "Jane",
+            Description = "some-description",
+            Personality = "some-personality",
+            Scenario = "some-scenario",
+            FirstMessage = "some-first-message",
+        };
+        var user = new ChatSessionDataUser { Name = "Joe" };
         var chat = new ChatSessionData
+        {
+            Culture = "en-US",
+            User = user,
+            Chat = new Chat
             {
-                Culture = "en-US",
-                User = new ChatSessionDataUser { Name = "Joe" },
-                Chat = new Chat
-                {
-                    Id = Guid.Empty,
-                    CharacterId = Guid.Empty,
-                },
-                Character = new()
-                {
-                    Name = "Jane",
-                    Description = "some-description",
-                    Personality = "some-personality",
-                    Scenario = "some-scenario",
-                    FirstMessage = "some-first-message",
-                }
-            }
-            .AddMessage("Joe", "Hello")
-            .AddMessage("Jane", "World")
-            .AddMessage("Joe", "Question");
+                Id = Guid.Empty,
+                CharacterId = Guid.Empty,
+            },
+            Character = character,
+        };
+        chat.AddMessage(user, "Hello");
+        chat.AddMessage(character, "World");
+        chat.AddMessage(user, "Question");
         
-        var actual = _builder.BuildReplyPrompt(chat, 0, 4096);
+        var actual = _builder.BuildReplyPromptString(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
         This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe.
@@ -61,34 +63,36 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptFull()
     {
+        var character = new ChatSessionDataCharacter
+        {
+            Name = "Jane",
+            Description = "some-description",
+            Personality = "some-personality",
+            Scenario = "some-scenario",
+            FirstMessage = "some-first-message",
+            SystemPrompt = "some-system-prompt",
+            PostHistoryInstructions = "some-post-history-instructions",
+            MessageExamples = "Joe: Request\nJane: Response",
+        };
+        var user = new ChatSessionDataUser { Name = "Joe" };
         var chat = new ChatSessionData
+        {
+            Culture = "en-US",
+            User = user,
+            Chat = new Chat
             {
-                Culture = "en-US",
-                User = new ChatSessionDataUser { Name = "Joe" },
-                Chat = new Chat
-                {
-                    Id = Guid.Empty,
-                    CharacterId = Guid.Empty,
-                },
-                Character = new()
-                {
-                    Name = "Jane",
-                    Description = "some-description",
-                    Personality = "some-personality",
-                    Scenario = "some-scenario",
-                    FirstMessage = "some-first-message",
-                    SystemPrompt = "some-system-prompt",
-                    PostHistoryInstructions = "some-post-history-instructions",
-                    MessageExamples = "Joe: Request\nJane: Response",
-                },
-                Actions = new[] { "action1", "action2" },
-                Context = "some-context",
-            }
-            .AddMessage("Joe", "Hello")
-            .AddMessage("Jane", "World")
-            .AddMessage("Joe", "Question");
+                Id = Guid.Empty,
+                CharacterId = Guid.Empty,
+            },
+            Character = character,
+            Actions = new[] { "action1", "action2" },
+            Context = "some-context",
+        };
+        chat.AddMessage(user, "Hello");
+        chat.AddMessage(character, "World");
+        chat.AddMessage(user, "Question");
         
-        var actual = _builder.BuildReplyPrompt(chat, 0, 4096);
+        var actual = _builder.BuildReplyPromptString(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
         some-system-prompt
@@ -108,32 +112,34 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptMemory()
     {
+        var character = new ChatSessionDataCharacter
+        {
+            Name = "Jane",
+            Description = "some-description",
+            Personality = "some-personality",
+            Scenario = "some-scenario",
+            FirstMessage = "some-first-message",
+        };
+        var user = new ChatSessionDataUser { Name = "Joe" };
         var chat = new ChatSessionData
+        {
+            Culture = "en-US",
+            User = user,
+            Chat = new Chat
             {
-                Culture = "en-US",
-                User = new ChatSessionDataUser { Name = "Joe" },
-                Chat = new Chat
-                {
-                    Id = Guid.Empty,
-                    CharacterId = Guid.Empty,
-                },
-                Character = new()
-                {
-                    Name = "Jane",
-                    Description = "some-description",
-                    Personality = "some-personality",
-                    Scenario = "some-scenario",
-                    FirstMessage = "some-first-message",
-                }
-            }
-            .AddMessage("Joe", "Hello")
-            .AddMessage("Jane", "World")
-            .AddMessage("Joe", "Question");
+                Id = Guid.Empty,
+                CharacterId = Guid.Empty,
+            },
+            Character = character,
+        };
+        chat.AddMessage(user, "Hello");
+        chat.AddMessage(character, "World");
+        chat.AddMessage(user, "Question");
         chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-1" });
         chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-2" });
         chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-3" });
         
-        var actual = _builder.BuildReplyPrompt(chat, 1024, 4096);
+        var actual = _builder.BuildReplyPromptString(chat, 1024, 4096);
 
         Assert.That(actual, Is.EqualTo("""
            This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe.
@@ -156,33 +162,35 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptActionInference()
     {
+        var character = new ChatSessionDataCharacter
+        {
+            Name = "Jane",
+            Description = "some-description",
+            Personality = "some-personality",
+            Scenario = "some-scenario",
+            FirstMessage = "some-first-message",
+            SystemPrompt = "some-system-prompt",
+            PostHistoryInstructions = "some-post-history-instructions",
+            MessageExamples = "Joe: Request\nJane: Response",
+        };
+        var user = new ChatSessionDataUser { Name = "Joe" };
         var chat = new ChatSessionData
+        {
+            Culture = "en-US",
+            User = user,
+            Chat = new Chat
             {
-                Culture = "en-US",
-                User = new ChatSessionDataUser { Name = "Joe" },
-                Chat = new Chat
-                {
-                    Id = Guid.Empty,
-                    CharacterId = Guid.Empty,
-                },
-                Character = new()
-                {
-                    Name = "Jane",
-                    Description = "some-description",
-                    Personality = "some-personality",
-                    Scenario = "some-scenario",
-                    FirstMessage = "some-first-message",
-                    SystemPrompt = "some-system-prompt",
-                    PostHistoryInstructions = "some-post-history-instructions",
-                    MessageExamples = "Joe: Request\nJane: Response",
-                },
-                Actions = new[] { "action1", "action2" },
-                Context = "some-context",
-            }
-            .AddMessage("Joe", "Hello")
-            .AddMessage("Jane", "World")
-            .AddMessage("Joe", "Question");
-        var actual = _builder.BuildActionInferencePrompt(chat);
+                Id = Guid.Empty,
+                CharacterId = Guid.Empty,
+            },
+            Character = character,
+            Actions = new[] { "action1", "action2" },
+            Context = "some-context",
+        };
+        chat.AddMessage(user, "Hello");
+        chat.AddMessage(character, "World");
+        chat.AddMessage(user, "Question");
+        var actual = _builder.BuildActionInferencePromptString(chat);
 
         Assert.That(actual, Is.EqualTo("""
         You are tasked with inferring the best action from a list based on the content of a sample chat.
@@ -211,33 +219,35 @@ public class GenericPromptBuilderTests
     [Test]
     public void TestPromptSummarization()
     {
+        var character = new ChatSessionDataCharacter
+        {
+            Name = "Jane",
+            Description = "some-description",
+            Personality = "some-personality",
+            Scenario = "some-scenario",
+            FirstMessage = "some-first-message",
+            SystemPrompt = "some-system-prompt",
+            PostHistoryInstructions = "some-post-history-instructions",
+            MessageExamples = "Joe: Request\nJane: Response",
+        };
+        var user = new ChatSessionDataUser { Name = "Joe" };
         var chat = new ChatSessionData
+        {
+            Culture = "en-US",
+            User = user,
+            Chat = new Chat
             {
-                Culture = "en-US",
-                User = new ChatSessionDataUser { Name = "Joe" },
-                Chat = new Chat
-                {
-                    Id = Guid.Empty,
-                    CharacterId = Guid.Empty,
-                },
-                Character = new()
-                {
-                    Name = "Jane",
-                    Description = "some-description",
-                    Personality = "some-personality",
-                    Scenario = "some-scenario",
-                    FirstMessage = "some-first-message",
-                    SystemPrompt = "some-system-prompt",
-                    PostHistoryInstructions = "some-post-history-instructions",
-                    MessageExamples = "Joe: Request\nJane: Response",
-                },
-                Actions = new[] { "action1", "action2" },
-                Context = "some-context",
-            }
-            .AddMessage("Joe", "Hello")
-            .AddMessage("Jane", "World")
-            .AddMessage("Joe", "Question");
-        var actual = _builder.BuildSummarizationPrompt(chat, chat.Messages);
+                Id = Guid.Empty,
+                CharacterId = Guid.Empty,
+            },
+            Character = character,
+            Actions = new[] { "action1", "action2" },
+            Context = "some-context",
+        };
+        chat.AddMessage(user, "Hello");
+        chat.AddMessage(character, "World");
+        chat.AddMessage(user, "Question");
+        var actual = _builder.BuildSummarizationPromptString(chat, chat.Messages);
 
         Assert.That(actual, Is.EqualTo("""
            You must write facts about Jane and Joe from their conversation.

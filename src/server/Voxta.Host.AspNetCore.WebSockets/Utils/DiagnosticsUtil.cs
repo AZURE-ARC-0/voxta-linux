@@ -179,8 +179,8 @@ public class DiagnosticsUtil
                         FirstMessage = "Beginning test.",
                     }
                 };
-                chat.AddMessage(chat.Character.Name, chat.Character.FirstMessage);
-                chat.AddMessage(chat.User.Name, "Are you working correctly?");
+                chat.AddMessage(chat.Character, chat.Character.FirstMessage);
+                chat.AddMessage(chat.User, "Are you working correctly?");
                 var result = await service.GenerateReplyAsync(chat, cancellationToken);
                 return "Response: " + result;
             }
@@ -252,7 +252,7 @@ public class DiagnosticsUtil
                     },
                     Actions = actions
                 };
-                chat.AddMessage(chat.Character.Name, "Yep, looks like this is working!");
+                chat.AddMessage(chat.Character, "Yep, looks like this is working!");
                 var result = await service.SelectActionAsync(chat, cancellationToken);
                 return "Action: " + result;
             }
@@ -284,8 +284,8 @@ public class DiagnosticsUtil
                     },
                     Actions = actions
                 };
-                chat.AddMessage(chat.Character.Name, "I like apples. Do you like apples?");
-                chat.AddMessage(chat.User.Name, "No, I don't like them at all.");
+                chat.AddMessage(chat.Character, "I like apples. Do you like apples?");
+                chat.AddMessage(chat.User, "No, I don't like them at all.");
                 var result = await service.SummarizeAsync(chat, chat.Messages, cancellationToken);
                 return "Summary: " + result;
             }

@@ -87,7 +87,7 @@ public abstract class IntegrationTestsBase
                 FirstMessage = processor.ProcessText(character.FirstMessage),
             },
         };
-        chat.AddMessage(chat.Character.Name, chat.Character.FirstMessage);
+        chat.AddMessage(chat.Character, chat.Character.FirstMessage);
         return chat;
     }
 }

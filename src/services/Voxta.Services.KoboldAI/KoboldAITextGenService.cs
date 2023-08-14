@@ -21,7 +21,7 @@ public class KoboldAITextGenService : KoboldAIClientBase, ITextGenService
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder(Tokenizer);
-        var prompt = builder.BuildReplyPrompt(chat, Settings.MaxMemoryTokens, Settings.MaxContextTokens);
+        var prompt = builder.BuildReplyPromptString(chat, Settings.MaxMemoryTokens, Settings.MaxContextTokens);
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, KoboldAIConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         

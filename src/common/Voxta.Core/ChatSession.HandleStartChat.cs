@@ -71,7 +71,7 @@ public partial class ChatSession
     {
         if (_chatSessionData.Messages.Count == 0 && _chatSessionData.Character.FirstMessage?.HasValue == true)
         {
-            var reply = await AppendMessageAsync(_chatSessionData.Character.Name.Value, _chatSessionData.Character.FirstMessage);
+            var reply = await AppendMessageAsync(_chatSessionData.Character, _chatSessionData.Character.FirstMessage);
             _logger.LogInformation("Sending first message: {Message}", reply.Value);
             await SendReusableReplyWithSpeechAsync(reply.Value, cancellationToken);
         }

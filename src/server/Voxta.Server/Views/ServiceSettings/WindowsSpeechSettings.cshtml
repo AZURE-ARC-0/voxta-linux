@@ -37,25 +37,6 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-end mt-3">
-            <a href="/settings" class="btn btn-secondary me-2">Back to settings</a>
-            <button id="resetBtn" class="btn btn-secondary me-2">Reset</button>
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-
-        <div class="text-danger mt-3">
-            @Html.ValidationSummary(false)
-        </div>
+        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("ResetWindowsSpeechSettings")" />
     </form>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById('resetBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (!confirm('Are you sure you want to reset the settings?')) { return; }
-            await fetch('@Url.Action("ResetNovelAISettings")', { method: 'POST' });
-            location.reload();
-        });
-    });
-</script>

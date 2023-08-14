@@ -96,8 +96,8 @@ public class PlaygroundController : Controller
                     },
                     Messages =
                     {
-                        ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
-                        ChatMessageData.FromText(Guid.Empty, profile.Name, "Hi! This is a test conversation. Can you tell me something in character?")
+                        ChatMessageData.FromText(Guid.Empty, character, character.FirstMessage),
+                        ChatMessageData.FromText(Guid.Empty, profile, "Hi! This is a test conversation. Can you tell me something in character?")
                     }
                 }, cancellationToken);
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
@@ -122,8 +122,8 @@ public class PlaygroundController : Controller
                     Actions = new[] { "wave", "sit_down", "stand_up", "break_chair" },
                     Messages =
                     {
-                        ChatMessageData.FromText(Guid.Empty, character.Name, character.FirstMessage),
-                        ChatMessageData.FromText(Guid.Empty, profile.Name, "Can you please sit down?")
+                        ChatMessageData.FromText(Guid.Empty, character, character.FirstMessage),
+                        ChatMessageData.FromText(Guid.Empty, profile, "Can you please sit down?")
                     }
                 }, cancellationToken);
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferenceService)?.Value ?? data.Service ?? "";

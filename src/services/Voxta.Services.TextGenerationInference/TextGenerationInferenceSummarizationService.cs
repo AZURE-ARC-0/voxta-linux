@@ -21,7 +21,7 @@ public class TextGenerationInferenceSummarizationService : TextGenerationInferen
     public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
         var builder = new GenericPromptBuilder(Tokenizer);
-        var prompt = builder.BuildSummarizationPrompt(chat, messagesToSummarize);
+        var prompt = builder.BuildSummarizationPromptString(chat, messagesToSummarize);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationService, TextGenerationInferenceConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationPrompt, prompt);
         

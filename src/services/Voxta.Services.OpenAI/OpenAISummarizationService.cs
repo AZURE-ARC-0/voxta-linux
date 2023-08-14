@@ -27,7 +27,7 @@ public class OpenAISummarizationService : OpenAIClientBase, ISummarizationServic
         _serviceObserver.Record(ServiceObserverKeys.SummarizationService, OpenAIConstants.ServiceName);
         foreach(var message in messages)
         {
-            _serviceObserver.Record($"{ServiceObserverKeys.SummarizationPrompt}[{message.role}]", message.content);
+            _serviceObserver.Record($"{ServiceObserverKeys.SummarizationPrompt}[{message.Role}]", message.Value);
         }
 
         var body = BuildRequestBody(messages);

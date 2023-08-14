@@ -21,7 +21,7 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         var builder = new NovelAIPromptBuilder(Tokenizer);
-        var prompt = builder.BuildReplyPrompt(chat, Settings.MaxMemoryTokens, Settings.MaxContextTokens, includePostHistoryPrompt: false);
+        var prompt = builder.BuildReplyPromptString(chat, Settings.MaxMemoryTokens, Settings.MaxContextTokens);
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, NovelAIConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");

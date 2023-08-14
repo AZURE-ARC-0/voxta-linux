@@ -4,13 +4,6 @@
     ViewBag.Title = "Settings - KoboldAI";
 }
 
-@section head {
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor.min.css" integrity="sha512-brXxIa/fpMfluh8HUWyrNssKy/H0oRzA0HhmipgfVwbXPamMUTZn1jEsvoGGwJYCRpSx4idujdul4vFwWgPROA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="~/styles/jsoneditor-dark.css" asp-append-version="true" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.10.2/jsoneditor-minimalist.js" integrity="sha512-H0X4c02ARmY4wCJ2CzRFfKWnB6ZrLFqsD9JYB3ljTOCtjSJB63Nfq/GUumYW3NMQRX3R2B8BH56DAywT4tQv6w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="~/scripts/components/json-editor.js" asp-append-version="true"></script>
-}
-
 <div class="container">
     <h1>KoboldAI Settings</h1>
     
@@ -41,53 +34,11 @@
                     <div class="form-text">Example: http://127.0.0.1:5001</div>
                     <span asp-validation-for="Uri" class="text-danger"></span>
                 </div>
-                <div>
-                    <label asp-for="MaxContextTokens">Max Context Tokens</label>
-                    <input asp-for="MaxContextTokens" class="form-control"/>
-                    <div class="form-text">Longer values means more memory but also longer processing.</div>
-                    <span asp-validation-for="MaxContextTokens" class="text-danger"></span>
-                </div>
-                <div>
-                    <label asp-for="MaxMemoryTokens">Max Memory Tokens</label>
-                    <input asp-for="MaxMemoryTokens" class="form-control"/>
-                    <div class="form-text">How much tokens are reserved for memory. Must be lower than Max Context Tokens.</div>
-                    <span asp-validation-for="MaxMemoryTokens" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Parameters">Text generation parameters</label>
-                    <input type="hidden" asp-for="Parameters" class="form-control"/>
-                    <div id="jsoneditor" class="jsoneditor" style="width: 100%; height: 220px;"></div>
-                </div>
-                <div class="form-check">
-                    <input asp-for="UseDefaults" type="checkbox" class="form-check-input"/>
-                    <label asp-for="UseDefaults">Use default parameters</label>
-                    <div class="form-text">Will ignore any changes you make on the parameters and use the default values instead.</div>
-                    <span asp-validation-for="UseDefaults" class="text-danger"></span>
-                </div>
+                <partial name="ServiceSettings/_LLMServiceSettings" model="@Model" />
+                <partial name="ServiceSettings/_JSONParametersServiceSettings" model="@Model" />
             </div>
         </div>
 
-        <div class="d-flex justify-content-end mt-3">
-            <a href="/settings" class="btn btn-secondary me-2">Back to settings</a>
-            <button id="resetBtn" class="btn btn-secondary me-2">Reset</button>
-            <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-
-        <div class="text-danger mt-3">
-            @Html.ValidationSummary(false)
-        </div>
+        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("ResetKoboldAISettings")" />
     </form>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        initJsonEditor(document.getElementById("configureForm"), document.getElementById("Parameters"), document.getElementById("UseDefaults"));
-            
-        document.getElementById('resetBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            if (!confirm('Are you sure you want to reset the settings?')) { return; }
-            await fetch('@Url.Action("ResetNovelAISettings")', { method: 'POST' });
-            location.reload();
-        });
-    });
-</script>
