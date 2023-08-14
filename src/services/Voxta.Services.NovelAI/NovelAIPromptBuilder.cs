@@ -3,7 +3,7 @@ using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Shared.LLMUtils;
 
-namespace Voxta.Services.OpenSourceLargeLanguageModels;
+namespace Voxta.Services.NovelAI;
 
 public class NovelAIPromptBuilder : GenericPromptBuilder
 {

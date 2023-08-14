@@ -24,13 +24,10 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         var success = await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken);
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
         if (dry || !success) return success;
-        if (success)
-        {
-            if (Parameters == null) throw new NullReferenceException("Parameters should be set at this point");
-            var logitBias = (Parameters.LogitBias ??= new Dictionary<string, int>());
-            logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" safety")), -80);
-            logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" appropriate")), -80);
-        }
+        if (Parameters == null) throw new NullReferenceException("Parameters should be set at this point");
+        var logitBias = (Parameters.LogitBias ??= new Dictionary<string, int>());
+        logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" safety")), -80);
+        logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" appropriate")), -80);
         return true;
     }
 

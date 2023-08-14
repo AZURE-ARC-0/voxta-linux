@@ -3,7 +3,6 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Voxta.Abstractions.System;
-using Voxta.Services.OpenSourceLargeLanguageModels;
 
 namespace Voxta.Services.NovelAI;
 

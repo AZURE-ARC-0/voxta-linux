@@ -84,7 +84,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.LLMUtils", "sr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{3D101AAD-8BB5-4177-90A3-274CFCB812F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.OpenSourceLargeLanguageModels.Tests", "tests\shared\Voxta.Shared.OpenSourceLargeLanguageModels.Tests\Voxta.Shared.OpenSourceLargeLanguageModels.Tests.csproj", "{5D1357A4-2682-4ACE-8CAC-9D31D3B62429}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.LLMUtils.Tests", "tests\shared\Voxta.Shared.LLMUtils.Tests\Voxta.Shared.LLMUtils.Tests.csproj", "{5D1357A4-2682-4ACE-8CAC-9D31D3B62429}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voxta.Shared.TextToSpeechUtils", "src\shared\Voxta.Shared.TextToSpeechUtils\Voxta.Shared.TextToSpeechUtils.csproj", "{ADA99E97-31DE-4DFA-AF1F-3FA1189B484B}"
 EndProject

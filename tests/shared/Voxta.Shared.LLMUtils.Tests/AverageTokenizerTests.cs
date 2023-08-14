@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
-using Voxta.Shared.LLMUtils;
 
-namespace Voxta.Shared.OpenSourceLargeLanguageModels.Tests;
+namespace Voxta.Shared.LLMUtils.Tests;
 
 public class AverageTokenizerTests
 {

@@ -2,9 +2,8 @@
 using NUnit.Framework;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Tokenizers;
-using Voxta.Shared.LLMUtils;
 
-namespace Voxta.Shared.OpenSourceLargeLanguageModels.Tests;
+namespace Voxta.Shared.LLMUtils.Tests;
 
 public class StringBuilderWithTokensTests
 {
