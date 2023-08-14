@@ -38,7 +38,6 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
     
     protected TInputParameters? Parameters { get; private set; }
     
-    
     private readonly ISettingsRepository _settingsRepository;
 
     protected LLMServiceClientBase(string serviceName, ISettingsRepository settingsRepository)
@@ -62,6 +61,26 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
     public int GetTokenCount(string message)
     {
         return Tokenizer.CountTokens(message);
+    }
+
+    public (List<ChatMessageData> Messages, int Tokens)? GetMessagesToSummarize(IChatInferenceData chat)
+    {
+        if (chat.GetMessages().Sum(m => m.Tokens) < Settings.SummarizationTriggerTokens)
+            return null;
+        
+        var messagesTokens = 0;
+        var messagesToSummarize = new List<ChatMessageData>();
+        foreach (var message in chat.GetMessages())
+        {
+            if (messagesTokens + message.Tokens > Settings.SummarizationDigestTokens) break;
+            messagesTokens += message.Tokens;
+            messagesToSummarize.Add(message);
+        }
+
+        if (messagesToSummarize.Count == 0)
+            throw new InvalidOperationException("Cannot summarize, not enough tokens for a single message");
+
+        return (messagesToSummarize, messagesTokens);
     }
 
     protected TOutputParameters CreateParameters()

@@ -33,11 +33,9 @@ public class NovelAISummarizationService : NovelAIClientBase, ISummarizationServ
 
         var actionInferencePerf = _performanceMetrics.Start($"{NovelAIConstants.ServiceName}.Summarization");
         var body = BuildRequestBody(prompt, "special_instruct");
-        #warning Move this value elsewhere
-        const int summarizeToMaxTokens = 60;
-        body.Parameters.MaxLength = summarizeToMaxTokens;
         body.Parameters.Temperature = 0.1;
         body.Parameters.StopSequences = Array.Empty<int[]>();
+        body.Parameters.MaxLength = Settings.SummaryMaxTokens;
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 

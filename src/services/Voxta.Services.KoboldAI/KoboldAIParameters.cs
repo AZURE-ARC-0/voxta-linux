@@ -8,7 +8,7 @@ namespace Voxta.Services.KoboldAI;
 public class KoboldAIParameters
 {   
     [JsonPropertyName("max_length")]
-    public double MaxLength { get; init; } = 80;
+    public double MaxLength { get; set; } = 80;
     
     [JsonPropertyName("rep_pen")]
     public double RepPen { get; init; } = 1.08;

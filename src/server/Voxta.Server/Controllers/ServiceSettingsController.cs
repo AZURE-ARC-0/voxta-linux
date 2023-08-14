@@ -12,7 +12,6 @@ using Voxta.Services.OpenAI;
 using Voxta.Services.Vosk;
 using Voxta.Services.AzureSpeechService;
 using Voxta.Services.Mocks;
-using Voxta.Services.NovelAI.Presets;
 using Voxta.Services.TextGenerationInference;
 #if(WINDOWS)
 using Voxta.Services.WindowsSpeech;
@@ -219,15 +218,7 @@ public class ServiceSettingsController : Controller
         {
             Uri = "http://127.0.0.1:5000",
         };
-        var vm = new OobaboogaSettingsViewModel
-        {
-            Enabled = settings.Enabled,
-            Uri = settings.Uri,
-            MaxContextTokens = settings.MaxContextTokens,
-            MaxMemoryTokens = settings.MaxMemoryTokens,
-            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new OobaboogaParameters()),
-            UseDefaults = settings.Parameters == null,
-        };
+        var vm = new OobaboogaSettingsViewModel(settings);
         return View(vm);
     }
     
@@ -239,14 +230,8 @@ public class ServiceSettingsController : Controller
             return View("TextGenerationWebUISettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new OobaboogaSettings
-        {
-            Enabled = value.Enabled,
-            Uri = value.Uri.TrimCopyPasteArtefacts(),
-            MaxContextTokens = value.MaxContextTokens,
-            MaxMemoryTokens = value.MaxMemoryTokens,
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OobaboogaParameters>(value.Parameters) ?? new OobaboogaParameters(),
-        });
+        var settings = value.ToSettings();
+        await _settingsRepository.SaveAsync(settings);
         
         return RedirectToAction("TextGenerationWebUISettings");
     }
@@ -273,15 +258,7 @@ public class ServiceSettingsController : Controller
         {
             Uri = "http://127.0.0.1:5001",
         };
-        var vm = new KoboldAISettingsViewModel
-        {
-            Enabled = settings.Enabled,
-            Uri = settings.Uri,
-            MaxContextTokens = settings.MaxContextTokens,
-            MaxMemoryTokens = settings.MaxMemoryTokens,
-            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new KoboldAIParameters()),
-            UseDefaults = settings.Parameters == null,
-        };
+        var vm = new KoboldAISettingsViewModel(settings);
         return View(vm);
     }
     
@@ -293,14 +270,8 @@ public class ServiceSettingsController : Controller
             return View("KoboldAISettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new KoboldAISettings
-        {
-            Enabled = value.Enabled,
-            Uri = value.Uri.TrimCopyPasteArtefacts(),
-            MaxContextTokens = value.MaxContextTokens,
-            MaxMemoryTokens = value.MaxMemoryTokens,
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<KoboldAIParameters>(value.Parameters) ?? new KoboldAIParameters(),
-        });
+        var settings = value.ToSettings();
+        await _settingsRepository.SaveAsync(settings);
         
         return RedirectToAction("KoboldAISettings");
     }
@@ -327,15 +298,7 @@ public class ServiceSettingsController : Controller
         {
             Uri = "http://127.0.0.1:8080",
         };
-        var vm = new TextGenerationInferenceSettingsViewModel
-        {
-            Enabled = settings.Enabled,
-            Uri = settings.Uri,
-            MaxContextTokens = settings.MaxContextTokens,
-            MaxMemoryTokens = settings.MaxMemoryTokens,
-            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new TextGenerationInferenceParameters()),
-            UseDefaults = settings.Parameters == null,
-        };
+        var vm = new TextGenerationInferenceSettingsViewModel(settings);
         return View(vm);
     }
     
@@ -347,14 +310,8 @@ public class ServiceSettingsController : Controller
             return View("TextGenerationInferenceSettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new TextGenerationInferenceSettings
-        {
-            Enabled = value.Enabled,
-            Uri = value.Uri.TrimCopyPasteArtefacts(),
-            MaxContextTokens = value.MaxContextTokens,
-            MaxMemoryTokens = value.MaxMemoryTokens,
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<TextGenerationInferenceParameters>(value.Parameters) ?? new TextGenerationInferenceParameters(),
-        });
+        var settings = value.ToSettings();
+        await _settingsRepository.SaveAsync(settings);
         
         return RedirectToAction("TextGenerationInferenceSettings");
     }
@@ -381,17 +338,7 @@ public class ServiceSettingsController : Controller
         {
             Token = "",
         };
-        var vm = new NovelAISettingsViewModel
-        {
-            Enabled = settings.Enabled,
-            Model = settings.Model,
-            Token = _encryptionProvider.SafeDecrypt(settings.Token),
-            MaxContextTokens = settings.MaxContextTokens,
-            MaxMemoryTokens = settings.MaxMemoryTokens,
-            Parameters = JsonSerializer.Serialize(settings.Parameters ?? NovelAIPresets.DefaultForModel(settings.Model)),
-            ThinkingSpeech = string.Join('\n', settings.ThinkingSpeech),
-            UseDefaults = settings.Parameters == null,
-        };   
+        var vm = new NovelAISettingsViewModel(settings, _encryptionProvider);
         return View(vm);
     }
     
@@ -403,16 +350,8 @@ public class ServiceSettingsController : Controller
             return View("NovelAISettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new NovelAISettings
-        {
-            Enabled = value.Enabled,
-            Token = string.IsNullOrEmpty(value.Token) ? "" : _encryptionProvider.Encrypt(value.Token.TrimCopyPasteArtefacts()),
-            Model = value.Model.TrimCopyPasteArtefacts(),
-            MaxContextTokens = value.MaxContextTokens,
-            MaxMemoryTokens = value.MaxMemoryTokens,
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<NovelAIParameters>(value.Parameters) ?? NovelAIPresets.DefaultForModel(value.Model),
-            ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        });
+        var settings = value.ToSettings(_encryptionProvider);
+        await _settingsRepository.SaveAsync(settings);
         
         return RedirectToAction("NovelAISettings");
     }
@@ -439,17 +378,8 @@ public class ServiceSettingsController : Controller
         {
             ApiKey = "",
         };
-        
-        var vm = new OpenAISettingsViewModel
-        {
-            Enabled = settings.Enabled,
-            ApiKey = _encryptionProvider.SafeDecrypt(settings.ApiKey),
-            Model = settings.Model,
-            MaxContextTokens = settings.MaxContextTokens,
-            MaxMemoryTokens = settings.MaxMemoryTokens,
-            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new OpenAIParameters()),
-            UseDefaults = settings.Parameters == null,
-        };
+
+        var vm = new OpenAISettingsViewModel(settings, _encryptionProvider);
         return View(vm);
     }
     
@@ -461,15 +391,8 @@ public class ServiceSettingsController : Controller
             return View("OpenAISettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new OpenAISettings
-        {
-            Enabled = value.Enabled,
-            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
-            Model = value.Model.TrimCopyPasteArtefacts(),
-            MaxContextTokens = value.MaxContextTokens,
-            MaxMemoryTokens = value.MaxMemoryTokens,
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<OpenAIParameters>(value.Parameters) ?? new OpenAIParameters(),
-        });
+        var settings = value.ToSettings(_encryptionProvider);
+        await _settingsRepository.SaveAsync(settings);
         
         return RedirectToAction("OpenAISettings");
     }

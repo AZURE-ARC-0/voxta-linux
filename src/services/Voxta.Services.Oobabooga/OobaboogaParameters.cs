@@ -14,7 +14,7 @@ public class OobaboogaParameters
     public int MinLength { get; init; } = 1;
     
     [JsonPropertyName("max_new_tokens")]
-    public int MaxNewTokens { get; init; } = 80;
+    public int MaxNewTokens { get; set; } = 80;
     
     [JsonPropertyName("temperature")]
     public double Temperature { get; set; } = 0.7;

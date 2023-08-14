@@ -29,6 +29,7 @@ public class OobaboogaSummarizationService : OobaboogaClientBase, ISummarization
         var body = BuildRequestBody(prompt, builder.SummarizationStopTokens);
         body.Temperature = 0.1;
         body.StoppingStrings = Array.Empty<string>();
+        body.MaxNewTokens = Settings.SummaryMaxTokens;
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 

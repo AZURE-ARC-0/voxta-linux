@@ -21,8 +21,8 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
 
     protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
+        var success = await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken);
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
-        var success = await base.TryInitializeAsync(prerequisites, culture, dry, cancellationToken);
         if (dry || !success) return success;
         if (success)
         {

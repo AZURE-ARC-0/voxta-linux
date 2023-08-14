@@ -9,7 +9,7 @@ namespace Voxta.Services.TextGenerationInference;
 public class TextGenerationInferenceParameters
 {   
     [JsonPropertyName("max_new_tokens")]
-    public double MaxNewTokens { get; init; } = 80;
+    public double MaxNewTokens { get; set; } = 80;
     
     [JsonPropertyName("repetition_penalty")]
     public double RepetitionPenalty { get; init; } = 1.08;

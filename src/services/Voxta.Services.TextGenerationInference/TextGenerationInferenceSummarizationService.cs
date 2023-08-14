@@ -29,6 +29,7 @@ public class TextGenerationInferenceSummarizationService : TextGenerationInferen
         var body = BuildRequestBody(prompt, builder.SummarizationStopTokens);
         body.Parameters.Temperature = 0.1;
         body.Parameters.Stop = Array.Empty<string>();
+        body.Parameters.MaxNewTokens = Settings.SummaryMaxTokens;
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 

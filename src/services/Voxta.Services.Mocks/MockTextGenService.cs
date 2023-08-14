@@ -13,6 +13,11 @@ public class MockTextGenService : ITextGenService
         return Task.FromResult(true);
     }
 
+    public (List<ChatMessageData> Messages, int Tokens)? GetMessagesToSummarize(IChatInferenceData chat)
+    {
+        return null;
+    }
+
     public ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
         return GenerateAsync(chat.GetMessages().LastOrDefault(x => x.User == chat.User.Name.Value)?.Value ?? "", cancellationToken);

@@ -94,30 +94,13 @@ public partial class ChatSession
 
     private async Task LaunchMemorySummarizationAsync(CancellationToken cancellationToken)
     {
-        // Once 200 tokens are reached, summarize the older 100 tokens to a maximum 0f 50 tokens.
-        #warning This is confusing; should these settings be in each summarizers? Or be a global, shared percentage?
-        const int summarizeTriggerTokens = 160;
-        const int tokensToSummarize = 120;
-        const int summarizeToMaxTokens = 60;
-        
-        if (_chatSessionData.Messages.Sum(m => m.Tokens) < summarizeTriggerTokens) return;
-        
-        var messagesTokens = 0;
-        var summaryId = Guid.NewGuid();
-        var messagesToSummarize = new List<ChatMessageData>();
-        foreach (var message in _chatSessionData.Messages)
-        {
-            if (messagesTokens + message.Tokens > tokensToSummarize) break;
-            messagesTokens += message.Tokens;
-            
-            message.SummarizedBy = summaryId;
-            messagesToSummarize.Add(message);
-        }
+        var summarizePlan = _textGen.GetMessagesToSummarize(_chatSessionData);
 
+        if (summarizePlan == null) return;
+        
+        var (messagesToSummarize, messagesTokens) = summarizePlan.Value;
+        
         _logger.LogInformation("Summarizing memory for {MessagesToSummarizeCount}", messagesToSummarize.Count);
-
-        if (messagesToSummarize.Count == 0)
-            throw new InvalidOperationException("Cannot summarize, not enough tokens for a single message");
 
         var summaryText = await _summarizationService.SummarizeAsync(_chatSessionData, messagesToSummarize, cancellationToken);
         if (string.IsNullOrEmpty(summaryText))
@@ -129,6 +112,8 @@ public partial class ChatSession
         var summaryTokens = _textGen.GetTokenCount(summaryText);
 
         #warning There is a risk of canceling here and having partially updated data. Use a transaction.
+        var summaryId = Guid.NewGuid();
+        messagesToSummarize.ForEach(m => m.SummarizedBy = summaryId);
         await Task.WhenAll(messagesToSummarize.Select(_chatMessageRepository.UpdateMessageAsync));
         messagesToSummarize.ForEach(m => _chatSessionData.Messages.Remove(m));
 

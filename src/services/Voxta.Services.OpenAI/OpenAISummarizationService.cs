@@ -32,10 +32,8 @@ public class OpenAISummarizationService : OpenAIClientBase, ISummarizationServic
 
         var body = BuildRequestBody(messages);
         body.Stop = Array.Empty<string>();
-        #warning Move this value elsewhere
-        const int summarizeToMaxTokens = 60;
-        body.MaxTokens = summarizeToMaxTokens;
         body.Temperature = 0;
+        body.MaxTokens = Settings.SummaryMaxTokens;
         var result = await SendChatRequestAsync(body, cancellationToken);
         perf.Done();
         _serviceObserver.Record(ServiceObserverKeys.SummarizationResult, result);

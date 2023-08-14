@@ -29,6 +29,7 @@ public class KoboldAISummarizationService : KoboldAIClientBase, ISummarizationSe
         var body = BuildRequestBody(prompt, builder.SummarizationStopTokens);
         body.Temperature = 0.1;
         body.StopSequence = Array.Empty<string>();
+        body.MaxLength = Settings.SummaryMaxTokens;
         var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 
