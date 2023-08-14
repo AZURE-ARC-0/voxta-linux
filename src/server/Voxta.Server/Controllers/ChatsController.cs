@@ -71,7 +71,7 @@ public class ChatsController : Controller
         if (message == null) return NotFound();
         if (string.IsNullOrEmpty(value.Text))
         {
-            _messageRepository.DeleteMessageAsync(messageId);
+            await _messageRepository.DeleteMessageAsync(messageId);
         }
         else
         {
