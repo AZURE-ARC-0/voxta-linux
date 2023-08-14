@@ -4,9 +4,8 @@ using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.Oobabooga;
 
-public class OobaboogaClientBase : RemoteServiceClientBase<OobaboogaSettings, OobaboogaParameters, OobaboogaRequestBody>
+public class OobaboogaClientBase : RemoteLLMServiceClientBase<OobaboogaSettings, OobaboogaParameters, OobaboogaRequestBody>
 {
-    protected override bool Streaming => true;
     protected override string GenerateRequestPath => "/api/v1/generate";
     
     protected OobaboogaClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)

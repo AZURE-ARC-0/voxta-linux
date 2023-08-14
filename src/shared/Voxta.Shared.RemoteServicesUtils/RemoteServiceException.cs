@@ -1,4 +1,4 @@
-﻿namespace Voxta.Services.KoboldAI;
+﻿namespace Voxta.Shared.RemoteServicesUtils;
 
 public class RemoteServiceException : Exception
 {

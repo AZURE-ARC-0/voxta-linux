@@ -19,7 +19,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         _serviceObserver = serviceObserver;
     }
 
-    public override async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
         var success = await base.TryInitializeAsync(prerequisites, culture, dry, cancellationToken);
@@ -38,7 +38,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
     {
         var builder = new OpenAIPromptBuilder(Tokenizer);
         var tokenizePerf = _performanceMetrics.Start("OpenAI.PromptBuilder");
-        var messages = builder.BuildReplyPrompt(chat, MaxMemoryTokens, MaxContextTokens);
+        var messages = builder.BuildReplyPrompt(chat, Settings.MaxMemoryTokens, Settings.MaxContextTokens);
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);
         foreach(var message in messages)
         {

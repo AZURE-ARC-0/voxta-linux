@@ -3,18 +3,15 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AutoMapper;
-using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
-using Voxta.Services.KoboldAI;
 using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Shared.RemoteServicesUtils;
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
-public abstract class RemoteServiceClientBase<TSettings, TInputParameters, TOutputParameters>
+public abstract class RemoteLLMServiceClientBase<TSettings, TInputParameters, TOutputParameters> : LLMServiceClientBase<TSettings, TInputParameters, TOutputParameters>
     where TSettings : RemoteLLMServiceSettingsBase<TInputParameters> where TInputParameters : new()
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
@@ -23,67 +20,31 @@ public abstract class RemoteServiceClientBase<TSettings, TInputParameters, TOutp
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     }; 
     
-    private static readonly IMapper Mapper;
-    
-    protected static readonly ITokenizer Tokenizer = TokenizerFactory.GetDefault();
-    
-    static RemoteServiceClientBase()
-    {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<TInputParameters, TOutputParameters>();
-        });
-        Mapper = config.CreateMapper();
-    }
-
-
-    public string ServiceName { get; }
-    public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.GPT3 };
-
-    protected int MaxMemoryTokens { get; private set; }
-    protected int MaxContextTokens { get; private set; }
+    protected override ITokenizer Tokenizer { get; } = TokenizerFactory.GetDefault();
     
     protected abstract string GenerateRequestPath { get; }
-    protected abstract bool Streaming { get; }
     
     private readonly HttpClient _httpClient;
-    private readonly ISettingsRepository _settingsRepository;
-    private TInputParameters? _parameters;
-    private bool _initialized;
 
-    protected RemoteServiceClientBase(string serviceName, IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
+    protected RemoteLLMServiceClientBase(string serviceName, IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
+        : base(serviceName, settingsRepository)
     {
-        ServiceName = serviceName;
         _httpClient = httpClientFactory.CreateClient(serviceName);
-        _settingsRepository = settingsRepository;
     }
 
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        if (_initialized) return true;
-        _initialized = true;
-        var settings = await _settingsRepository.GetAsync<TSettings>(cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false; 
+        return Task.FromResult(TryInitializeSync(settings, dry));
+    }
+
+    private bool TryInitializeSync(TSettings settings, bool dry)
+    {
         var uri = settings.Uri;
         if (string.IsNullOrEmpty(uri)) return false;
         if (dry) return true;
-        
+
         _httpClient.BaseAddress = new Uri(uri);
-        _parameters = settings.Parameters ?? new TInputParameters();
-        MaxMemoryTokens = settings.MaxMemoryTokens;
-        MaxContextTokens = settings.MaxContextTokens;
         return true;
-    }
-
-    public int GetTokenCount(string message)
-    {
-        return Tokenizer.CountTokens(message);
-    }
-
-    protected TOutputParameters CreateParameters()
-    {
-        return Mapper.Map<TOutputParameters>(_parameters);
     }
 
     protected async Task<string> SendStreamingCompletionRequest<TEventData>(object body, CancellationToken cancellationToken)
@@ -120,9 +81,5 @@ public abstract class RemoteServiceClientBase<TSettings, TInputParameters, TOutp
         var json = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken);
         if (json == null) throw new RemoteServiceException("Could not deserialize response");
         return json;
-    }
-
-    public void Dispose()
-    {
     }
 }

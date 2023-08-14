@@ -5,8 +5,8 @@ using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.KoboldAI;
 
-public class KoboldAIClientBase : RemoteServiceClientBase<KoboldAISettings, KoboldAIParameters, KoboldAIRequestBody>
-{   protected override bool Streaming => true;
+public class KoboldAIClientBase : RemoteLLMServiceClientBase<KoboldAISettings, KoboldAIParameters, KoboldAIRequestBody>
+{
     protected override string GenerateRequestPath => "/api/extra/generate/stream";
 
     protected KoboldAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)

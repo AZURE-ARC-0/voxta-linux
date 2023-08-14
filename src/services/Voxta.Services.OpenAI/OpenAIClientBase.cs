@@ -2,17 +2,17 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AutoMapper;
-using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
+using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.OpenAI;
 
-public abstract class OpenAIClientBase
+public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, OpenAIParameters, OpenAIRequestBody>
 {
-    protected static readonly ITokenizer Tokenizer = DeepDevTokenizer.Create();
+    private static readonly ITokenizer SharedTokenizer = DeepDevTokenizer.Create();
+    protected override ITokenizer Tokenizer => SharedTokenizer;
     
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
@@ -20,62 +20,36 @@ public abstract class OpenAIClientBase
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
     
-    private static readonly IMapper Mapper;
-    
-    static OpenAIClientBase()
-    {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<OpenAIParameters, OpenAIRequestBody>();
-        });
-        Mapper = config.CreateMapper();
-    }
-    
-    public string ServiceName => OpenAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.GPT3 };
-
-    protected int MaxMemoryTokens { get; private set; }
-    protected int MaxContextTokens { get; private set; }
-    
-    protected OpenAIParameters? Parameters;
-    
-    private readonly ISettingsRepository _settingsRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
     private string _model = "gpt-3.5-turbo";
 
     protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
+        : base(OpenAIConstants.ServiceName, settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
-    public int GetTokenCount(string message)
+    protected override Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        return Tokenizer.CountTokens(message);
+        return Task.FromResult(TryInitializeSync(settings, dry));
     }
 
-    public virtual async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    private bool TryInitializeSync(OpenAISettings settings, bool dry)
     {
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.ApiKey)) return false;
         if (dry) return true;
-        
+
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  _encryptionProvider.Decrypt(settings.ApiKey));
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;
-        Parameters = new OpenAIParameters();
-        MaxMemoryTokens = settings.MaxMemoryTokens;
-        MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
 
     protected OpenAIRequestBody BuildRequestBody(List<OpenAIMessage> messages)
     {
-        var body = Mapper.Map<OpenAIRequestBody>(Parameters);
+        var body = CreateParameters();
         body.Messages = messages;
         body.Model = _model;
         return body;
@@ -95,9 +69,5 @@ public abstract class OpenAIClientBase
         if (apiResponse == null) throw new NullReferenceException("OpenAI API response was null");
 
         return apiResponse.Value.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString()?.TrimExcess() ?? throw new OpenAIException("No content in response: " + apiResponse);
-    }
-
-    public void Dispose()
-    {
     }
 }

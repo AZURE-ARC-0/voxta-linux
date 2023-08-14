@@ -3,89 +3,63 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
-using Voxta.Services.NovelAI.Presets;
+using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.NovelAI;
 
-public class NovelAIClientBase
+public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIParameters, NovelAIRequestBodyParameters>
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
-    
-    private static readonly IMapper Mapper;
-    
-    protected static readonly ITokenizer Tokenizer = new NovelAITokenizer();
-    
-    static NovelAIClientBase()
-    {
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<NovelAIParameters, NovelAIRequestBodyParameters>();
-        });
-        Mapper = config.CreateMapper();
-    }
-    
-    public string ServiceName => NovelAIConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
 
-    protected int MaxMemoryTokens { get; private set; }
-    protected int MaxContextTokens { get; private set; }
+    protected override ITokenizer Tokenizer { get; } = new NovelAITokenizer();
     
     private readonly HttpClient _httpClient;
-    private NovelAIParameters? _parameters;
-    private readonly ISettingsRepository _settingsRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private string _model = NovelAISettings.KayraV1;
 
     protected NovelAIClientBase(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILocalEncryptionProvider encryptionProvider)
+    :base(NovelAIConstants.ServiceName, settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
     }
     
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        return Task.FromResult(TryInitializeSync(settings, prerequisites, culture, dry));
+    }
+
+    private bool TryInitializeSync(NovelAISettings settings, string[] prerequisites, string culture, bool dry)
+    {
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
         if (prerequisites.Contains(ServiceFeatures.GPT3) && settings.Model == NovelAISettings.ClioV1) return false;
-        if (!ValidateSettings(settings)) return false;
+        if (!ValidateSettings(settings)) return true;
         if (dry) return true;
-        
+
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _model = settings.Model;
-        _parameters = settings.Parameters ?? NovelAIPresets.DefaultForModel(_model);
-        MaxMemoryTokens = settings.MaxMemoryTokens;
-        MaxContextTokens = settings.MaxContextTokens;
         return true;
     }
-    
+
     protected virtual bool ValidateSettings(NovelAISettings settings)
     {
         return true;
     }
 
-    public int GetTokenCount(string value)
-    {
-        return Tokenizer.CountTokens(value);
-    }
-
     protected NovelAIRequestBody BuildRequestBody(string prompt, string prefix)
     {
-        var parameters = Mapper.Map<NovelAIRequestBodyParameters>(_parameters);
+        var parameters = CreateParameters();
         parameters.Prefix = prefix;
 
         /*
@@ -146,9 +120,5 @@ public class NovelAIClientBase
         public string? error { get; init; }
         
         public string GetToken() => token;
-    }
-
-    public void Dispose()
-    {
     }
 }

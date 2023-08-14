@@ -52,10 +52,10 @@ public class NovelAIParameters
     public double RepetitionPenaltySlope { get; set; }
 
     [JsonPropertyName("phrase_rep_pen")]
-    public required string PhraseRepPen { get; set; }
+    public string? PhraseRepPen { get; set; }
 
     [JsonPropertyName("order")]
-    public required int[] Order { get; set; }
+    public int[] Order { get; set; } = Array.Empty<int>();
 
     [JsonPropertyName("repetition_penalty_whitelist")]
     public int[]? RepetitionPenaltyWhitelist { get; set; }

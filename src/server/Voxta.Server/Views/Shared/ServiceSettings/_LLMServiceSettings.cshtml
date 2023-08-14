@@ -1,0 +1,13 @@
+﻿@model Voxta.Server.ViewModels.ServiceSettings.LLMServiceSettingsViewModel
+<div>
+    <label asp-for="MaxContextTokens">Max Context Tokens</label>
+    <input asp-for="MaxContextTokens" class="form-control"/>
+    <div class="form-text">Longer values means more memory but also longer processing.</div>
+    <span asp-validation-for="MaxContextTokens" class="text-danger"></span>
+</div>
+<div>
+    <label asp-for="MaxMemoryTokens">Max Memory Tokens</label>
+    <input asp-for="MaxMemoryTokens" class="form-control"/>
+    <div class="form-text">How much tokens are reserved for memory. Must be lower than Max Context Tokens.</div>
+    <span asp-validation-for="MaxMemoryTokens" class="text-danger"></span>
+</div>

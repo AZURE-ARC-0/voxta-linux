@@ -5,9 +5,8 @@ using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.TextGenerationInference;
 
-public class TextGenerationInferenceClientBase : RemoteServiceClientBase<TextGenerationInferenceSettings, TextGenerationInferenceParameters, TextGenerationInferenceParametersBody>
+public class TextGenerationInferenceClientBase : RemoteLLMServiceClientBase<TextGenerationInferenceSettings, TextGenerationInferenceParameters, TextGenerationInferenceParametersBody>
 {
-    protected override bool Streaming => true;
     protected override string GenerateRequestPath => "/generate_stream";
     
     protected TextGenerationInferenceClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
