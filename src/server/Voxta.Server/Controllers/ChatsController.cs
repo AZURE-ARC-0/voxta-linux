@@ -31,11 +31,15 @@ public class ChatsController : Controller
                 chats.Add(new ChatsListItemViewModel
                 {
                     Id = chat.Id,
+                    CreatedDateTimeOffset = chat.CreatedAt,
                     Created = (DateTimeOffset.UtcNow - chat.CreatedAt).Humanize(),
                     Character = character
                 });                
             }
         }
+
+        chats = chats.OrderByDescending(c => c.CreatedDateTimeOffset).ToList();
+        
         return View(chats);
     }
     

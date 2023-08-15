@@ -89,6 +89,7 @@ voxtaClient.addEventListener('onerror', evt => {
 voxtaClient.addEventListener('welcome', evt => {
     getId('username').textContent = evt.detail.username;
     if(selectedChatId) {
+        audioVisualizer.think();
         voxtaClient.resumeChat(selectedChatId);
     } else {
         splash.classList.add('voxta_show');
@@ -122,15 +123,18 @@ voxtaClient.addEventListener('chatsListLoaded', evt => {
     if (evt.detail.chats.length === 0) {
         createElement(chatButtons, 'p', 'text-muted text-center colspan', 'No chats found');
         createButton(chatButtons, 'btn btn-secondary colspan', 'New chat', () => {
+            audioVisualizer.think();
             voxtaClient.newChat({characterId: selectedCharacter.id});
             chatButtons.classList.remove('voxta_show');
         });
     } else {
         evt.detail.chats.forEach(chat => createButton(chatButtons, 'btn btn-secondary colspan', 'Continue', () => {
+            audioVisualizer.think();
             voxtaClient.resumeChat(chat.id);
             chatButtons.classList.remove('voxta_show');
         }));
         createButton(chatButtons, 'btn btn-secondary colspan', 'Clear and reset chat', () => {
+            audioVisualizer.think();
             voxtaClient.newChat({characterId: selectedCharacter.id});
             chatButtons.classList.remove('voxta_show');
         });
