@@ -1,0 +1,144 @@
+﻿@model Voxta.Server.ViewModels.Settings.AddServiceViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Settings - Add Service";
+}
+
+<div class="container">
+    <h1>Add Service</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Help</h2>
+            <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp" aria-expanded="false" aria-controls="collapseHelp">
+                <i class="bi bi-question-circle"></i> General help
+            </button>
+        </div>
+        <div class="card-body">
+            <p>The first available service of each category with the required features for the character (e.g. multilingual, nsfw) will be used.</p>
+            <div class="collapse" id="collapseHelp">
+                <p>To talk with an AI, you need:</p>
+                <ul>
+                    <li><code>Text Gen</code> (the ability to "think" and generate a response)</li>
+                    <li><code>Text To Speech</code>, also known as <code>TTS</code> (the ability to "speak" words)</li>
+                    <li><code>Speech To Text</code>, also known as <code>STT</code> (the ability to "hear" what you say)</li>
+                </ul>
+                <p>So, make sure to configure at least one of each.</p>
+                <p>Unless you specify a service, the first available AI that matches the requirements will be selected. You can reorder them if you have different preferences.</p>
+                <p>Text Gen usually include those capabilities:</p>
+                <ul>
+                    <li><code>Reply</code> (talk to you)</li>
+                    <li><code>Action Inference</code> (the ability to "infer" actions the AI can do from the conversation)</li>
+                    <li><code>Summarization</code> (remember information in longer conversations)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Readiness</h2>
+        </div>
+        <div class="card-body">
+            <p>At least one service of each type must be configured and enabled.</p>
+            <ul class="list-unstyled">
+                <li>
+                    @if (Model.Services.Any(s => s.Help.TextGen && s.EnabledOccurrences > 0))
+                    {
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                    }
+                    Text Generation
+                </li>
+                <li>
+                    @if (Model.Services.Any(s => s.Help.TTS && s.EnabledOccurrences > 0))
+                    {
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                    }
+                    Text To Speech
+                </li>
+                <li>
+                    @if (Model.Services.Any(s => s.Help.STT && s.EnabledOccurrences > 0))
+                    {
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                    }
+                    Speech To Text
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Available Services</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+            @foreach (var s in Model.Services)
+            {
+                <div class="col-sm-4">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h3>@s.Help.Label</h3>
+                            @if (s.Occurrences == 1)
+                            {
+                                <p class="text-muted">This service was already configured once.</p>
+                            } else if (s.Occurrences > 1)
+                            {
+                                <p class="text-muted">This service was already configured @s.Occurrences times.</p>
+                            }
+                            <ul class="list-unstyled">
+                                <li>
+                                    @if (s.Help.TextGen)
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                                    }
+                                    Text Generation
+                                </li>
+                                <li>
+                                    @if (s.Help.TTS)
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                                    }
+                                    Text To Speech
+                                </li>
+                                <li>
+                                    @if (s.Help.STT)
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-dash-circle-fill text-secondary"></i>
+                                    }
+                                    Speech To Text
+                                </li>
+                            </ul>
+                            <a href="/services/@s.Help.ServiceName/@Guid.Empty" class="btn btn-primary" title="Configure this service"><i class="bi bi-plus"></i> @(s.Occurrences == 0 ? "Create" : "Add")</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            </div>
+        </div>
+    </div>
+</div>

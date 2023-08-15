@@ -12,6 +12,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<AzureSpeechServiceTextToSpeech>();
     }
     
+    public static void RegisterAzureSpeechService(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = AzureSpeechServiceConstants.ServiceName,
+            Label = "Azure Speech Service",
+            TextGen = false,
+            STT = true,
+            TTS = true,
+            Summarization = false,
+            ActionInference = false,
+        });
+    }
+    
     public static void RegisterAzureSpeechService(this IServiceRegistry<ITextToSpeechService> registry)
     {
         registry.Add<AzureSpeechServiceTextToSpeech>(AzureSpeechServiceConstants.ServiceName);

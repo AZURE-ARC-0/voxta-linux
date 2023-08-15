@@ -14,6 +14,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<MockSummarizationService>();
     }
     
+    public static void RegisterMocks(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = MockConstants.ServiceName,
+            Label = "Mocks (Testing)",
+            TextGen = true,
+            STT = false,
+            TTS = true,
+            Summarization = true,
+            ActionInference = true,
+        });
+    }
+    
     public static void RegisterMocks(this IServiceRegistry<ITextGenService> registry)
     {
         registry.Add<MockTextGenService>(MockConstants.ServiceName);

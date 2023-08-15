@@ -13,6 +13,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<KoboldAISummarizationService>();
     }
     
+    public static void RegisterKoboldAI(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = KoboldAIConstants.ServiceName,
+            Label = "KoboldAI",
+            TextGen = true,
+            STT = false,
+            TTS = false,
+            Summarization = true,
+            ActionInference = true,
+        });
+    }
+    
     public static void RegisterKoboldAI(this IServiceRegistry<ITextGenService> registry)
     {
         registry.Add<KoboldAITextGenService>(KoboldAIConstants.ServiceName);

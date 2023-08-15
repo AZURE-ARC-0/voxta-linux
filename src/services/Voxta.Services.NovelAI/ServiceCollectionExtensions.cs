@@ -15,6 +15,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<NovelAISummarizationService>();
     }
     
+    public static void RegisterNovelAI(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = NovelAIConstants.ServiceName,
+            Label = "NovelAI",
+            TextGen = true,
+            STT = false,
+            TTS = true,
+            Summarization = true,
+            ActionInference = true,
+        });
+    }
+    
     public static void RegisterNovelAI(this IServiceRegistry<ITextGenService> registry)
     {
         registry.Add<NovelAITextGenService>(NovelAIConstants.ServiceName);

@@ -48,7 +48,7 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
 
     public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<TSettings>(cancellationToken);
+        var settings = await _settingsRepository.GetAsync<TSettings>(TODO, cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         Parameters = settings.Parameters ?? CreateDefaultParameters(settings);

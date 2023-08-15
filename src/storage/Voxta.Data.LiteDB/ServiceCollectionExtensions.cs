@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ILiteDatabase>(_ => new LiteDatabase("Data/Voxta.db"));
         services.AddSingleton<LiteDBMigrations>();
         services.AddSingleton<IProfileRepository, ProfileLiteDBRepository>();
+        services.AddSingleton<IServicesRepository, ServicesLiteDBRepository>();
         services.AddSingleton<ISettingsRepository, SettingsLiteDBRepository>();
         services.AddSingleton<ICharacterRepository, CharacterLiteDBRepository>();
         services.AddSingleton<IChatRepository, ChatLiteDBRepository>();

@@ -13,6 +13,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<OpenAISummarizationService>();
     }
     
+    public static void RegisterOpenAI(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = OpenAIConstants.ServiceName,
+            Label = "OpenAI",
+            TextGen = true,
+            STT = false,
+            TTS = false,
+            Summarization = true,
+            ActionInference = true,
+        });
+    }
+    
     public static void RegisterOpenAI(this IServiceRegistry<ITextGenService> registry)
     {
         registry.Add<OpenAITextGenClient>(OpenAIConstants.ServiceName);

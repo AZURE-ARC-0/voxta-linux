@@ -29,7 +29,7 @@ public sealed class FFmpegSpeechToText : ISpeechToTextService
     {
         if (_initialized) return true;
         _initialized = true;
-        var settings = await _settingsRepository.GetAsync<FFmpegSettings>(cancellationToken);
+        var settings = await _settingsRepository.GetAsync<FFmpegSettings>(TODO, cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (dry) return true;

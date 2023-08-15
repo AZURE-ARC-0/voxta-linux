@@ -18,6 +18,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITimeProvider, TimeProvider>();
     }
     
+    public static IServiceHelpRegistry AddServiceHelpRegistry(this IServiceCollection services)
+    {
+        var registry = new ServiceHelpRegistry();
+        services.AddSingleton<IServiceHelpRegistry>(registry);
+        return registry;
+    }
+    
     public static IServiceRegistry<ISpeechToTextService> AddSpeechToTextRegistry(this IServiceCollection services)
     {
         var registry = new ServiceRegistry<ISpeechToTextService>();

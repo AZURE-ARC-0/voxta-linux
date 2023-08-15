@@ -1,4 +1,4 @@
-﻿@model Voxta.Services.AzureSpeechService.AzureSpeechServiceSettings
+﻿@model ConfiguredService<Voxta.Services.AzureSpeechService.AzureSpeechServiceSettings>
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - Azure Speech Service";
@@ -29,36 +29,36 @@
                     <span asp-validation-for="Enabled" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="SubscriptionKey">Subscription Key</label>
-                    <input asp-for="SubscriptionKey" class="form-control" />
-                    <span asp-validation-for="SubscriptionKey" class="text-danger"></span>
+                    <label asp-for="Settings.SubscriptionKey">Subscription Key</label>
+                    <input asp-for="Settings.SubscriptionKey" class="form-control" />
+                    <span asp-validation-for="Settings.SubscriptionKey" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Region">Region</label>
-                    <input asp-for="Region" class="form-control" />
-                    <span asp-validation-for="Region" class="text-danger"></span>
+                    <label asp-for="Settings.Region">Region</label>
+                    <input asp-for="Settings.Region" class="form-control" />
+                    <span asp-validation-for="Settings.Region" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="LogFilename">Log Filename</label>
-                    <input asp-for="LogFilename" class="form-control" />
+                    <label asp-for="Settings.LogFilename">Log Filename</label>
+                    <input asp-for="Settings.LogFilename" class="form-control" />
                     <div class="form-text">Only enable this if you have problems with the service. Enter a full path.</div>
-                    <span asp-validation-for="LogFilename" class="text-danger"></span>
+                    <span asp-validation-for="Settings.LogFilename" class="text-danger"></span>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" asp-for="FilterProfanity" class="form-check-input"/>
-                    <label asp-for="FilterProfanity">Filter Profanity</label>
+                    <input type="checkbox" asp-for="Settings.FilterProfanity" class="form-check-input"/>
+                    <label asp-for="Settings.FilterProfanity">Filter Profanity</label>
                     <div class="form-text">Whether to remove profanity from tts and stt.</div>
-                    <span asp-validation-for="FilterProfanity" class="text-danger"></span>
+                    <span asp-validation-for="Settings.FilterProfanity" class="text-danger"></span>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" asp-for="Diarization" class="form-check-input"/>
-                    <label asp-for="Diarization">Diarization</label>
+                    <input type="checkbox" asp-for="Settings.Diarization" class="form-check-input"/>
+                    <label asp-for="Settings.Diarization">Diarization</label>
                     <div class="form-text">Uses the conversation transcriber. Much slower than the normal recognizer, but can filter out other speakers.</div>
-                    <span asp-validation-for="Diarization" class="text-danger"></span>
+                    <span asp-validation-for="Settings.Diarization" class="text-danger"></span>
                 </div>
             </div>
         </div>
 
-        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("ResetAzureSpeechServiceSettings")" />
+        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteAzureSpeechServiceSettings")" />
     </form>
 </div>

@@ -2,10 +2,6 @@
 using Voxta.Characters.Samples;
 using Voxta.Data.LiteDB;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
-using Voxta.Services.Vosk;
-#if(WINDOWS)
-using Voxta.Services.WindowsSpeech;
-#endif
 
 namespace Voxta.Server.Filters;
 
@@ -15,14 +11,12 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
     private readonly ICharacterRepository _charactersRepository;
     private readonly IMemoryRepository _memoryRepository;
     private readonly IProfileRepository _profileRepository;
-    private readonly ISettingsRepository _settingsRepository;
 
-    public AutoRequestServicesStartupFilter(LiteDBMigrations migrations, ICharacterRepository charactersRepository, IProfileRepository profileRepository, ISettingsRepository settingsRepository, IMemoryRepository memoryRepository)
+    public AutoRequestServicesStartupFilter(LiteDBMigrations migrations, ICharacterRepository charactersRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository)
     {
         _migrations = migrations;
         _charactersRepository = charactersRepository;
         _profileRepository = profileRepository;
-        _settingsRepository = settingsRepository;
         _memoryRepository = memoryRepository;
     }
     
@@ -60,23 +54,6 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
                 {
                     await _profileRepository.SaveProfileAsync(profile);
                 }
-            }
-            
-            // Default services
-            #if(WINDOWS)
-            var windowsspeech = await _settingsRepository.GetAsync<WindowsSpeechSettings>(CancellationToken.None);
-            if (windowsspeech == null)
-            {
-                windowsspeech = new WindowsSpeechSettings();
-                await _settingsRepository.SaveAsync(windowsspeech);
-            }
-            #endif
-            
-            var vosk = await _settingsRepository.GetAsync<VoskSettings>(CancellationToken.None);
-            if (vosk == null)
-            {
-                vosk = new VoskSettings();
-                await _settingsRepository.SaveAsync(vosk);
             }
         }).Wait();
         

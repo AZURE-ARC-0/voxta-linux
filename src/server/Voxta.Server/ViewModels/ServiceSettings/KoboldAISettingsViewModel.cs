@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Services.KoboldAI;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
@@ -11,25 +12,31 @@ public class KoboldAISettingsViewModel : RemoteLLMServiceSettingsViewModelBase<K
     }
     
     [SetsRequiredMembers]
-    public KoboldAISettingsViewModel(KoboldAISettings source)
-        : base(source)
+    public KoboldAISettingsViewModel(ConfiguredService<KoboldAISettings> source)
+        : base(source, source.Settings)
     {
-        Uri = source.Uri;
+        Uri = source.Settings.Uri;
     }
 
-    public KoboldAISettings ToSettings()
+    public ConfiguredService<KoboldAISettings> ToSettings(Guid serviceId)
     {
-        return new KoboldAISettings
+        return new ConfiguredService<KoboldAISettings>
         {
+            Id = serviceId,
+            ServiceName = KoboldAIConstants.ServiceName,
+            Label = Label,
             Enabled = Enabled,
-            Uri = Uri.TrimCopyPasteArtefacts(),
-            PromptFormat = PromptFormat,
-            MaxContextTokens = MaxContextTokens,
-            MaxMemoryTokens = MaxMemoryTokens,
-            SummaryMaxTokens = SummaryMaxTokens,
-            SummarizationDigestTokens = SummarizationDigestTokens,
-            SummarizationTriggerTokens = SummarizationTriggerTokens,
-            Parameters = GetParameters<KoboldAIParameters>(),
+            Settings = new KoboldAISettings
+            {
+                Uri = Uri.TrimCopyPasteArtefacts(),
+                PromptFormat = PromptFormat,
+                MaxContextTokens = MaxContextTokens,
+                MaxMemoryTokens = MaxMemoryTokens,
+                SummaryMaxTokens = SummaryMaxTokens,
+                SummarizationDigestTokens = SummarizationDigestTokens,
+                SummarizationTriggerTokens = SummarizationTriggerTokens,
+                Parameters = GetParameters<KoboldAIParameters>(),
+            }
         };
     }
 }

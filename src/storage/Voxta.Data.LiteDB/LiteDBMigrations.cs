@@ -1,4 +1,5 @@
 ﻿using LiteDB;
+using Voxta.Abstractions.Model;
 
 namespace Voxta.Data.LiteDB;
 
@@ -66,20 +67,52 @@ public class LiteDBMigrations
     {
         var messages = _db.GetCollection("ChatMessageData");
         messages.DeleteAll();
-        UpdateCollection("OobaboogaSettings");
+        UpdateCollection("OobaboogaSettings", "Oobabooga", true);
+        UpdateCollection("TextGenerationWebUISettings", "TextGenerationWebUI", true);
+        UpdateCollection("TextGenerationInferenceSettings", "TextGenerationInference", true);
+        UpdateCollection("OpenAISettings", "OpenAI", true);
+        UpdateCollection("KoboldAISettings", "KoboldAI", true);
+        UpdateCollection("NovelAISettings", "NovelAI", true);
+        
+        UpdateCollection("AzureSpeechServiceSettings", "AzureSpeechService", false);
+        UpdateCollection("ElevenLabsSettings", "ElevenLabs", false);
+        UpdateCollection("FFmpegSettings", "FFmpeg", false);
+        UpdateCollection("MockSettings", "Mock", false);
+        UpdateCollection("VoskSettings", "Vosk", false);
+        UpdateCollection("WindowsSpeechSettings", "WindowsSpeech", false);
     }
 
-    private void UpdateCollection(string name)
+    private void UpdateCollection(string collectionName, string typeName, bool updateMemory)
     {
-        var collection = _db.GetCollection(name);
+        var services = _db.GetCollection<ConfiguredService>();
+        var collection = _db.GetCollection(collectionName);
+        var first = true;
         foreach (var settings in collection.FindAll())
         {
-            SetIntIfMissing(settings, "MaxMemoryTokens", 400);
-            SetIntIfMissing(settings, "SummarizationTriggerTokens", 1000);
-            SetIntIfMissing(settings, "SummarizationDigestTokens", 500);
-            SetIntIfMissing(settings, "SummaryMaxTokens", 200);
-            SetIntIfMissing(settings, "MaxContextTokens", 1600);
-            collection.Update(settings);
+            collection.Delete(settings);
+            
+            if (!first) continue;
+            first = false;
+            
+            if (updateMemory)
+            {
+                SetIntIfMissing(settings, "MaxMemoryTokens", 400);
+                SetIntIfMissing(settings, "SummarizationTriggerTokens", 1000);
+                SetIntIfMissing(settings, "SummarizationDigestTokens", 500);
+                SetIntIfMissing(settings, "SummaryMaxTokens", 200);
+                SetIntIfMissing(settings, "MaxContextTokens", 1600);
+            }
+
+            var serviceRef = new ConfiguredService
+            {
+                Id = Guid.NewGuid(),
+                Label = "",
+                ServiceName = typeName
+            };
+            services.Insert(serviceRef);
+            
+            settings["_id"] = new BsonValue(serviceRef.Id);
+            collection.Insert(settings);
         }
     }
 

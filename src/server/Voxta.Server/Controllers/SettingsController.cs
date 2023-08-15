@@ -2,6 +2,7 @@
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Abstractions.Services;
 using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Server.ViewModels.Settings;
 #if(WINDOWS)
@@ -13,12 +14,16 @@ namespace Voxta.Server.Controllers;
 public class SettingsController : Controller
 {
     private readonly IProfileRepository _profileRepository;
+    private readonly IServicesRepository _servicesRepository;
+    private readonly IServiceHelpRegistry _serviceHelpRegistry;
     private readonly DiagnosticsUtil _diagnosticsUtil;
 
-    public SettingsController(IProfileRepository profileRepository, DiagnosticsUtil diagnosticsUtil)
+    public SettingsController(IProfileRepository profileRepository, DiagnosticsUtil diagnosticsUtil, IServicesRepository servicesRepository, IServiceHelpRegistry serviceHelpRegistry)
     {
         _profileRepository = profileRepository;
         _diagnosticsUtil = diagnosticsUtil;
+        _servicesRepository = servicesRepository;
+        _serviceHelpRegistry = serviceHelpRegistry;
     }
     
     [HttpGet("/settings")]
@@ -38,20 +43,40 @@ public class SettingsController : Controller
     }
 
     [SuppressMessage("ReSharper", "RawStringCanBeSimplified")]
-    private async Task<SettingsViewModel> GetSettingsViewModel(Func<Task<DiagnosticsResult>> getServices, CancellationToken cancellationToken)
+    private async Task<SettingsViewModel> GetSettingsViewModel(Func<Task<DiagnosticsResult>> getServiceTypes, CancellationToken cancellationToken)
     {
-        var profile = await _profileRepository.GetProfileAsync(cancellationToken) ?? ProfileUtils.CreateDefaultProfile();
-        var services = await getServices();
+        var profile = await _profileRepository.GetProfileAsync(cancellationToken);
+        if (profile == null)
+        {
+            return new SettingsViewModel
+            {
+                Profile = null,
+                Services = Array.Empty<ConfiguredServiceViewModel>(),
+                ServiceTypes = Array.Empty<ServiceAssignationTypesViewModel>(),
+            };
+        }
+        var services = await _servicesRepository.GetServicesAsync(cancellationToken);
+        var serviceTypes = await getServiceTypes();
+        var servicesVMs = services
+            .OrderBy(x => x.Label)
+            .ThenBy(x => x.ServiceName)
+            .Select(x => new ConfiguredServiceViewModel
+            {
+                Service = x,
+                Help = _serviceHelpRegistry.Get(x.ServiceName),
+            })
+            .ToArray();
         var vm = new SettingsViewModel
         {
             Profile = profile,
-            Services = new SettingsServiceViewModel[]
+            Services = servicesVMs,
+            ServiceTypes = new ServiceAssignationTypesViewModel[]
             {
                 new()
                 {
                     Name = "profile",
                     Title = "Profile",
-                    Services = new[] { services.Profile },
+                    Services = new[] { serviceTypes.Profile },
                     Help = """
                         <p>Your profile defines how the AI will see you and call you.</p>
                         """
@@ -60,7 +85,7 @@ public class SettingsController : Controller
                 {
                     Name = "stt",
                     Title = "Speech To Text Services",
-                    Services = services.SpeechToTextServices,
+                    Services = serviceTypes.SpeechToTextServices,
                     Help = """
                         <p>Azure Speech Service is highly recommended because it supports punctuation and works extremely well. It is also free up to a point. Otherwise, Vosk is free, fast and runs locally, despite being inferior to Azure.</p>
                         """
@@ -69,7 +94,7 @@ public class SettingsController : Controller
                 {
                     Name = "textgen",
                     Title = "Text Generation Services",
-                    Services = services.TextGenServices,
+                    Services = serviceTypes.TextGenServices,
                     Help = """
                         <p>Some recommendations:</p>
                         <ul>
@@ -92,7 +117,7 @@ public class SettingsController : Controller
                 {
                     Name = "tts",
                     Title = "Text To Speech Services",
-                    Services = services.TextToSpeechServices,
+                    Services = serviceTypes.TextToSpeechServices,
                     Help = """
                         <p>Some recommendations:</p>
                         <ul>
@@ -115,7 +140,7 @@ public class SettingsController : Controller
                 {
                     Name = "action_inference",
                     Title = "Action Inference Services",
-                    Services = services.ActionInferenceServices,
+                    Services = serviceTypes.ActionInferenceServices,
                     Help = """
                         <p>You should use OpenAI, even for NSFW, unless you want to experiment with other LLMs. Keep in mind, the LLM must be good to do action inference correctly.</p>
                         """
@@ -124,7 +149,7 @@ public class SettingsController : Controller
                 {
                     Name = "summarization",
                     Title = "Summarization Services",
-                    Services = services.SummarizationServices,
+                    Services = serviceTypes.SummarizationServices,
                     Help = """
                            <p>Summarization is used to replace long chat history by summaries. This results in a stronger character adherence and faster inference.</p>
                            """
@@ -132,6 +157,32 @@ public class SettingsController : Controller
             }
         };
         return vm;
+    }
+
+    [HttpGet("/settings/add")]
+    public async Task<IActionResult> AddService([FromServices] IServiceHelpRegistry serviceHelpRegistry, CancellationToken cancellationToken)
+    {
+        var configured = await _servicesRepository.GetServicesAsync(cancellationToken);
+        var services = serviceHelpRegistry.List()
+            .OrderBy(s => s.ServiceName)
+            .Select(s => new AddServiceViewModel.ServiceEntryViewModel
+            {
+                Help = s,
+                Occurrences = configured.Count(x => x.ServiceName == s.ServiceName),
+                EnabledOccurrences = configured.Count(x => x.Enabled && x.ServiceName == s.ServiceName),
+            })
+            .ToArray();
+        return View(new AddServiceViewModel
+        {
+            Services = services
+        });
+    }
+    
+    [HttpPost("/settings/add")]
+    public IActionResult CreateService([FromForm] string serviceName)
+    {
+        #warning TODO
+        return RedirectToAction("Settings");
     }
 
     [HttpPost("/settings/reorder")]

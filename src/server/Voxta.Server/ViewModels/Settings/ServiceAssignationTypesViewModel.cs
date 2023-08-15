@@ -2,7 +2,7 @@
 
 namespace Voxta.Server.ViewModels.Settings;
 
-public class SettingsServiceViewModel
+public class ServiceAssignationTypesViewModel
 {
     public required string Name { get; init; }
     public required string Title { get; init; }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
@@ -17,8 +18,8 @@ public abstract class LLMServiceSettingsViewModel : ServiceSettingsViewModel
     }
     
     [SetsRequiredMembers]
-    protected LLMServiceSettingsViewModel(LLMSettingsBase source, object parameters, bool useDefaults)
-        : base(source, parameters, useDefaults)
+    protected LLMServiceSettingsViewModel(ConfiguredService service, LLMSettingsBase source, object parameters, bool useDefaults)
+        : base(service, source, parameters, useDefaults)
     {
         MaxContextTokens = source.MaxContextTokens;
         MaxMemoryTokens = source.MaxMemoryTokens;

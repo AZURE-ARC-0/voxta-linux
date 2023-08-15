@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Shared.LLMUtils;
 using Voxta.Shared.RemoteServicesUtils;
 
@@ -17,8 +18,8 @@ public abstract class RemoteLLMServiceSettingsViewModelBase<TParameters> : LLMSe
     }
 
     [SetsRequiredMembers]
-    protected RemoteLLMServiceSettingsViewModelBase(RemoteLLMServiceSettingsBase<TParameters> source)
-        : base(source, source.Parameters ?? new TParameters(), source.Parameters == null)
+    protected RemoteLLMServiceSettingsViewModelBase(ConfiguredService service, RemoteLLMServiceSettingsBase<TParameters> source)
+        : base(service, source, source.Parameters ?? new TParameters(), source.Parameters == null)
     {
         Uri = source.Uri;
         PromptFormat = source.PromptFormat;

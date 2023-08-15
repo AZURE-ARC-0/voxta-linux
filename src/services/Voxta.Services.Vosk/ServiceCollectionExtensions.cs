@@ -12,6 +12,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<VoskSpeechToText>();
     }
     
+    public static void RegisterVosk(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = VoskConstants.ServiceName,
+            Label = "Vosk",
+            TextGen = false,
+            STT = true,
+            TTS = false,
+            Summarization = false,
+            ActionInference = true,
+        });
+    }
+    
     public static void RegisterVosk(this IServiceRegistry<ISpeechToTextService> registry)
     {
         registry.Add<VoskSpeechToText>(VoskConstants.ServiceName);

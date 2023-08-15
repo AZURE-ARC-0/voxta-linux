@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Services.Oobabooga;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
@@ -10,24 +11,30 @@ public class OobaboogaSettingsViewModel : RemoteLLMServiceSettingsViewModelBase<
     }
     
     [SetsRequiredMembers]
-    public OobaboogaSettingsViewModel(OobaboogaSettings source)
-        : base(source)
+    public OobaboogaSettingsViewModel(ConfiguredService<OobaboogaSettings> source)
+        : base(source, source.Settings)
     {
     }
 
-    public OobaboogaSettings ToSettings()
+    public ConfiguredService<OobaboogaSettings> ToSettings(Guid serviceId)
     {
-        return new OobaboogaSettings
+        return new ConfiguredService<OobaboogaSettings>
         {
+            Id = serviceId,
+            ServiceName = OobaboogaConstants.ServiceName,
+            Label = Label,
             Enabled = Enabled,
-            Uri = Uri.TrimCopyPasteArtefacts(),
-            PromptFormat = PromptFormat,
-            MaxContextTokens = MaxContextTokens,
-            MaxMemoryTokens = MaxMemoryTokens,
-            SummaryMaxTokens = SummaryMaxTokens,
-            SummarizationDigestTokens = SummarizationDigestTokens,
-            SummarizationTriggerTokens = SummarizationTriggerTokens,
-            Parameters = GetParameters<OobaboogaParameters>(),
+            Settings = new OobaboogaSettings
+            {
+                Uri = Uri.TrimCopyPasteArtefacts(),
+                PromptFormat = PromptFormat,
+                MaxContextTokens = MaxContextTokens,
+                MaxMemoryTokens = MaxMemoryTokens,
+                SummaryMaxTokens = SummaryMaxTokens,
+                SummarizationDigestTokens = SummarizationDigestTokens,
+                SummarizationTriggerTokens = SummarizationTriggerTokens,
+                Parameters = GetParameters<OobaboogaParameters>(),
+            }
         };
     }
 }

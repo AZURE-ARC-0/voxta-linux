@@ -36,7 +36,7 @@ public class NovelAITextToSpeechService : ITextToSpeechService
     
     public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken);
+        var settings = await _settingsRepository.GetAsync<NovelAISettings>(TODO, cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Token)) return false;

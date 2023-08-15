@@ -1,4 +1,4 @@
-﻿@model Voxta.Services.Mocks.MockSettings
+﻿@model ConfiguredService<Voxta.Services.Mocks.MockSettings>
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - Mock";
@@ -31,6 +31,6 @@
             </div>
         </div>
 
-        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("ResetMockSettings")" />
+        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteMockSettings")" />
     </form>
 </div>

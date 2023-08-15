@@ -43,6 +43,7 @@ public static class ServiceCollectionExtensions
 
     private static void AddAllServices(IServiceCollection services)
     {
+        var helpRegistry = services.AddServiceHelpRegistry();
         var speechToTextRegistry = services.AddSpeechToTextRegistry();
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();
@@ -50,44 +51,53 @@ public static class ServiceCollectionExtensions
         var summarizationRegistry = services.AddSummarizationRegistry();
 
         services.AddMocks();
+        helpRegistry.RegisterMocks();
         textGenRegistry.RegisterMocks();
         textToSpeechRegistry.RegisterMocks();
         actionInferenceRegistry.RegisterMocks();
         summarizationRegistry.RegisterMocks();
 
         services.AddOpenAI();
+        helpRegistry.RegisterOpenAI();
         textGenRegistry.RegisterOpenAI();
         actionInferenceRegistry.RegisterOpenAI();
         summarizationRegistry.RegisterOpenAI();
 
         services.AddNovelAI();
+        helpRegistry.RegisterNovelAI();
         textGenRegistry.RegisterNovelAI();
         textToSpeechRegistry.RegisterNovelAI();
         actionInferenceRegistry.RegisterNovelAI();
         summarizationRegistry.RegisterNovelAI();
 
         services.AddKoboldAI();
+        helpRegistry.RegisterKoboldAI();
         textGenRegistry.RegisterKoboldAI();
         actionInferenceRegistry.RegisterKoboldAI();
         summarizationRegistry.RegisterKoboldAI();
         
         services.AddOobabooga();
+        helpRegistry.RegisterOobabooga();
         textGenRegistry.RegisterOobabooga();
         actionInferenceRegistry.RegisterOobabooga();
         summarizationRegistry.RegisterOobabooga();
         
         services.AddTextGenerationInference();
+        helpRegistry.RegisterTextGenerationInference();
         textGenRegistry.RegisterTextGenerationInference();
         actionInferenceRegistry.RegisterTextGenerationInference();
         summarizationRegistry.RegisterTextGenerationInference();
 
         services.AddElevenLabs();
+        helpRegistry.RegisterElevenLabs();
         textToSpeechRegistry.RegisterElevenLabs();
 
         services.AddVosk();
+        helpRegistry.RegisterVosk();
         speechToTextRegistry.RegisterVosk();
 
         services.AddAzureSpeechService();
+        helpRegistry.RegisterAzureSpeechService();
         textToSpeechRegistry.RegisterAzureSpeechService();
         speechToTextRegistry.RegisterAzureSpeechService();
 
@@ -96,12 +106,14 @@ public static class ServiceCollectionExtensions
         services.AddNAudio();
         
         services.AddWindowsSpeech();
+        helpRegistry.RegisterWindowsSpeech();
         textToSpeechRegistry.RegisterWindowsSpeech();
         speechToTextRegistry.RegisterWindowsSpeech();
         
         #else
         
         services.AddFFmpeg();
+        helpRegistry.RegisterFFmpeg();
         speechToTextRegistry.RegisterFFmpeg();
         
         #endif

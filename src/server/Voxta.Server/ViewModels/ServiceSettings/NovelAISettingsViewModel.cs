@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Services.NovelAI;
 using Voxta.Services.NovelAI.Presets;
@@ -17,28 +18,34 @@ public class NovelAISettingsViewModel : LLMServiceSettingsViewModel
     }
 
     [SetsRequiredMembers]
-    public NovelAISettingsViewModel(NovelAISettings source, ILocalEncryptionProvider encryptionProvider)
-        : base(source, source.Parameters ?? NovelAIPresets.DefaultForModel(source.Model), source.Parameters == null)
+    public NovelAISettingsViewModel(ConfiguredService<NovelAISettings> source, ILocalEncryptionProvider encryptionProvider)
+        : base(source, source.Settings, source.Settings.Parameters ?? NovelAIPresets.DefaultForModel(source.Settings.Model), source.Settings.Parameters == null)
     {
-        Token = encryptionProvider.SafeDecrypt(source.Token);
-        Model = source.Model;
-        ThinkingSpeech = string.Join('\n', source.ThinkingSpeech);
+        Token = encryptionProvider.SafeDecrypt(source.Settings.Token);
+        Model = source.Settings.Model;
+        ThinkingSpeech = string.Join('\n', source.Settings.ThinkingSpeech);
     }
 
-    public NovelAISettings ToSettings(ILocalEncryptionProvider encryptionProvider)
+    public ConfiguredService<NovelAISettings> ToSettings(Guid serviceId, ILocalEncryptionProvider encryptionProvider)
     {
-        return new NovelAISettings
+        return new ConfiguredService<NovelAISettings>
         {
+            Id = serviceId,
+            ServiceName = NovelAIConstants.ServiceName,
+            Label = Label,
             Enabled = Enabled,
-            Token = string.IsNullOrEmpty(Token) ? "" : encryptionProvider.Encrypt(Token.TrimCopyPasteArtefacts()),
-            Model = Model.TrimCopyPasteArtefacts(),
-            MaxContextTokens = MaxContextTokens,
-            MaxMemoryTokens = MaxMemoryTokens,
-            SummaryMaxTokens = SummaryMaxTokens,
-            SummarizationDigestTokens = SummarizationDigestTokens,
-            SummarizationTriggerTokens = SummarizationTriggerTokens,
-            Parameters = GetParameters<NovelAIParameters>(),
-            ThinkingSpeech = ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            Settings = new NovelAISettings
+            {
+                Token = string.IsNullOrEmpty(Token) ? "" : encryptionProvider.Encrypt(Token.TrimCopyPasteArtefacts()),
+                Model = Model.TrimCopyPasteArtefacts(),
+                MaxContextTokens = MaxContextTokens,
+                MaxMemoryTokens = MaxMemoryTokens,
+                SummaryMaxTokens = SummaryMaxTokens,
+                SummarizationDigestTokens = SummarizationDigestTokens,
+                SummarizationTriggerTokens = SummarizationTriggerTokens,
+                Parameters = GetParameters<NovelAIParameters>(),
+                ThinkingSpeech = ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            }
         };
     }
 }

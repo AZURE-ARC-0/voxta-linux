@@ -50,7 +50,7 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
     
     public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken);
+        var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(TODO, cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;

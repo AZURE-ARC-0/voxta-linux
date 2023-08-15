@@ -1,8 +1,10 @@
 ﻿#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Repositories;
+using Voxta.Common;
 using Voxta.Server.ViewModels.ServiceSettings;
 using Voxta.Services.KoboldAI;
 using Voxta.Services.ElevenLabs;
@@ -25,403 +27,458 @@ namespace Voxta.Server.Controllers;
 [Controller]
 public class ServiceSettingsController : Controller
 {
-    private readonly ISettingsRepository _settingsRepository;
+    private readonly IServicesRepository _servicesRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
 
-    public ServiceSettingsController(ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
+    public ServiceSettingsController(IServicesRepository servicesRepository, ILocalEncryptionProvider encryptionProvider)
     {
-        _settingsRepository = settingsRepository;
+        _servicesRepository = servicesRepository;
         _encryptionProvider = encryptionProvider;
     }
     
-    [HttpGet("/settings/mocks")]
-    public async Task<IActionResult> MockSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/mocks/{serviceId:guid}")]
+    public async Task<IActionResult> MockSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<MockSettings>(cancellationToken) ?? new MockSettings();
+        var settings = await _servicesRepository.GetAsync<MockSettings>(serviceId, cancellationToken) ?? new ConfiguredService<MockSettings>
+        {
+            Id = serviceId,
+            ServiceName = MockConstants.ServiceName,
+            Settings = new MockSettings(),
+        };
         return View(settings);
     }
     
-    [HttpPost("/settings/mocks")]
-    public async Task<IActionResult> PostMockSettings([FromForm] MockSettings value)
+    [HttpPost("/settings/mocks/{serviceId:guid}")]
+    public async Task<IActionResult> PostMockSettings([FromRoute] Guid serviceId, [FromForm] ConfiguredService<MockSettings> value)
     {
         if (!ModelState.IsValid)
         {
             return View("MockSettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new MockSettings
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        await _servicesRepository.SaveAsync(new ConfiguredService<MockSettings>
         {
+            Id = serviceId,
+            ServiceName = MockConstants.ServiceName,
+            Label = value.Label,
             Enabled = value.Enabled,
+            Settings = value.Settings,
         });
         
         return RedirectToAction("MockSettings");
     }
 
-    [HttpPost("/settings/mocks/reset")]
-    public async Task<IActionResult> ResetMockSettings()
+    [HttpPost("/settings/mocks/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteMockSettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<MockSettings>();
+        var current = await _servicesRepository.GetAsync<MockSettings>(serviceId);
         if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+            await _servicesRepository.DeleteAsync(current.Id);
 
-        return RedirectToAction("MockSettings");
+        return RedirectToAction("Settings", "Settings");
     }
     
-    [HttpGet("/settings/azurespeechservice")]
-    public async Task<IActionResult> AzureSpeechServiceSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/azurespeechservice/{serviceId:guid}")]
+    public async Task<IActionResult> AzureSpeechServiceSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(cancellationToken) ?? new AzureSpeechServiceSettings
+        var settings = await _servicesRepository.GetAsync<AzureSpeechServiceSettings>(serviceId, cancellationToken) ?? new ConfiguredService<AzureSpeechServiceSettings>
         {
-            SubscriptionKey = "",
-            Region = "",
+            Id = default,
+            ServiceName = AzureSpeechServiceConstants.ServiceName,
+            Settings = new AzureSpeechServiceSettings
+            {
+
+                SubscriptionKey = "",
+                Region = "",
+            },
         };
-        settings.SubscriptionKey = _encryptionProvider.SafeDecrypt(settings.SubscriptionKey);  
+        settings.Settings.SubscriptionKey = _encryptionProvider.SafeDecrypt(settings.Settings.SubscriptionKey);  
         return View(settings);
     }
     
-    [HttpPost("/settings/azurespeechservice")]
-    public async Task<IActionResult> PostAzureSpeechServiceSettings([FromForm] AzureSpeechServiceSettings value)
+    [HttpPost("/settings/azurespeechservice/{serviceId:guid}")]
+    public async Task<IActionResult> PostAzureSpeechServiceSettings([FromRoute] Guid serviceId, [FromForm] ConfiguredService<AzureSpeechServiceSettings> value)
     {
         if (!ModelState.IsValid)
         {
             return View("AzureSpeechServiceSettings", value);
         }
+        
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
+        await _servicesRepository.SaveAsync(new ConfiguredService<AzureSpeechServiceSettings>
         {
+            Id = serviceId,
+            ServiceName = AzureSpeechServiceConstants.ServiceName,
+            Label = value.Label,
             Enabled = value.Enabled,
-            SubscriptionKey = string.IsNullOrEmpty(value.SubscriptionKey) ? "" : _encryptionProvider.Encrypt(value.SubscriptionKey.TrimCopyPasteArtefacts()),
-            Region = value.Region.TrimCopyPasteArtefacts(),
-            LogFilename = value.LogFilename?.TrimCopyPasteArtefacts(),
-            FilterProfanity = value.FilterProfanity,
+            Settings = new AzureSpeechServiceSettings
+            {
+                Id = serviceId,
+                SubscriptionKey = _encryptionProvider.Encrypt(value.Settings.SubscriptionKey.TrimCopyPasteArtefacts()),
+                Region = value.Settings.Region.TrimCopyPasteArtefacts(),
+                LogFilename = value.Settings.LogFilename?.TrimCopyPasteArtefacts(),
+                FilterProfanity = value.Settings.FilterProfanity,
+            }
         });
         
         return RedirectToAction("AzureSpeechServiceSettings");
     }
 
-    [HttpPost("/settings/azurespeechservice/reset")]
-    public async Task<IActionResult> ResetAzureSpeechServiceSettings()
+    [HttpPost("/settings/azurespeechservice/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteAzureSpeechServiceSettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>();
-        if (!string.IsNullOrEmpty(current?.SubscriptionKey))
-            await _settingsRepository.SaveAsync(new AzureSpeechServiceSettings
-            {
-                SubscriptionKey = current.SubscriptionKey,
-                Region = current.Region,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
 
-        return RedirectToAction("AzureSpeechServiceSettings");
+        return RedirectToAction("Settings", "Settings");
     }
 
-    [HttpGet("/settings/vosk")]
-    public async Task<IActionResult> VoskSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/vosk/{serviceId:guid}")]
+    public async Task<IActionResult> VoskSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var vosk = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken) ?? new VoskSettings();
+        var vosk = await _servicesRepository.GetAsync<VoskSettings>(serviceId, cancellationToken) ?? new ConfiguredService<VoskSettings>
+        {
+            Id = serviceId,
+            Settings = new VoskSettings(),
+            ServiceName = VoskConstants.ServiceName,
+        };
         var vm = new VoskSettingsViewModel
         {
-            Model = vosk.Model,
-            ModelHash = vosk.ModelHash,
-            IgnoredWords = string.Join(", ", vosk.IgnoredWords),
+            Label = vosk.Label,
+            Enabled = vosk.Enabled,
+            Model = vosk.Settings.Model,
+            ModelHash = vosk.Settings.ModelHash,
+            IgnoredWords = string.Join(", ", vosk.Settings.IgnoredWords),
         };
         return View(vm);
     }
     
-    [HttpPost("/settings/vosk")]
-    public async Task<IActionResult> PostVoskSettings([FromForm] VoskSettingsViewModel value)
+    [HttpPost("/settings/vosk/{serviceId:guid}")]
+    public async Task<IActionResult> PostVoskSettings([FromRoute] Guid serviceId, [FromForm] VoskSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("VoskSettings", value);
         }
 
-        await _settingsRepository.SaveAsync(new VoskSettings
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        await _servicesRepository.SaveAsync(new ConfiguredService<VoskSettings>
         {
+            Id = serviceId,
+            ServiceName = VoskConstants.ServiceName,
+            Label = value.Label,
             Enabled = value.Enabled,
-            Model = value.Model.TrimCopyPasteArtefacts(),
-            ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
-            IgnoredWords = value.IgnoredWords.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+            Settings = new VoskSettings
+            {
+                Model = value.Model.TrimCopyPasteArtefacts(),
+                ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
+                IgnoredWords = value.IgnoredWords.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+            }
         });
         
         return RedirectToAction("VoskSettings");
     }
     
-    [HttpPost("/settings/vosk/reset")]
-    public async Task<IActionResult> ResetVoskSettings()
+    [HttpPost("/settings/vosk/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteVoskSettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<VoskSettings>();
+        var current = await _servicesRepository.GetAsync<VoskSettings>(serviceId);
         if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+            await _servicesRepository.DeleteAsync(current.Id);
         
-        return RedirectToAction("VoskSettings");
+        return RedirectToAction("Settings", "Settings");
     }
     
-    [HttpGet("/settings/elevenlabs")]
-    public async Task<IActionResult> ElevenLabsSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/elevenlabs/{serviceId:guid}")]
+    public async Task<IActionResult> ElevenLabsSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(cancellationToken) ?? new ElevenLabsSettings
+        var settings = await _servicesRepository.GetAsync<ElevenLabsSettings>(serviceId, cancellationToken) ?? new ConfiguredService<ElevenLabsSettings>
         {
-            ApiKey = "",
+            Id = serviceId,
+            ServiceName = ElevenLabsConstants.ServiceName,
+            Settings = new ElevenLabsSettings
+            {
+                ApiKey = "",
+            }
         };
         var vm = new ElevenLabsSettingsViewModel
         {
             Enabled = settings.Enabled,
-            Model = settings.Model,
-            ApiKey = _encryptionProvider.SafeDecrypt(settings.ApiKey),
-            Parameters = JsonSerializer.Serialize(settings.Parameters ?? new ElevenLabsParameters()),
-            ThinkingSpeech = string.Join('\n', settings.ThinkingSpeech),
-            UseDefaults = settings.Parameters == null,
+            Label = settings.Label,
+            Model = settings.Settings.Model,
+            ApiKey = _encryptionProvider.SafeDecrypt(settings.Settings.ApiKey),
+            Parameters = JsonSerializer.Serialize(settings.Settings.Parameters ?? new ElevenLabsParameters()),
+            ThinkingSpeech = string.Join('\n', settings.Settings.ThinkingSpeech),
+            UseDefaults = settings.Settings.Parameters == null,
         };   
         return View(vm);
     }
     
-    [HttpPost("/settings/elevenlabs")]
-    public async Task<IActionResult> PostElevenLabsSettings([FromForm] ElevenLabsSettingsViewModel value)
+    [HttpPost("/settings/elevenlabs/{serviceId:guid}")]
+    public async Task<IActionResult> PostElevenLabsSettings([FromRoute] Guid serviceId, [FromForm] ElevenLabsSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("ElevenLabsSettings", value);
         }
+        
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _settingsRepository.SaveAsync(new ElevenLabsSettings
+        await _servicesRepository.SaveAsync(new ConfiguredService<ElevenLabsSettings>
         {
+            Id = serviceId,
+            ServiceName = ElevenLabsConstants.ServiceName,
+            Label = value.Label,
             Enabled = value.Enabled,
-            ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
-            Model = value.Model.TrimCopyPasteArtefacts(),
-            Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<ElevenLabsParameters>(value.Parameters) ?? new ElevenLabsParameters(),
-            ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            Settings = new ElevenLabsSettings
+            {
+                ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
+                Model = value.Model.TrimCopyPasteArtefacts(),
+                Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<ElevenLabsParameters>(value.Parameters) ?? new ElevenLabsParameters(),
+                ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            },
         });
         
         return RedirectToAction("ElevenLabsSettings");
     }
 
-    [HttpPost("/settings/elevenlabs/reset")]
-    public async Task<IActionResult> ResetElevenLabsSettings()
+    [HttpPost("/settings/elevenlabs/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteElevenLabsSettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<ElevenLabsSettings>();
-        if (!string.IsNullOrEmpty(current?.ApiKey))
-            await _settingsRepository.SaveAsync(new ElevenLabsSettings
-            {
-                ApiKey = current.ApiKey,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
-
-        return RedirectToAction("ElevenLabsSettings");
+        await _servicesRepository.DeleteAsync(serviceId);
+        
+        return RedirectToAction("Settings", "Settings");
     }
 
-    [HttpGet("/settings/textgenerationwebui")]
-    public async Task<IActionResult> TextGenerationWebUISettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/textgenerationwebui/{serviceId:guid}")]
+    public async Task<IActionResult> TextGenerationWebUISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<OobaboogaSettings>(cancellationToken) ?? new OobaboogaSettings
+        var settings = await _servicesRepository.GetAsync<OobaboogaSettings>(serviceId, cancellationToken) ?? new ConfiguredService<OobaboogaSettings>
         {
-            Uri = "http://127.0.0.1:5000",
+            Id = serviceId,
+            ServiceName = OobaboogaConstants.ServiceName,
+            Settings = new OobaboogaSettings
+            {
+                Uri = "http://127.0.0.1:5000",
+            }
         };
         var vm = new OobaboogaSettingsViewModel(settings);
         return View(vm);
     }
     
-    [HttpPost("/settings/textgenerationwebui")]
-    public async Task<IActionResult> PostTextGenerationWebUISettings([FromForm] OobaboogaSettingsViewModel value)
+    [HttpPost("/settings/textgenerationwebui/{serviceId:guid}")]
+    public async Task<IActionResult> PostTextGenerationWebUISettings([FromRoute] Guid serviceId, [FromForm] OobaboogaSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("TextGenerationWebUISettings", value);
         }
+        
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        var settings = value.ToSettings();
-        await _settingsRepository.SaveAsync(settings);
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("TextGenerationWebUISettings");
     }
     
-    [HttpPost("/settings/textgenerationwebui/reset")]
-    public async Task<IActionResult> ResetTextGenerationWebUISettings()
+    [HttpPost("/settings/textgenerationwebui/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteTextGenerationWebUISettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<OobaboogaSettings>();
-        if (!string.IsNullOrEmpty(current?.Uri))
-            await _settingsRepository.SaveAsync(new OobaboogaSettings
-            {
-                Uri = current.Uri,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
         
-        return RedirectToAction("TextGenerationWebUISettings");
+        return RedirectToAction("Settings", "Settings");
     }
     
-    [HttpGet("/settings/koboldai")]
-    public async Task<IActionResult> KoboldAISettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/koboldai/{serviceId:guid}")]
+    public async Task<IActionResult> KoboldAISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<KoboldAISettings>(cancellationToken) ?? new KoboldAISettings
+        var settings = await _servicesRepository.GetAsync<KoboldAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<KoboldAISettings>
         {
-            Uri = "http://127.0.0.1:5001",
+            Id = serviceId,
+            ServiceName = KoboldAIConstants.ServiceName,
+            Settings = new KoboldAISettings
+            {
+                Uri = "http://127.0.0.1:5001",
+            },
         };
         var vm = new KoboldAISettingsViewModel(settings);
         return View(vm);
     }
     
-    [HttpPost("/settings/koboldai")]
-    public async Task<IActionResult> PostKoboldAISettings([FromForm] KoboldAISettingsViewModel value)
+    [HttpPost("/settings/koboldai/{serviceId:guid}")]
+    public async Task<IActionResult> PostKoboldAISettings([FromRoute] Guid serviceId, [FromForm] KoboldAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("KoboldAISettings", value);
         }
+        
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        var settings = value.ToSettings();
-        await _settingsRepository.SaveAsync(settings);
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("KoboldAISettings");
     }
     
-    [HttpPost("/settings/koboldai/reset")]
-    public async Task<IActionResult> ResetKoboldAISettings()
+    [HttpPost("/settings/koboldai/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteKoboldAISettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<KoboldAISettings>();
-        if (!string.IsNullOrEmpty(current?.Uri))
-            await _settingsRepository.SaveAsync(new KoboldAISettings
-            {
-                Uri = current.Uri,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
         
-        return RedirectToAction("KoboldAISettings");
+        return RedirectToAction("Settings", "Settings");
     }
 
-    [HttpGet("/settings/textgenerationinference")]
-    public async Task<IActionResult> TextGenerationInferenceSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/textgenerationinference/{serviceId:guid}")]
+    public async Task<IActionResult> TextGenerationInferenceSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<TextGenerationInferenceSettings>(cancellationToken) ?? new TextGenerationInferenceSettings
+        var settings = await _servicesRepository.GetAsync<TextGenerationInferenceSettings>(serviceId, cancellationToken) ?? new ConfiguredService<TextGenerationInferenceSettings>
         {
-            Uri = "http://127.0.0.1:8080",
+            Id = serviceId,
+            ServiceName = TextGenerationInferenceConstants.ServiceName,
+            Settings = new TextGenerationInferenceSettings
+            {
+                Uri = "http://127.0.0.1:8080",
+            },
         };
         var vm = new TextGenerationInferenceSettingsViewModel(settings);
         return View(vm);
     }
     
-    [HttpPost("/settings/textgenerationinference")]
-    public async Task<IActionResult> PostTextGenerationInferenceSettings([FromForm] TextGenerationInferenceSettingsViewModel value)
+    [HttpPost("/settings/textgenerationinference/{serviceId:guid}")]
+    public async Task<IActionResult> PostTextGenerationInferenceSettings([FromRoute] Guid serviceId, [FromForm] TextGenerationInferenceSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("TextGenerationInferenceSettings", value);
         }
 
-        var settings = value.ToSettings();
-        await _settingsRepository.SaveAsync(settings);
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("TextGenerationInferenceSettings");
     }
     
-    [HttpPost("/settings/textgenerationinference/reset")]
-    public async Task<IActionResult> ResetTextGenerationInferenceSettings()
+    [HttpPost("/settings/textgenerationinference/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteTextGenerationInferenceSettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<TextGenerationInferenceSettings>();
-        if (!string.IsNullOrEmpty(current?.Uri))
-            await _settingsRepository.SaveAsync(new TextGenerationInferenceSettings
-            {
-                Uri = current.Uri,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
         
-        return RedirectToAction("TextGenerationInferenceSettings");
+        return RedirectToAction("Settings", "Settings");
     }
     
-    [HttpGet("/settings/novelai")]
-    public async Task<IActionResult> NovelAISettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/novelai/{serviceId:guid}")]
+    public async Task<IActionResult> NovelAISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>(cancellationToken) ?? new NovelAISettings
+        var settings = await _servicesRepository.GetAsync<NovelAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<NovelAISettings>
         {
-            Token = "",
+            Id = serviceId,
+            ServiceName = NovelAIConstants.ServiceName,
+            Settings = new NovelAISettings
+            {
+                Token = "",
+            }
         };
         var vm = new NovelAISettingsViewModel(settings, _encryptionProvider);
         return View(vm);
     }
     
-    [HttpPost("/settings/novelai")]
-    public async Task<IActionResult> PostNovelAISettings([FromForm] NovelAISettingsViewModel value)
+    [HttpPost("/settings/novelai/{serviceId:guid}")]
+    public async Task<IActionResult> PostNovelAISettings([FromRoute] Guid serviceId, [FromForm] NovelAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("NovelAISettings", value);
         }
 
-        var settings = value.ToSettings(_encryptionProvider);
-        await _settingsRepository.SaveAsync(settings);
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        var settings = value.ToSettings(serviceId, _encryptionProvider);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("NovelAISettings");
     }
 
-    [HttpPost("/settings/novelai/reset")]
-    public async Task<IActionResult> ResetNovelAISettings()
+    [HttpPost("/settings/novelai/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteNovelAISettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<NovelAISettings>();
-        if (!string.IsNullOrEmpty(current?.Token))
-            await _settingsRepository.SaveAsync(new NovelAISettings
-            {
-                Token = current.Token,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
 
-        return RedirectToAction("NovelAISettings");
+        return RedirectToAction("Settings", "Settings");
     }
 
-    [HttpGet("/settings/openai")]
-    public async Task<IActionResult> OpenAISettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/openai/{serviceId:guid}")]
+    public async Task<IActionResult> OpenAISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<OpenAISettings>(cancellationToken) ?? new OpenAISettings
+        var settings = await _servicesRepository.GetAsync<OpenAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<OpenAISettings>
         {
-            ApiKey = "",
+            Id = serviceId,
+            ServiceName = OpenAIConstants.ServiceName,
+            Settings = new OpenAISettings
+            {
+                ApiKey = "",
+            }
         };
 
         var vm = new OpenAISettingsViewModel(settings, _encryptionProvider);
         return View(vm);
     }
     
-    [HttpPost("/settings/openai")]
-    public async Task<IActionResult> PostOpenAISettings([FromForm] OpenAISettingsViewModel value)
+    [HttpPost("/settings/openai/{serviceId:guid}")]
+    public async Task<IActionResult> PostOpenAISettings([FromRoute] Guid serviceId, [FromForm] OpenAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("OpenAISettings", value);
         }
 
-        var settings = value.ToSettings(_encryptionProvider);
-        await _settingsRepository.SaveAsync(settings);
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        var settings = value.ToSettings(serviceId, _encryptionProvider);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("OpenAISettings");
     }
     
-    [HttpPost("/settings/openai/reset")]
-    public async Task<IActionResult> ResetOpenAISettings()
+    [HttpPost("/settings/openai/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteOpenAISettings([FromRoute] Guid serviceId)
     {
-        var current = await _settingsRepository.GetAsync<OpenAISettings>();
-        if (!string.IsNullOrEmpty(current?.ApiKey))
-            await _settingsRepository.SaveAsync(new OpenAISettings
-            {
-                ApiKey = current.ApiKey,
-            });
-        else if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
         
-        return RedirectToAction("OpenAISettings");
+        return RedirectToAction("Settings", "Settings");
     }
     
-    [HttpGet("/settings/windowsspeech")]
-    public async Task<IActionResult> WindowsSpeechSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/windowsspeech/{serviceId:guid}")]
+    public async Task<IActionResult> WindowsSpeechSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
     
         #if(WINDOWS)
-        var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(cancellationToken) ?? new WindowsSpeechSettings();
+        var settings = await _servicesRepository.GetAsync<WindowsSpeechSettings>(serviceId, cancellationToken) ?? new ConfiguredService<WindowsSpeechSettings>
+        {
+            Id = serviceId,
+            ServiceName = WindowsSpeechConstants.ServiceName,
+            Settings = new WindowsSpeechSettings()
+        };
         var vm = new WindowsSpeechSettingsViewModel
         {
+            Label = settings.Label,
             Enabled = settings.Enabled,
-            MinimumConfidence = settings.MinimumConfidence,
+            MinimumConfidence = settings.Settings.MinimumConfidence,
         };
         return View(vm);
         #else
@@ -429,8 +486,8 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
-    [HttpPost("/settings/windowsspeech")]
-    public async Task<IActionResult> PostWindowsSpeechSettings([FromForm] WindowsSpeechSettingsViewModel value)
+    [HttpPost("/settings/windowsspeech/{serviceId:guid}")]
+    public async Task<IActionResult> PostWindowsSpeechSettings([FromRoute] Guid serviceId, [FromForm] WindowsSpeechSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -438,10 +495,19 @@ public class ServiceSettingsController : Controller
         }
 
         #if(WINDOWS)
-        await _settingsRepository.SaveAsync(new WindowsSpeechSettings
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        await _servicesRepository.SaveAsync(new ConfiguredService<WindowsSpeechSettings>
         {
+            Id = serviceId,
+            ServiceName = WindowsSpeechConstants.ServiceName,
+            Label = value.Label,
             Enabled = value.Enabled,
-            MinimumConfidence = value.MinimumConfidence,
+            Settings = new WindowsSpeechSettings
+            {
+                MinimumConfidence = value.MinimumConfidence,
+            }
         });
         
         return RedirectToAction("WindowsSpeechSettings");
@@ -450,27 +516,28 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
-    [HttpPost("/settings/windowsspeech/reset")]
-    public async Task<IActionResult> ResetWindowsSpeechSettings()
+    [HttpPost("/settings/windowsspeech/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteWindowsSpeechSettings([FromRoute] Guid serviceId)
     {
-        #if(WINDOWS)
-        var current = await _settingsRepository.GetAsync<WindowsSpeechSettings>();
-        if (current != null)
-            await _settingsRepository.DeleteAsync(current);
-        return RedirectToAction("WindowsSpeechSettings");
-        #else
-        throw new PlatformNotSupportedException();
-        #endif
+        await _servicesRepository.DeleteAsync(serviceId);
+        
+        return RedirectToAction("Settings", "Settings");
     }
     
-    [HttpGet("/settings/ffmpeg")]
-    public async Task<IActionResult> FFmpegSettings(CancellationToken cancellationToken)
+    [HttpGet("/settings/ffmpeg/{serviceId:guid}")]
+    public async Task<IActionResult> FFmpegSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         #if(!WINDOWS)
-        var ffmpeg = await _settingsRepository.GetAsync<FFmpegSettings>(cancellationToken) ?? new FFmpegSettings();
+        var ffmpeg = await _servicesRepository.GetAsync<FFmpegSettings>(serviceId, cancellationToken) ?? new ConfiguredService<FFmpegSettings>
+        {
+            Id = serviceId,
+            ServiceName = FFmpegConstants.ServiceName,
+            Settings = new FFmpegSettings(),
+        };
         var vm = new FFmpegSettingsViewModel
         {
-            Enabled = ffmpeg.Enabled
+            Enabled = ffmpeg.Enabled,
+            Label = "",
         };
         return View(vm);
         #else
@@ -478,17 +545,26 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
-    [HttpPost("/settings/ffmpeg")]
-    public async Task<IActionResult> PostFFmpegSettings([FromForm] FFmpegSettingsViewModel value)
+    [HttpPost("/settings/ffmpeg/{serviceId:guid}")]
+    public async Task<IActionResult> PostFFmpegSettings([FromRoute] Guid serviceId, [FromForm] FFmpegSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
             return View("FFmpegSettings", value);
         }
         #if(!WINDOWS)
-        await _settingsRepository.SaveAsync(new FFmpegSettings
+        if (serviceId == Guid.Empty)
+            serviceId = Crypto.CreateCryptographicallySecureGuid();
+
+        await _servicesRepository.SaveAsync(new ConfiguredService<FFmpegSettings>
         {
+            Id = serviceId,
+            ServiceName = FFMpegConstants.ServiceName,
+            Label = value.Enabled,
             Enabled = value.Enabled,
+            Settings = new FFmpegSettings
+            {
+            }
         });
         
         return RedirectToAction("FFmpegSettings");
@@ -497,17 +573,11 @@ public class ServiceSettingsController : Controller
         #endif
     }
     
-    [HttpPost("/settings/ffmpeg/reset")]
-    public async Task<IActionResult> ResetFFmpegSettings()
+    [HttpPost("/settings/ffmpeg/{serviceId:guid}/delete")]
+    public async Task<IActionResult> DeleteFFmpegSettings([FromRoute] Guid serviceId)
     {
-        #if(!WINDOWS)
-        var current = await _settingsRepository.GetAsync<FFmpegSettings>();
-        if (current != null)
-            await _settingsRepository.DeleteAsync(current);
+        await _servicesRepository.DeleteAsync(serviceId);
         
-        return RedirectToAction("FFmpegSettings");
-        #else
-        throw new PlatformNotSupportedException();
-        #endif
+        return RedirectToAction("Settings", "Settings");
     }
 }

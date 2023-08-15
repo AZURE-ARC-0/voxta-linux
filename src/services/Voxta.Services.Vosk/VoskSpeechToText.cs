@@ -49,7 +49,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     {
         if (_initialized) return true;
         _initialized = true;
-        var settings = await _settingsRepository.GetAsync<VoskSettings>(cancellationToken);
+        var settings = await _settingsRepository.GetAsync<VoskSettings>(TODO, cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
         if (string.IsNullOrEmpty(settings.Model)) return false;

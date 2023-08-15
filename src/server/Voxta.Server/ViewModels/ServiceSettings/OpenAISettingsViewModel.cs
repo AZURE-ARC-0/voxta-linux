@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Services.OpenAI;
 
@@ -14,26 +15,32 @@ public class OpenAISettingsViewModel : LLMServiceSettingsViewModel
     }
 
     [SetsRequiredMembers]
-    public OpenAISettingsViewModel(OpenAISettings source, ILocalEncryptionProvider encryptionProvider)
-        : base(source, source.Parameters ?? new OpenAIParameters(), source.Parameters == null)
+    public OpenAISettingsViewModel(ConfiguredService<OpenAISettings> source, ILocalEncryptionProvider encryptionProvider)
+        : base(source, source.Settings, source.Settings.Parameters ?? new OpenAIParameters(), source.Settings.Parameters == null)
     {
-        ApiKey = encryptionProvider.SafeDecrypt(source.ApiKey);
-        Model = source.Model;
+        ApiKey = encryptionProvider.SafeDecrypt(source.Settings.ApiKey);
+        Model = source.Settings.Model;
     }
 
-    public OpenAISettings ToSettings(ILocalEncryptionProvider encryptionProvider)
+    public ConfiguredService<OpenAISettings> ToSettings(Guid serviceId, ILocalEncryptionProvider encryptionProvider)
     {
-        return new OpenAISettings
+        return new ConfiguredService<OpenAISettings>
         {
+            Id = serviceId,
+            ServiceName = OpenAIConstants.ServiceName,
+            Label = Label,
             Enabled = Enabled,
-            ApiKey = string.IsNullOrEmpty(ApiKey) ? "" : encryptionProvider.Encrypt(ApiKey.TrimCopyPasteArtefacts()),
-            Model = Model.TrimCopyPasteArtefacts(),
-            MaxContextTokens = MaxContextTokens,
-            MaxMemoryTokens = MaxMemoryTokens,
-            SummaryMaxTokens = SummaryMaxTokens,
-            SummarizationDigestTokens = SummarizationDigestTokens,
-            SummarizationTriggerTokens = SummarizationTriggerTokens,
-            Parameters = GetParameters<OpenAIParameters>(),
+            Settings = new OpenAISettings
+            {
+                ApiKey = string.IsNullOrEmpty(ApiKey) ? "" : encryptionProvider.Encrypt(ApiKey.TrimCopyPasteArtefacts()),
+                Model = Model.TrimCopyPasteArtefacts(),
+                MaxContextTokens = MaxContextTokens,
+                MaxMemoryTokens = MaxMemoryTokens,
+                SummaryMaxTokens = SummaryMaxTokens,
+                SummarizationDigestTokens = SummarizationDigestTokens,
+                SummarizationTriggerTokens = SummarizationTriggerTokens,
+                Parameters = GetParameters<OpenAIParameters>(),
+            }
         };
     }
 }

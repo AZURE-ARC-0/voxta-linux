@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Services.TextGenerationInference;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
@@ -11,24 +12,31 @@ public class TextGenerationInferenceSettingsViewModel : RemoteLLMServiceSettings
     }
     
     [SetsRequiredMembers]
-    public TextGenerationInferenceSettingsViewModel(TextGenerationInferenceSettings source)
-        : base(source)
+    public TextGenerationInferenceSettingsViewModel(ConfiguredService<TextGenerationInferenceSettings> source)
+        : base(source, source.Settings)
     {
+        Uri = source.Settings.Uri;
     }
 
-    public TextGenerationInferenceSettings ToSettings()
+    public ConfiguredService<TextGenerationInferenceSettings> ToSettings(Guid serviceId)
     {
-        return new TextGenerationInferenceSettings
+        return new ConfiguredService<TextGenerationInferenceSettings>
         {
+            Id = serviceId,
+            ServiceName = TextGenerationInferenceConstants.ServiceName,
+            Label = Label,
             Enabled = Enabled,
-            Uri = Uri.TrimCopyPasteArtefacts(),
-            PromptFormat = PromptFormat,
-            MaxContextTokens = MaxContextTokens,
-            MaxMemoryTokens = MaxMemoryTokens,
-            SummaryMaxTokens = SummaryMaxTokens,
-            SummarizationDigestTokens = SummarizationDigestTokens,
-            SummarizationTriggerTokens = SummarizationTriggerTokens,
-            Parameters = GetParameters<TextGenerationInferenceParameters>(),
+            Settings = new TextGenerationInferenceSettings
+            {
+                Uri = Uri.TrimCopyPasteArtefacts(),
+                PromptFormat = PromptFormat,
+                MaxContextTokens = MaxContextTokens,
+                MaxMemoryTokens = MaxMemoryTokens,
+                SummaryMaxTokens = SummaryMaxTokens,
+                SummarizationDigestTokens = SummarizationDigestTokens,
+                SummarizationTriggerTokens = SummarizationTriggerTokens,
+                Parameters = GetParameters<TextGenerationInferenceParameters>(),
+            },
         };
     }
 }

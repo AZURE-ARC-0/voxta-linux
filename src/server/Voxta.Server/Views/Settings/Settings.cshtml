@@ -67,7 +67,134 @@
         </div>
     </div>
     
-    @foreach (var serviceType in Model.Services)
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>
+                Profile
+            </h2>
+            <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_profile" aria-expanded="false" aria-controls="collapseHelp_profile">
+                <i class="bi bi-question-circle"></i>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="collapse" id="collapseHelp_profile">
+                <p>Your profile defines how the AI will see you and call you.</p>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 80px;">Status</th>
+                    <th scope="col">Message</th>
+                    <th scope="col" style="width: 80px;"></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            @if (Model.Profile != null)
+                            {
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                            }
+                        </td>
+                        <td>
+                            
+                            @if (Model.Profile != null)
+                            {
+                                @Model.Profile.Name
+                            }
+                            else
+                            {
+                                <span>Profile not configured</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex">
+                                <a class="btn btn-sm btn-secondary" href="/settings/profile">Configure</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>
+                Services
+            </h2>
+            <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_services" aria-expanded="false" aria-controls="collapseHelp_services">
+                <i class="bi bi-question-circle"></i>
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="collapse" id="collapseHelp_services">
+                <p>Services are where your AI runs, including text generation, text to speech, and speech to text.</p>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col" style="width: 80px;">Type</th>
+                    <th scope="col">Name</th>
+                    <th scope="col" style="width: 80px;">
+                        @if(Model.Services.Any(x => x.Service.Enabled && x.Help.TextGen)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                        TXT
+                    </th>
+                    <th scope="col" style="width: 80px;">
+                        @if(Model.Services.Any(x => x.Service.Enabled && x.Help.TTS)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                        TTS
+                    </th>
+                    <th scope="col" style="width: 80px;">
+                        @if(Model.Services.Any(x => x.Service.Enabled && x.Help.STT)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                        STT
+                    </th>
+                    <th scope="col" style="width: 80px;"></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var s in Model.Services)
+                {
+                    <tr>
+                        <td>
+                            @s.Help.ServiceName
+                        </td>
+                        <td>
+                            @s.Help.Label
+                            @if (!string.IsNullOrEmpty(s.Service.Label))
+                            {
+                                <span>(@s.Service.Label)</span>
+                            }
+                        </td>
+                        @if(s.Service.Enabled)
+                        {
+                            <td>@if(s.Help.TextGen) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
+                            <td>@if(s.Help.TTS) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
+                            <td>@if(s.Help.STT) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
+                        }
+                        else
+                        {
+                            <td colspan="3"><span class="text-muted">Disabled</span></td>
+                        }
+                        <td class="text-end">
+                            <div class="d-inline-flex">
+                                <a class="btn btn-sm btn-secondary" href="/settings/@s.Help.ServiceName.ToLowerInvariant()/@s.Service.Id">Configure</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-center">
+            <a class="btn btn-secondary" href="/settings/add"><i class="bi bi-plus"></i> Add services</a>
+        </div>
+    </div>
+    
+    @foreach (var serviceType in Model.ServiceTypes)
     {
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">

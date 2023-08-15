@@ -14,6 +14,20 @@ public static class ServiceCollectionExtensions
         services.AddTransient<WindowsSpeechSpeechToText>();
     }
     
+    public static void RegisterWindowsSpeech(this IServiceHelpRegistry registry)
+    {
+        registry.Add(new ServiceHelp
+        {
+            ServiceName = WindowsSpeechConstants.ServiceName,
+            Label = "Windows Speech",
+            TextGen = false,
+            STT = true,
+            TTS = true,
+            Summarization = false,
+            ActionInference = false,
+        });
+    }
+    
     public static void RegisterWindowsSpeech(this IServiceRegistry<ITextToSpeechService> registry)
     {
         registry.Add<WindowsSpeechTextToSpeechService>(WindowsSpeechConstants.ServiceName);
