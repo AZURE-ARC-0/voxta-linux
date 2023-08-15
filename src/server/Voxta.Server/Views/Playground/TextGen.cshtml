@@ -7,7 +7,7 @@
 <div class="container">
     <h1>Text Generation Playground</h1>
 
-    <form method="post" action="/playground/text-gen">
+    <form method="post" action="/playground/text-gen" onsubmit="document.getElementById('generateButton').disabled = true;">
     <div class="card mb-3">
         <div class="card-body">
             <div class="mb-2">
@@ -35,7 +35,7 @@
                 <small class="text-danger">@Html.ValidationMessageFor(m => m.Prompt)</small>
             </div>
             <div class="mb-3 text-center">
-                <button class="btn btn-secondary" id="speechTestButton"><i class="bi bi-play"></i> Generate</button>
+                <button class="btn btn-secondary" id="generateButton"><i class="bi bi-play"></i> Generate</button>
                 <div class="text-danger mt-3">
                     @Html.ValidationSummary(false)
                 </div>

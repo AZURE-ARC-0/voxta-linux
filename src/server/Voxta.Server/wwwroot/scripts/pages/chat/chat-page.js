@@ -25,7 +25,7 @@ const playThinkingSpeech = () => {
     audioVisualizer.play(audioUrl, () => {
         // Start
     }, () => {
-        // Complete
+        audioVisualizer.think();
     });
 }
 

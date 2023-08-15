@@ -90,4 +90,9 @@ public class TextPromptBuilder : MessagePromptBuilder
         sb.Append(": ");
         sb.AppendLineLinux(message.Value);
     }
+
+    public virtual string[] GetReplyStoppingStrings(IChatInferenceData chat)
+    {
+        return new[] { "END_OF_DIALOG", $"{chat.User.Name}:", $"{chat.Character.Name}:", "\n" };
+    }
 }

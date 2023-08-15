@@ -24,7 +24,7 @@ public partial class ChatSession
                 _logger.LogInformation("Cutoff last character message to account for the interruption: {Text}", lastCharacterMessage.Value);
             }
 
-            text = "*interrupts {{char}}* " + text;
+            text =$" *interrupts {_chatSessionData.Character.Name}* " + text;
             _logger.LogInformation("Added interruption notice to the user message. Updated text: {Text}", text);
         }
 

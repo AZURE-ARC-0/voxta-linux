@@ -3,5 +3,6 @@
 public enum PromptFormats
 {
     Generic,
+    Alpaca,
     Llama2,
 }

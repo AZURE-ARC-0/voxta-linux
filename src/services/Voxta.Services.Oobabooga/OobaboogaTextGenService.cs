@@ -26,7 +26,7 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         
         var textGenPerf = _performanceMetrics.Start("KoboldAI.TextGen");
-        var stoppingStrings = new[] { "END_OF_DIALOG", "You:", $"{chat.User.Name}:", $"{chat.Character.Name}:", "\n" };
+        var stoppingStrings = builder.GetReplyStoppingStrings(chat);
         var body = BuildRequestBody(prompt, stoppingStrings);
         var text = await SendCompletionRequest(body, cancellationToken);
         textGenPerf.Done();
@@ -39,7 +39,8 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
     {
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, OobaboogaConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
-        var text = await SendCompletionRequest(BuildRequestBody(prompt, Array.Empty<string>()), cancellationToken);
+        var body = BuildRequestBody(prompt, Array.Empty<string>());
+        var text = await SendCompletionRequest(body, cancellationToken);
         _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
         return text;
     }

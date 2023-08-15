@@ -11,14 +11,14 @@ public abstract class RemoteLLMServiceSettingsViewModelBase<TParameters> : LLMSe
     public required string Uri { get; init; }
     public PromptFormats PromptFormat { get; init; }
 
-    public RemoteLLMServiceSettingsViewModelBase()
+    protected RemoteLLMServiceSettingsViewModelBase()
     {
         
     }
 
     [SetsRequiredMembers]
     protected RemoteLLMServiceSettingsViewModelBase(RemoteLLMServiceSettingsBase<TParameters> source)
-        : base(source, source.Parameters ?? new TParameters(), source.Parameters != null)
+        : base(source, source.Parameters ?? new TParameters(), source.Parameters == null)
     {
         Uri = source.Uri;
         PromptFormat = source.PromptFormat;

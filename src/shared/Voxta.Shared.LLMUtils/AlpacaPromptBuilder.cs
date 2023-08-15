@@ -5,54 +5,51 @@ using Voxta.Abstractions.Tokenizers;
 
 namespace Voxta.Shared.LLMUtils;
 
-public class Llama2PromptBuilder : TextPromptBuilder
+public class AlpacaPromptBuilder : TextPromptBuilder
 {
-    public Llama2PromptBuilder(ITokenizer tokenizer) : base(tokenizer)
+    public AlpacaPromptBuilder(ITokenizer tokenizer) : base(tokenizer)
     {
     }
 
-    public Llama2PromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider) : base(tokenizer, timeProvider)
+    public AlpacaPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider) : base(tokenizer, timeProvider)
     {
     }
 
     protected override void BeginMessages(StringBuilder sb)
     {
+        sb.AppendLineLinux("### Instruction:");
     }
 
     protected override void EndMessages(StringBuilder sb, string query)
     {
+        sb.AppendLineLinux();
+        sb.AppendLineLinux("### Response:");
+        sb.Append(query);
     }
 
     protected override void FormatMessage(StringBuilder sb, IChatInferenceData chat, MessageData message)
     {
         if (message.Role == ChatMessageRole.System)
         {
-            sb.AppendLineLinux("<s>[INST] <<SYS>>");
             sb.AppendLineLinux(message.Value);
-            sb.AppendLineLinux("<</SYS>>");
             sb.AppendLineLinux();
-            sb.Append("[/INST]");
+            sb.AppendLineLinux("### Input:");
         }
         else if (message.Role == ChatMessageRole.User)
         {
-            sb.Append("[INST] ");
-            sb.Append(message.Value);
-            sb.Append(" [/INST]");
+            sb.Append(chat.User.Name);
+            sb.Append(": ");
+            sb.AppendLineLinux(message.Value);
         }
         else if (message.Role == ChatMessageRole.Assistant)
         {
-            sb.Append(' ');
-            sb.Append(message.Value);
-            sb.Append(" </s><s>");
+            sb.Append(chat.Character.Name);
+            sb.Append(": ");
+            sb.AppendLineLinux(message.Value);
         }
         else
         {
             throw new ArgumentOutOfRangeException(null, $"Unknown role: {message.Role}");
         }
-    }
-
-    public override string[] GetReplyStoppingStrings(IChatInferenceData chat)
-    {
-        return new[] { " </s>", $"{chat.User.Name}:", $"{chat.Character.Name}:", "\n" };
     }
 }

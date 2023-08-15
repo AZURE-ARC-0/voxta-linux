@@ -1,4 +1,5 @@
-﻿@model Voxta.Server.ViewModels.ServiceSettings.TextGenerationInferenceSettingsViewModel
+﻿@using Voxta.Server.ViewModels.ServiceSettings
+@model Voxta.Server.ViewModels.ServiceSettings.TextGenerationInferenceSettingsViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - Text Generation Inference";
@@ -28,11 +29,17 @@
                     <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
                     <span asp-validation-for="Enabled" class="text-danger"></span>
                 </div>
-                <div>
+                <div class="mb-3">
                     <label asp-for="Uri">Text generation inference URI</label>
                     <input asp-for="Uri" class="form-control"/>
                     <div class="form-text">Example: http://127.0.0.1:8080. Note that the API URL is different from the web interface URL.</div>
                     <span asp-validation-for="Uri" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PromptFormat">Prompt format</label>
+                    <select asp-for="PromptFormat" asp-items="@(new SelectList(PromptFormatsViewModel.Values, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
+                    <div class="form-text">Can improve the inference, but also increase alignment with the model's fine-tuning.</div>
+                    <span asp-validation-for="PromptFormat" class="text-danger"></span>
                 </div>
                 <partial name="ServiceSettings/_LLMServiceSettings" model="@Model" />
                 <partial name="ServiceSettings/_JSONParametersServiceSettings" model="@Model" />

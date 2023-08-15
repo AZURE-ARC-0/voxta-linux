@@ -26,7 +26,7 @@ public class TextGenerationInferenceTextGenService : TextGenerationInferenceClie
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         
         var textGenPerf = _performanceMetrics.Start("TextGenerationInference.TextGen");
-        var stoppingStrings = new[] { $"{chat.User.Name}:", $"{chat.Character.Name}:", "\n" };
+        var stoppingStrings = builder.GetReplyStoppingStrings(chat);;
         var text = await SendCompletionRequest(BuildRequestBody(prompt, stoppingStrings), cancellationToken);
         textGenPerf.Done();
         

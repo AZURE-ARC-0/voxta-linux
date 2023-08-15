@@ -9,6 +9,7 @@ public static class TextPromptBuilderFactory
         return format switch
         {
             PromptFormats.Generic => new TextPromptBuilder(tokenizer),
+            PromptFormats.Alpaca => new AlpacaPromptBuilder(tokenizer),
             PromptFormats.Llama2 => new Llama2PromptBuilder(tokenizer),
             _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
         };

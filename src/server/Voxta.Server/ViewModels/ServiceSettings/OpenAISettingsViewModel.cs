@@ -15,7 +15,7 @@ public class OpenAISettingsViewModel : LLMServiceSettingsViewModel
 
     [SetsRequiredMembers]
     public OpenAISettingsViewModel(OpenAISettings source, ILocalEncryptionProvider encryptionProvider)
-        : base(source, source.Parameters ?? new OpenAIParameters(), source.Parameters != null)
+        : base(source, source.Parameters ?? new OpenAIParameters(), source.Parameters == null)
     {
         ApiKey = encryptionProvider.SafeDecrypt(source.ApiKey);
         Model = source.Model;

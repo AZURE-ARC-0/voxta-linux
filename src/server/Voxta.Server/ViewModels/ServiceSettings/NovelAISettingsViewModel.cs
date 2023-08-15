@@ -18,7 +18,7 @@ public class NovelAISettingsViewModel : LLMServiceSettingsViewModel
 
     [SetsRequiredMembers]
     public NovelAISettingsViewModel(NovelAISettings source, ILocalEncryptionProvider encryptionProvider)
-        : base(source, source.Parameters ?? NovelAIPresets.DefaultForModel(source.Model), source.Parameters != null)
+        : base(source, source.Parameters ?? NovelAIPresets.DefaultForModel(source.Model), source.Parameters == null)
     {
         Token = encryptionProvider.SafeDecrypt(source.Token);
         Model = source.Model;

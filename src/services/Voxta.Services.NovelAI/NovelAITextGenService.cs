@@ -25,7 +25,8 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, NovelAIConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
         var textGenPerf = _performanceMetrics.Start("NovelAI.TextGen");
-        var text = await SendCompletionRequest(BuildRequestBody(prompt, "special_instruct"), cancellationToken);
+        var body = BuildRequestBody(prompt, "special_instruct");
+        var text = await SendCompletionRequest(body, cancellationToken);
         textGenPerf.Done();
         
         _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
