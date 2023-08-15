@@ -1,30 +1,29 @@
 ﻿@model Voxta.Server.ViewModels.ServiceSettings.LLMServiceSettingsViewModel
-<div>
+<div class="mb-3">
     <label asp-for="MaxContextTokens">Max Context Tokens</label>
     <input asp-for="MaxContextTokens" class="form-control"/>
     <div class="form-text">The maximum total tokens sent to the LLM, including chat messages and system prompt. Longer values means more memory but also longer processing.</div>
     <span asp-validation-for="MaxContextTokens" class="text-danger"></span>
 </div>
-<div>
+<div class="mb-3">
     <label asp-for="MaxMemoryTokens">Max Memory Tokens</label>
     <input asp-for="MaxMemoryTokens" class="form-control"/>
     <div class="form-text">How much tokens are reserved for memory books. Must be lower than Max Context Tokens.</div>
     <span asp-validation-for="MaxMemoryTokens" class="text-danger"></span>
 </div>
-
-<div>
+<div class="mb-3">
     <label asp-for="SummarizationTriggerTokens">Summarization Trigger Tokens</label>
     <input asp-for="SummarizationTriggerTokens" class="form-control"/>
     <div class="form-text">When messages reach this amount of tokens, triggers summarization.</div>
     <span asp-validation-for="SummarizationTriggerTokens" class="text-danger"></span>
 </div>
-<div>
+<div class="mb-3">
     <label asp-for="SummarizationDigestTokens">Summarization Digest Tokens</label>
     <input asp-for="SummarizationDigestTokens" class="form-control"/>
     <div class="form-text">How much tokens to summarize at once. Using more tokens means fewer summarizations will happen, but weaker LLMs may have difficulty extracting the relevant information.</div>
     <span asp-validation-for="SummarizationDigestTokens" class="text-danger"></span>
 </div>
-<div>
+<div class="mb-3">
     <label asp-for="SummaryMaxTokens">Summary Max Tokens</label>
     <input asp-for="SummaryMaxTokens" class="form-control"/>
     <div class="form-text">When doing summarization, how many tokens to generate in the summary</div>

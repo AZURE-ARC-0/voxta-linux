@@ -41,6 +41,8 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         Console.WriteLine();
         Console.WriteLine("### Result");
         Console.WriteLine(action);
+        
+        Assert.That(action, Is.EqualTo("smile"));
     }
     
     [Test, Explicit]
@@ -51,12 +53,14 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
 
         var client = await CreateClientAsync<NovelAISummarizationService>();
-        var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
+        var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
         Console.WriteLine(ServiceObserver.GetRecord(ServiceObserverKeys.SummarizationPrompt)?.Value);
         Console.WriteLine();
         Console.WriteLine("### Result");
-        Console.WriteLine(action);
+        Console.WriteLine(summary);
+        
+        StringAssert.Contains("apple", summary);
     }
 }

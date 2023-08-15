@@ -31,7 +31,9 @@ public class NovelAIActionInferenceService : NovelAIClientBase, IActionInference
         _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);
 
         var actionInferencePerf = _performanceMetrics.Start($"{NovelAIConstants.ServiceName}.ActionInference");
-        var action = await SendCompletionRequest(BuildRequestBody(prompt, "special_instruct"), cancellationToken);
+        var body = BuildRequestBody(prompt, "special_instruct");
+        body.Parameters.Temperature = 0.1;
+        var action = await SendCompletionRequest(body, cancellationToken);
         actionInferencePerf.Done();
 
         var result = action.TrimContainerAndToLower();

@@ -8,6 +8,7 @@ using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
+using Voxta.Services.NovelAI.Presets;
 using Voxta.Shared.RemoteServicesUtils;
 
 namespace Voxta.Services.NovelAI;
@@ -50,6 +51,11 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.Token));
         _model = settings.Model;
         return true;
+    }
+    
+    protected override NovelAIParameters CreateDefaultParameters(NovelAISettings settings)
+    {
+        return NovelAIPresets.DefaultForModel(settings.Model);
     }
 
     protected virtual bool ValidateSettings(NovelAISettings settings)

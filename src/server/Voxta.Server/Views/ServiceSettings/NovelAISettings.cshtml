@@ -50,29 +50,8 @@
                     </select>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
-                <div>
-                    <label asp-for="MaxContextTokens">Max Context Tokens</label>
-                    <input asp-for="MaxContextTokens" class="form-control"/>
-                    <div class="form-text">Longer values means more memory but also longer processing.</div>
-                    <span asp-validation-for="MaxContextTokens" class="text-danger"></span>
-                </div>
-                <div>
-                    <label asp-for="MaxMemoryTokens">Max Memory Tokens</label>
-                    <input asp-for="MaxMemoryTokens" class="form-control"/>
-                    <div class="form-text">How much tokens are reserved for memory. Must be lower than Max Context Tokens.</div>
-                    <span asp-validation-for="MaxMemoryTokens" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Parameters">Text generation parameters</label>
-                    <input type="hidden" asp-for="Parameters" class="form-control"/>
-                    <div id="jsoneditor" class="jsoneditor" style="width: 100%; height: 400px;"></div>
-                </div>
-                <div class="form-check">
-                    <input asp-for="UseDefaults" type="checkbox" class="form-check-input"/>
-                    <label asp-for="UseDefaults">Use default parameters</label>
-                    <div class="form-text">Will ignore any changes you make on the parameters and use the default values instead.</div>
-                    <span asp-validation-for="UseDefaults" class="text-danger"></span>
-                </div>
+                <partial name="ServiceSettings/_LLMServiceSettings" model="@Model" />
+                <partial name="ServiceSettings/_JSONParametersServiceSettings" model="@Model" />
             </div>
         </div>
         

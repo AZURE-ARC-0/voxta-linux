@@ -129,9 +129,9 @@ public class PlaygroundController : Controller
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferenceService)?.Value ?? data.Service ?? "";
                 vm.Prompt = vm.Service == OpenAIConstants.ServiceName
                     ? "System:\n" +
-                      _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[system]")?.Value +
+                      _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[System]")?.Value +
                       "\n\nUser:\n" +
-                      _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[user]")?.Value
+                      _serviceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[User]")?.Value
                     : _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferencePrompt)?.Value ?? "";
             }
             else

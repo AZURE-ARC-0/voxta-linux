@@ -1,4 +1,5 @@
-﻿@model Voxta.Server.ViewModels.ServiceSettings.OobaboogaSettingsViewModel
+﻿@using Voxta.Shared.LLMUtils
+@model Voxta.Server.ViewModels.ServiceSettings.OobaboogaSettingsViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - Text Generation Web UI";
@@ -34,6 +35,15 @@
                     <div class="form-text">Example: http://127.0.0.1:5000. Note that the API URL is different from the web interface URL.</div>
                     <span asp-validation-for="Uri" class="text-danger"></span>
                 </div>
+                <div>
+                    <label asp-for="PromptFormat">Prompt format</label>
+                    <select asp-for="PromptFormat" class="form-control">
+                        <option value="@PromptFormats.Generic">Generic</option>
+                        <option value="@PromptFormats.Llama2">Llama2</option>
+                    </select>
+                    <div class="form-text">Can improve the inference, but also increase alignment with the model's fine-tuning.</div>
+                    <span asp-validation-for="PromptFormat" class="text-danger"></span>
+              </div>
                 <partial name="ServiceSettings/_LLMServiceSettings" model="@Model" />
                 <partial name="ServiceSettings/_JSONParametersServiceSettings" model="@Model" />
             </div>

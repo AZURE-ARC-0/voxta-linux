@@ -24,8 +24,7 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         });
         Mapper = config.CreateMapper();
     }
-
-
+    
     public string ServiceName { get; }
     public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.GPT3 };
 
@@ -52,9 +51,14 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         var settings = await _settingsRepository.GetAsync<TSettings>(cancellationToken);
         if (settings == null) return false;
         if (!settings.Enabled) return false;
-        Parameters = settings.Parameters ?? new TInputParameters();
+        Parameters = settings.Parameters ?? CreateDefaultParameters(settings);
         Settings = settings;
         return await TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken);
+    }
+
+    protected virtual TInputParameters CreateDefaultParameters(TSettings settings)
+    {
+        return new TInputParameters();
     }
 
     protected abstract Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken);

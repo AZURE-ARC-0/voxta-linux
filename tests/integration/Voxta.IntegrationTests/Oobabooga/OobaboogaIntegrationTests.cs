@@ -45,6 +45,8 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         Console.WriteLine();
         Console.WriteLine("### Result");
         Console.WriteLine(action);
+        
+        Assert.That(action, Is.EqualTo("smile"));
     }
     
     [Test, Explicit]
@@ -63,12 +65,14 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "I like you! ... I hope that's okay with you?");
 
         var client = await CreateClientAsync<OobaboogaSummarizationService>();
-        var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
+        var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
         Console.WriteLine(ServiceObserver.GetRecord(ServiceObserverKeys.SummarizationPrompt)?.Value);
         Console.WriteLine();
         Console.WriteLine("### Result");
-        Console.WriteLine(action);
+        Console.WriteLine(summary);
+        
+        StringAssert.Contains("apple", summary);
     }
 }

@@ -6,6 +6,10 @@ namespace Voxta.Server.ViewModels.ServiceSettings;
 [Serializable]
 public class TextGenerationInferenceSettingsViewModel : RemoteLLMServiceSettingsViewModelBase<TextGenerationInferenceParameters>
 {
+    public TextGenerationInferenceSettingsViewModel()
+    {
+    }
+    
     [SetsRequiredMembers]
     public TextGenerationInferenceSettingsViewModel(TextGenerationInferenceSettings source)
         : base(source)

@@ -28,6 +28,7 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         var logitBias = (Parameters.LogitBias ??= new Dictionary<string, int>());
         logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" safety")), -80);
         logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" appropriate")), -80);
+        logitBias.TryAdd(string.Join(",", Tokenizer.Tokenize(" AI")), -60);
         return true;
     }
 

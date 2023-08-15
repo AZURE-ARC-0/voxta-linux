@@ -19,9 +19,9 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");
-        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.TextGenPrompt}[system]")?.Value);
+        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.TextGenPrompt}[System]")?.Value);
         Console.WriteLine("### Prompt (User)");
-        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.TextGenPrompt}[user]")?.Value);
+        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.TextGenPrompt}[User]")?.Value);
         Console.WriteLine();
         Console.WriteLine("### Result");
         Console.WriteLine(reply);
@@ -39,12 +39,14 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
         var action = await client.SelectActionAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");
-        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[system]")?.Value);
+        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[System]")?.Value);
         Console.WriteLine("### Prompt (User)");
-        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[user]")?.Value);
+        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.ActionInferencePrompt}[User]")?.Value);
         Console.WriteLine();
         Console.WriteLine("### Result");
         Console.WriteLine(action);
+        
+        Assert.That(action, Is.EqualTo("smile"));
     }
     
     [Test, Explicit]
@@ -59,14 +61,16 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "I guess I'm not your typical girl!");
 
         var client = await CreateClientAsync<OpenAISummarizationService>();
-        var action = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
+        var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");
-        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.SummarizationPrompt}[system]")?.Value);
+        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.SummarizationPrompt}[System]")?.Value);
         Console.WriteLine("### Prompt (User)");
-        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.SummarizationPrompt}[user]")?.Value);
+        Console.WriteLine(ServiceObserver.GetRecord($"{ServiceObserverKeys.SummarizationPrompt}[User]")?.Value);
         Console.WriteLine();
         Console.WriteLine("### Result");
-        Console.WriteLine(action);
+        Console.WriteLine(summary);
+
+        StringAssert.Contains("apple", summary);
     }
 }

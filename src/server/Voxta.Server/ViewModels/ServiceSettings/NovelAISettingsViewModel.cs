@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Voxta.Abstractions.System;
 using Voxta.Services.NovelAI;
+using Voxta.Services.NovelAI.Presets;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
@@ -10,10 +11,14 @@ public class NovelAISettingsViewModel : LLMServiceSettingsViewModel
     public required string Token { get; set; }
     public required string Model { get; set; }
     public required string ThinkingSpeech { get; set; }
+    
+    public NovelAISettingsViewModel()
+    {
+    }
 
     [SetsRequiredMembers]
     public NovelAISettingsViewModel(NovelAISettings source, ILocalEncryptionProvider encryptionProvider)
-        : base(source, source.Parameters ?? new NovelAIParameters(), source.Parameters != null)
+        : base(source, source.Parameters ?? NovelAIPresets.DefaultForModel(source.Model), source.Parameters != null)
     {
         Token = encryptionProvider.SafeDecrypt(source.Token);
         Model = source.Model;

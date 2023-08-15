@@ -5,6 +5,10 @@ namespace Voxta.Server.ViewModels.ServiceSettings;
 
 public class OobaboogaSettingsViewModel : RemoteLLMServiceSettingsViewModelBase<OobaboogaParameters>
 {
+    public OobaboogaSettingsViewModel()
+    {
+    }
+    
     [SetsRequiredMembers]
     public OobaboogaSettingsViewModel(OobaboogaSettings source)
         : base(source)

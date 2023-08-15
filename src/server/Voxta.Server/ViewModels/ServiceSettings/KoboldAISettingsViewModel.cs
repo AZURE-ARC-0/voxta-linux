@@ -6,6 +6,10 @@ namespace Voxta.Server.ViewModels.ServiceSettings;
 [Serializable]
 public class KoboldAISettingsViewModel : RemoteLLMServiceSettingsViewModelBase<KoboldAIParameters>
 {
+    public KoboldAISettingsViewModel()
+    {
+    }
+    
     [SetsRequiredMembers]
     public KoboldAISettingsViewModel(KoboldAISettings source)
         : base(source)
