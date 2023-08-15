@@ -20,7 +20,7 @@ public class OobaboogaSummarizationService : OobaboogaClientBase, ISummarization
 
     public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
-        var builder = new GenericPromptBuilder(Tokenizer);
+        var builder = TextPromptBuilderFactory.Create(Settings.PromptFormat, Tokenizer);
         var prompt = builder.BuildSummarizationPromptString(chat, messagesToSummarize);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationService, OobaboogaConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.SummarizationPrompt, prompt);

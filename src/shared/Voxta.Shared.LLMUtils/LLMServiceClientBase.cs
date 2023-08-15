@@ -9,7 +9,8 @@ namespace Voxta.Shared.RemoteServicesUtils;
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputParameters>
-    where TSettings : LLMSettingsBase<TInputParameters> where TInputParameters : new()
+    where TSettings : LLMSettingsBase<TInputParameters>
+    where TInputParameters : new()
 {   
     private static readonly IMapper Mapper;
     
@@ -28,9 +29,9 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
     public string ServiceName { get; }
     public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.GPT3 };
 
-    private LLMSettingsBase<TInputParameters>? _settings;
+    private TSettings? _settings;
 
-    protected LLMSettingsBase<TInputParameters> Settings
+    protected TSettings Settings
     {
         get => _settings ?? throw new NullReferenceException("Settings were not loaded prior to calling this property");
         private set => _settings = value;

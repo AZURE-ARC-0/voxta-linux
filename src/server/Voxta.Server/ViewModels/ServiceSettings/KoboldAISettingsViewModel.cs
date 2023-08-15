@@ -4,13 +4,11 @@ using Voxta.Services.KoboldAI;
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
 [Serializable]
-public class KoboldAISettingsViewModel : LLMServiceSettingsViewModel
+public class KoboldAISettingsViewModel : RemoteLLMServiceSettingsViewModelBase<KoboldAIParameters>
 {
-    public required string Uri { get; set; }
-
     [SetsRequiredMembers]
     public KoboldAISettingsViewModel(KoboldAISettings source)
-        : base(source, source.Parameters ?? new KoboldAIParameters(), source.Parameters != null)
+        : base(source)
     {
         Uri = source.Uri;
     }
@@ -21,6 +19,7 @@ public class KoboldAISettingsViewModel : LLMServiceSettingsViewModel
         {
             Enabled = Enabled,
             Uri = Uri.TrimCopyPasteArtefacts(),
+            PromptFormat = PromptFormat,
             MaxContextTokens = MaxContextTokens,
             MaxMemoryTokens = MaxMemoryTokens,
             SummaryMaxTokens = SummaryMaxTokens,

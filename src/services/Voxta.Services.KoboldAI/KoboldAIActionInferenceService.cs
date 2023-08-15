@@ -20,7 +20,7 @@ public class KoboldAIActionInferenceService : KoboldAIClientBase, IActionInferen
 
     public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new GenericPromptBuilder(Tokenizer);
+        var builder = TextPromptBuilderFactory.Create(Settings.PromptFormat, Tokenizer);
         var prompt = builder.BuildActionInferencePromptString(chat);
         _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, KoboldAIConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);

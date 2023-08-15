@@ -4,7 +4,7 @@ using Voxta.Services.MessageBased;
 
 namespace Voxta.Services.OpenAI;
 
-public class OpenAIPromptBuilder : MessageBasedPromptBuilder
+public class OpenAIPromptBuilder : MessagePromptBuilder
 {
     public OpenAIPromptBuilder(ITokenizer tokenizer)
         : base(tokenizer)

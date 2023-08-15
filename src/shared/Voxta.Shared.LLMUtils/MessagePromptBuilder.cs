@@ -5,19 +5,19 @@ using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.MessageBased;
 
-public abstract class MessageBasedPromptBuilder
+public abstract class MessagePromptBuilder
 {
     protected virtual bool PostHistorySupport => true;
     
     private readonly ITimeProvider _timeProvider;
     private readonly ITokenizer _tokenizer;
 
-    protected MessageBasedPromptBuilder(ITokenizer tokenizer)
+    protected MessagePromptBuilder(ITokenizer tokenizer)
         : this(tokenizer, TimeProvider.Current)
     {
     }
 
-    protected MessageBasedPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
+    protected MessagePromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
     {
         _tokenizer = tokenizer;
         _timeProvider = timeProvider;
@@ -48,6 +48,7 @@ public abstract class MessageBasedPromptBuilder
                     if (!memorySb.AppendLineLinux(memory.Text)) break;
                 }
             }
+            memorySb.AppendLineLinux();
         }
 
         if (memorySb.Tokens > 0)
@@ -167,7 +168,7 @@ public abstract class MessageBasedPromptBuilder
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Value);
         else
-            sb.AppendLineLinux($"This is a conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}.  Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character.");
+            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about {chat.User.Name}.");
         
         sb.AppendLineLinux();
         
@@ -183,7 +184,6 @@ public abstract class MessageBasedPromptBuilder
             sb.AppendLineLinux(chat.Context.Value);
         if (chat.Actions is { Length: > 1 })
             sb.AppendLineLinux($"Optional actions {character.Name} can do: {string.Join(", ", chat.Actions.Select(x => $"[{x}]"))}");
-        sb.AppendLineLinux($"Only write a single reply from {character.Name} for natural speech.");
         return sb.ToTextData();
     }
 

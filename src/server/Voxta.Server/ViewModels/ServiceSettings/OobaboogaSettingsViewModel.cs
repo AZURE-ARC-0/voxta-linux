@@ -3,19 +3,12 @@ using Voxta.Services.Oobabooga;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
-public class OobaboogaSettingsViewModel : LLMServiceSettingsViewModel
+public class OobaboogaSettingsViewModel : RemoteLLMServiceSettingsViewModelBase<OobaboogaParameters>
 {
-    public required string Uri { get; set; }
-
-    public OobaboogaSettingsViewModel()
-    {
-    }
-
     [SetsRequiredMembers]
     public OobaboogaSettingsViewModel(OobaboogaSettings source)
-        : base(source, source.Parameters ?? new OobaboogaParameters(), source.Parameters != null)
+        : base(source)
     {
-        Uri = source.Uri;
     }
 
     public OobaboogaSettings ToSettings()
@@ -24,6 +17,7 @@ public class OobaboogaSettingsViewModel : LLMServiceSettingsViewModel
         {
             Enabled = Enabled,
             Uri = Uri.TrimCopyPasteArtefacts(),
+            PromptFormat = PromptFormat,
             MaxContextTokens = MaxContextTokens,
             MaxMemoryTokens = MaxMemoryTokens,
             SummaryMaxTokens = SummaryMaxTokens,

@@ -3,15 +3,13 @@ using Voxta.Services.TextGenerationInference;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
-public class TextGenerationInferenceSettingsViewModel : LLMServiceSettingsViewModel
+[Serializable]
+public class TextGenerationInferenceSettingsViewModel : RemoteLLMServiceSettingsViewModelBase<TextGenerationInferenceParameters>
 {
-    public required string Uri { get; set; }
-
     [SetsRequiredMembers]
     public TextGenerationInferenceSettingsViewModel(TextGenerationInferenceSettings source)
-        : base(source, source.Parameters ?? new TextGenerationInferenceParameters(), source.Parameters != null)
+        : base(source)
     {
-        Uri = source.Uri;
     }
 
     public TextGenerationInferenceSettings ToSettings()
@@ -20,6 +18,7 @@ public class TextGenerationInferenceSettingsViewModel : LLMServiceSettingsViewMo
         {
             Enabled = Enabled,
             Uri = Uri.TrimCopyPasteArtefacts(),
+            PromptFormat = PromptFormat,
             MaxContextTokens = MaxContextTokens,
             MaxMemoryTokens = MaxMemoryTokens,
             SummaryMaxTokens = SummaryMaxTokens,

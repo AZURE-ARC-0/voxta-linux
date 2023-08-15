@@ -1,11 +1,12 @@
-﻿using Voxta.Abstractions.Model;
+﻿using System.Text;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.NovelAI;
 
-public class NovelAIPromptBuilder : GenericPromptBuilder
+public class NovelAIPromptBuilder : TextPromptBuilder
 {
     private readonly ITokenizer _tokenizer;
 
@@ -19,6 +20,24 @@ public class NovelAIPromptBuilder : GenericPromptBuilder
         : base(tokenizer, timeProvider)
     {
         _tokenizer = tokenizer;
+    }
+    
+    protected override void FormatMessage(StringBuilder sb, IChatInferenceData chat, MessageData message)
+    {
+        if (message.Role == ChatMessageRole.System)
+        {
+            sb.AppendLineLinux(message.Value);
+            return;
+        }
+        
+        sb.Append(message.Role switch
+        {
+            ChatMessageRole.Assistant => chat.Character.Name,
+            ChatMessageRole.User => chat.User.Name,
+            _ => throw new ArgumentOutOfRangeException(null, $"Unknown role: {message.Role}")
+        });
+        sb.Append(": ");
+        sb.AppendLineLinux(message.Value);
     }
 
     // https://docs.novelai.net/text/chatformat.html

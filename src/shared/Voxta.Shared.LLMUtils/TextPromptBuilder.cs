@@ -6,7 +6,7 @@ using Voxta.Services.MessageBased;
 
 namespace Voxta.Shared.LLMUtils;
 
-public class GenericPromptBuilder : MessageBasedPromptBuilder
+public class TextPromptBuilder : MessagePromptBuilder
 {
     public string[] SummarizationStopTokens => new[] { "\n\n" };
     
@@ -16,13 +16,13 @@ public class GenericPromptBuilder : MessageBasedPromptBuilder
 
     private readonly Dictionary<string, int> _userPrefixTokens = new();
 
-    public GenericPromptBuilder(ITokenizer tokenizer)
+    public TextPromptBuilder(ITokenizer tokenizer)
         : base(tokenizer)
     {
         _tokenizer = tokenizer;
     }
 
-    public GenericPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
+    public TextPromptBuilder(ITokenizer tokenizer, ITimeProvider timeProvider)
         : base(tokenizer, timeProvider)
     {
         _tokenizer = tokenizer;
@@ -39,7 +39,7 @@ public class GenericPromptBuilder : MessageBasedPromptBuilder
 
     public string BuildReplyPromptString(IChatInferenceData chat, int maxMemoryTokens, int maxTokens)
     {
-        var query = $"\n{chat.Character.Name}:";
+        var query = $"{chat.Character.Name}:";
         var queryTokens = _tokenizer.CountTokens(query);
         var messages = BuildReplyPrompt(chat, maxMemoryTokens, maxTokens - queryTokens);
         return StringifyMessages(chat, messages, query);
@@ -48,7 +48,7 @@ public class GenericPromptBuilder : MessageBasedPromptBuilder
     public string BuildActionInferencePromptString(IChatInferenceData chat)
     {
         var messages = BuildActionInferencePrompt(chat);
-        return StringifyMessages(chat, messages, "Action: [");
+        return StringifyMessages(chat, messages, "\nAction: [");
     }
 
     public string BuildSummarizationPromptString(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize)
@@ -57,23 +57,37 @@ public class GenericPromptBuilder : MessageBasedPromptBuilder
         return StringifyMessages(chat, messages, "");
     }
 
-    private static string StringifyMessages(IChatInferenceData chat, List<MessageData> messages, string query)
+    private string StringifyMessages(IChatInferenceData chat, List<MessageData> messages, string query)
     {
         var sb = new StringBuilder(messages.Sum(m => m.Value.Length + 4));
+        BeginMessages(sb);
         foreach (var message in messages)
         {
-            sb.Append(message.Role switch
-            {
-                ChatMessageRole.System => "System",
-                ChatMessageRole.Assistant => chat.Character.Name,
-                ChatMessageRole.User => chat.User.Name,
-                _ => throw new ArgumentOutOfRangeException(null, $"Unknown role: {message.Role}")
-            });
-            sb.Append(": ");
-            sb.AppendLineLinux(message.Value);
+            FormatMessage(sb, chat, message);
         }
-
-        sb.Append(query);
+        EndMessages(sb, query);
         return sb.ToString();
+    }
+
+    protected virtual void BeginMessages(StringBuilder sb)
+    {
+    }
+
+    protected virtual void EndMessages(StringBuilder sb, string query)
+    {
+        sb.Append(query);
+    }
+
+    protected virtual void FormatMessage(StringBuilder sb, IChatInferenceData chat, MessageData message)
+    {
+        sb.Append(message.Role switch
+        {
+            ChatMessageRole.System => "System",
+            ChatMessageRole.Assistant => chat.Character.Name,
+            ChatMessageRole.User => chat.User.Name,
+            _ => throw new ArgumentOutOfRangeException(null, $"Unknown role: {message.Role}")
+        });
+        sb.Append(": ");
+        sb.AppendLineLinux(message.Value);
     }
 }

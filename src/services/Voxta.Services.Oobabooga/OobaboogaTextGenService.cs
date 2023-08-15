@@ -20,7 +20,7 @@ public class OobaboogaTextGenService : OobaboogaClientBase, ITextGenService
 
     public async ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new GenericPromptBuilder(Tokenizer);
+        var builder = TextPromptBuilderFactory.Create(Settings.PromptFormat, Tokenizer);
         var prompt = builder.BuildReplyPromptString(chat, Settings.MaxMemoryTokens, Settings.MaxContextTokens);
         _serviceObserver.Record(ServiceObserverKeys.TextGenService, OobaboogaConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);

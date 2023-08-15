@@ -20,7 +20,7 @@ public class OobaboogaActionInferenceService : OobaboogaClientBase, IActionInfer
 
     public async ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)
     {
-        var builder = new GenericPromptBuilder(Tokenizer);
+        var builder = TextPromptBuilderFactory.Create(Settings.PromptFormat, Tokenizer);
         var prompt = builder.BuildActionInferencePromptString(chat);
         _serviceObserver.Record(ServiceObserverKeys.ActionInferenceService, OobaboogaConstants.ServiceName);
         _serviceObserver.Record(ServiceObserverKeys.ActionInferencePrompt, prompt);
