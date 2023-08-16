@@ -7,7 +7,7 @@ public class SettingsViewModel
 {
     public required ProfileSettings? Profile { get; init; }
     public required ConfiguredServiceViewModel[] Services { get; init; }
-    public required ServiceAssignationTypesViewModel[] ServiceTypes { get; init; }
+    public required ServiceLinksViewModel[] ServiceTypes { get; init; }
 }
 
 public class ConfiguredServiceViewModel

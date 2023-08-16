@@ -4,41 +4,8 @@
     ViewBag.Title = "Settings";
 }
 
-
 @section head {
-    <style>
-        .tooltip2 {
-          position: relative;
-          display: inline-block;
-          cursor: pointer;
-          border-bottom: 1px dotted black; /*optional, to indicate a tooltip is available */
-        }
-        
-        .tooltip2 .tooltip-text {
-          visibility: hidden;
-          width: 60vw;
-          background-color: #555;
-          color: #fff;
-          text-align: left;
-          padding: 5px;
-          border-radius: 6px;
-          
-          /* Positioning */
-          position: absolute;
-          z-index: 1;
-          bottom: 100%; 
-          left: -50%;
-        
-          /* Fade-in effect */
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-        
-        .tooltip2:hover .tooltip-text {
-          visibility: visible;
-          opacity: 1;
-        }
-    </style>
+    <script src="/scripts/pages/settings/settings-page.js"></script>
 }
 
 <div class="container">
@@ -192,102 +159,16 @@
     
     @foreach (var serviceType in Model.ServiceTypes)
     {
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h2>
-                    @serviceType.Title
-                </h2>
-                <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_@serviceType.Name" aria-expanded="false" aria-controls="collapseHelp_@serviceType.Name">
-                    <i class="bi bi-question-circle"></i>
-                </button>
-            </div>
-            <div class="card-body">
-                <div class="collapse" id="collapseHelp_@serviceType.Name">
-                    @Html.Raw(serviceType.Help)
-                </div>
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th scope="col" style="width: 80px;">Status</th>
-                        <th scope="col" style="width: 250px;">Service</th>
-                        <th scope="col">Message</th>
-                        <th scope="col" style="width: 80px;"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var s in serviceType.Services)
-                    {
-                        <tr>
-                            <td>
-                                @if (!s.IsReady)
-                                {
-                                    <i class="bi bi-dash-circle-fill text-secondary"></i>
-                                }
-                                else if (s.IsHealthy)
-                                {
-                                    <i class="bi bi-check-circle-fill text-success"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-exclamation-circle-fill text-danger"></i>
-                                }
-                            </td>
-                            <td>
-                                @s.Label
-                            </td>
-                            <td>
-                                @if (s.IsTested || s is { IsReady: true,IsHealthy: false })
-                                {
-                                    <code class="tooltip2">
-                                        @s.Status
-                                        @if (!string.IsNullOrEmpty(s.Details))
-                                        {
-                                            <span class="tooltip-text"><pre>@s.Details.Trim()</pre></span>
-                                        }
-                                    </code>
-                                }
-                                else if (!s.IsReady)
-                                {
-                                    <span class="text-muted">Disabled</span>
-                                }
-                                else
-                                {
-                                    <span>Ready</span>
-                                }
-                            </td>
-                            <td class="text-end">
-                                <div class="d-inline-flex">
-                                    @if (serviceType.Services[0] == s)
-                                    {
-                                        <input type="submit" value="Primary" class="btn btn-sm btn-dark me-2" disabled="disabled"/>
-                                    }
-                                    else
-                                    {
-                                        using (Html.BeginForm("Reorder", "Settings"))
-                                        {
-                                            <input type="hidden" name="direction" value="up"/>
-                                            <input type="hidden" name="type" value="@serviceType.Name"/>
-                                            <input type="hidden" name="name" value="@s.ServiceName"/>
-                                            <input type="submit" value="Move Up" class="btn btn-sm btn-dark me-2"/>
-                                        }
-                                    }
-                                    <a class="btn btn-sm btn-secondary" href="/settings/@s.ServiceName.ToLower()">Configure</a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <partial name="Settings/_ServiceSelector" model="@serviceType" />
     }
+    
     <div class="card mb-3">
         <div class="card-header">
             <h2>Test</h2>
         </div>
         <div class="card-body">
             <div class="d-flex justify-content-center text-center">
-                <form asp-action="TestAllSettings">
+                <form asp-action="TestAllSettings" asp-controller="Diagnostics">
                     <input type="hidden" name="test" value="true"/>
                     <p class="text-muted pl-2">Click once and wait for the results, it may take some time.</p>
                     <p><button id="testBtn" type="submit" class="btn btn-primary"><i class="bi bi-journal-check"></i> Test Now</button></p>

@@ -35,4 +35,17 @@ public class DiagnosticsController : Controller
         };
         return View(vm);
     }
+
+    #warning BRING THIS BACK
+    [HttpPost("/diagnostics/test")]
+    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
+    public async Task<IActionResult> TestAllSettings([FromForm] bool test, CancellationToken cancellationToken)
+    {
+        if (!test) throw new InvalidOperationException("Unexpected settings test without test flag.");
+
+        throw new NotImplementedException();
+        //
+        // var vm = await GetSettingsViewModel(() => _diagnosticsUtil.TestAllServicesAsync(cancellationToken), cancellationToken);
+        //  return View("Settings", vm);
+    }
 }
