@@ -1,30 +1,28 @@
 ﻿@model Voxta.Server.ViewModels.Settings.ServiceLinksViewModel
 
-<input type="hidden" id="orderedServices" name="orderedServices" />
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <h4>@Model.Title</h4>
 
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h2>
-            @Model.Title
-        </h2>
-        <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_@Model.Type" aria-expanded="false" aria-controls="collapseHelp_@Model.Type">
-            <i class="bi bi-question-circle"></i>
-        </button>
-    </div>
-    <div class="card-body">
-        <div class="collapse" id="collapseHelp_@Model.Type">
-            @Html.Raw(Model.Help)
-        </div>
+    <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_@Model.Type" aria-expanded="false" aria-controls="collapseHelp_@Model.Type">
+        <i class="bi bi-question-circle"></i>
+    </button>
+</div>
 
-        <h4>Order</h4>
-        <div class="service-ordering list-group" data-servicetype="@Model.Type">
-            @foreach (var service in Model.ServiceLinks.Where(x => x.Enabled))
-            {
-                <div id="@($"serviceLink__{Model.Type}_{service.ServiceName}_{service.ServiceId}")" class="service-ordering-item list-group-item" draggable="true" data-servicelink="@service.ServiceLinkString">
-                    @service.ServiceName
-                </div>
-            }
+<div class="collapse alert alert-secondary" id="collapseHelp_@Model.Type">
+    @Html.Raw(Model.Help)
+</div>
+
+<div class="service-ordering list-group" data-servicetype="@Model.Type">
+    @if (Model.ServiceLinks.Count == 0)
+    {
+        <div class="alert alert-danger">
+            You don't have any services configured. Please configure at least one service.
         </div>
-        
-    </div>
+    }
+    @foreach (var service in Model.ServiceLinks.Where(x => x.Enabled))
+    {
+        <div id="@($"serviceLink__{Model.Type}_{service.ServiceName}_{service.ServiceId}")" class="service-ordering-item list-group-item" draggable="true" data-servicelink="@service.ServiceLinkString">
+            @service.ServiceName
+        </div>
+    }
 </div>

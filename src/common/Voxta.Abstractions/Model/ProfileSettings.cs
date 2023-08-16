@@ -31,4 +31,8 @@ public class ProfileSettings
     public ServicesList TextToSpeech { get; set; } = new();
     public ServicesList TextGen { get; set; } = new();
     public ServicesList Summarization { get; set; } = new();
+
+
+    public DateTimeOffset Created { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset LastConnected { get; set; } = DateTimeOffset.UtcNow;
 }

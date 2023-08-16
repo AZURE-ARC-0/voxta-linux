@@ -49,5 +49,6 @@ public class ServiceDefinition
     public required bool TextGen { get; init; }
     public required bool ActionInference { get; init; }
     public required bool Summarization { get; init; }
+    
     public required Type? SettingsType { get; init; }
 }

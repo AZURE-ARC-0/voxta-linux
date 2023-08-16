@@ -47,47 +47,50 @@ public class SettingsController : Controller
                 ServiceDefinition = _serviceDefinitionsRegistry.Get(x.ServiceName)
             })
             .ToList();
-
+        
         var serviceTypes = new ServiceLinksViewModel[]
         {
             new()
             {
                 Type = "stt",
                 Title = "Speech To Text Services",
-                ServiceLinks = linkVms.Where(s => s.ServiceDefinition.STT).ToList(),
+                ServiceLinks = GetServiceLinks(profile.SpeechToText, linkVms, s => s.ServiceDefinition.STT),
                 Help = """
-                   <p>Azure Speech Service is highly recommended because it supports punctuation and works extremely well. It is also free up to a point. Otherwise, Vosk is free, fast and runs locally, despite being inferior to Azure.</p>
-                   """
+                       <p>Allows you to speak using your voice.</p>
+                       <p>Azure Speech Service is highly recommended because it supports punctuation and works extremely well. It is also free up to a point. Otherwise, Vosk is free, fast and runs locally, despite being inferior to Azure.</p>
+                       """
             },
             new()
             {
                 Type = "textgen",
                 Title = "Text Generation Services",
-                ServiceLinks = linkVms.Where(s => s.ServiceDefinition.TextGen).ToList(),
+                ServiceLinks = GetServiceLinks(profile.TextGen, linkVms, s => s.ServiceDefinition.TextGen),
                 Help = """
-                   <p>Some recommendations:</p>
-                   <ul>
-                       <li>
-                           <p><b>Easy, fast and unrestricted: NovelAI</b></p>
-                           <p>For fast and natural speech with minimal setup, use NovelAI for both Text Gen and TTS.</p>
-                       </li>
-                       <li>
-                           <p><b>Easy, fast, coherent but restricted: OpenAI</b></p>
-                           <p>For a helpful AI that knows things and can really help with questions, use OpenAI for Text Gen. GPT-4 is very good, but also much slower and more expensive.</p>
-                       </li>
-                       <li>
-                           <p><b>Unrestricted, but slower, requires a GPU and some efforts to setup: Text Generation Web UI or KoboldAI</b></p>
-                           <p>For unrestricted chat, use Text Generation Web UI or KoboldAI for TextGen. You need to host them yourself or on RunPod.io (or another host), and they are more complicated to setup, but they won't cost you anything and they can run completely locally.</p>
-                       </li>
-                   </ul>
-                   """
+                       <p>The brain of the AI, this is what writes the replies.</p>
+                       <p>Some recommendations:</p>
+                       <ul>
+                           <li>
+                               <p><b>Easy, fast and unrestricted: NovelAI</b></p>
+                               <p>For fast and natural speech with minimal setup, use NovelAI for both Text Gen and TTS.</p>
+                           </li>
+                           <li>
+                               <p><b>Easy, fast, coherent but restricted: OpenAI</b></p>
+                               <p>For a helpful AI that knows things and can really help with questions, use OpenAI for Text Gen. GPT-4 is very good, but also much slower and more expensive.</p>
+                           </li>
+                           <li>
+                               <p><b>Unrestricted, but slower, requires a GPU and some efforts to setup: Text Generation Web UI or KoboldAI</b></p>
+                               <p>For unrestricted chat, use Text Generation Web UI or KoboldAI for TextGen. You need to host them yourself or on RunPod.io (or another host), and they are more complicated to setup, but they won't cost you anything and they can run completely locally.</p>
+                           </li>
+                       </ul>
+                       """
             },
             new()
             {
                 Type = "tts",
                 Title = "Text To Speech Services",
-                ServiceLinks = linkVms.Where(s => s.ServiceDefinition.TTS).ToList(),
+                ServiceLinks = GetServiceLinks(profile.TextToSpeech, linkVms, s => s.ServiceDefinition.TTS),
                 Help = """
+                   <p>This is what gives a voice to the character.</p>
                    <p>Some recommendations:</p>
                    <ul>
                        <li>
@@ -109,8 +112,9 @@ public class SettingsController : Controller
             {
                 Type = "action_inference",
                 Title = "Action Inference Services",
-                ServiceLinks = linkVms.Where(s => s.ServiceDefinition.ActionInference).ToList(),
+                ServiceLinks = GetServiceLinks(profile.ActionInference, linkVms, s => s.ServiceDefinition.ActionInference),
                 Help = """
+                       <p>This is what allows the AI to do things with their avatar in virtual reality.</p>
                        <p>You should use OpenAI, even for NSFW, unless you want to experiment with other LLMs. Keep in mind, the LLM must be good to do action inference correctly.</p>
                        """
             },
@@ -118,8 +122,9 @@ public class SettingsController : Controller
             {
                 Type = "summarization",
                 Title = "Summarization Services",
-                ServiceLinks = linkVms.Where(s => s.ServiceDefinition.Summarization).ToList(),
+                ServiceLinks = GetServiceLinks(profile.Summarization, linkVms, s => s.ServiceDefinition.Summarization),
                 Help = """
+                   <p>This is what allows longer conversations by compression memories.</p>
                    <p>Summarization is used to replace long chat history by summaries. This results in a stronger character adherence and faster inference.</p>
                    """
             }
@@ -140,6 +145,15 @@ public class SettingsController : Controller
             ServiceTypes = serviceTypes
         };
         return View(vm);
+    }
+
+    private static List<ServiceLinkViewModel> GetServiceLinks(ServicesList services, IReadOnlyCollection<ServiceLinkViewModel> linkVms, Func<ServiceLinkViewModel, bool> filter)
+    {
+        var filtered = linkVms.Where(filter).ToList();
+        var result = services.Services
+            .Select(x => linkVms.FirstOrDefault(l => l.ServiceId == x.ServiceId) ?? filtered.First(l => l.ServiceName == x.ServiceName))
+            .ToList();
+        return result;
     }
 
     [HttpPost("/settings/reorder")]
