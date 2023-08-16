@@ -31,7 +31,8 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
         _logger = loggerFactory.CreateLogger<WindowsSpeechSpeechToText>();
     }
     
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(TODO, cancellationToken);
         if (settings == null) return false;

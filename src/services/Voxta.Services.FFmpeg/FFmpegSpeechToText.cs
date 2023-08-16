@@ -25,7 +25,8 @@ public sealed class FFmpegSpeechToText : ISpeechToTextService
         _settingsRepository = settingsRepository;
     }
 
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (_initialized) return true;
         _initialized = true;

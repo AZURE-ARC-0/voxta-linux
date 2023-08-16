@@ -6,7 +6,7 @@ using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
-using Voxta.Shared.RemoteServicesUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.OpenAI;
 

@@ -3,5 +3,5 @@
 [Serializable]
 public class ServiceMap
 {
-    public string? Service { get; init; }
+    public Guid? Service { get; init; }
 }

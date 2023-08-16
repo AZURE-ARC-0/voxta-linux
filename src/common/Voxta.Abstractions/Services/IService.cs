@@ -4,5 +4,6 @@ public interface IService : IDisposable
 {
     string ServiceName { get; }
     string[] Features { get; }
-    Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken);
+    Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken);
 }

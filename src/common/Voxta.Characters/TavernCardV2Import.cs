@@ -47,9 +47,9 @@ public static class TavernCardV2Import
         var prerequisites = GetPrerequisites(data);
         var charIdValue =  GetString(data.Extensions, "voxta/charId", Crypto.CreateCryptographicallySecureGuid().ToString());
         var cultureValue = GetString(data.Extensions, "voxta/culture", "en-US");
-        var textGenValue = GetString(data.Extensions, "voxta/textgen/service", "");
-        var ttsValue = GetString(data.Extensions, "voxta/tts/service", "");
-        var voiceValue = GetString(data.Extensions, "voxta/tts/voice", "");
+        // var textGenValue = GetString(data.Extensions, "voxta/textgen/service", "");
+        // var ttsValue = GetString(data.Extensions, "voxta/tts/service", "");
+        // var voiceValue = GetString(data.Extensions, "voxta/tts/voice", "");
         var thinkingSpeechValue = GetString(data.Extensions, "voxta/options/enable_thinking_speech", "true") == "true";
         
         return new Character
@@ -67,17 +67,18 @@ public static class TavernCardV2Import
             Culture = cultureValue,
             Prerequisites = prerequisites,
             ReadOnly = false,
+            #warning Would be nice to keep the service type at least
             Services = new CharacterServicesMap
             {
-                TextGen = new ServiceMap
-                {
-                    Service = textGenValue
-                },
-                SpeechGen = new VoiceServiceMap
-                {
-                    Service = ttsValue,
-                    Voice = voiceValue
-                },
+                // TextGen = new ServiceMap
+                // {
+                //     Service = textGenValue
+                // },
+                // SpeechGen = new VoiceServiceMap
+                // {
+                //     Service = ttsValue,
+                //     Voice = voiceValue
+                // },
             },
             Options = new()
             {

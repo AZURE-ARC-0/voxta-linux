@@ -52,7 +52,7 @@ public abstract class IntegrationTestsBase
         
         var client = sp.GetRequiredService<TClient>();
         
-        var initialized = await client.TryInitializeAsync(Array.Empty<string>(), "en-US", false, CancellationToken.None);
+        var initialized = await client.TryInitializeAsync(TODO, Array.Empty<string>(), "en-US", false, CancellationToken.None);
         if (!initialized) throw new Exception("Failed to initialize client");
 
         return client;

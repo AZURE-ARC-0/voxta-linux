@@ -9,7 +9,7 @@ using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
 using Voxta.Services.NovelAI.Presets;
-using Voxta.Shared.RemoteServicesUtils;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.NovelAI;
 

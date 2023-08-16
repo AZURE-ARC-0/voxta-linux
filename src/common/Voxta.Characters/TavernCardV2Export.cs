@@ -28,9 +28,10 @@ public static class TavernCardV2Export
                     { "voxta/charId", character.Id.ToString() },
                     { "voxta/prerequisites", character.Prerequisites != null ? string.Join(",", character.Prerequisites) : "" },
                     { "voxta/culture", character.Culture },
-                    { "voxta/textgen/service", character.Services.TextGen.Service ?? "" },
-                    { "voxta/tts/service", character.Services.SpeechGen.Service ?? "" },
-                    { "voxta/tts/voice", character.Services.SpeechGen.Voice ?? "" },
+                    #warning Would be nice to keep the service type at least
+                    // { "voxta/textgen/service", character.Services.TextGen.Service ?? "" },
+                    // { "voxta/tts/service", character.Services.SpeechGen.Service ?? "" },
+                    // { "voxta/tts/voice", character.Services.SpeechGen.Voice ?? "" },
                     { "voxta/options/enable_thinking_speech", character.Options?.EnableThinkingSpeech ?? true ? "true" : "false" },
                 },
                 CharacterBook = ConvertBook(book)

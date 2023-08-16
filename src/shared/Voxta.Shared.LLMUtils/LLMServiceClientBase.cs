@@ -3,9 +3,8 @@ using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Tokenizers;
-using Voxta.Shared.LLMUtils;
 
-namespace Voxta.Shared.RemoteServicesUtils;
+namespace Voxta.Shared.LLMUtils;
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputParameters>
@@ -46,11 +45,9 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         _settingsRepository = settingsRepository;
     }
 
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<TSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        var settings = await _settingsRepository.GetRequiredAsync<TSettings>(serviceId, cancellationToken);
         Parameters = settings.Parameters ?? CreateDefaultParameters(settings);
         Settings = settings;
         return await TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken);

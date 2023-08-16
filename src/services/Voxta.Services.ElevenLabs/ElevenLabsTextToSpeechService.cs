@@ -39,7 +39,8 @@ public class ElevenLabsTextToSpeechService : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(TODO, cancellationToken);
         if (settings == null) return false;

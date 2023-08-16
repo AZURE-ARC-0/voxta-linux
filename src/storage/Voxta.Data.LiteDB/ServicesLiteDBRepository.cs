@@ -21,6 +21,12 @@ public class ServicesLiteDBRepository : IServicesRepository
         return Task.FromResult(services);
     }
 
+    public Task<ConfiguredService?> GetServiceAsync(Guid serviceId, CancellationToken cancellationToken = default)
+    {
+        var services = _servicesCollection.FindOne(x => x.Id == serviceId);
+        return Task.FromResult<ConfiguredService?>(services);
+    }
+
     public Task<ConfiguredService<T>?> GetAsync<T>(Guid serviceId, CancellationToken cancellationToken = default) where T : SettingsBase
     {
         var collection = _db.GetCollection<T>();

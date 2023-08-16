@@ -45,7 +45,8 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         global::Vosk.Vosk.SetLogLevel(-1);
     }
 
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (_initialized) return true;
         _initialized = true;

@@ -48,7 +48,8 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceTextToSpeech>();
     }
     
-    public async Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(TODO, cancellationToken);
         if (settings == null) return false;

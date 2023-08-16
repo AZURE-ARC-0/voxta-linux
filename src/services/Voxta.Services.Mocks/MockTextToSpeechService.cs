@@ -12,7 +12,8 @@ public class MockTextToSpeechService : ITextToSpeechService
     public string ContentType => "audio/x-wav";
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
-    public Task<bool> TryInitializeAsync(string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    public Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         return Task.FromResult(true);
     }
