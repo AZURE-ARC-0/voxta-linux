@@ -7,10 +7,12 @@ namespace Voxta.Services.TextGenerationInference;
 
 public class TextGenerationInferenceClientBase : RemoteLLMServiceClientBase<TextGenerationInferenceSettings, TextGenerationInferenceParameters, TextGenerationInferenceParametersBody>
 {
+    public override string ServiceName => TextGenerationInferenceConstants.ServiceName;
+    
     protected override string GenerateRequestPath => "/generate_stream";
     
     protected TextGenerationInferenceClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
-        : base(TextGenerationInferenceConstants.ServiceName, httpClientFactory, settingsRepository)
+        : base(httpClientFactory, settingsRepository)
     {
     }
 

@@ -68,7 +68,7 @@ public class ServiceSettingsController : Controller
             Settings = value.Settings,
         });
         
-        return RedirectToAction("MockSettings");
+        return RedirectToAction("MockSettings", new { serviceId });
     }
 
     [HttpPost("/settings/mocks/{serviceId:guid}/delete")]
@@ -126,7 +126,7 @@ public class ServiceSettingsController : Controller
             }
         });
         
-        return RedirectToAction("AzureSpeechServiceSettings");
+        return RedirectToAction("AzureSpeechServiceSettings", new { serviceId });
     }
 
     [HttpPost("/settings/azurespeechservice/{serviceId:guid}/delete")]
@@ -182,7 +182,7 @@ public class ServiceSettingsController : Controller
             }
         });
         
-        return RedirectToAction("VoskSettings");
+        return RedirectToAction("VoskSettings", new { serviceId });
     }
     
     [HttpPost("/settings/vosk/{serviceId:guid}/delete")]
@@ -246,7 +246,7 @@ public class ServiceSettingsController : Controller
             },
         });
         
-        return RedirectToAction("ElevenLabsSettings");
+        return RedirectToAction("ElevenLabsSettings", new { serviceId });
     }
 
     [HttpPost("/settings/elevenlabs/{serviceId:guid}/delete")]
@@ -287,7 +287,7 @@ public class ServiceSettingsController : Controller
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
         
-        return RedirectToAction("TextGenerationWebUISettings");
+        return RedirectToAction("TextGenerationWebUISettings", new { serviceId });
     }
     
     [HttpPost("/settings/textgenerationwebui/{serviceId:guid}/delete")]
@@ -328,7 +328,7 @@ public class ServiceSettingsController : Controller
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
         
-        return RedirectToAction("KoboldAISettings");
+        return RedirectToAction("KoboldAISettings", new { serviceId });
     }
     
     [HttpPost("/settings/koboldai/{serviceId:guid}/delete")]
@@ -369,7 +369,7 @@ public class ServiceSettingsController : Controller
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
         
-        return RedirectToAction("TextGenerationInferenceSettings");
+        return RedirectToAction("TextGenerationInferenceSettings", new { serviceId });
     }
     
     [HttpPost("/settings/textgenerationinference/{serviceId:guid}/delete")]
@@ -410,7 +410,7 @@ public class ServiceSettingsController : Controller
         var settings = value.ToSettings(serviceId, _encryptionProvider);
         await _servicesRepository.SaveAsync(settings);
         
-        return RedirectToAction("NovelAISettings");
+        return RedirectToAction("NovelAISettings", new { serviceId });
     }
 
     [HttpPost("/settings/novelai/{serviceId:guid}/delete")]
@@ -452,7 +452,7 @@ public class ServiceSettingsController : Controller
         var settings = value.ToSettings(serviceId, _encryptionProvider);
         await _servicesRepository.SaveAsync(settings);
         
-        return RedirectToAction("OpenAISettings");
+        return RedirectToAction("OpenAISettings", new { serviceId });
     }
     
     [HttpPost("/settings/openai/{serviceId:guid}/delete")]
@@ -510,7 +510,7 @@ public class ServiceSettingsController : Controller
             }
         });
         
-        return RedirectToAction("WindowsSpeechSettings");
+        return RedirectToAction("WindowsSpeechSettings", new { serviceId });
         #else
         throw new PlatformNotSupportedException();
         #endif
@@ -567,7 +567,7 @@ public class ServiceSettingsController : Controller
             }
         });
         
-        return RedirectToAction("FFmpegSettings");
+        return RedirectToAction("FFmpegSettings", new { serviceId });
         #else
         throw new PlatformNotSupportedException();
         #endif

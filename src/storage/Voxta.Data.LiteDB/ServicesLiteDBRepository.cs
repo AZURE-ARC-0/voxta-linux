@@ -21,9 +21,15 @@ public class ServicesLiteDBRepository : IServicesRepository
         return Task.FromResult(services);
     }
 
-    public Task<ConfiguredService?> GetServiceAsync(Guid serviceId, CancellationToken cancellationToken = default)
+    public Task<ConfiguredService?> GetServiceByIdAsync(Guid serviceId, CancellationToken cancellationToken = default)
     {
         var services = _servicesCollection.FindOne(x => x.Id == serviceId);
+        return Task.FromResult<ConfiguredService?>(services);
+    }
+
+    public Task<ConfiguredService?> GetServiceByNameAsync(string serviceName, CancellationToken cancellationToken = default)
+    {
+        var services = _servicesCollection.FindOne(x => x.ServiceName == serviceName && x.Enabled);
         return Task.FromResult<ConfiguredService?>(services);
     }
 

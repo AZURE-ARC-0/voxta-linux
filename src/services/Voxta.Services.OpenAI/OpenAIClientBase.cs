@@ -21,20 +21,24 @@ public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, Op
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
     
+    public override string ServiceName => OpenAIConstants.ServiceName;
+    
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
     private string _model = "gpt-3.5-turbo";
 
     protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
-        : base(OpenAIConstants.ServiceName, settingsRepository)
+        : base(settingsRepository)
     {
         _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
-    protected override Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        return Task.FromResult(TryInitializeSync(settings, dry));
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
+        return TryInitializeSync(settings, dry);
     }
 
     private bool TryInitializeSync(OpenAISettings settings, bool dry)

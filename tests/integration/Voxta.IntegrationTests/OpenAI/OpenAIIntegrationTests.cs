@@ -15,7 +15,7 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
         var chat = CreateChat(CatherineCharacter.Create());
         chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
 
-        var client = await CreateClientAsync<OpenAITextGenClient>();
+        var client = await CreateClientAsync<OpenAITextGenClient>(OpenAIConstants.ServiceName);
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");
@@ -35,7 +35,7 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "This fills me with joy!");
         chat.Actions = new[] { "cry", "think", "leave", "smile", "frown" };
 
-        var client = await CreateClientAsync<OpenAIActionInferenceClient>();
+        var client = await CreateClientAsync<OpenAIActionInferenceClient>(OpenAIConstants.ServiceName);
         var action = await client.SelectActionAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");
@@ -60,7 +60,7 @@ public class OpenAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.User, "Really? That's uncommon!");
         chat.AddMessage(chat.Character, "I guess I'm not your typical girl!");
 
-        var client = await CreateClientAsync<OpenAISummarizationService>();
+        var client = await CreateClientAsync<OpenAISummarizationService>(OpenAIConstants.ServiceName);
         var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt (System)");

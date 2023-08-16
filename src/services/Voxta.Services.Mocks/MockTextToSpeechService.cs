@@ -3,19 +3,16 @@ using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Services;
 using NAudio.Utils;
 using NAudio.Wave;
+using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Services.Mocks;
 
-public class MockTextToSpeechService : ITextToSpeechService
+public class MockTextToSpeechService : MockServiceBase, ITextToSpeechService
 {
-    public string ServiceName => MockConstants.ServiceName;
     public string ContentType => "audio/x-wav";
-    public string[] Features => new[] { ServiceFeatures.NSFW };
 
-    public Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    public MockTextToSpeechService(ISettingsRepository settingsRepository) : base(settingsRepository)
     {
-        return Task.FromResult(true);
     }
 
     public string[] GetThinkingSpeech()
@@ -42,7 +39,7 @@ public class MockTextToSpeechService : ITextToSpeechService
         ms.Seek(0, SeekOrigin.Begin);
         await tunnel.SendAsync(new AudioData(ms, ContentType), cancellationToken);
     }
-    
+
     private static void GenerateSineWave(double frequency, double duration, Stream outputStream)
     {
         var sampleRate = 44100;
@@ -57,9 +54,5 @@ public class MockTextToSpeechService : ITextToSpeechService
             var value = (float)Math.Sin(i * angleStep);
             writer.WriteSample(value);
         }
-    }
-
-    public void Dispose()
-    {
     }
 }

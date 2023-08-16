@@ -9,7 +9,7 @@ namespace Voxta.Core;
 
 public interface ISpeechGenerator : IDisposable
 {
-    string ServiceName { get; }
+    ServiceLink? Link { get; }
     string? Voice { get; }
     Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken);
     Task<string?> LoadSpeechAsync(string file, string thinkingSpeechId, bool b, CancellationToken cancellationToken);
@@ -33,7 +33,7 @@ public class SpeechGeneratorFactory
         audioConverter.SelectOutputContentType(acceptContentTypes, service.ContentType);
 
         if (audioPath == null)
-            return new RemoteSpeechGenerator(service.ServiceName, ttsVoice ?? "", culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
+            return new RemoteSpeechGenerator(service.SettingsRef, ttsVoice ?? "", culture, _sp.GetRequiredService<PendingSpeechManager>(), audioConverter.ContentType);
 
         return new LocalSpeechGenerator(service, ttsVoice ?? "", culture, _sp.GetRequiredService<ITemporaryFileCleanup>(), audioPath, audioConverter);
     }
@@ -41,7 +41,7 @@ public class SpeechGeneratorFactory
 
 public class NoSpeechGenerator : ISpeechGenerator
 {
-    public string ServiceName => "None";
+    public ServiceLink? Link => null;
     public string Voice => "None";
     
     public Task<string?> CreateSpeechAsync(string text, string id, bool reusable, CancellationToken cancellationToken)
@@ -61,7 +61,7 @@ public class NoSpeechGenerator : ISpeechGenerator
 
 public class LocalSpeechGenerator : ISpeechGenerator
 {
-    public string ServiceName => _textToSpeechService.ServiceName;
+    public ServiceLink Link => _textToSpeechService.SettingsRef.ToLink();
     public string Voice => _ttsVoice;
     
     private readonly ITextToSpeechService _textToSpeechService;
@@ -90,7 +90,8 @@ public class LocalSpeechGenerator : ISpeechGenerator
             _temporaryFileCleanup.MarkForDeletion(speechUrl, false);
         await _textToSpeechService.GenerateSpeechAsync(new SpeechRequest
             {
-                Service = _textToSpeechService.ServiceName,
+                ServiceName = _textToSpeechService.SettingsRef.ServiceName,
+                ServiceId = _textToSpeechService.SettingsRef.ServiceId,
                 Text = text,
                 Voice = _ttsVoice,
                 Culture = _culture,
@@ -122,16 +123,16 @@ public class LocalSpeechGenerator : ISpeechGenerator
 
 public class RemoteSpeechGenerator : ISpeechGenerator
 {
-    public string ServiceName => _ttsService;
+    public ServiceLink Link => _ttsService.ToLink();
     public string Voice => _ttsVoice;
     
-    private readonly string _ttsService;
+    private readonly ServiceSettingsRef _ttsService;
     private readonly string _ttsVoice;
     private readonly PendingSpeechManager _pendingSpeech;
     private readonly string _contentType;
     private readonly string _culture;
 
-    public RemoteSpeechGenerator(string ttsService, string ttsVoice, string culture, PendingSpeechManager pendingSpeech, string contentType)
+    public RemoteSpeechGenerator(ServiceSettingsRef ttsService, string ttsVoice, string culture, PendingSpeechManager pendingSpeech, string contentType)
     {
         _ttsService = ttsService;
         _ttsVoice = ttsVoice;
@@ -145,7 +146,8 @@ public class RemoteSpeechGenerator : ISpeechGenerator
         var pendingId = Crypto.CreateCryptographicallySecureGuid().ToString();
         _pendingSpeech.Push(pendingId, new SpeechRequest
         {
-            Service = _ttsService,
+            ServiceName = _ttsService.ServiceName,
+            ServiceId = _ttsService.ServiceId,
             Text = text,
             Voice = _ttsVoice,
             Culture = _culture,

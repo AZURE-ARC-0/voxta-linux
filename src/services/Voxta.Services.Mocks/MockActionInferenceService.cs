@@ -1,17 +1,13 @@
 ﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 
 namespace Voxta.Services.Mocks;
 
-public class MockActionInferenceService : IActionInferenceService
+public class MockActionInferenceService : MockServiceBase, IActionInferenceService
 {
-    public string ServiceName => MockConstants.ServiceName;
-    public string[] Features => new[] { ServiceFeatures.NSFW };
-    
-    public Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    public MockActionInferenceService(ISettingsRepository settingsRepository) : base(settingsRepository)
     {
-        return Task.FromResult(true);
     }
 
     public ValueTask<string> SelectActionAsync(IChatInferenceData chat, CancellationToken cancellationToken)

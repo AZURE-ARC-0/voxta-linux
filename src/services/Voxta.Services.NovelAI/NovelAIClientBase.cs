@@ -21,6 +21,8 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
+    public override string ServiceName => NovelAIConstants.ServiceName;
+
     protected override ITokenizer Tokenizer { get; } = new NovelAITokenizer();
     
     private readonly HttpClient _httpClient;
@@ -28,15 +30,17 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
     private string _model = NovelAISettings.KayraV1;
 
     protected NovelAIClientBase(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILocalEncryptionProvider encryptionProvider)
-    :base(NovelAIConstants.ServiceName, settingsRepository)
+        : base(settingsRepository)
     {
         _encryptionProvider = encryptionProvider;
         _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
     }
     
-    protected override Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        return Task.FromResult(TryInitializeSync(settings, prerequisites, culture, dry));
+        if (await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
+        return TryInitializeSync(settings, prerequisites, culture, dry);
     }
 
     private bool TryInitializeSync(NovelAISettings settings, string[] prerequisites, string culture, bool dry)

@@ -19,7 +19,7 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "Oh, I think I'm blushing... that would be anything, as long as I'm with you!");
         chat.AddMessage(chat.User, "You're cute, you know that?");
 
-        var client = await CreateClientAsync<OobaboogaTextGenService>();
+        var client = await CreateClientAsync<OobaboogaTextGenService>(OobaboogaConstants.ServiceName);
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
@@ -37,7 +37,7 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "This fills me with joy!");
         chat.Actions = new[] { "cry", "think", "leave", "smile", "frown" };
 
-        var client = await CreateClientAsync<OobaboogaActionInferenceService>();
+        var client = await CreateClientAsync<OobaboogaActionInferenceService>(OobaboogaConstants.ServiceName);
         var action = await client.SelectActionAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
@@ -64,7 +64,7 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.User, "Ok, well what do you like?");
         chat.AddMessage(chat.Character, "I like you! ... I hope that's okay with you?");
 
-        var client = await CreateClientAsync<OobaboogaSummarizationService>();
+        var client = await CreateClientAsync<OobaboogaSummarizationService>(OobaboogaConstants.ServiceName);
         var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt");

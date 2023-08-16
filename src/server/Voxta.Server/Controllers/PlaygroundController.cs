@@ -38,7 +38,7 @@ public class PlaygroundController : Controller
         if (profile == null) return RedirectToAction("Settings", "Settings");
         return View(new TextToSpeechPlaygroundViewModel
         {
-            Services = profile.TextToSpeech.Services.Select(OptionViewModel.Create).ToList(),
+            Services = profile.TextToSpeech.Services.Select(l => OptionViewModel.Create(l.ServiceId.ToString(), l.ServiceName)).ToList(),
             Cultures = CultureUtils.Bcp47LanguageTags.Select(x => new OptionViewModel(x.Name, x.Label)).ToList(),
         });
     }
@@ -78,9 +78,11 @@ public class PlaygroundController : Controller
         string result;
         try
         {
+            #warning Test this and other Service! occurrences
+            var link = new ServiceLink(vm.Service!);
             if (data.Template == "Reply")
             {
-                var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
                 var processor = new ChatTextProcessor(profile, character.Name, CultureInfo.GetCultureInfoByIetfLanguageTag(character.Culture), textGen);
                 result = await textGen.GenerateReplyAsync(new ChatSessionData
                 {
@@ -105,8 +107,7 @@ public class PlaygroundController : Controller
             }
             else if (data.Template == "ActionInference")
             {
-                var svc = await actionInferenceServiceFactory.CreateBestMatchAsync(profile.ActionInference,
-                    vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var svc = await actionInferenceServiceFactory.CreateBestMatchAsync(profile.ActionInference, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
                 result = await svc.SelectActionAsync(new ChatSessionData
                 {
                     Chat = null!,
@@ -136,7 +137,7 @@ public class PlaygroundController : Controller
             }
             else
             {
-                var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, vm.Service ?? "", Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
                 result = await textGen.GenerateAsync(vm.Prompt, cancellationToken);
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
             }
@@ -156,7 +157,7 @@ public class PlaygroundController : Controller
     private async Task<TextGenPlaygroundViewModel> GetTextGenViewModel(ProfileSettings profile, string? service, CancellationToken cancellationToken, Character? character)
     {
         var services = new[] { new OptionViewModel("", "Automatic") }
-            .Concat(profile.TextGen.Services.Select(OptionViewModel.Create))
+            .Concat(profile.TextGen.Services.Select(x => OptionViewModel.Create(x.ServiceName, x.ServiceName)))
             .ToList();
 
         var characters = await _characterRepository.GetCharactersListAsync(cancellationToken);
@@ -164,7 +165,7 @@ public class PlaygroundController : Controller
         return new TextGenPlaygroundViewModel
         {
             Services = services,
-            Service = service ?? character?.Services.TextGen.Service,
+            Service = service ?? character?.Services.TextGen.Service?.ServiceName,
             Characters = characters.Select(c => new OptionViewModel(c.Id.ToString(), c.Name)).ToList(),
             Character = character?.Id.ToString(),
             Culture = character?.Culture ?? "en-US",

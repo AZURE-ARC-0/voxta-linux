@@ -8,12 +8,11 @@ using Voxta.Abstractions.Services;
 
 namespace Voxta.Services.WindowsSpeech;
 
-public class WindowsSpeechSpeechToText : ISpeechToTextService
+public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISpeechToTextService
 {
-    public string ServiceName => WindowsSpeechConstants.ServiceName;
+    public override string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features { get; } = Array.Empty<string>();
     
-    private readonly ISettingsRepository _settingsRepository;
     private readonly ILogger<WindowsSpeechSpeechToText> _logger;
     private SpeechRecognitionEngine ? _recognizer;
     private bool _speaking;
@@ -26,22 +25,21 @@ public class WindowsSpeechSpeechToText : ISpeechToTextService
     public event EventHandler<string>? SpeechRecognitionFinished;
 
     public WindowsSpeechSpeechToText(ISettingsRepository settingsRepository, ILoggerFactory loggerFactory)
+        : base(settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _logger = loggerFactory.CreateLogger<WindowsSpeechSpeechToText>();
     }
     
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(WindowsSpeechSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+        
         if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
         if (dry) return true;
 
         _recognizer = new SpeechRecognitionEngine(CultureInfo.GetCultureInfoByIetfLanguageTag(culture));
         var grammar = new DictationGrammar();
+        // ReSharper disable once MethodHasAsyncOverload
         _recognizer.LoadGrammar(grammar);
         _recognizer.SetInputToDefaultAudioDevice();
         

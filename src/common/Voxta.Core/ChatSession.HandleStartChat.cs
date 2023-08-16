@@ -17,10 +17,10 @@ public partial class ChatSession
     private async ValueTask HandleStartChatAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Beginning chat with {CharacterName}: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.Chat.Id);
-        _logger.LogInformation("Tex Gen: {ServiceName}", _textGen.ServiceName);
-        _logger.LogInformation("Text To Speech: {ServiceName} (voice: {Voice})", _speechGenerator.ServiceName, _speechGenerator.Voice);
-        _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.ServiceName ?? "None");
-        _logger.LogInformation("Speech To Text: {ServiceName}", _speechToText?.ServiceName ?? "None");
+        _logger.LogInformation("Tex Gen: {ServiceName}", _textGen.SettingsRef.ServiceName);
+        _logger.LogInformation("Text To Speech: {ServiceName} (voice: {Voice})", _speechGenerator.Link?.ServiceName ?? "None", _speechGenerator.Voice);
+        _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.SettingsRef.ServiceName ?? "None");
+        _logger.LogInformation("Speech To Text: {ServiceName}", _speechToText?.SettingsRef.ServiceName ?? "None");
         
         var thinkingSpeechUrls = new List<string>(_chatSessionData.ThinkingSpeech?.Length ?? 0);
         if (_chatSessionData.ThinkingSpeech != null)
@@ -42,20 +42,20 @@ public partial class ChatSession
             {
                 TextGen = new ServiceMap
                 {
-                    Service = _textGen.ServiceName,
+                    Service = _textGen.SettingsRef.ToLink(),
                 },
                 SpeechGen = new VoiceServiceMap
                 {
-                    Service = _speechGenerator.ServiceName,
+                    Service = _speechGenerator.Link,
                     Voice = _speechGenerator.Voice,
                 },
                 SpeechToText = new ServiceMap
                 {
-                    Service = _speechToText?.ServiceName ?? "",
+                    Service = _speechToText?.SettingsRef.ToLink(),
                 },
                 ActionInference = new ServiceMap
                 {
-                    Service = _actionInference?.ServiceName ?? "",
+                    Service = _actionInference?.SettingsRef.ToLink(),
                 },
             },
             ThinkingSpeechUrls = thinkingSpeechUrls.ToArray(),
@@ -69,7 +69,7 @@ public partial class ChatSession
 
     private async Task SendFirstMessageAsync(CancellationToken cancellationToken)
     {
-        if (_chatSessionData.Messages.Count == 0 && _chatSessionData.Character.FirstMessage?.HasValue == true)
+        if (_chatSessionData.Messages.Count == 0 && _chatSessionData.Character.FirstMessage.HasValue == true)
         {
             var reply = await AppendMessageAsync(_chatSessionData.Character, _chatSessionData.Character.FirstMessage);
             _logger.LogInformation("Sending first message: {Message}", reply.Value);

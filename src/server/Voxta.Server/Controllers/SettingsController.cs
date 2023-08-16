@@ -177,13 +177,6 @@ public class SettingsController : Controller
             Services = services
         });
     }
-    
-    [HttpPost("/settings/add")]
-    public IActionResult CreateService([FromForm] string serviceName)
-    {
-        #warning TODO
-        return RedirectToAction("Settings");
-    }
 
     [HttpPost("/settings/reorder")]
     public async Task<ActionResult> Reorder([FromForm] string type, [FromForm] string name, [FromForm] string direction)
@@ -220,15 +213,16 @@ public class SettingsController : Controller
         if (direction != "up") throw new NotSupportedException("Only up is supported");
         var index = Array.IndexOf(services.Services, name);
         if (index == 0) return services;
-        var list = new List<string>(services.Services);
+        var list = new List<ServiceLink>(services.Services);
+        var item = services.Services[index];
         if (index == -1)
         {
-            list.Add(name);
+            list.Add(item);
         }
         else
         {
             list.RemoveAt(index);
-            list.Insert(index - 1, name);
+            list.Insert(index - 1, item);
         }
         services.Services = list.ToArray();
         return services;

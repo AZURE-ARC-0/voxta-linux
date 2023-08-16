@@ -80,6 +80,27 @@ public class LiteDBMigrations
         UpdateCollection("MockSettings", "Mock", false);
         UpdateCollection("VoskSettings", "Vosk", false);
         UpdateCollection("WindowsSpeechSettings", "WindowsSpeech", false);
+        
+        var profileRepository = _db.GetCollection("ProfileSettings");
+        foreach (var profile in profileRepository.FindAll())
+        {
+            profile.Remove("Summarization");
+            profile.Remove("TextGen");
+            profile.Remove("TextToSpeech");
+            profile.Remove("SpeechToText");
+            profile.Remove("ActionInference");
+            profileRepository.Upsert(profile);
+        }
+        var profileRepositoryTyped = _db.GetCollection<ProfileSettings>();
+        foreach (var profile in profileRepositoryTyped.FindAll())
+        {
+            profile.Summarization = new();
+            profile.TextGen = new();
+            profile.TextToSpeech = new();
+            profile.SpeechToText = new();
+            profile.ActionInference = new();
+            profileRepositoryTyped.Upsert(profile);
+        }
     }
 
     private void UpdateCollection(string collectionName, string typeName, bool updateMemory)

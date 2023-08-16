@@ -13,13 +13,12 @@ using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.ElevenLabs;
 
-public class ElevenLabsTextToSpeechService : ITextToSpeechService
+public class ElevenLabsTextToSpeechService : ServiceBase<ElevenLabsSettings>, ITextToSpeechService
 {
-    public string ServiceName => ElevenLabsConstants.ServiceName;
+    public override string ServiceName => ElevenLabsConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly ILogger<ElevenLabsTextToSpeechService> _logger;
-    private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
     private readonly ILocalEncryptionProvider _encryptionProvider;
@@ -30,8 +29,8 @@ public class ElevenLabsTextToSpeechService : ITextToSpeechService
     private string[]? _thinkingSpeech;
 
     public ElevenLabsTextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor, ILocalEncryptionProvider encryptionProvider)
+        : base(settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
         _encryptionProvider = encryptionProvider;
@@ -39,12 +38,10 @@ public class ElevenLabsTextToSpeechService : ITextToSpeechService
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(ElevenLabsSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<ElevenLabsSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
         if (string.IsNullOrEmpty(settings.ApiKey)) throw new AuthenticationException("ElevenLabs token is missing.");
         if (dry) return true;
         

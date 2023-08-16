@@ -32,10 +32,11 @@ public class SpeechController : ControllerBase
             return;
         }
         
-        if (string.IsNullOrEmpty(speechRequest.Service)) throw new InvalidOperationException("TTS service must be resolved prior to adding to pending speech.");
+        if (string.IsNullOrEmpty(speechRequest.ServiceName)) throw new InvalidOperationException("TTS service must be resolved prior to adding to pending speech.");
 
         // NOTE: Here we don't specify prerequisites because it's too late anyway.
-        var textToSpeech = await speechGenFactory.CreateSpecificAsync(speechRequest.Service, speechRequest.Culture, false, cancellationToken);
+        var link = new ServiceLink { ServiceName = speechRequest.ServiceName, ServiceId = speechRequest.ServiceId };
+        var textToSpeech = await speechGenFactory.CreateSpecificAsync(link, speechRequest.Culture, false, cancellationToken);
         audioConverter.SelectOutputContentType(new[] { speechRequest.ContentType }, textToSpeech.ContentType);
         if (speechRequest.Reusable)
         {
@@ -87,9 +88,10 @@ public class SpeechController : ControllerBase
         await Response.SendFileAsync(file, cancellationToken: cancellationToken);
     }
     
-    [HttpGet("/tts/services/{service}/speak")]
+    [HttpGet("/tts/services/{serviceName}/{serviceId}/speak")]
     public async Task Speak(
-        [FromRoute] string service,
+        [FromRoute] string serviceName,
+        [FromRoute] Guid serviceId,
         [FromQuery] string culture,
         [FromQuery] string voice,
         [FromQuery] string text,
@@ -98,10 +100,12 @@ public class SpeechController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        var textToSpeech = await speechGenFactory.CreateSpecificAsync(service, culture, false, cancellationToken);
+        var link = new ServiceLink { ServiceName = serviceName, ServiceId = serviceId };
+        var textToSpeech = await speechGenFactory.CreateSpecificAsync(link, culture, false, cancellationToken);
         var speechRequest = new SpeechRequest
         {
-            Service = service,
+            ServiceName = link.ServiceName,
+            ServiceId = link.ServiceId,
             Voice = voice,
             Culture = culture,
             Text = text,
@@ -112,22 +116,24 @@ public class SpeechController : ControllerBase
         await textToSpeech.GenerateSpeechAsync(speechRequest, speechTunnel, cancellationToken);
     }
 
-    [HttpGet("/tts/services/{service}/voices")]
+    [HttpGet("/tts/services/{serviceName}/{serviceId}/voices")]
     public async Task<VoiceInfo[]> GetVoices(
-        [FromRoute] string service,
+        [FromRoute] string serviceName,
+        [FromRoute] Guid serviceId,
         [FromQuery] string culture,
         [FromServices] IServiceFactory<ITextToSpeechService> speechGenFactory,
         CancellationToken cancellationToken
     )
     {
-        if (service == "None")
+        if (serviceName == "None")
         {
             return VoiceInfo.DefaultVoices;
         }
         // NOTE: There is no voices list implementation that require any prerequisites.
         try
         {
-            var textToSpeech = await speechGenFactory.CreateSpecificAsync(service, culture, false, cancellationToken);
+            var link = new ServiceLink { ServiceName = serviceName, ServiceId = serviceId };
+            var textToSpeech = await speechGenFactory.CreateSpecificAsync(link, culture, false, cancellationToken);
             return await textToSpeech.GetVoicesAsync(cancellationToken);
         }
         catch (ServiceDisabledException)

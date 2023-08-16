@@ -4,35 +4,29 @@ using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Services.FFmpeg;
 
-public sealed class FFmpegSpeechToText : ISpeechToTextService
+public sealed class FFmpegSpeechToText : ServiceBase<FFmpegSettings>, ISpeechToTextService
 {
-    public string ServiceName => FFmpegConstants.ServiceName;
+    public override string ServiceName => FFmpegConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IRecordingService _recordingService;
-    private readonly ISettingsRepository _settingsRepository;
 
     private bool _disposed;
-    private bool _initialized;
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
     public event EventHandler<string>? SpeechRecognitionFinished;
 
     public FFmpegSpeechToText(IRecordingService recordingService, ISettingsRepository settingsRepository)
+        : base(settingsRepository)
     {
         _recordingService = recordingService;
-        _settingsRepository = settingsRepository;
     }
 
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(FFmpegSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        if (_initialized) return true;
-        _initialized = true;
-        var settings = await _settingsRepository.GetAsync<FFmpegSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
         if (dry) return true;
         
         if (_disposed) throw new ObjectDisposedException(nameof(FFmpegSpeechToText));

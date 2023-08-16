@@ -11,7 +11,7 @@ using VoiceInfo = Voxta.Abstractions.Model.VoiceInfo;
 
 namespace Voxta.Services.AzureSpeechService;
 
-public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
+public class AzureSpeechServiceTextToSpeech : ServiceBase<AzureSpeechServiceSettings>, ITextToSpeechService
 {
     [SuppressMessage("ReSharper", "StringLiteralTypo")] private static readonly string[] RestrictedVoices = new[]
     {
@@ -29,31 +29,27 @@ public class AzureSpeechServiceTextToSpeech : ITextToSpeechService
         "zh-CN-XiaoyouNeural",
     };
     
-    public string ServiceName => AzureSpeechServiceConstants.ServiceName;
-    
+    public override string ServiceName => AzureSpeechServiceConstants.ServiceName;
     public string[] Features { get; private set; } = Array.Empty<string>();
 
     private readonly ILogger<AzureSpeechServiceTextToSpeech> _logger;
-    private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private SpeechSynthesizer? _speechSynthesizer;
     private string _culture = "en-US";
 
     public AzureSpeechServiceTextToSpeech(ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ILocalEncryptionProvider encryptionProvider)
+        : base(settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceTextToSpeech>();
     }
     
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(AzureSpeechServiceSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+        
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;

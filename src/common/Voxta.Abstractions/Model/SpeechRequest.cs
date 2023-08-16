@@ -2,7 +2,8 @@
 
 public class SpeechRequest
 {
-    public required string Service { get; init; }
+    public required string ServiceName { get; init; }
+    public required Guid? ServiceId { get; init; }
     public required string Text { get; init; }
     public required string Voice { get; init; }
     public required string ContentType { get; init; }

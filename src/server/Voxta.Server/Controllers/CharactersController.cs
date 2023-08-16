@@ -71,14 +71,9 @@ public class CharactersController : Controller
                 PostHistoryInstructions = "",
                 Services = new CharacterServicesMap
                 {
-                    TextGen = new ServiceMap
-                    {
-                        Service = "",
-                    },
                     SpeechGen = new VoiceServiceMap
                     {
-                        Service = "",
-                        Voice = "",
+                        Voice = SpecialVoices.Undefined,
                     },
                 },
                 Options = new CharacterOptions
@@ -142,7 +137,7 @@ public class CharactersController : Controller
     {
         VoiceInfo[] voices; 
 
-        if (!string.IsNullOrEmpty(character.Services.SpeechGen.Service))
+        if (character.Services.SpeechGen.Service != null)
         {
             try
             {

@@ -2,12 +2,13 @@
 using AutoMapper;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
 using Voxta.Abstractions.Tokenizers;
 
 namespace Voxta.Shared.LLMUtils;
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
-public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputParameters>
+public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputParameters> : ServiceBase<TSettings>
     where TSettings : LLMSettingsBase<TInputParameters>
     where TInputParameters : new()
 {   
@@ -24,7 +25,6 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         Mapper = config.CreateMapper();
     }
     
-    public string ServiceName { get; }
     public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.GPT3 };
 
     private TSettings? _settings;
@@ -37,28 +37,24 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
     
     protected TInputParameters? Parameters { get; private set; }
     
-    private readonly ISettingsRepository _settingsRepository;
-
-    protected LLMServiceClientBase(string serviceName, ISettingsRepository settingsRepository)
+    protected LLMServiceClientBase(ISettingsRepository settingsRepository)
+        : base(settingsRepository)
     {
-        ServiceName = serviceName;
-        _settingsRepository = settingsRepository;
     }
 
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetRequiredAsync<TSettings>(serviceId, cancellationToken);
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
         Parameters = settings.Parameters ?? CreateDefaultParameters(settings);
         Settings = settings;
-        return await TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken);
+        return true;
     }
 
     protected virtual TInputParameters CreateDefaultParameters(TSettings settings)
     {
         return new TInputParameters();
     }
-
-    protected abstract Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken);
 
     public int GetTokenCount(string message)
     {

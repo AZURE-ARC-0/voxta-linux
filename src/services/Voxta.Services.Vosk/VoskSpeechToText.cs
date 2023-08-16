@@ -7,7 +7,7 @@ using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Services.Vosk;
 
-public sealed class VoskSpeechToText : ISpeechToTextService
+public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextService
 {
     private const int SampleRate = 16000;
     
@@ -17,16 +17,15 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
     
-    public string ServiceName => VoskConstants.ServiceName;
+    public override string ServiceName => VoskConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IVoskModelDownloader _modelDownloader;
     private readonly IRecordingService _recordingService;
-    private readonly ISettingsRepository _settingsRepository;
 
     private VoskRecognizer? _recognizer;
     private bool _disposed;
-    private bool _initialized;
+    private bool _semaphoreInitialized;
     private string[]? _ignoredWords;
 
     public event EventHandler? SpeechRecognitionStarted;
@@ -34,10 +33,10 @@ public sealed class VoskSpeechToText : ISpeechToTextService
     public event EventHandler<string>? SpeechRecognitionFinished;
 
     public VoskSpeechToText(IVoskModelDownloader modelDownloader, IRecordingService recordingService, ISettingsRepository settingsRepository)
+        : base(settingsRepository)
     {
         _modelDownloader = modelDownloader;
         _recordingService = recordingService;
-        _settingsRepository = settingsRepository;
     }
 
     static VoskSpeechToText()
@@ -45,20 +44,17 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         global::Vosk.Vosk.SetLogLevel(-1);
     }
 
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(VoskSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        if (_initialized) return true;
-        _initialized = true;
-        var settings = await _settingsRepository.GetAsync<VoskSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+        
         if (string.IsNullOrEmpty(settings.Model)) return false;
         if (!settings.Model.Contains(culture, StringComparison.InvariantCultureIgnoreCase)) return false;
         if (dry) return true;
         
         if (_disposed) throw new ObjectDisposedException(nameof(VoskSpeechToText));
         await Semaphore.WaitAsync(cancellationToken);
+        _semaphoreInitialized = true;
         if (_disposed) return false;
         var model = await _modelDownloader.AcquireModelAsync(settings.Model, settings.ModelHash, cancellationToken);
         _ignoredWords = settings.IgnoredWords;
@@ -132,7 +128,7 @@ public sealed class VoskSpeechToText : ISpeechToTextService
         _recognizer?.Dispose();
         try
         {
-            if (_initialized) Semaphore.Release();
+            if (_semaphoreInitialized) Semaphore.Release();
         }
         catch (SemaphoreFullException)
         {

@@ -31,10 +31,10 @@ public class WebSocketTest
         {
             Id = Guid.Empty.ToString(),
             Name = "User",
-            TextGen = new ServicesList { Services = new[] { "Mocks" } },
-            SpeechToText = new ServicesList { Services = new[] { "Mocks" } },
-            TextToSpeech = new ServicesList { Services = new[] { "Mocks" } },
-            ActionInference = new ServicesList { Services = new[] { "Mocks" } },
+            TextGen = new ServicesList { Services = new[] { new ServiceLink("Mocks") } },
+            SpeechToText = new ServicesList { Services = new[] { new ServiceLink("Mocks") } },
+            TextToSpeech = new ServicesList { Services = new[] { new ServiceLink("Mocks") } },
+            ActionInference = new ServicesList { Services = new[] { new ServiceLink("Mocks") } },
         });
             
         var webDir = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "..", "..", "..", "src", "server", "Voxta.Server"));
@@ -95,10 +95,10 @@ public class WebSocketTest
         Assert.Multiple(() =>
         {
             Assert.That(ready.ChatId, Is.Not.EqualTo(Guid.Empty));
-            Assert.That(ready.Services.TextGen.Service, Is.EqualTo("Mocks"));
-            Assert.That(ready.Services.SpeechGen.Service, Is.EqualTo("Mocks"));
-            Assert.That(ready.Services.ActionInference.Service, Is.EqualTo("Mocks"));
-            Assert.That(ready.Services.SpeechToText.Service, Is.EqualTo(""));
+            Assert.That(ready.Services.TextGen.Service?.ServiceName, Is.EqualTo("Mocks"));
+            Assert.That(ready.Services.SpeechGen.Service?.ServiceName, Is.EqualTo("Mocks"));
+            Assert.That(ready.Services.ActionInference.Service?.ServiceName, Is.EqualTo("Mocks"));
+            Assert.That(ready.Services.SpeechToText.Service?.ServiceName, Is.EqualTo(""));
         });
         
         var firstMsg = await Receive<ServerReplyMessage>();

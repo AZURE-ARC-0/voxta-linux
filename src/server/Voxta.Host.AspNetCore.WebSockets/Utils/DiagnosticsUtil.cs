@@ -158,7 +158,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _textGenFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
+            async () => await _textGenFactory.CreateSpecificAsync(new ServiceLink(serviceName), "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var chat = new ChatSessionData
@@ -192,14 +192,15 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _textToSpeechFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
+            async () => await _textToSpeechFactory.CreateSpecificAsync(new ServiceLink(serviceName), "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var voices = await service.GetVoicesAsync(cancellationToken);
                 var tunnel = new DeadSpeechTunnel();
                 await service.GenerateSpeechAsync(new SpeechRequest
                 {
-                    Service = serviceName,
+                    ServiceName = serviceName,
+                    ServiceId = null,
                     Text = "Hi",
                     Voice = voices.FirstOrDefault()?.Id ?? "default",
                     Culture = "en-US",
@@ -232,7 +233,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _actionInferenceFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
+            async () => await _actionInferenceFactory.CreateSpecificAsync(new ServiceLink(serviceName), "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var actions = new[] { "test_successful", "test_failed" };
@@ -264,7 +265,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _summarizationFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
+            async () => await _summarizationFactory.CreateSpecificAsync(new ServiceLink(serviceName), "en-US", !runTests, cancellationToken),
             async service =>
             {
                 var actions = new[] { "test_successful", "talk_to_user" };
@@ -297,7 +298,7 @@ public class DiagnosticsUtil
         return await TestServiceAsync(
             serviceName,
             runTests,
-            async () => await _speechToTextFactory.CreateSpecificAsync(serviceName, "en-US", !runTests, cancellationToken),
+            async () => await _speechToTextFactory.CreateSpecificAsync(new ServiceLink(serviceName), "en-US", !runTests, cancellationToken),
             _ => Task.FromResult("Cannot be tested automatically")
         );
     }

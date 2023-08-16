@@ -17,6 +17,7 @@
     </div>
     
     <form id="configureForm" method="post" asp-action="PostAzureSpeechServiceSettings">
+        <input type="hidden" asp-for="ServiceName" />
         <div class="card mb-3">
             <div class="card-header">
                 <h2>Configuration</h2>
@@ -30,17 +31,17 @@
                 </div>
                 <div class="mb-3">
                     <label asp-for="Settings.SubscriptionKey">Subscription Key</label>
-                    <input asp-for="Settings.SubscriptionKey" class="form-control" />
+                    <input asp-for="Settings.SubscriptionKey" class="form-control"/>
                     <span asp-validation-for="Settings.SubscriptionKey" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
                     <label asp-for="Settings.Region">Region</label>
-                    <input asp-for="Settings.Region" class="form-control" />
+                    <input asp-for="Settings.Region" class="form-control"/>
                     <span asp-validation-for="Settings.Region" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
                     <label asp-for="Settings.LogFilename">Log Filename</label>
-                    <input asp-for="Settings.LogFilename" class="form-control" />
+                    <input asp-for="Settings.LogFilename" class="form-control"/>
                     <div class="form-text">Only enable this if you have problems with the service. Enter a full path.</div>
                     <span asp-validation-for="Settings.LogFilename" class="text-danger"></span>
                 </div>
@@ -59,6 +60,6 @@
             </div>
         </div>
 
-        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteAzureSpeechServiceSettings")" />
+        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteAzureSpeechServiceSettings")"/>
     </form>
 </div>

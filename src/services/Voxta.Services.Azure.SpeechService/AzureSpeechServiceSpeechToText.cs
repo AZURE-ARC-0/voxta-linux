@@ -9,13 +9,12 @@ using Voxta.Services.AzureSpeechService.Transcribers;
 
 namespace Voxta.Services.AzureSpeechService;
 
-public class AzureSpeechServiceSpeechToText : ISpeechToTextService
+public class AzureSpeechServiceSpeechToText : ServiceBase<AzureSpeechServiceSettings>, ISpeechToTextService
 {
-    public string ServiceName => AzureSpeechServiceConstants.ServiceName;
+    public override string ServiceName => AzureSpeechServiceConstants.ServiceName;
     public string[] Features { get; private set; } = Array.Empty<string>();
     
     private readonly IRecordingService _recordingService;
-    private readonly ISettingsRepository _settingsRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly ILogger<AzureSpeechServiceSpeechToText> _logger;
     private IAzureSpeechTranscriber? _transcriber;
@@ -26,19 +25,17 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
     public event EventHandler<string>? SpeechRecognitionFinished;
 
     public AzureSpeechServiceSpeechToText(IRecordingService recordingService, ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, ILocalEncryptionProvider encryptionProvider)
+        : base(settingsRepository)
     {
         _recordingService = recordingService;
-        _settingsRepository = settingsRepository;
         _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceSpeechToText>();
     }
     
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(AzureSpeechServiceSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<AzureSpeechServiceSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
         if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
@@ -89,7 +86,7 @@ public class AzureSpeechServiceSpeechToText : ISpeechToTextService
                 SpeechRecognitionFinished?.Invoke(this, e);
         };
 
-        _transcriber.Canceled += (_, e) => {
+        _transcriber.Canceled += (_, _) => {
             #warning Here we should notify the UI to stop the loading indicator
             _recordingService.Speaking = false;
         };

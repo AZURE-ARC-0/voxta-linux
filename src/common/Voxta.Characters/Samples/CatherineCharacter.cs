@@ -30,13 +30,8 @@ public static class CatherineCharacter
         Culture = "en-US",
         Services = new()
         {
-            TextGen = new()
-            {
-                Service = "",
-            },
             SpeechGen = new()
             {
-                Service = "",
                 Voice = SpecialVoices.Female
             }
         },

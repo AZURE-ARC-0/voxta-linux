@@ -7,10 +7,11 @@ namespace Voxta.Services.KoboldAI;
 
 public class KoboldAIClientBase : RemoteLLMServiceClientBase<KoboldAISettings, KoboldAIParameters, KoboldAIRequestBody>
 {
+    public override string ServiceName => KoboldAIConstants.ServiceName;
     protected override string GenerateRequestPath => "/api/extra/generate/stream";
 
     protected KoboldAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
-        : base(KoboldAIConstants.ServiceName, httpClientFactory, settingsRepository)
+        : base(httpClientFactory, settingsRepository)
 
     {
         httpClientFactory.CreateClient(KoboldAIConstants.ServiceName);

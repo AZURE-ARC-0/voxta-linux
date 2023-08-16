@@ -30,13 +30,8 @@ public static class GeorgeCharacter
         Culture = "en-US",
         Services = new()
         {
-            TextGen = new()
-            {
-                Service = "",
-            },
             SpeechGen = new()
             {
-                Service = "",
                 Voice = SpecialVoices.Male
             }
         },

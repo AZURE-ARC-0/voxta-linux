@@ -37,11 +37,12 @@ public abstract class IntegrationTestsBase
         ServiceObserver = new TestServiceObserver();
     }
 
-    protected async Task<TClient> CreateClientAsync<TClient>() where TClient : class, IService
+    protected async Task<TClient> CreateClientAsync<TClient>(string serviceName) where TClient : class, IService
     {
         var services = new ServiceCollection();
         services.AddSingleton<IHttpClientFactory>(_ => HttpClientFactory);
         services.AddSingleton(Db);
+        services.AddSingleton<IServicesRepository>(_ => new ServicesLiteDBRepository(Db));
         services.AddSingleton<ISettingsRepository>(_ => new SettingsLiteDBRepository(Db));
         services.AddSingleton<IPerformanceMetrics>(_ => new TestPerformanceMetrics());
         services.AddSingleton<IServiceObserver>(ServiceObserver);
@@ -51,8 +52,10 @@ public abstract class IntegrationTestsBase
         var sp = services.BuildServiceProvider();
         
         var client = sp.GetRequiredService<TClient>();
+        var service = await sp.GetRequiredService<IServicesRepository>().GetServiceByNameAsync(serviceName);
+        if (service == null) throw new Exception($"Service {serviceName} not found");
         
-        var initialized = await client.TryInitializeAsync(TODO, Array.Empty<string>(), "en-US", false, CancellationToken.None);
+        var initialized = await client.TryInitializeAsync(service.Id, Array.Empty<string>(), "en-US", false, CancellationToken.None);
         if (!initialized) throw new Exception("Failed to initialize client");
 
         return client;

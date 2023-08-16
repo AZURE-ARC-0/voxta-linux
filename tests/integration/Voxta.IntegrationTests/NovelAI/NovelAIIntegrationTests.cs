@@ -15,7 +15,7 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         var chat = CreateChat(CatherineCharacter.Create());
         chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
 
-        var client = await CreateClientAsync<NovelAITextGenService>();
+        var client = await CreateClientAsync<NovelAITextGenService>(NovelAIConstants.ServiceName);
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
@@ -33,7 +33,7 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.Character, "This fills me with joy!");
         chat.Actions = new[] { "cry", "think", "leave", "smile", "frown" };
 
-        var client = await CreateClientAsync<NovelAIActionInferenceService>();
+        var client = await CreateClientAsync<NovelAIActionInferenceService>(NovelAIConstants.ServiceName);
         var action = await client.SelectActionAsync(chat, CancellationToken.None);
         
         Console.WriteLine("### Prompt");
@@ -52,7 +52,7 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         chat.AddMessage(chat.User, "I love apples, they taste delicious!");
         chat.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
 
-        var client = await CreateClientAsync<NovelAISummarizationService>();
+        var client = await CreateClientAsync<NovelAISummarizationService>(NovelAIConstants.ServiceName);
         var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
         
         Console.WriteLine("### Prompt");

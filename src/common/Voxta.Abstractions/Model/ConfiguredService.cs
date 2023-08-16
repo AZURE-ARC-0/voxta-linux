@@ -8,7 +8,7 @@ public class ConfiguredService
 {
     [BsonId] public required Guid Id { get; init; } = Guid.Empty;
     public string Label { get; init; } = "";
-    public required string ServiceName { get; init; } = null!;
+    public required string ServiceName { get; set; } = null!;
     public bool Enabled { get; set; } = true;
 }
 

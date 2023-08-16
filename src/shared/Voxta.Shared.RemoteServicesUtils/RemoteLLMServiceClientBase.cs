@@ -26,15 +26,17 @@ public abstract class RemoteLLMServiceClientBase<TSettings, TInputParameters, TO
     
     private readonly HttpClient _httpClient;
 
-    protected RemoteLLMServiceClientBase(string serviceName, IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
-        : base(serviceName, settingsRepository)
+    protected RemoteLLMServiceClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository)
+        : base(settingsRepository)
     {
-        _httpClient = httpClientFactory.CreateClient(serviceName);
+        _httpClient = httpClientFactory.CreateClient(GetType().Name);
     }
 
-    protected override Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        return Task.FromResult(TryInitializeSync(settings, dry));
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+        
+        return TryInitializeSync(settings, dry);
     }
 
     private bool TryInitializeSync(TSettings settings, bool dry)

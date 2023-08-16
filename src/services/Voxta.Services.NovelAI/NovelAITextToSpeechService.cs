@@ -11,35 +11,34 @@ using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.NovelAI;
 
-public class NovelAITextToSpeechService : ITextToSpeechService
+public class NovelAITextToSpeechService : ServiceBase<NovelAISettings>, ITextToSpeechService
 {
-    public string ServiceName => NovelAIConstants.ServiceName;
+    public override string ServiceName => NovelAIConstants.ServiceName;
+
+    public string ContentType => "audio/webm";
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly HttpClient _httpClient;
     private readonly ILogger<NovelAITextToSpeechService> _logger;
-    private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private string[]? _thinkingSpeech;
 
     public NovelAITextToSpeechService(ISettingsRepository settingsRepository, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor, ILocalEncryptionProvider encryptionProvider)
+        : base(settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
         _encryptionProvider = encryptionProvider;
         _logger = loggerFactory.CreateLogger<NovelAITextToSpeechService>();
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
-    
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+
+    protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<NovelAISettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+        
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en")) return false;
         if (dry) return true;
@@ -49,8 +48,6 @@ public class NovelAITextToSpeechService : ITextToSpeechService
         _thinkingSpeech = settings.ThinkingSpeech;
         return true;
     }
-
-    public string ContentType => "audio/webm";
 
     public string[] GetThinkingSpeech()
     {

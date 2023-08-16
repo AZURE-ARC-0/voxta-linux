@@ -11,12 +11,11 @@ using Voxta.Shared.TextToSpeechUtils;
 
 namespace Voxta.Services.WindowsSpeech;
 
-public class WindowsSpeechTextToSpeechService : ITextToSpeechService
+public class WindowsSpeechTextToSpeechService : ServiceBase<WindowsSpeechSettings>, ITextToSpeechService
 {
-    public string ServiceName => WindowsSpeechConstants.ServiceName;
+    public override string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
-    private readonly ISettingsRepository _settingsRepository;
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly ITextToSpeechPreprocessor _preprocessor;
     private CultureInfo _culture = CultureInfo.CurrentCulture;
@@ -24,20 +23,18 @@ public class WindowsSpeechTextToSpeechService : ITextToSpeechService
     private readonly SpeechSynthesizer _synthesizer;
 
     public WindowsSpeechTextToSpeechService(ISettingsRepository settingsRepository, IPerformanceMetrics performanceMetrics, ITextToSpeechPreprocessor preprocessor)
+        : base(settingsRepository)
     {
-        _settingsRepository = settingsRepository;
         _performanceMetrics = performanceMetrics;
         _preprocessor = preprocessor;
         
         _synthesizer = new SpeechSynthesizer();
     }
     
-    public async Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry,
-        CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(WindowsSpeechSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        var settings = await _settingsRepository.GetAsync<WindowsSpeechSettings>(TODO, cancellationToken);
-        if (settings == null) return false;
-        if (!settings.Enabled) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+
         if (dry) return true;
         
         _culture = CultureInfo.GetCultureInfo(culture);

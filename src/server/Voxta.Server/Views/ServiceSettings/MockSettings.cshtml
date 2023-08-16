@@ -17,6 +17,7 @@
     </div>
     
     <form id="configureForm" method="post" asp-action="PostMockSettings">
+        <input type="hidden" asp-for="ServiceName" />
         <div class="card mb-3">
             <div class="card-header">
                 <h2>Configuration</h2>
@@ -31,6 +32,6 @@
             </div>
         </div>
 
-        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteMockSettings")" />
+        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteMockSettings")"/>
     </form>
 </div>
