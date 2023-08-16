@@ -14,6 +14,7 @@ public class ServiceLinksViewModel
 public class ServiceLinkViewModel
 {
     public required bool Enabled { get; init; }
+    public required string? Label { get; init; }
     public required Guid? ServiceId { get; init; }
     public required string ServiceName { get; init; }
     public required ServiceDefinition ServiceDefinition { get; init; }

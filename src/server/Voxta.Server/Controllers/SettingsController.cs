@@ -42,6 +42,7 @@ public class SettingsController : Controller
             .Select(x => new ServiceLinkViewModel
             {
                 Enabled = x.Enabled,
+                Label = x.Label,
                 ServiceName = x.ServiceName,
                 ServiceId = x.Id,
                 ServiceDefinition = _serviceDefinitionsRegistry.Get(x.ServiceName)
@@ -159,6 +160,7 @@ public class SettingsController : Controller
     [HttpPost("/settings/reorder")]
     public async Task<IActionResult> ReorderServices([FromForm] string serviceType, [FromForm] string orderedServices, CancellationToken cancellationToken)
     {
+        #warning Double-click should toggle enabled!!
         var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
         switch (serviceType)
         {

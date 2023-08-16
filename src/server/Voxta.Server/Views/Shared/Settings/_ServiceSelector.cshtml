@@ -1,7 +1,7 @@
 ﻿@model Voxta.Server.ViewModels.Settings.ServiceLinksViewModel
 
 <div class="d-flex justify-content-between align-items-center mt-3">
-    <h4>@Model.Title</h4>
+    <h4>@Model.Title Priority</h4>
 
     <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp_@Model.Type" aria-expanded="false" aria-controls="collapseHelp_@Model.Type">
         <i class="bi bi-question-circle"></i>
@@ -12,17 +12,21 @@
     @Html.Raw(Model.Help)
 </div>
 
-<div class="service-ordering list-group" data-servicetype="@Model.Type">
+<div class="service-ordering nav" data-servicetype="@Model.Type">
     @if (Model.ServiceLinks.Count == 0)
     {
         <div class="alert alert-danger">
             You don't have any services configured. Please configure at least one service.
         </div>
     }
-    @foreach (var service in Model.ServiceLinks.Where(x => x.Enabled))
+    @foreach (var service in Model.ServiceLinks)
     {
-        <div id="@($"serviceLink__{Model.Type}_{service.ServiceName}_{service.ServiceId}")" class="service-ordering-item list-group-item" draggable="true" data-servicelink="@service.ServiceLinkString">
+        <div id="@($"serviceLink__{Model.Type}_{service.ServiceName}_{service.ServiceId}")" class="service-ordering-item alert alert-@(service.Enabled ? "primary" : "secondary") me-2" draggable="true" data-servicelink="@service.ServiceLinkString">
             @service.ServiceName
+            @if (service.Label != null)
+            {
+                @("(" + service.Label + ")")
+            }
         </div>
     }
 </div>
