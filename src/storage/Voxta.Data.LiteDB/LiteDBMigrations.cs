@@ -101,6 +101,30 @@ public class LiteDBMigrations
             profile.ActionInference = new();
             profileRepositoryTyped.Upsert(profile);
         }
+        
+        var characters = _db.GetCollection("Character");
+        var charactersTyped = _db.GetCollection<Character>();
+        foreach (var character in characters.FindAll())
+        {
+            var voice = character["Services"]["SpeechGen"]["Voice"];
+            var tts = character["Services"]["SpeechGen"]["Service"];
+            character.Remove("Services");
+            characters.Upsert(character);
+            // characters.Upsert(character);
+            if (voice != null)
+            {
+                var characterTyped = charactersTyped.FindById(character["_id"]);
+                characterTyped.Services = new CharacterServicesMap
+                {
+                    SpeechToText = new VoiceServiceMap
+                    {
+                        Service = new ServiceLink(tts.AsString),
+                        Voice = voice.AsString,
+                    }
+                };
+                charactersTyped.Upsert(characterTyped);
+            }
+        }
     }
 
     private void UpdateCollection(string collectionName, string typeName, bool updateMemory)

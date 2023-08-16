@@ -10,7 +10,7 @@ public class CharacterCardExtended : CharacterCard
     [RegularExpression(@"^[a-z]{2}-[A-Z]{2}$")]
     public string Culture { get; set; } = "en-US";
     
-    public required CharacterServicesMap Services { get; init; }
+    public required CharacterServicesMap Services { get; set; }
     public CharacterOptions? Options { get; init; }
 }
 
