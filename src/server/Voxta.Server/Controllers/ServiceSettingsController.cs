@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Services;
 using Voxta.Common;
 using Voxta.Server.ViewModels.ServiceSettings;
 using Voxta.Services.KoboldAI;
@@ -26,13 +27,17 @@ namespace Voxta.Server.Controllers;
 [Controller]
 public class ServiceSettingsController : Controller
 {
+    private readonly IProfileRepository _profileRepository;
+    private readonly IServiceDefinitionsRegistry _serviceRegistry;
     private readonly IServicesRepository _servicesRepository;
     private readonly ILocalEncryptionProvider _encryptionProvider;
 
-    public ServiceSettingsController(IServicesRepository servicesRepository, ILocalEncryptionProvider encryptionProvider)
+    public ServiceSettingsController(IServicesRepository servicesRepository, ILocalEncryptionProvider encryptionProvider, IProfileRepository profileRepository, IServiceDefinitionsRegistry serviceRegistry)
     {
         _servicesRepository = servicesRepository;
         _encryptionProvider = encryptionProvider;
+        _profileRepository = profileRepository;
+        _serviceRegistry = serviceRegistry;
     }
     
     [HttpGet("/settings/mocks/{serviceId:guid}")]
@@ -61,6 +66,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("MockSettings", new { serviceId });
     }
@@ -106,6 +112,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("AzureSpeechServiceSettings", new { serviceId });
     }
@@ -144,6 +151,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("VoskSettings", new { serviceId });
     }
@@ -187,6 +195,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("ElevenLabsSettings", new { serviceId });
     }
@@ -228,6 +237,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("TextGenerationWebUISettings", new { serviceId });
     }
@@ -269,6 +279,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("KoboldAISettings", new { serviceId });
     }
@@ -310,6 +321,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("TextGenerationInferenceSettings", new { serviceId });
     }
@@ -351,6 +363,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("NovelAISettings", new { serviceId });
     }
@@ -393,6 +406,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("OpenAISettings", new { serviceId });
     }
@@ -437,6 +451,7 @@ public class ServiceSettingsController : Controller
 
         var settings = value.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("WindowsSpeechSettings", new { serviceId });
         #else
@@ -482,6 +497,7 @@ public class ServiceSettingsController : Controller
 
         var settings = FFmpegSettingsViewModel.ToSettings(serviceId);
         await _servicesRepository.SaveAsync(settings);
+        await UpdateProfileAsync(settings);
         
         return RedirectToAction("FFmpegSettings", new { serviceId });
         #else
@@ -495,5 +511,13 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.DeleteAsync(serviceId);
         
         return RedirectToAction("Settings", "Settings");
+    }
+
+    private async Task UpdateProfileAsync(ConfiguredService settings)
+    {
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        var definition = _serviceRegistry.Get(settings.ServiceName) ?? throw new InvalidOperationException("No such service type");
+        if (profile.EnsureService(settings, definition))
+            await _profileRepository.SaveProfileAsync(profile);
     }
 }
