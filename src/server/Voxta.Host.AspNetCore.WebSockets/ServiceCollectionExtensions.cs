@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
 
     private static void AddAllServices(IServiceCollection services)
     {
-        var helpRegistry = services.AddServiceHelpRegistry();
+        var helpRegistry = services.AddServiceDefinitionsRegistry();
         var speechToTextRegistry = services.AddSpeechToTextRegistry();
         var textGenRegistry = services.AddTextGenRegistry();
         var textToSpeechRegistry = services.AddTextToSpeechRegistry();

@@ -28,7 +28,7 @@ public class OpenAISettingsViewModel : LLMServiceSettingsViewModel
         {
             Id = serviceId,
             ServiceName = OpenAIConstants.ServiceName,
-            Label = Label,
+            Label = string.IsNullOrWhiteSpace(Label) ? null : Label,
             Enabled = Enabled,
             Settings = new OpenAISettings
             {

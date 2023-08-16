@@ -1,5 +1,6 @@
 ﻿using Voxta.Abstractions.Repositories;
 using LiteDB;
+using Voxta.Abstractions.Model;
 
 namespace Voxta.Data.LiteDB;
 

@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Abstractions.Services;
 

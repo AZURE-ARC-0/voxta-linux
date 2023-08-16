@@ -1,4 +1,6 @@
-﻿namespace Voxta.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Model;
+
+namespace Voxta.Abstractions.Repositories;
 
 public interface ISettingsRepository
 {

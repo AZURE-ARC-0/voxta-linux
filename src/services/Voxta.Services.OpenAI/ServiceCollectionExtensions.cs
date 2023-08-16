@@ -13,9 +13,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<OpenAISummarizationService>();
     }
     
-    public static void RegisterOpenAI(this IServiceHelpRegistry registry)
+    public static void RegisterOpenAI(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = OpenAIConstants.ServiceName,
             Label = "OpenAI",
@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             TTS = false,
             Summarization = true,
             ActionInference = true,
+            SettingsType = typeof(OpenAISettings),
         });
     }
     

@@ -14,9 +14,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<FFmpegSpeechToText>();
     }
     
-    public static void RegisterFFmpeg(this IServiceHelpRegistry registry)
+    public static void RegisterFFmpeg(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = FFmpegConstants.ServiceName,
             Label = "FFmpeg",
@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
             TTS = false,
             Summarization = false,
             ActionInference = false,
+            SettingsType = typeof(FFmpegSettings),
         });
     }
     

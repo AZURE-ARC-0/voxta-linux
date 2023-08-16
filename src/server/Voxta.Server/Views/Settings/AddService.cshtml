@@ -43,7 +43,7 @@
             <p>At least one service of each type must be configured and enabled.</p>
             <ul class="list-unstyled">
                 <li>
-                    @if (Model.Services.Any(s => s.Help.TextGen && s.EnabledOccurrences > 0))
+                    @if (Model.Services.Any(s => s.Definition.TextGen && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -54,7 +54,7 @@
                     Text Generation
                 </li>
                 <li>
-                    @if (Model.Services.Any(s => s.Help.TTS && s.EnabledOccurrences > 0))
+                    @if (Model.Services.Any(s => s.Definition.TTS && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -65,7 +65,7 @@
                     Text To Speech
                 </li>
                 <li>
-                    @if (Model.Services.Any(s => s.Help.STT && s.EnabledOccurrences > 0))
+                    @if (Model.Services.Any(s => s.Definition.STT && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -90,7 +90,7 @@
                 <div class="col-sm-4">
                     <div class="card mb-3">
                         <div class="card-body">
-                            <h3>@s.Help.Label</h3>
+                            <h3>@s.Definition.Label</h3>
                             @if (s.Occurrences == 1)
                             {
                                 <p class="text-muted">This service was already configured once.</p>
@@ -100,7 +100,7 @@
                             }
                             <ul class="list-unstyled">
                                 <li>
-                                    @if (s.Help.TextGen)
+                                    @if (s.Definition.TextGen)
                                     {
                                         <i class="bi bi-check-circle-fill text-success"></i>
                                     }
@@ -111,7 +111,7 @@
                                     Text Generation
                                 </li>
                                 <li>
-                                    @if (s.Help.TTS)
+                                    @if (s.Definition.TTS)
                                     {
                                         <i class="bi bi-check-circle-fill text-success"></i>
                                     }
@@ -122,7 +122,7 @@
                                     Text To Speech
                                 </li>
                                 <li>
-                                    @if (s.Help.STT)
+                                    @if (s.Definition.STT)
                                     {
                                         <i class="bi bi-check-circle-fill text-success"></i>
                                     }
@@ -133,7 +133,7 @@
                                     Speech To Text
                                 </li>
                             </ul>
-                            <a href="/services/@s.Help.ServiceName/@Guid.Empty" class="btn btn-primary" title="Configure this service"><i class="bi bi-plus"></i> @(s.Occurrences == 0 ? "Create" : "Add")</a>
+                            <a href="/settings/@s.Definition.ServiceName.ToLowerInvariant()/@Guid.Empty" class="btn btn-primary" title="Configure this service"><i class="bi bi-plus"></i> @(s.Occurrences == 0 ? "Create" : "Add")</a>
                         </div>
                     </div>
                 </div>

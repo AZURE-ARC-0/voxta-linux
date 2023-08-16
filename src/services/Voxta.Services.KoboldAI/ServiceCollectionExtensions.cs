@@ -13,9 +13,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<KoboldAISummarizationService>();
     }
     
-    public static void RegisterKoboldAI(this IServiceHelpRegistry registry)
+    public static void RegisterKoboldAI(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = KoboldAIConstants.ServiceName,
             Label = "KoboldAI",
@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             TTS = false,
             Summarization = true,
             ActionInference = true,
+            SettingsType = typeof(KoboldAISettings),
         });
     }
     

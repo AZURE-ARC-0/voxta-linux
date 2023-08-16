@@ -8,7 +8,7 @@ public class AddServiceViewModel
 
     public class ServiceEntryViewModel
     {
-        public required ServiceHelp Help { get; init; }
+        public required ServiceDefinition Definition { get; init; }
         public required int Occurrences { get; init; }
         public required int EnabledOccurrences { get; init; }
     }

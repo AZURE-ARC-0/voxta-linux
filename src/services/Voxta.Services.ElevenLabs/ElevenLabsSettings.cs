@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Model;
 
 namespace Voxta.Services.ElevenLabs;
 

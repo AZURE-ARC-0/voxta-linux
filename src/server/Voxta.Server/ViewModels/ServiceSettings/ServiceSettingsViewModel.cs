@@ -1,35 +1,22 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 using Voxta.Abstractions.Model;
-using Voxta.Abstractions.Repositories;
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
 [Serializable]
 public class ServiceSettingsViewModel
 {
-    public required string Label { get; init; }
-    public required bool Enabled { get; init; }
-    public required bool UseDefaults { get; init; }
-    public required string Parameters { get; init; }
-
-    protected ServiceSettingsViewModel()
+    public ServiceSettingsViewModel()
     {
-        
     }
-
+    
     [SetsRequiredMembers]
-    protected ServiceSettingsViewModel(ConfiguredService service, SettingsBase source, object parameters, bool useDefaults)
+    protected ServiceSettingsViewModel(ConfiguredService service)
     {
+        Label = string.IsNullOrWhiteSpace(service.Label) ? null : service.Label;
         Enabled = service.Enabled;
-        Label = service.Label;
-        Parameters = JsonSerializer.Serialize(parameters);
-        UseDefaults = useDefaults;
     }
 
-    protected TSettings? GetParameters<TSettings>()
-        where TSettings : class, new()
-    {
-        return UseDefaults ? null : JsonSerializer.Deserialize<TSettings>(Parameters) ?? new TSettings();
-    }
+    public required string? Label { get; init; }
+    public required bool Enabled { get; init; }
 }

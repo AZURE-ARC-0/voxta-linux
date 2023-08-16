@@ -32,7 +32,7 @@ public class NovelAISettingsViewModel : LLMServiceSettingsViewModel
         {
             Id = serviceId,
             ServiceName = NovelAIConstants.ServiceName,
-            Label = Label,
+            Label = string.IsNullOrWhiteSpace(Label) ? null : Label,
             Enabled = Enabled,
             Settings = new NovelAISettings
             {

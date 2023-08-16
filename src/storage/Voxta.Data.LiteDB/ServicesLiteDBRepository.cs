@@ -1,17 +1,20 @@
 ﻿using Voxta.Abstractions.Repositories;
 using LiteDB;
 using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 
 namespace Voxta.Data.LiteDB;
 
 public class ServicesLiteDBRepository : IServicesRepository
 {
     private readonly ILiteDatabase _db;
+    private readonly IServiceDefinitionsRegistry _serviceDefinitionsRegistry;
     private readonly ILiteCollection<ConfiguredService> _servicesCollection;
 
-    public ServicesLiteDBRepository(ILiteDatabase db)
+    public ServicesLiteDBRepository(ILiteDatabase db, IServiceDefinitionsRegistry serviceDefinitionsRegistry)
     {
         _db = db;
+        _serviceDefinitionsRegistry = serviceDefinitionsRegistry;
         _servicesCollection = db.GetCollection<ConfiguredService>();
     }
 
@@ -71,7 +74,9 @@ public class ServicesLiteDBRepository : IServicesRepository
     {
         var service = _servicesCollection.FindOne(x => x.Id == serviceId);
         if (service == null) return Task.CompletedTask;
-        var collection = _db.GetCollection($"{service.ServiceName}Settings");
+        var settingsType = _serviceDefinitionsRegistry.Get(service.ServiceName)?.SettingsType;
+        if (settingsType == null) return Task.CompletedTask;
+        var collection = _db.GetCollection(settingsType.Name);
         _servicesCollection.Delete(serviceId);
         collection.Delete(serviceId);
         return Task.CompletedTask;

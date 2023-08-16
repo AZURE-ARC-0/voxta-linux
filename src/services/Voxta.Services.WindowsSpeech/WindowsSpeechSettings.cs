@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Voxta.Abstractions.Repositories;
+using Voxta.Abstractions.Model;
 
 namespace Voxta.Services.WindowsSpeech;
 

@@ -15,15 +15,15 @@ public class SettingsController : Controller
 {
     private readonly IProfileRepository _profileRepository;
     private readonly IServicesRepository _servicesRepository;
-    private readonly IServiceHelpRegistry _serviceHelpRegistry;
+    private readonly IServiceDefinitionsRegistry _serviceDefinitionsRegistry;
     private readonly DiagnosticsUtil _diagnosticsUtil;
 
-    public SettingsController(IProfileRepository profileRepository, DiagnosticsUtil diagnosticsUtil, IServicesRepository servicesRepository, IServiceHelpRegistry serviceHelpRegistry)
+    public SettingsController(IProfileRepository profileRepository, DiagnosticsUtil diagnosticsUtil, IServicesRepository servicesRepository, IServiceDefinitionsRegistry serviceDefinitionsRegistry)
     {
         _profileRepository = profileRepository;
         _diagnosticsUtil = diagnosticsUtil;
         _servicesRepository = servicesRepository;
-        _serviceHelpRegistry = serviceHelpRegistry;
+        _serviceDefinitionsRegistry = serviceDefinitionsRegistry;
     }
     
     [HttpGet("/settings")]
@@ -63,7 +63,7 @@ public class SettingsController : Controller
             .Select(x => new ConfiguredServiceViewModel
             {
                 Service = x,
-                Help = _serviceHelpRegistry.Get(x.ServiceName),
+                Definition = _serviceDefinitionsRegistry.Get(x.ServiceName),
             })
             .ToArray();
         var vm = new SettingsViewModel
@@ -160,14 +160,14 @@ public class SettingsController : Controller
     }
 
     [HttpGet("/settings/add")]
-    public async Task<IActionResult> AddService([FromServices] IServiceHelpRegistry serviceHelpRegistry, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddService([FromServices] IServiceDefinitionsRegistry serviceDefinitionsRegistry, CancellationToken cancellationToken)
     {
         var configured = await _servicesRepository.GetServicesAsync(cancellationToken);
-        var services = serviceHelpRegistry.List()
+        var services = serviceDefinitionsRegistry.List()
             .OrderBy(s => s.ServiceName)
             .Select(s => new AddServiceViewModel.ServiceEntryViewModel
             {
-                Help = s,
+                Definition = s,
                 Occurrences = configured.Count(x => x.ServiceName == s.ServiceName),
                 EnabledOccurrences = configured.Count(x => x.Enabled && x.ServiceName == s.ServiceName),
             })

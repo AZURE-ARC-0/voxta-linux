@@ -1,6 +1,6 @@
 ﻿using LiteDB;
 
-namespace Voxta.Abstractions.Repositories;
+namespace Voxta.Abstractions.Model;
 
 [Serializable]
 public abstract class SettingsBase

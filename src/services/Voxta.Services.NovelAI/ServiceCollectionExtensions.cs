@@ -15,9 +15,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<NovelAISummarizationService>();
     }
     
-    public static void RegisterNovelAI(this IServiceHelpRegistry registry)
+    public static void RegisterNovelAI(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = NovelAIConstants.ServiceName,
             Label = "NovelAI",
@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
             TTS = true,
             Summarization = true,
             ActionInference = true,
+            SettingsType = typeof(NovelAISettings),
         });
     }
     

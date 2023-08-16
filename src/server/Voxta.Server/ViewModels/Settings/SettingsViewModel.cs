@@ -13,5 +13,5 @@ public class SettingsViewModel
 public class ConfiguredServiceViewModel
 {
     public required ConfiguredService Service { get; init; }
-    public required ServiceHelp Help { get; set; }
+    public required ServiceDefinition Definition { get; set; }
 }

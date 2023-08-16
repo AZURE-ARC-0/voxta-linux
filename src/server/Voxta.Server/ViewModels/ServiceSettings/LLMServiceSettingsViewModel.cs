@@ -5,7 +5,7 @@ using Voxta.Shared.LLMUtils;
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
 [Serializable]
-public abstract class LLMServiceSettingsViewModel : ServiceSettingsViewModel
+public abstract class LLMServiceSettingsViewModel : ServiceSettingsWithParametersViewModel
 {
     public required int MaxContextTokens { get; init; }
     public required int MaxMemoryTokens { get; init; }

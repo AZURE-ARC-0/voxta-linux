@@ -137,51 +137,47 @@
             </div>
             <table class="table table-striped">
                 <thead>
-                <tr>
-                    <th scope="col" style="width: 80px;">Type</th>
-                    <th scope="col">Name</th>
-                    <th scope="col" style="width: 80px;">
-                        @if(Model.Services.Any(x => x.Service.Enabled && x.Help.TextGen)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
-                        TXT
-                    </th>
-                    <th scope="col" style="width: 80px;">
-                        @if(Model.Services.Any(x => x.Service.Enabled && x.Help.TTS)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
-                        TTS
-                    </th>
-                    <th scope="col" style="width: 80px;">
-                        @if(Model.Services.Any(x => x.Service.Enabled && x.Help.STT)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
-                        STT
-                    </th>
-                    <th scope="col" style="width: 80px;"></th>
-                </tr>
+                    <tr>
+                        <th scope="col" style="width: 40%;">Service</th>
+                        <th scope="col">Label</th>
+                        <th scope="col" style="width: 80px;">
+                            @if(Model.Services.Any(x => x.Service.Enabled && x.Definition.TextGen)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                            <span title="Text Generation (Replies, Summarization and Action Inference)">TXT</span>
+                        </th>
+                        <th scope="col" style="width: 80px;">
+                            @if(Model.Services.Any(x => x.Service.Enabled && x.Definition.TTS)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                            <span title="Text To Speech (Synthesizer)">TTS</span>
+                        </th>
+                        <th scope="col" style="width: 80px;">
+                            @if(Model.Services.Any(x => x.Service.Enabled && x.Definition.STT)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                            <span title="Speech To Text (Transcription)">STT</span>
+                        </th>
+                        <th scope="col" style="width: 80px;"></th>
+                    </tr>
                 </thead>
                 <tbody>
                 @foreach (var s in Model.Services)
                 {
                     <tr>
                         <td>
-                            @s.Help.ServiceName
+                            @s.Definition.Label
                         </td>
                         <td>
-                            @s.Help.Label
-                            @if (!string.IsNullOrEmpty(s.Service.Label))
-                            {
-                                <span>(@s.Service.Label)</span>
-                            }
+                            @s.Service.Label
                         </td>
                         @if(s.Service.Enabled)
                         {
-                            <td>@if(s.Help.TextGen) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
-                            <td>@if(s.Help.TTS) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
-                            <td>@if(s.Help.STT) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
+                            <td>@if(s.Definition.TextGen) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
+                            <td>@if(s.Definition.TTS) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
+                            <td>@if(s.Definition.STT) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
                         }
                         else
                         {
-                            <td colspan="3"><span class="text-muted">Disabled</span></td>
+                            <td colspan="3" class="text-center"><span class="text-muted">Disabled</span></td>
                         }
                         <td class="text-end">
                             <div class="d-inline-flex">
-                                <a class="btn btn-sm btn-secondary" href="/settings/@s.Help.ServiceName.ToLowerInvariant()/@s.Service.Id">Configure</a>
+                                <a class="btn btn-sm btn-secondary" href="/settings/@s.Definition.ServiceName.ToLowerInvariant()/@s.Service.Id">Configure</a>
                             </div>
                         </td>
                     </tr>

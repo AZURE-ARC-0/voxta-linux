@@ -18,10 +18,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITimeProvider, TimeProvider>();
     }
     
-    public static IServiceHelpRegistry AddServiceHelpRegistry(this IServiceCollection services)
+    public static IServiceDefinitionsRegistry AddServiceDefinitionsRegistry(this IServiceCollection services)
     {
-        var registry = new ServiceHelpRegistry();
-        services.AddSingleton<IServiceHelpRegistry>(registry);
+        var registry = new ServiceDefinitionsRegistry();
+        services.AddSingleton<IServiceDefinitionsRegistry>(registry);
         return registry;
     }
     

@@ -24,7 +24,7 @@ public class TextGenerationInferenceSettingsViewModel : RemoteLLMServiceSettings
         {
             Id = serviceId,
             ServiceName = TextGenerationInferenceConstants.ServiceName,
-            Label = Label,
+            Label = string.IsNullOrWhiteSpace(Label) ? null : Label,
             Enabled = Enabled,
             Settings = new TextGenerationInferenceSettings
             {

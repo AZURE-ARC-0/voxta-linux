@@ -24,7 +24,7 @@ public class KoboldAISettingsViewModel : RemoteLLMServiceSettingsViewModelBase<K
         {
             Id = serviceId,
             ServiceName = KoboldAIConstants.ServiceName,
-            Label = Label,
+            Label = string.IsNullOrWhiteSpace(Label) ? null : Label,
             Enabled = Enabled,
             Settings = new KoboldAISettings
             {

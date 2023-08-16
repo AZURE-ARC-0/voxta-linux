@@ -13,9 +13,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<OobaboogaSummarizationService>();
     }
     
-    public static void RegisterOobabooga(this IServiceHelpRegistry registry)
+    public static void RegisterOobabooga(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = OobaboogaConstants.ServiceName,
             Label = "Oobabooga Text Generation Web UI",
@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             TTS = false,
             Summarization = true,
             ActionInference = true,
+            SettingsType = typeof(OobaboogaSettings),
         });
     }
     

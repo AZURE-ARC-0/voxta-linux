@@ -13,9 +13,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<TextGenerationInferenceSummarizationService>();
     }
     
-    public static void RegisterTextGenerationInference(this IServiceHelpRegistry registry)
+    public static void RegisterTextGenerationInference(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = TextGenerationInferenceConstants.ServiceName,
             Label = "HuggingFace Text Generation Inference",
@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             TTS = false,
             Summarization = true,
             ActionInference = true,
+            SettingsType = typeof(TextGenerationInferenceSettings),
         });
     }
     

@@ -1,26 +1,26 @@
 ﻿namespace Voxta.Abstractions.Services;
 
-public interface IServiceHelpRegistry
+public interface IServiceDefinitionsRegistry
 {
-    void Add(ServiceHelp serviceHelp);
-    ServiceHelp Get(string serviceName);
-    IEnumerable<ServiceHelp> List();
+    void Add(ServiceDefinition serviceDefinition);
+    ServiceDefinition Get(string serviceName);
+    IEnumerable<ServiceDefinition> List();
 }
 
-public class ServiceHelpRegistry : IServiceHelpRegistry
+public class ServiceDefinitionsRegistry : IServiceDefinitionsRegistry
 {
-    private readonly Dictionary<string, ServiceHelp> _services = new();
+    private readonly Dictionary<string, ServiceDefinition> _services = new();
     
-    public void Add(ServiceHelp serviceHelp)
+    public void Add(ServiceDefinition serviceDefinition)
     {
-        _services.Add(serviceHelp.ServiceName, serviceHelp);
+        _services.Add(serviceDefinition.ServiceName, serviceDefinition);
     }
 
-    public ServiceHelp Get(string serviceName)
+    public ServiceDefinition Get(string serviceName)
     {
         return (_services.TryGetValue(serviceName, out var serviceHelp))
             ? serviceHelp
-            : new ServiceHelp
+            : new ServiceDefinition
             {
                 ServiceName = serviceName,
                 Label = serviceName + " (Unknown)",
@@ -28,17 +28,18 @@ public class ServiceHelpRegistry : IServiceHelpRegistry
                 ActionInference = false,
                 TextGen = false,
                 STT = false,
-                TTS = false
+                TTS = false,
+                SettingsType = null,
             };
     }
 
-    public IEnumerable<ServiceHelp> List()
+    public IEnumerable<ServiceDefinition> List()
     {
         return _services.Values;
     }
 }
 
-public class ServiceHelp
+public class ServiceDefinition
 {
     public required string ServiceName { get; init; }
     public required string Label { get; init; }
@@ -48,4 +49,5 @@ public class ServiceHelp
     public required bool TextGen { get; init; }
     public required bool ActionInference { get; init; }
     public required bool Summarization { get; init; }
+    public required Type? SettingsType { get; init; }
 }

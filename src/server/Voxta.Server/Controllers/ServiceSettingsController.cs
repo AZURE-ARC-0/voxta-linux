@@ -1,6 +1,5 @@
 ﻿#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Repositories;
@@ -37,7 +36,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/mocks/{serviceId:guid}")]
-    public async Task<IActionResult> MockSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> MockSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<MockSettings>(serviceId, cancellationToken) ?? new ConfiguredService<MockSettings>
         {
@@ -45,11 +44,12 @@ public class ServiceSettingsController : Controller
             ServiceName = MockConstants.ServiceName,
             Settings = new MockSettings(),
         };
-        return View(settings);
+        var vm = new MockSettingsViewModel(settings);
+        return View(vm);
     }
     
     [HttpPost("/settings/mocks/{serviceId:guid}")]
-    public async Task<IActionResult> PostMockSettings([FromRoute] Guid serviceId, [FromForm] ConfiguredService<MockSettings> value)
+    public async Task<IActionResult> PostMockSettingsAsync([FromRoute] Guid serviceId, [FromForm] MockSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -59,20 +59,14 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _servicesRepository.SaveAsync(new ConfiguredService<MockSettings>
-        {
-            Id = serviceId,
-            ServiceName = MockConstants.ServiceName,
-            Label = value.Label,
-            Enabled = value.Enabled,
-            Settings = value.Settings,
-        });
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("MockSettings", new { serviceId });
     }
 
     [HttpPost("/settings/mocks/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteMockSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteMockSettingsAsync([FromRoute] Guid serviceId)
     {
         var current = await _servicesRepository.GetAsync<MockSettings>(serviceId);
         if (current != null)
@@ -82,7 +76,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/azurespeechservice/{serviceId:guid}")]
-    public async Task<IActionResult> AzureSpeechServiceSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AzureSpeechServiceSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<AzureSpeechServiceSettings>(serviceId, cancellationToken) ?? new ConfiguredService<AzureSpeechServiceSettings>
         {
@@ -95,12 +89,12 @@ public class ServiceSettingsController : Controller
                 Region = "",
             },
         };
-        settings.Settings.SubscriptionKey = _encryptionProvider.SafeDecrypt(settings.Settings.SubscriptionKey);  
-        return View(settings);
+        var vm = new AzureSpeechServiceSettingsViewModel(settings, _encryptionProvider);
+        return View(vm);
     }
     
     [HttpPost("/settings/azurespeechservice/{serviceId:guid}")]
-    public async Task<IActionResult> PostAzureSpeechServiceSettings([FromRoute] Guid serviceId, [FromForm] ConfiguredService<AzureSpeechServiceSettings> value)
+    public async Task<IActionResult> PostAzureSpeechServiceSettingsAsync([FromRoute] Guid serviceId, [FromForm] AzureSpeechServiceSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -110,27 +104,14 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _servicesRepository.SaveAsync(new ConfiguredService<AzureSpeechServiceSettings>
-        {
-            Id = serviceId,
-            ServiceName = AzureSpeechServiceConstants.ServiceName,
-            Label = value.Label,
-            Enabled = value.Enabled,
-            Settings = new AzureSpeechServiceSettings
-            {
-                Id = serviceId,
-                SubscriptionKey = _encryptionProvider.Encrypt(value.Settings.SubscriptionKey.TrimCopyPasteArtefacts()),
-                Region = value.Settings.Region.TrimCopyPasteArtefacts(),
-                LogFilename = value.Settings.LogFilename?.TrimCopyPasteArtefacts(),
-                FilterProfanity = value.Settings.FilterProfanity,
-            }
-        });
+        var settings = value.ToSettings(serviceId, _encryptionProvider);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("AzureSpeechServiceSettings", new { serviceId });
     }
 
     [HttpPost("/settings/azurespeechservice/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteAzureSpeechServiceSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteAzureSpeechServiceSettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
 
@@ -138,27 +119,20 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/vosk/{serviceId:guid}")]
-    public async Task<IActionResult> VoskSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> VoskSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
-        var vosk = await _servicesRepository.GetAsync<VoskSettings>(serviceId, cancellationToken) ?? new ConfiguredService<VoskSettings>
+        var settings = await _servicesRepository.GetAsync<VoskSettings>(serviceId, cancellationToken) ?? new ConfiguredService<VoskSettings>
         {
             Id = serviceId,
             Settings = new VoskSettings(),
             ServiceName = VoskConstants.ServiceName,
         };
-        var vm = new VoskSettingsViewModel
-        {
-            Label = vosk.Label,
-            Enabled = vosk.Enabled,
-            Model = vosk.Settings.Model,
-            ModelHash = vosk.Settings.ModelHash,
-            IgnoredWords = string.Join(", ", vosk.Settings.IgnoredWords),
-        };
+        var vm = new VoskSettingsViewModel(settings);
         return View(vm);
     }
     
     [HttpPost("/settings/vosk/{serviceId:guid}")]
-    public async Task<IActionResult> PostVoskSettings([FromRoute] Guid serviceId, [FromForm] VoskSettingsViewModel value)
+    public async Task<IActionResult> PostVoskSettingsAsync([FromRoute] Guid serviceId, [FromForm] VoskSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -168,25 +142,14 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _servicesRepository.SaveAsync(new ConfiguredService<VoskSettings>
-        {
-            Id = serviceId,
-            ServiceName = VoskConstants.ServiceName,
-            Label = value.Label,
-            Enabled = value.Enabled,
-            Settings = new VoskSettings
-            {
-                Model = value.Model.TrimCopyPasteArtefacts(),
-                ModelHash = value.ModelHash?.TrimCopyPasteArtefacts() ?? "",
-                IgnoredWords = value.IgnoredWords.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-            }
-        });
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("VoskSettings", new { serviceId });
     }
     
     [HttpPost("/settings/vosk/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteVoskSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteVoskSettingsAsync([FromRoute] Guid serviceId)
     {
         var current = await _servicesRepository.GetAsync<VoskSettings>(serviceId);
         if (current != null)
@@ -196,7 +159,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/elevenlabs/{serviceId:guid}")]
-    public async Task<IActionResult> ElevenLabsSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> ElevenLabsSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<ElevenLabsSettings>(serviceId, cancellationToken) ?? new ConfiguredService<ElevenLabsSettings>
         {
@@ -207,21 +170,12 @@ public class ServiceSettingsController : Controller
                 ApiKey = "",
             }
         };
-        var vm = new ElevenLabsSettingsViewModel
-        {
-            Enabled = settings.Enabled,
-            Label = settings.Label,
-            Model = settings.Settings.Model,
-            ApiKey = _encryptionProvider.SafeDecrypt(settings.Settings.ApiKey),
-            Parameters = JsonSerializer.Serialize(settings.Settings.Parameters ?? new ElevenLabsParameters()),
-            ThinkingSpeech = string.Join('\n', settings.Settings.ThinkingSpeech),
-            UseDefaults = settings.Settings.Parameters == null,
-        };   
+        var vm = new ElevenLabsSettingsViewModel(settings, _encryptionProvider); 
         return View(vm);
     }
     
     [HttpPost("/settings/elevenlabs/{serviceId:guid}")]
-    public async Task<IActionResult> PostElevenLabsSettings([FromRoute] Guid serviceId, [FromForm] ElevenLabsSettingsViewModel value)
+    public async Task<IActionResult> PostElevenLabsSettingsAsync([FromRoute] Guid serviceId, [FromForm] ElevenLabsSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -231,26 +185,14 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _servicesRepository.SaveAsync(new ConfiguredService<ElevenLabsSettings>
-        {
-            Id = serviceId,
-            ServiceName = ElevenLabsConstants.ServiceName,
-            Label = value.Label,
-            Enabled = value.Enabled,
-            Settings = new ElevenLabsSettings
-            {
-                ApiKey = string.IsNullOrEmpty(value.ApiKey) ? "" : _encryptionProvider.Encrypt(value.ApiKey.TrimCopyPasteArtefacts()),
-                Model = value.Model.TrimCopyPasteArtefacts(),
-                Parameters = value.UseDefaults ? null : JsonSerializer.Deserialize<ElevenLabsParameters>(value.Parameters) ?? new ElevenLabsParameters(),
-                ThinkingSpeech = value.ThinkingSpeech.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            },
-        });
+        var settings = value.ToSettings(serviceId, _encryptionProvider);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("ElevenLabsSettings", new { serviceId });
     }
 
     [HttpPost("/settings/elevenlabs/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteElevenLabsSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteElevenLabsSettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
@@ -258,7 +200,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/textgenerationwebui/{serviceId:guid}")]
-    public async Task<IActionResult> TextGenerationWebUISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> TextGenerationWebUISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<OobaboogaSettings>(serviceId, cancellationToken) ?? new ConfiguredService<OobaboogaSettings>
         {
@@ -274,7 +216,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/textgenerationwebui/{serviceId:guid}")]
-    public async Task<IActionResult> PostTextGenerationWebUISettings([FromRoute] Guid serviceId, [FromForm] OobaboogaSettingsViewModel value)
+    public async Task<IActionResult> PostTextGenerationWebUISettingsAsync([FromRoute] Guid serviceId, [FromForm] OobaboogaSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -291,7 +233,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/textgenerationwebui/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteTextGenerationWebUISettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteTextGenerationWebUISettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
@@ -299,7 +241,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/koboldai/{serviceId:guid}")]
-    public async Task<IActionResult> KoboldAISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> KoboldAISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<KoboldAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<KoboldAISettings>
         {
@@ -315,7 +257,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/koboldai/{serviceId:guid}")]
-    public async Task<IActionResult> PostKoboldAISettings([FromRoute] Guid serviceId, [FromForm] KoboldAISettingsViewModel value)
+    public async Task<IActionResult> PostKoboldAISettingsAsync([FromRoute] Guid serviceId, [FromForm] KoboldAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -332,7 +274,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/koboldai/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteKoboldAISettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteKoboldAISettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
@@ -340,7 +282,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/textgenerationinference/{serviceId:guid}")]
-    public async Task<IActionResult> TextGenerationInferenceSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> TextGenerationInferenceSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<TextGenerationInferenceSettings>(serviceId, cancellationToken) ?? new ConfiguredService<TextGenerationInferenceSettings>
         {
@@ -356,7 +298,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/textgenerationinference/{serviceId:guid}")]
-    public async Task<IActionResult> PostTextGenerationInferenceSettings([FromRoute] Guid serviceId, [FromForm] TextGenerationInferenceSettingsViewModel value)
+    public async Task<IActionResult> PostTextGenerationInferenceSettingsAsync([FromRoute] Guid serviceId, [FromForm] TextGenerationInferenceSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -373,7 +315,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/textgenerationinference/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteTextGenerationInferenceSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteTextGenerationInferenceSettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
@@ -381,7 +323,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/novelai/{serviceId:guid}")]
-    public async Task<IActionResult> NovelAISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> NovelAISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<NovelAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<NovelAISettings>
         {
@@ -397,7 +339,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/novelai/{serviceId:guid}")]
-    public async Task<IActionResult> PostNovelAISettings([FromRoute] Guid serviceId, [FromForm] NovelAISettingsViewModel value)
+    public async Task<IActionResult> PostNovelAISettingsAsync([FromRoute] Guid serviceId, [FromForm] NovelAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -414,7 +356,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpPost("/settings/novelai/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteNovelAISettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteNovelAISettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
 
@@ -422,7 +364,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/openai/{serviceId:guid}")]
-    public async Task<IActionResult> OpenAISettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OpenAISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<OpenAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<OpenAISettings>
         {
@@ -439,7 +381,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/openai/{serviceId:guid}")]
-    public async Task<IActionResult> PostOpenAISettings([FromRoute] Guid serviceId, [FromForm] OpenAISettingsViewModel value)
+    public async Task<IActionResult> PostOpenAISettingsAsync([FromRoute] Guid serviceId, [FromForm] OpenAISettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -456,7 +398,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/openai/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteOpenAISettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteOpenAISettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
@@ -464,7 +406,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/windowsspeech/{serviceId:guid}")]
-    public async Task<IActionResult> WindowsSpeechSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> WindowsSpeechSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
     
         #if(WINDOWS)
@@ -474,12 +416,7 @@ public class ServiceSettingsController : Controller
             ServiceName = WindowsSpeechConstants.ServiceName,
             Settings = new WindowsSpeechSettings()
         };
-        var vm = new WindowsSpeechSettingsViewModel
-        {
-            Label = settings.Label,
-            Enabled = settings.Enabled,
-            MinimumConfidence = settings.Settings.MinimumConfidence,
-        };
+        var vm = new WindowsSpeechSettingsViewModel(settings);
         return View(vm);
         #else
         throw new PlatformNotSupportedException();
@@ -487,7 +424,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/windowsspeech/{serviceId:guid}")]
-    public async Task<IActionResult> PostWindowsSpeechSettings([FromRoute] Guid serviceId, [FromForm] WindowsSpeechSettingsViewModel value)
+    public async Task<IActionResult> PostWindowsSpeechSettingsAsync([FromRoute] Guid serviceId, [FromForm] WindowsSpeechSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -498,17 +435,8 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _servicesRepository.SaveAsync(new ConfiguredService<WindowsSpeechSettings>
-        {
-            Id = serviceId,
-            ServiceName = WindowsSpeechConstants.ServiceName,
-            Label = value.Label,
-            Enabled = value.Enabled,
-            Settings = new WindowsSpeechSettings
-            {
-                MinimumConfidence = value.MinimumConfidence,
-            }
-        });
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("WindowsSpeechSettings", new { serviceId });
         #else
@@ -517,7 +445,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/windowsspeech/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteWindowsSpeechSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteWindowsSpeechSettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
@@ -525,20 +453,16 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/ffmpeg/{serviceId:guid}")]
-    public async Task<IActionResult> FFmpegSettings([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> FFmpegSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
     {
         #if(!WINDOWS)
-        var ffmpeg = await _servicesRepository.GetAsync<FFmpegSettings>(serviceId, cancellationToken) ?? new ConfiguredService<FFmpegSettings>
+        var settings = await _servicesRepository.GetAsync<FFmpegSettings>(serviceId, cancellationToken) ?? new ConfiguredService<FFmpegSettings>
         {
             Id = serviceId,
             ServiceName = FFmpegConstants.ServiceName,
             Settings = new FFmpegSettings(),
         };
-        var vm = new FFmpegSettingsViewModel
-        {
-            Enabled = ffmpeg.Enabled,
-            Label = "",
-        };
+        var vm = new FFmpegSettingsViewModel(settings);
         return View(vm);
         #else
         throw new PlatformNotSupportedException();
@@ -546,7 +470,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/ffmpeg/{serviceId:guid}")]
-    public async Task<IActionResult> PostFFmpegSettings([FromRoute] Guid serviceId, [FromForm] FFmpegSettingsViewModel value)
+    public async Task<IActionResult> PostFFmpegSettingsAsync([FromRoute] Guid serviceId, [FromForm] FFmpegSettingsViewModel value)
     {
         if (!ModelState.IsValid)
         {
@@ -556,16 +480,8 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        await _servicesRepository.SaveAsync(new ConfiguredService<FFmpegSettings>
-        {
-            Id = serviceId,
-            ServiceName = FFMpegConstants.ServiceName,
-            Label = value.Enabled,
-            Enabled = value.Enabled,
-            Settings = new FFmpegSettings
-            {
-            }
-        });
+        var settings = FFmpegSettingsViewModel.ToSettings(serviceId);
+        await _servicesRepository.SaveAsync(settings);
         
         return RedirectToAction("FFmpegSettings", new { serviceId });
         #else
@@ -574,7 +490,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpPost("/settings/ffmpeg/{serviceId:guid}/delete")]
-    public async Task<IActionResult> DeleteFFmpegSettings([FromRoute] Guid serviceId)
+    public async Task<IActionResult> DeleteFFmpegSettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
         

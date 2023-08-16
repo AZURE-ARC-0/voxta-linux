@@ -67,8 +67,7 @@ public class LiteDBMigrations
     {
         var messages = _db.GetCollection("ChatMessageData");
         messages.DeleteAll();
-        UpdateCollection("OobaboogaSettings", "Oobabooga", true);
-        UpdateCollection("TextGenerationWebUISettings", "TextGenerationWebUI", true);
+        UpdateCollection("OobaboogaSettings", "TextGenerationWebUI", true);
         UpdateCollection("TextGenerationInferenceSettings", "TextGenerationInference", true);
         UpdateCollection("OpenAISettings", "OpenAI", true);
         UpdateCollection("KoboldAISettings", "KoboldAI", true);
@@ -127,7 +126,7 @@ public class LiteDBMigrations
         }
     }
 
-    private void UpdateCollection(string collectionName, string typeName, bool updateMemory)
+    private void UpdateCollection(string collectionName, string serviceName, bool updateMemory)
     {
         var services = _db.GetCollection<ConfiguredService>();
         var collection = _db.GetCollection(collectionName);
@@ -152,7 +151,7 @@ public class LiteDBMigrations
             {
                 Id = Guid.NewGuid(),
                 Label = "",
-                ServiceName = typeName
+                ServiceName = serviceName
             };
             services.Insert(serviceRef);
             

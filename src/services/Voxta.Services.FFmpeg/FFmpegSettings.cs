@@ -1,4 +1,4 @@
-﻿using Voxta.Abstractions.Repositories;
+﻿using Voxta.Abstractions.Model;
 
 namespace Voxta.Services.FFmpeg;
 

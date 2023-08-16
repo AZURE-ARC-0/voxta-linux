@@ -1,5 +1,4 @@
-﻿@using Voxta.Shared.LLMUtils
-@using Voxta.Server.ViewModels.ServiceSettings
+﻿@using Voxta.Server.ViewModels.ServiceSettings
 @model Voxta.Server.ViewModels.ServiceSettings.OobaboogaSettingsViewModel
 @{
     Layout = "_Layout";
@@ -19,17 +18,13 @@
     </div>
     
     <form id="configureForm" method="post" asp-action="PostTextGenerationWebUISettings">
+        <partial name="ServiceSettings/_CommonSettings" model="@Model"/>
+        
         <div class="card mb-3">
             <div class="card-header">
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-check mb-3">
-                    <input type="checkbox" asp-for="Enabled" class="form-check-input"/>
-                    <label asp-for="Enabled">Enabled</label>
-                    <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
-                    <span asp-validation-for="Enabled" class="text-danger"></span>
-                </div>
                 <div class="mb-3">
                     <label asp-for="Uri">Text generation web UI URI</label>
                     <input asp-for="Uri" class="form-control"/>
@@ -47,6 +42,6 @@
             </div>
         </div>
         
-        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteTextGenerationWebUISettings")" />
+        <partial name="ServiceSettings/_FormFooter" model="@Model"/>
     </form>
 </div>

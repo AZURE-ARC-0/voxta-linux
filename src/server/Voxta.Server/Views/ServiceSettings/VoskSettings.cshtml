@@ -17,38 +17,34 @@
     </div>
     
     <form id="configureForm" method="post" asp-action="PostVoskSettings">
+        <partial name="ServiceSettings/_CommonSettings" model="@Model"/>
+        
         <div class="card mb-3">
             <div class="card-header">
                 <h2>Configuration</h2>
             </div>
             <div class="card-body">
-                <div class="form-check mb-3">
-                    <input type="checkbox" asp-for="Enabled" class="form-check-input"/>
-                    <label asp-for="Enabled">Enabled</label>
-                    <div class="form-text">You can disable this service if you don't want it to be selected automatically.</div>
-                    <span asp-validation-for="Enabled" class="text-danger"></span>
-                </div>
                 <div class="mb-3">
                     <label asp-for="Model">Vosk model</label>
-                    <input asp-for="Model" class="form-control" />
+                    <input asp-for="Model" class="form-control"/>
                     <div class="form-text">Download from the <a href="https://alphacephei.com/vosk/models" target="_blank">models list</a>. Smaller models are faster.</div>
                     <span asp-validation-for="Model" class="text-danger"></span>
                 </div>
                 <div>
                     <label asp-for="ModelHash">Model download zip hash</label>
-                    <input asp-for="ModelHash" class="form-control" />
+                    <input asp-for="ModelHash" class="form-control"/>
                     <div class="form-text">Optional, increases security by checking the downloaded zip file to ensure the file is the expected one. Only use automatic downloads for small models.</div>
                     <span asp-validation-for="ModelHash" class="text-danger"></span>
                 </div>
                 <div>
                     <label asp-for="IgnoredWords">Ignored words</label>
-                    <input asp-for="IgnoredWords" class="form-control" />
+                    <input asp-for="IgnoredWords" class="form-control"/>
                     <div class="form-text">A comma-separated list of words you want to ignore when listening, when they are the only word picked up. Used to avoid converting background noise into speech.</div>
                     <span asp-validation-for="IgnoredWords" class="text-danger"></span>
                 </div>
             </div>
         </div>
 
-        <partial name="ServiceSettings/_FormFooter" model="@Url.Action("DeleteVoskSettings")" />
+        <partial name="ServiceSettings/_FormFooter" model="@Model"/>
     </form>
 </div>

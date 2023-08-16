@@ -11,9 +11,9 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ElevenLabsTextToSpeechService>();
     }
     
-    public static void RegisterElevenLabs(this IServiceHelpRegistry registry)
+    public static void RegisterElevenLabs(this IServiceDefinitionsRegistry registry)
     {
-        registry.Add(new ServiceHelp
+        registry.Add(new ServiceDefinition
         {
             ServiceName = ElevenLabsConstants.ServiceName,
             Label = "11ElevenLabs",
@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
             TTS = true,
             Summarization = false,
             ActionInference = false,
+            SettingsType = typeof(ElevenLabsSettings),
         });
     }
     

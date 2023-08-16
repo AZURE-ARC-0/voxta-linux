@@ -22,7 +22,7 @@ public class OobaboogaSettingsViewModel : RemoteLLMServiceSettingsViewModelBase<
         {
             Id = serviceId,
             ServiceName = OobaboogaConstants.ServiceName,
-            Label = Label,
+            Label = string.IsNullOrWhiteSpace(Label) ? null : Label,
             Enabled = Enabled,
             Settings = new OobaboogaSettings
             {

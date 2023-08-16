@@ -16,7 +16,7 @@ namespace Voxta.IntegrationTests.Shared;
 public abstract class IntegrationTestsBase
 {
     private static readonly LiteDatabase Db;
-    private static readonly TestHttpClientFactory HttpClientFactory = new TestHttpClientFactory();
+    private static readonly TestHttpClientFactory HttpClientFactory = new();
 
     static IntegrationTestsBase()
     {
@@ -42,7 +42,7 @@ public abstract class IntegrationTestsBase
         var services = new ServiceCollection();
         services.AddSingleton<IHttpClientFactory>(_ => HttpClientFactory);
         services.AddSingleton(Db);
-        services.AddSingleton<IServicesRepository>(_ => new ServicesLiteDBRepository(Db));
+        services.AddSingleton<IServicesRepository>(_ => new ServicesLiteDBRepository(Db, null!));
         services.AddSingleton<ISettingsRepository>(_ => new SettingsLiteDBRepository(Db));
         services.AddSingleton<IPerformanceMetrics>(_ => new TestPerformanceMetrics());
         services.AddSingleton<IServiceObserver>(ServiceObserver);
