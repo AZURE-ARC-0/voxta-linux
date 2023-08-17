@@ -17,8 +17,4 @@ public class MockActionInferenceService : MockServiceBase, IActionInferenceServi
         var action = chat.Actions[Random.Shared.Next(chat.Actions.Length)];
         return ValueTask.FromResult(action);
     }
-
-    public void Dispose()
-    {
-    }
 }

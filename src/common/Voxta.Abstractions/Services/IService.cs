@@ -2,7 +2,7 @@
 
 namespace Voxta.Abstractions.Services;
 
-public interface IService : IDisposable
+public interface IService : IAsyncDisposable
 {
     ServiceSettingsRef SettingsRef { get; }
     string[] Features { get; }

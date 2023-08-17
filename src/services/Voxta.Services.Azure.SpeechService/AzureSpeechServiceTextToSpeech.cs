@@ -135,8 +135,10 @@ public class AzureSpeechServiceTextToSpeech : ServiceBase<AzureSpeechServiceSett
             .ToArray();
     }
 
-    public void Dispose()
+    
+    public ValueTask DisposeAsync()
     {
         _speechSynthesizer?.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

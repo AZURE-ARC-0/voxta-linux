@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Voxta.Core;
 
-public interface ISpeechGenerator : IDisposable
+public interface ISpeechGenerator : IAsyncDisposable
 {
     ServiceLink? Link { get; }
     string? Voice { get; }
@@ -54,8 +54,9 @@ public class NoSpeechGenerator : ISpeechGenerator
         return Task.FromResult<string?>(null);
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }
 
@@ -115,9 +116,9 @@ public class LocalSpeechGenerator : ISpeechGenerator
         return speechUrl;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        _textToSpeechService.Dispose();
+        return _textToSpeechService.DisposeAsync();
     }
 }
 
@@ -166,7 +167,8 @@ public class RemoteSpeechGenerator : ISpeechGenerator
         return Task.FromResult<string?>(speechUrl);
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }

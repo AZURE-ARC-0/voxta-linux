@@ -410,7 +410,7 @@ public class DiagnosticsUtil
         }
         finally
         {
-            service?.Dispose();
+            if(service != null) await service.DisposeAsync();
         }
     }
 }

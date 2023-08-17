@@ -98,8 +98,9 @@ public class WindowsSpeechTextToSpeechService : ServiceBase<WindowsSpeechSetting
         return voice.VoiceInfo.Name;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }
 #endif

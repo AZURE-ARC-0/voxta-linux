@@ -110,11 +110,12 @@ public class AzureSpeechServiceSpeechToText : ServiceBase<AzureSpeechServiceSett
         _recordingService.StopRecording();
     }
     
-    public void Dispose()
+    
+    public async ValueTask DisposeAsync()
     {
         _recordingService.StopRecording();
-        #warning Use AsyncDisposable
-        _transcriber?.StopContinuousRecognitionAsync().Wait();
+        if(_transcriber != null)
+            await _transcriber.StopContinuousRecognitionAsync();
         _transcriber?.Dispose();
         _transcriber = null;
         _pushStream?.Close();

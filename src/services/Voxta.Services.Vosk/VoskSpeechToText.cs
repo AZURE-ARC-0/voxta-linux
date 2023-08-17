@@ -119,9 +119,9 @@ public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextS
         _recordingService.StopRecording();
     }
     
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        if(_disposed) return;
+        if(_disposed) return ValueTask.CompletedTask;
         _disposed = true;
         _recordingService.StopRecording();
         _recordingService.DataAvailable -= DataAvailable;
@@ -133,5 +133,6 @@ public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextS
         catch (SemaphoreFullException)
         {
         }
+        return ValueTask.CompletedTask;
     }
 }

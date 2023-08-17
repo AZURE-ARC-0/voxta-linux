@@ -137,10 +137,10 @@ public sealed partial class ChatSession : IChatSession
             _speechToText.SpeechRecognitionFinished -= OnSpeechRecognitionFinished;
         }
 
-        _speechToText?.Dispose();
-        _textGen.Dispose();
-        _speechGenerator.Dispose();
-        _actionInference?.Dispose();
+        if(_speechToText != null) await _speechToText.DisposeAsync();
+        await _textGen.DisposeAsync();
+        await _speechGenerator.DisposeAsync();
+        _actionInference?.DisposeAsync();
         _processingSemaphore.Dispose();
         _messageQueueCancellationTokenSource.Dispose();
     }

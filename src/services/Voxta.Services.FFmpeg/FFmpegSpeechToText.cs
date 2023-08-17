@@ -68,12 +68,14 @@ public sealed class FFmpegSpeechToText : ServiceBase<FFmpegSettings>, ISpeechToT
         _recordingService.StopRecording();
     }
     
-    public void Dispose()
+
+    public ValueTask DisposeAsync()
     {
-        if(_disposed) return;
+        if(_disposed) return ValueTask.CompletedTask;
         _disposed = true;
         _recordingService.StopRecording();
         _recordingService.DataAvailable -= DataAvailable;
         // Dispose any FFmpeg references
+        return ValueTask.CompletedTask;
     }
 }

@@ -122,7 +122,8 @@ public class NovelAITextToSpeechService : ServiceBase<NovelAISettings>, ITextToS
         return speechRequest.Voice;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }

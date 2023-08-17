@@ -1,14 +1,16 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if(WINDOWS)
+using System.Diagnostics.CodeAnalysis;
 using Voxta.Abstractions.Model;
 using Voxta.Services.WindowsSpeech;
+#endif
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
 public class WindowsSpeechSettingsViewModel : ServiceSettingsViewModel
 {
     public required double MinimumConfidence { get; init; }
-    
 
+    #if(WINDOWS)
     public WindowsSpeechSettingsViewModel()
     {
     }
@@ -34,4 +36,5 @@ public class WindowsSpeechSettingsViewModel : ServiceSettingsViewModel
             }
         };
     }
+    #endif
 }

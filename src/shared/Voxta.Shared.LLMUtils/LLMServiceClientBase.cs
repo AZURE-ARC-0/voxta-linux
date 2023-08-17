@@ -86,7 +86,8 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         return Mapper.Map<TOutputParameters>(Parameters);
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }

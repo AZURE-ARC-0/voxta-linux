@@ -1,16 +1,18 @@
 ﻿#if(!WINDOWS)
+using System.Diagnostics.CodeAnalysis;
+using Voxta.Abstractions.Model;
 using Voxta.Services.FFmpeg;
 #endif
 
 namespace Voxta.Server.ViewModels.ServiceSettings;
 
-public class FFmpegSettingsViewModel
+public class FFmpegSettingsViewModel : ServiceSettingsViewModel
 {
+    #if(!WINDOWS)
     public FFmpegSettingsViewModel()
     {
     }
 
-    #if(!WINDOWS)
     [SetsRequiredMembers]
     public FFmpegSettingsViewModel(ConfiguredService<FFmpegSettings> source)
         : base(source)

@@ -535,8 +535,8 @@ public class ServiceSettingsController : Controller
         if (serviceId == Guid.Empty)
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
-        var settings = FFmpegSettingsViewModel.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        var settings = value.ToSettings(serviceId);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("FFmpegSettings", new { serviceId });

@@ -94,9 +94,9 @@ public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISp
         _activated = false;
     }
     
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        if(_disposed) return;
+        if(_disposed) return ValueTask.CompletedTask;
         _disposed = true;
         if (_activated)
         {
@@ -112,6 +112,7 @@ public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISp
         }
         _recognizer?.Dispose();
         _recognizer = null;
+        return ValueTask.CompletedTask;
     }
 }
 #endif

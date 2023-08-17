@@ -21,7 +21,8 @@ public class MockServiceBase : ServiceBase<MockSettings>
         return true;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }

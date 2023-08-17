@@ -143,11 +143,11 @@ public class ChatSessionFactory
         }
         catch (Exception exc)
         {
-            textGen?.Dispose();
-            speechToText?.Dispose();
-            actionInference?.Dispose();
-            speechGenerator?.Dispose();
-            summarizationService?.Dispose();
+            if(textGen != null) await textGen.DisposeAsync();
+            if(speechToText != null) await speechToText.DisposeAsync();
+            if(actionInference != null) await actionInference.DisposeAsync();
+            if(speechGenerator != null) await speechGenerator.DisposeAsync();
+            if(summarizationService != null) await summarizationService.DisposeAsync();
             ExceptionDispatchInfo.Capture(exc).Throw();
             throw;
         }

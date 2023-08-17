@@ -124,7 +124,8 @@ public class ElevenLabsTextToSpeechService : ServiceBase<ElevenLabsSettings>, IT
         public required string name { get; init; }
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
+        return ValueTask.CompletedTask;
     }
 }
