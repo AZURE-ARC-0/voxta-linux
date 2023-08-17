@@ -31,9 +31,11 @@ public partial class ChatSession
                 case ChatSessionStates.Paused:
                     if (clientSendMessage.Text.Contains("go online", StringComparison.InvariantCultureIgnoreCase))
                         await EnterLiveMode(queueCancellationToken);
+                    else if (clientSendMessage.Text.Contains("analysis mode", StringComparison.InvariantCultureIgnoreCase))
+                        await EnterAnalysisMode(queueCancellationToken);
                     else
                         // TODO: Workaround because the client does not know we are offline and waits for the reply
-                        await SendReusableReplyWithSpeechAsync("I'm back online.", queueCancellationToken);
+                        await SendReusableReplyWithSpeechAsync(".", queueCancellationToken);
                     break;
                 case ChatSessionStates.Analysis:
                     if (clientSendMessage.Text.Contains("go online", StringComparison.InvariantCultureIgnoreCase))
