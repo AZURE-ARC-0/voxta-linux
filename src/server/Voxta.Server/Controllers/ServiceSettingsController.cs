@@ -569,15 +569,15 @@ public class ServiceSettingsController : Controller
     {
         var modified = false;
         if (serviceDefinition.TTS.IsSupported())
-            modified = modified || EnsureService(profile.TextToSpeech, settings, serviceDefinition, s => s.TTS);
+            modified = EnsureService(profile.TextToSpeech, settings, serviceDefinition, s => s.TTS) || modified;
         if (serviceDefinition.STT.IsSupported())
-            modified = modified || EnsureService(profile.SpeechToText, settings, serviceDefinition, s => s.STT);
+            modified = EnsureService(profile.SpeechToText, settings, serviceDefinition, s => s.STT) || modified;
         if (serviceDefinition.TextGen.IsSupported())
-            modified = modified || EnsureService(profile.TextGen, settings, serviceDefinition, s => s.TextGen);
+            modified = EnsureService(profile.TextGen, settings, serviceDefinition, s => s.TextGen) || modified;
         if (serviceDefinition.ActionInference.IsSupported())
-            modified = modified || EnsureService(profile.ActionInference, settings, serviceDefinition, s => s.ActionInference);
+            modified = EnsureService(profile.ActionInference, settings, serviceDefinition, s => s.ActionInference) || modified;
         if (serviceDefinition.Summarization.IsSupported())
-            modified = modified || EnsureService(profile.Summarization, settings, serviceDefinition, s => s.Summarization);
+            modified = EnsureService(profile.Summarization, settings, serviceDefinition, s => s.Summarization) || modified;
         return modified;
     }
 
