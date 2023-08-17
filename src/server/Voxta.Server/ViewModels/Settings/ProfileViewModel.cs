@@ -8,7 +8,11 @@ public class ProfileViewModel
     public required bool IsAdult { get; init; }
     [Range(typeof(bool), "true", "true", ErrorMessage = "You must agree to the terms and conditions")]
     public required bool AgreesToTerms { get; init; }
+    
+    [MinLength(1)]
     public required string Name { get; init; }
-    public required string Description { get; set; }
-    public required bool PauseSpeechRecognitionDuringPlayback { get; set; }
+    public required string? Description { get; init; }
+    
+    public required bool PauseSpeechRecognitionDuringPlayback { get; init; }
+    public required bool IgnorePrerequisites { get; init; }
 }

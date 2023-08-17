@@ -1,7 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using LiteDB;
-using Voxta.Abstractions.Services;
 
 namespace Voxta.Abstractions.Model;
 
@@ -23,10 +21,12 @@ public class ProfileSettings
 
     [BsonId] public string Id { get; init; } = SharedId;
     
-    [MinLength(1)]
     public required string Name { get; set; }
     public string? Description { get; set; }
+    
     public bool PauseSpeechRecognitionDuringPlayback { get; set; } = true;
+    public bool IgnorePrerequisites { get; set; }
+    
     public ServicesList ActionInference { get; set; } = new();
     public ServicesList SpeechToText { get; set; } = new();
     public ServicesList TextToSpeech { get; set; } = new();

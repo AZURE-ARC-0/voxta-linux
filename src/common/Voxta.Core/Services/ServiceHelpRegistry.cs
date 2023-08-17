@@ -1,12 +1,5 @@
 ﻿namespace Voxta.Abstractions.Services;
 
-public interface IServiceDefinitionsRegistry
-{
-    void Add(ServiceDefinition serviceDefinition);
-    ServiceDefinition Get(string serviceName);
-    IEnumerable<ServiceDefinition> List();
-}
-
 public class ServiceDefinitionsRegistry : IServiceDefinitionsRegistry
 {
     private readonly Dictionary<string, ServiceDefinition> _services = new();

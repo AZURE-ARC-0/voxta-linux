@@ -2,14 +2,9 @@
 using Voxta.Abstractions.Exceptions;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
+using Voxta.Core;
 
 namespace Voxta.Abstractions.Services;
-
-public interface IServiceFactory<TInterface> where TInterface : class
-{
-    Task<TInterface> CreateSpecificAsync(ServiceLink link, string culture, bool dry, CancellationToken cancellationToken);
-    Task<TInterface?> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken);
-}
 
 public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInterface : class, IService
 {
@@ -33,12 +28,13 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
             throw new NotSupportedException($"Service {serviceRef.ServiceName} referenced by service {link} is not registered");
         
         var instance = (TInterface)_sp.GetRequiredService(type);
-        var success = await instance.TryInitializeAsync(serviceRef.Id, Array.Empty<string>(), culture, dry, cancellationToken);
+        var success = await instance.TryInitializeAsync(serviceRef.Id, IgnorePrerequisitesValidator.Instance, culture, dry, cancellationToken);
         if(!success) throw new ServiceDisabledException();
         return instance;
     }
 
-    public async Task<TInterface?> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<TInterface?> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, IPrerequisitesValidator prerequisites, string culture,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(preferred?.ServiceName)) preferred = null;
         
@@ -47,7 +43,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         if (preferred != null)
         {
             var service = await TryCreateOneAsync(preferred, prerequisites, culture, servicesRepository, cancellationToken);
-            if (service == null) throw new InvalidOperationException($"Preferred service with name {preferred.ServiceName} and ID {(preferred.ServiceId?.ToString() ?? "*")} was either not found or was not compatible with features [{(prerequisites.Length > 0 ? string.Join(", ", prerequisites) : "(none)")}] and culture {culture}");
+            if (service == null) throw new InvalidOperationException($"Preferred service with name {preferred.ServiceName} and ID {(preferred.ServiceId?.ToString() ?? "*")} was either not found or was not compatible with prerequisites {prerequisites}");
             return service;
         }
 
@@ -63,7 +59,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         return null;
     }
 
-    private async Task<TInterface?> TryCreateOneAsync(ServiceLink serviceLink, string[] prerequisites, string culture, IServicesRepository servicesRepository, CancellationToken cancellationToken)
+    private async Task<TInterface?> TryCreateOneAsync(ServiceLink serviceLink, IPrerequisitesValidator prerequisites, string culture, IServicesRepository servicesRepository, CancellationToken cancellationToken)
     {
         var serviceRef = serviceLink.ServiceId != null ? await servicesRepository.GetServiceByIdAsync(serviceLink.ServiceId.Value, cancellationToken) : null;
         if (serviceRef == null) serviceRef = await servicesRepository.GetServiceByNameAsync(serviceLink.ServiceName, cancellationToken);
@@ -76,16 +72,5 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         var instance = (TInterface)_sp.GetRequiredService(type);
         var success = await instance.TryInitializeAsync(serviceRef.Id, prerequisites, culture, false, cancellationToken);
         return success ? instance : null;
-    }
-}
-
-public static class ServiceFactoryExtensions
-{
-    public static async Task<TInterface> CreateBestMatchRequiredAsync<TInterface>(this IServiceFactory<TInterface> factory, ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken)
-        where TInterface : class, IService
-    {
-        var service = await factory.CreateBestMatchAsync(services, preferred, prerequisites, culture, cancellationToken);
-        if (service != null) return service;
-        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service compatible with features [{(prerequisites.Length > 0 ? string.Join(", ", prerequisites) : "(none)")}] and culture {culture}");
     }
 }

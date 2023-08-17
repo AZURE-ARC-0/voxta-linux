@@ -24,12 +24,12 @@
             <div class="card-body">
                 <div class="mb-3">
                     <input asp-for="IsAdult" type="checkbox" class="form-check-input"/>
-                    <label asp-for="IsAdult">You certify you are 18 years old or more.</label>
+                    <label asp-for="IsAdult">I certify that I am 18 years old or more, and an adult in my country.</label>
                     <span asp-validation-for="IsAdult" class="text-danger"></span>
                 </div>
                 <div>
                     <input asp-for="AgreesToTerms" type="checkbox" class="form-check-input"/>
-                    <label asp-for="AgreesToTerms">You have read and agree to the <a href="/legal/tos">terms and conditions</a>.</label>
+                    <label asp-for="AgreesToTerms">I have read and agree to the <a href="/legal/tos">terms and conditions</a>.</label>
                     <span asp-validation-for="AgreesToTerms" class="text-danger"></span>
                 </div>
             </div>
@@ -61,12 +61,19 @@
                 <h2>Options</h2>
             </div>
             <div class="card-body">
-                <h3>Speech To Text Options</h3>
+                <h3>General Options</h3>
                 <div class="form-check mb-3">
                     <input asp-for="PauseSpeechRecognitionDuringPlayback" type="checkbox" class="form-check-input"/>
                     <label asp-for="PauseSpeechRecognitionDuringPlayback">Prevent speech interruptions</label>
                     <div class="form-text">Stops recording while the character speaks. The character may interrupt itself without this. You can disable if you have headphones.</div>
                     <span asp-validation-for="PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
+                </div>
+                <h3>Speech To Text Options</h3>
+                <div class="form-check">
+                    <input asp-for="IgnorePrerequisites" type="checkbox" class="form-check-input"/>
+                    <label asp-for="IgnorePrerequisites">Ignore prerequisites</label>
+                    <div class="form-text">By default, incompatible services (e.g. without NSFW support or not supporting the language) will not be used. By enabling this, whichever service is configured as the first one will be used. Be aware that this may break terms of services of AI services that disallow NSFW content, and may generate low quality content for unsupported languages.</div>
+                    <span asp-validation-for="IgnorePrerequisites" class="text-danger"></span>
                 </div>
             </div>
         </div>

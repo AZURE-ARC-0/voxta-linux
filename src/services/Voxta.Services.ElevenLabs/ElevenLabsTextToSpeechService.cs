@@ -8,6 +8,7 @@ using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions;
 using Voxta.Abstractions.System;
 using Voxta.Shared.TextToSpeechUtils;
 
@@ -15,7 +16,7 @@ namespace Voxta.Services.ElevenLabs;
 
 public class ElevenLabsTextToSpeechService : ServiceBase<ElevenLabsSettings>, ITextToSpeechService
 {
-    public override string ServiceName => ElevenLabsConstants.ServiceName;
+    protected override string ServiceName => ElevenLabsConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly ILogger<ElevenLabsTextToSpeechService> _logger;
@@ -38,7 +39,8 @@ public class ElevenLabsTextToSpeechService : ServiceBase<ElevenLabsSettings>, IT
         _httpClient = httpClientFactory.CreateClient($"{ElevenLabsConstants.ServiceName}.TextToSpeech");
     }
     
-    protected override async Task<bool> TryInitializeAsync(ElevenLabsSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(ElevenLabsSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 

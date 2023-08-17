@@ -125,7 +125,7 @@ public class SpeechController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        if (serviceName == "None")
+        if (serviceId == Guid.Empty)
         {
             return VoiceInfo.DefaultVoices;
         }

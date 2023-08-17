@@ -94,10 +94,12 @@ public class PlaygroundController : Controller
                     throw new NullReferenceException($"Could not find service {vm.Service}");
                 link = new ServiceLink(cs);
             }
+            
+            var prerequisites = profile.IgnorePrerequisites ? IgnorePrerequisitesValidator.Instance : new PrerequisitesValidator(character);
 
             if (data.Template == "Reply")
             {
-                var textGen = await textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var textGen = await textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, link, prerequisites, vm.Culture ?? "en-US", cancellationToken);
                 var processor = new ChatTextProcessor(profile, character.Name, CultureInfo.GetCultureInfoByIetfLanguageTag(character.Culture), textGen);
                 result = await textGen.GenerateReplyAsync(new ChatSessionData
                 {
@@ -122,7 +124,7 @@ public class PlaygroundController : Controller
             }
             else if (data.Template == "ActionInference")
             {
-                var svc = await actionInferenceServiceFactory.CreateBestMatchRequiredAsync(profile.ActionInference, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var svc = await actionInferenceServiceFactory.CreateBestMatchRequiredAsync(profile.ActionInference, link, prerequisites, vm.Culture ?? "en-US", cancellationToken);
                 result = await svc.SelectActionAsync(new ChatSessionData
                 {
                     Chat = null!,
@@ -152,7 +154,7 @@ public class PlaygroundController : Controller
             }
             else
             {
-                var textGen = await textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
+                var textGen = await textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, link, prerequisites, vm.Culture ?? "en-US", cancellationToken);
                 result = await textGen.GenerateAsync(vm.Prompt, cancellationToken);
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
             }

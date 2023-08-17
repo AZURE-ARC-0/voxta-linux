@@ -6,7 +6,7 @@ namespace Voxta.Services.Oobabooga;
 
 public class OobaboogaClientBase : RemoteLLMServiceClientBase<OobaboogaSettings, OobaboogaParameters, OobaboogaRequestBody>
 {
-    public override string ServiceName => OobaboogaConstants.ServiceName;
+    protected override string ServiceName => OobaboogaConstants.ServiceName;
     
     protected override string GenerateRequestPath => "/api/v1/generate";
     

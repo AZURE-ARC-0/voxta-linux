@@ -1,6 +1,7 @@
 ﻿using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
@@ -11,7 +12,7 @@ namespace Voxta.Services.AzureSpeechService;
 
 public class AzureSpeechServiceSpeechToText : ServiceBase<AzureSpeechServiceSettings>, ISpeechToTextService
 {
-    public override string ServiceName => AzureSpeechServiceConstants.ServiceName;
+    protected override string ServiceName => AzureSpeechServiceConstants.ServiceName;
     public string[] Features { get; private set; } = Array.Empty<string>();
     
     private readonly IRecordingService _recordingService;
@@ -32,13 +33,17 @@ public class AzureSpeechServiceSpeechToText : ServiceBase<AzureSpeechServiceSett
         _logger = loggerFactory.CreateLogger<AzureSpeechServiceSpeechToText>();
     }
     
-    protected override async Task<bool> TryInitializeAsync(AzureSpeechServiceSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(AzureSpeechServiceSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 
         if (string.IsNullOrEmpty(settings.SubscriptionKey)) return false;
         if (string.IsNullOrEmpty(settings.Region)) return false;
-        if (prerequisites.Contains(ServiceFeatures.NSFW) && settings.FilterProfanity) return false;
+        if (!prerequisites.ValidateFeatures(settings.FilterProfanity
+                ? Array.Empty<string>()
+                : new[] { ServiceFeatures.NSFW }))
+            return false;
         if (dry) return true;
         
         var config = SpeechConfig.FromSubscription(_encryptionProvider.Decrypt(settings.SubscriptionKey), settings.Region);

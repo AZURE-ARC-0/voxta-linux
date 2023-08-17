@@ -6,6 +6,7 @@ using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions;
 using Voxta.Abstractions.System;
 
 namespace Voxta.Core;
@@ -74,14 +75,16 @@ public class ChatSessionFactory
             var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
             var useSpeechRecognition = startChatMessage.UseServerSpeechRecognition && profile.SpeechToText.Services.Any();
 
-            var prerequisites = character.Prerequisites ?? Array.Empty<string>();
+            var prerequisites = profile.IgnorePrerequisites
+                ? (IPrerequisitesValidator)new IgnorePrerequisitesValidator()
+                : new PrerequisitesValidator(character);
             var culture = character.Culture;
             textGen = await _textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, character.Services.TextGen.Service, prerequisites, culture, cancellationToken);
             speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateBestMatchAsync(profile.SpeechToText, null, prerequisites, culture, cancellationToken) : null;
             actionInference = startChatMessage.UseActionInference && profile.ActionInference.Services.Any()
                 ? await _animationSelectionFactory.CreateBestMatchAsync(profile.ActionInference, character.Services.ActionInference.Service, prerequisites, culture, cancellationToken)
                 : null;
-            summarizationService = await _summarizationServiceFactory.CreateBestMatchAsync(profile.Summarization, null, Array.Empty<string>(), character.Culture, cancellationToken);
+            summarizationService = await _summarizationServiceFactory.CreateBestMatchAsync(profile.Summarization, null, prerequisites, character.Culture, cancellationToken);
 
             var cultureInfo = CultureInfo.GetCultureInfoByIetfLanguageTag(culture);
             var textProcessor = new ChatTextProcessor(profile, character.Name, cultureInfo, textGen);

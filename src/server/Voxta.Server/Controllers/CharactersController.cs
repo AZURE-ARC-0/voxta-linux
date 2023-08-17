@@ -7,6 +7,7 @@ using Voxta.Characters;
 using Voxta.Common;
 using Voxta.Server.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Voxta.Core;
 using Voxta.Server.ViewModels.Characters;
 #if(WINDOWS)
 #endif
@@ -147,7 +148,8 @@ public class CharactersController : Controller
             try
             {
                 var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
-                var ttsService = await ttsServiceFactory.CreateBestMatchRequiredAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
+                var prerequisites = profile.IgnorePrerequisites ? IgnorePrerequisitesValidator.Instance : new PrerequisitesValidator(character);
+                var ttsService = await ttsServiceFactory.CreateBestMatchRequiredAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, prerequisites, character.Culture, cancellationToken);
                 voices = await ttsService.GetVoicesAsync(cancellationToken);
             }
             catch (Exception exc)

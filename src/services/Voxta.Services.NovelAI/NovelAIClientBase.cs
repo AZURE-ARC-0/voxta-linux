@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Voxta.Abstractions;
+using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
@@ -20,7 +22,7 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    public override string ServiceName => NovelAIConstants.ServiceName;
+    protected override string ServiceName => NovelAIConstants.ServiceName;
 
     protected override ITokenizer Tokenizer { get; } = new NovelAITokenizer();
     
@@ -35,17 +37,19 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
         _httpClient = httpClientFactory.CreateClient(NovelAIConstants.ServiceName);
     }
     
-    protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 
         return TryInitializeSync(settings, prerequisites, culture, dry);
     }
 
-    private bool TryInitializeSync(NovelAISettings settings, string[] prerequisites, string culture, bool dry)
+    private bool TryInitializeSync(NovelAISettings settings, IPrerequisitesValidator prerequisites, string? culture, bool dry)
     {
         if (string.IsNullOrEmpty(settings.Token)) return false;
-        if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
+        if (!prerequisites.ValidateFeatures(ServiceFeatures.NSFW)) return false;
+        if (!prerequisites.ValidateCulture("en", "jp")) return false;
         if (!ValidateSettings(settings)) return true;
         if (dry) return true;
 
@@ -54,7 +58,7 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
         _model = settings.Model;
         return true;
     }
-    
+
     protected override NovelAIParameters CreateDefaultParameters(NovelAISettings settings)
     {
         return NovelAIPresets.DefaultForModel(settings.Model);

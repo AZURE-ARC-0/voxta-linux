@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
@@ -42,7 +43,7 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
     {
     }
 
-    protected override async Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(TSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 

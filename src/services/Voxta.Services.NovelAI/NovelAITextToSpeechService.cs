@@ -6,6 +6,7 @@ using Voxta.Abstractions.Network;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 using Microsoft.Extensions.Logging;
+using Voxta.Abstractions;
 using Voxta.Abstractions.System;
 using Voxta.Shared.TextToSpeechUtils;
 
@@ -13,7 +14,7 @@ namespace Voxta.Services.NovelAI;
 
 public class NovelAITextToSpeechService : ServiceBase<NovelAISettings>, ITextToSpeechService
 {
-    public override string ServiceName => NovelAIConstants.ServiceName;
+    protected override string ServiceName => NovelAIConstants.ServiceName;
 
     public string ContentType => "audio/webm";
     public string[] Features => new[] { ServiceFeatures.NSFW };
@@ -35,12 +36,14 @@ public class NovelAITextToSpeechService : ServiceBase<NovelAISettings>, ITextToS
         _httpClient = httpClientFactory.CreateClient($"{NovelAIConstants.ServiceName}.TextToSpeech");
     }
 
-    protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
         
         if (string.IsNullOrEmpty(settings.Token)) return false;
-        if (!culture.StartsWith("en")) return false;
+        if (!prerequisites.ValidateFeatures(ServiceFeatures.NSFW)) return false;
+        if (!prerequisites.ValidateCulture("en", "jp")) return false;
         if (dry) return true;
         
         _httpClient.BaseAddress = new Uri("https://api.novelai.net");

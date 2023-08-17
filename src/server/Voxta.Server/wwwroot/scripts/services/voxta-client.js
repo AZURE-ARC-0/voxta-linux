@@ -57,7 +57,8 @@
                 this.dispatchEvent(new CustomEvent('ready', {
                     detail: {
                         chatId: data.chatId,
-                        thinkingSpeechUrls: data.thinkingSpeechUrls
+                        thinkingSpeechUrls: data.thinkingSpeechUrls,
+                        services: data.services,
                     }
                 }));
                 break;

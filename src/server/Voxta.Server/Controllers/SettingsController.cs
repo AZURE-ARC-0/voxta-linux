@@ -242,9 +242,10 @@ public class SettingsController : Controller
         {
             Name = profile.Name,
             Description = profile.Description ?? "",
-            PauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback,
             IsAdult = exists,
             AgreesToTerms = exists,
+            PauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback,
+            IgnorePrerequisites = profile.IgnorePrerequisites,
         };
         return View(vm);
     }
@@ -262,6 +263,7 @@ public class SettingsController : Controller
         profile.Name = value.Name;
         profile.Description = value.Description;
         profile.PauseSpeechRecognitionDuringPlayback = value.PauseSpeechRecognitionDuringPlayback;
+        profile.IgnorePrerequisites = value.IgnorePrerequisites;
 
         await _profileRepository.SaveProfileAsync(profile);
         

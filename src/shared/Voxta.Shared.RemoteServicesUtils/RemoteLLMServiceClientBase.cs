@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Tokenizers;
 using Voxta.Common;
@@ -32,7 +33,7 @@ public abstract class RemoteLLMServiceClientBase<TSettings, TInputParameters, TO
         _httpClient = httpClientFactory.CreateClient(GetType().Name);
     }
 
-    protected override async Task<bool> TryInitializeAsync(TSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(TSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
         

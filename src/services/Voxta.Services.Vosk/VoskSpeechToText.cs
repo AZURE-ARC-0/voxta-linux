@@ -2,6 +2,7 @@
 using Voxta.Abstractions.Services;
 using Voxta.Services.Vosk.Model;
 using Vosk;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 
@@ -16,8 +17,8 @@ public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextS
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
-    
-    public override string ServiceName => VoskConstants.ServiceName;
+
+    protected override string ServiceName => VoskConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IVoskModelDownloader _modelDownloader;
@@ -44,7 +45,8 @@ public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextS
         global::Vosk.Vosk.SetLogLevel(-1);
     }
 
-    protected override async Task<bool> TryInitializeAsync(VoskSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(VoskSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
         

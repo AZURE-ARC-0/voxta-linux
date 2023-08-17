@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.System;
@@ -20,8 +21,8 @@ public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, Op
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
-    
-    public override string ServiceName => OpenAIConstants.ServiceName;
+
+    protected override string ServiceName => OpenAIConstants.ServiceName;
     
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
@@ -34,7 +35,8 @@ public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, Op
         _httpClient = httpClientFactory.CreateClient($"{OpenAIConstants.ServiceName}");
     }
 
-    protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 

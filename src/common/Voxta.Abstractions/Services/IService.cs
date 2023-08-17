@@ -6,7 +6,7 @@ public interface IService : IAsyncDisposable
 {
     ServiceSettingsRef SettingsRef { get; }
     string[] Features { get; }
-    Task<bool> TryInitializeAsync(Guid serviceId, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken);
+    Task<bool> TryInitializeAsync(Guid serviceId, IPrerequisitesValidator prerequisites, string culture, bool dry, CancellationToken cancellationToken);
 }
 
 [Serializable]

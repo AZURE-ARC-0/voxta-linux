@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Speech.Synthesis;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Network;
@@ -13,7 +14,7 @@ namespace Voxta.Services.WindowsSpeech;
 
 public class WindowsSpeechTextToSpeechService : ServiceBase<WindowsSpeechSettings>, ITextToSpeechService
 {
-    public override string ServiceName => WindowsSpeechConstants.ServiceName;
+    protected override string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
 
     private readonly IPerformanceMetrics _performanceMetrics;
@@ -31,7 +32,8 @@ public class WindowsSpeechTextToSpeechService : ServiceBase<WindowsSpeechSetting
         _synthesizer = new SpeechSynthesizer();
     }
     
-    protected override async Task<bool> TryInitializeAsync(WindowsSpeechSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(WindowsSpeechSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Speech.Recognition;
 using Microsoft.Extensions.Logging;
-using Voxta.Abstractions.Model;
+using Voxta.Abstractions;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
 
@@ -10,7 +10,7 @@ namespace Voxta.Services.WindowsSpeech;
 
 public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISpeechToTextService
 {
-    public override string ServiceName => WindowsSpeechConstants.ServiceName;
+    protected override string ServiceName => WindowsSpeechConstants.ServiceName;
     public string[] Features { get; } = Array.Empty<string>();
     
     private readonly ILogger<WindowsSpeechSpeechToText> _logger;
@@ -30,11 +30,12 @@ public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISp
         _logger = loggerFactory.CreateLogger<WindowsSpeechSpeechToText>();
     }
     
-    protected override async Task<bool> TryInitializeAsync(WindowsSpeechSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(WindowsSpeechSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
         
-        if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
+        if (!prerequisites.ValidateFeatures()) return false;
         if (dry) return true;
 
         _recognizer = new SpeechRecognitionEngine(CultureInfo.GetCultureInfoByIetfLanguageTag(culture));

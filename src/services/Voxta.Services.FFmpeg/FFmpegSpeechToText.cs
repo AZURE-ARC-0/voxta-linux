@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions;
+using Voxta.Abstractions.Services;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 
@@ -6,7 +7,7 @@ namespace Voxta.Services.FFmpeg;
 
 public sealed class FFmpegSpeechToText : ServiceBase<FFmpegSettings>, ISpeechToTextService
 {
-    public override string ServiceName => FFmpegConstants.ServiceName;
+    protected override string ServiceName => FFmpegConstants.ServiceName;
     public string[] Features => new[] { ServiceFeatures.NSFW };
     
     private readonly IRecordingService _recordingService;
@@ -23,7 +24,8 @@ public sealed class FFmpegSpeechToText : ServiceBase<FFmpegSettings>, ISpeechToT
         _recordingService = recordingService;
     }
 
-    protected override async Task<bool> TryInitializeAsync(FFmpegSettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(FFmpegSettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 

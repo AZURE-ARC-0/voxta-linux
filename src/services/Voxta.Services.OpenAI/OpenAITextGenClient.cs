@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Diagnostics;
+﻿using Voxta.Abstractions;
+using Voxta.Abstractions.Diagnostics;
 using Voxta.Abstractions.Model;
 using Voxta.Abstractions.Repositories;
 using Voxta.Abstractions.Services;
@@ -19,10 +20,11 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         _serviceObserver = serviceObserver;
     }
 
-    protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
+    protected override async Task<bool> TryInitializeAsync(OpenAISettings settings, IPrerequisitesValidator prerequisites, string culture, bool dry,
+        CancellationToken cancellationToken)
     {
         var success = await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken);
-        if (prerequisites.Contains(ServiceFeatures.NSFW)) return false;
+        if (!prerequisites.ValidateFeatures()) return false;
         if (dry || !success) return success;
         if (Parameters == null) throw new NullReferenceException("Parameters should be set at this point");
         var logitBias = (Parameters.LogitBias ??= new Dictionary<string, int>());
