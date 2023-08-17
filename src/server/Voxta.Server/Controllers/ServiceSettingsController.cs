@@ -41,7 +41,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/mocks/{serviceId:guid}")]
-    public async Task<IActionResult> MockSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> MockSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<MockSettings>(serviceId, cancellationToken) ?? new ConfiguredService<MockSettings>
         {
@@ -68,7 +68,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("MockSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("MockSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
 
     [HttpPost("/settings/mocks/{serviceId:guid}/delete")]
@@ -86,7 +89,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/azurespeechservice/{serviceId:guid}")]
-    public async Task<IActionResult> AzureSpeechServiceSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AzureSpeechServiceSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<AzureSpeechServiceSettings>(serviceId, cancellationToken) ?? new ConfiguredService<AzureSpeechServiceSettings>
         {
@@ -118,7 +121,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("AzureSpeechServiceSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("AzureSpeechServiceSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
 
     [HttpPost("/settings/azurespeechservice/{serviceId:guid}/delete")]
@@ -134,7 +140,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/vosk/{serviceId:guid}")]
-    public async Task<IActionResult> VoskSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> VoskSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<VoskSettings>(serviceId, cancellationToken) ?? new ConfiguredService<VoskSettings>
         {
@@ -161,7 +167,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("VoskSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("VoskSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
     
     [HttpPost("/settings/vosk/{serviceId:guid}/delete")]
@@ -179,7 +188,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/elevenlabs/{serviceId:guid}")]
-    public async Task<IActionResult> ElevenLabsSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> ElevenLabsSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<ElevenLabsSettings>(serviceId, cancellationToken) ?? new ConfiguredService<ElevenLabsSettings>
         {
@@ -209,7 +218,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("ElevenLabsSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("ElevenLabsSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
 
     [HttpPost("/settings/elevenlabs/{serviceId:guid}/delete")]
@@ -225,7 +237,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/textgenerationwebui/{serviceId:guid}")]
-    public async Task<IActionResult> TextGenerationWebUISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> TextGenerationWebUISettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<OobaboogaSettings>(serviceId, cancellationToken) ?? new ConfiguredService<OobaboogaSettings>
         {
@@ -255,7 +267,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("TextGenerationWebUISettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("TextGenerationWebUISettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
     
     [HttpPost("/settings/textgenerationwebui/{serviceId:guid}/delete")]
@@ -271,7 +286,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/koboldai/{serviceId:guid}")]
-    public async Task<IActionResult> KoboldAISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> KoboldAISettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<KoboldAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<KoboldAISettings>
         {
@@ -301,7 +316,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("KoboldAISettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("KoboldAISettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
     
     [HttpPost("/settings/koboldai/{serviceId:guid}/delete")]
@@ -317,7 +335,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/textgenerationinference/{serviceId:guid}")]
-    public async Task<IActionResult> TextGenerationInferenceSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> TextGenerationInferenceSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<TextGenerationInferenceSettings>(serviceId, cancellationToken) ?? new ConfiguredService<TextGenerationInferenceSettings>
         {
@@ -347,7 +365,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("TextGenerationInferenceSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("TextGenerationInferenceSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
     
     [HttpPost("/settings/textgenerationinference/{serviceId:guid}/delete")]
@@ -363,7 +384,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/novelai/{serviceId:guid}")]
-    public async Task<IActionResult> NovelAISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> NovelAISettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<NovelAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<NovelAISettings>
         {
@@ -393,7 +414,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("NovelAISettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("NovelAISettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
 
     [HttpPost("/settings/novelai/{serviceId:guid}/delete")]
@@ -409,7 +433,7 @@ public class ServiceSettingsController : Controller
     }
 
     [HttpGet("/settings/openai/{serviceId:guid}")]
-    public async Task<IActionResult> OpenAISettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OpenAISettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         var settings = await _servicesRepository.GetAsync<OpenAISettings>(serviceId, cancellationToken) ?? new ConfiguredService<OpenAISettings>
         {
@@ -440,7 +464,10 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("OpenAISettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("OpenAISettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
     }
     
     [HttpPost("/settings/openai/{serviceId:guid}/delete")]
@@ -456,7 +483,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/windowsspeech/{serviceId:guid}")]
-    public async Task<IActionResult> WindowsSpeechSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> WindowsSpeechSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
     
         #if(WINDOWS)
@@ -489,7 +516,11 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("WindowsSpeechSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("WindowsSpeechSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
+            
         #else
         throw new PlatformNotSupportedException();
         #endif
@@ -508,7 +539,7 @@ public class ServiceSettingsController : Controller
     }
     
     [HttpGet("/settings/ffmpeg/{serviceId:guid}")]
-    public async Task<IActionResult> FFmpegSettingsAsync([FromRoute] Guid serviceId, CancellationToken cancellationToken)
+    public async Task<IActionResult> FFmpegSettingsAsync([FromRoute] Guid serviceId, [FromQuery] bool stayOnPage, CancellationToken cancellationToken)
     {
         #if(!WINDOWS)
         var settings = await _servicesRepository.GetAsync<FFmpegSettings>(serviceId, cancellationToken) ?? new ConfiguredService<FFmpegSettings>
@@ -539,7 +570,11 @@ public class ServiceSettingsController : Controller
         await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
-        return RedirectToAction("FFmpegSettings", new { serviceId });
+        if (value.StayOnPage)
+            return RedirectToAction("FFmpegSettings", new { serviceId, stayOnPage = value.StayOnPage });
+        else
+            return RedirectToAction("Settings", "Settings");
+            
         #else
         throw new PlatformNotSupportedException();
         #endif

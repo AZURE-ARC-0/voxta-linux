@@ -13,10 +13,14 @@ public class ServiceSettingsViewModel
     [SetsRequiredMembers]
     protected ServiceSettingsViewModel(ConfiguredService service)
     {
+        Id = service.Id;
         Label = string.IsNullOrWhiteSpace(service.Label) ? null : service.Label;
         Enabled = service.Enabled;
     }
+    
+    public bool StayOnPage { get; init; }
 
+    public Guid Id { get; init; }
     public required string? Label { get; init; }
     public required bool Enabled { get; init; }
 }

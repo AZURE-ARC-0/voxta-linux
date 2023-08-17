@@ -1,14 +1,24 @@
 ﻿@model Voxta.Server.ViewModels.ServiceSettings.ServiceSettingsViewModel
 
+<div class="text-danger mt-3">
+    @Html.ValidationSummary(false)
+</div>
+
 <div class="d-flex justify-content-end mt-3">
     <a href="/settings" class="btn btn-secondary me-2">Back to settings</a>
     <button id="resetBtn" class="btn btn-danger me-2"><i class="bi bi-trash"></i> Delete</button>
     <button type="submit" class="btn btn-primary">Save</button>
 </div>
-
-<div class="text-danger mt-3">
-    @Html.ValidationSummary(false)
-</div>
+    
+@if (Model.Id != Guid.Empty)
+{
+    <div class="d-flex justify-content-end mt-3">
+        <div class="form-check">
+            <input asp-for="StayOnPage" type="checkbox" class="form-check-input"/>
+            <label asp-for="StayOnPage">Stay on this page after saving</label>
+        </div>
+    </div>
+}
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
