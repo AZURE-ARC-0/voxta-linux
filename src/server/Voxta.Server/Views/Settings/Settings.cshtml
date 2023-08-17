@@ -1,4 +1,5 @@
-﻿@model Voxta.Server.ViewModels.Settings.SettingsViewModel
+﻿@using Voxta.Abstractions.Services
+@model Voxta.Server.ViewModels.Settings.SettingsViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings";
@@ -99,55 +100,62 @@
             <div class="collapse" id="collapseHelp_services">
                 <p>Services are where your AI runs, including text generation, text to speech, and speech to text.</p>
             </div>
-            <table class="table table-striped">
-                <thead>
+            @if (Model.Services.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
                     <tr>
                         <th scope="col" style="width: 40%;">Service</th>
                         <th scope="col">Label</th>
                         <th scope="col" style="width: 80px;">
-                            @if(Model.Services.Any(x => x.Service.Enabled && x.Definition.TextGen)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                            <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.Service.Enabled).DefaultIfEmpty().Max(x => x?.Definition.TextGen ?? ServiceDefinitionCategoryScore.NotSupported)"/>
                             <span title="Text Generation (Replies, Summarization and Action Inference)">TXT</span>
                         </th>
                         <th scope="col" style="width: 80px;">
-                            @if(Model.Services.Any(x => x.Service.Enabled && x.Definition.TTS)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                            <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.Service.Enabled).DefaultIfEmpty().Max(x => x?.Definition.TTS ?? ServiceDefinitionCategoryScore.NotSupported)"/>
                             <span title="Text To Speech (Synthesizer)">TTS</span>
                         </th>
                         <th scope="col" style="width: 80px;">
-                            @if(Model.Services.Any(x => x.Service.Enabled && x.Definition.STT)) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }
+                            <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.Service.Enabled).DefaultIfEmpty().Max(x => x?.Definition.STT ?? ServiceDefinitionCategoryScore.NotSupported)"/>
                             <span title="Speech To Text (Transcription)">STT</span>
                         </th>
                         <th scope="col" style="width: 80px;"></th>
                     </tr>
-                </thead>
-                <tbody>
-                @foreach (var s in Model.Services)
-                {
-                    <tr>
-                        <td>
-                            @s.Definition.Label
-                        </td>
-                        <td>
-                            @s.Service.Label
-                        </td>
-                        @if(s.Service.Enabled)
-                        {
-                            <td>@if(s.Definition.TextGen) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
-                            <td>@if(s.Definition.TTS) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
-                            <td>@if(s.Definition.STT) { <i class="bi bi-check-circle-fill text-success"></i> } else { <i class="bi bi-dash-circle-fill text-secondary"></i> }</td>
-                        }
-                        else
-                        {
-                            <td colspan="3" class="text-center"><span class="text-muted">Disabled</span></td>
-                        }
-                        <td class="text-end">
-                            <div class="d-inline-flex">
-                                <a class="btn btn-sm btn-secondary" href="/settings/@s.Definition.ServiceName.ToLowerInvariant()/@s.Service.Id">Configure</a>
-                            </div>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    @foreach (var s in Model.Services)
+                    {
+                        <tr>
+                            <td>
+                                @s.Definition.Label
+                            </td>
+                            <td>
+                                @s.Service.Label
+                            </td>
+                            @if (s.Service.Enabled)
+                            {
+                                <td><partial name="Settings/_ServiceQuality" model="@s.Definition.TextGen"/></td>
+                                <td><partial name="Settings/_ServiceQuality" model="@s.Definition.TTS"/></td>
+                                <td><partial name="Settings/_ServiceQuality" model="@s.Definition.STT"/></td>
+                            }
+                            else
+                            {
+                                <td colspan="3" class="text-center"><span class="text-muted">Disabled</span></td>
+                            }
+                            <td class="text-end">
+                                <div class="d-inline-flex">
+                                    <a class="btn btn-sm btn-secondary" href="/settings/@s.Definition.ServiceName.ToLowerInvariant()/@s.Service.Id">Configure</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-danger">You have no services configured yet. Add some!</div>
+            }
         </div>
         <div class="card-footer text-center">
             <a class="btn btn-secondary" href="/settings/add"><i class="bi bi-plus"></i> Add services</a>

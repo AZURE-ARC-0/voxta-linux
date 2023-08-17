@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.Mocks;
 
 // ReSharper disable once CheckNamespace
@@ -20,11 +21,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = MockConstants.ServiceName,
             Label = "Mocks (Debug Only)",
-            TextGen = true,
-            STT = false,
-            TTS = true,
-            Summarization = true,
-            ActionInference = true,
+            TextGen = ServiceDefinitionCategoryScore.Low,
+            STT = ServiceDefinitionCategoryScore.NotSupported,
+            TTS = ServiceDefinitionCategoryScore.Low,
+            Summarization = ServiceDefinitionCategoryScore.Low,
+            ActionInference = ServiceDefinitionCategoryScore.Low,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(MockSettings),
         });
     }

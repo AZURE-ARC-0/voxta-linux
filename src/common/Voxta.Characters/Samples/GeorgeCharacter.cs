@@ -26,7 +26,7 @@ public static class GeorgeCharacter
         Personality = "sassy + helpful + complains + teases, sarcastic + deadpan",
         PostHistoryInstructions = "Reply as {{char}}. Stay in character. Current date and time: {{now}}.",
         FirstMessage = "Hey. What do you want?",
-        Prerequisites = new[] { ServiceFeatures.GPT3 },
+        Prerequisites = Array.Empty<string>(),
         Culture = "en-US",
         Services = new()
         {

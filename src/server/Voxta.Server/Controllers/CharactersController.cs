@@ -126,7 +126,6 @@ public class CharactersController : Controller
 
         var prerequisites = new List<string>();
         if (data.PrerequisiteNSFW) prerequisites.Add(ServiceFeatures.NSFW);
-        if (data.PrerequisiteGPT3) prerequisites.Add(ServiceFeatures.GPT3);
         if (prerequisites.Count > 0) data.Character.Prerequisites = prerequisites.ToArray();
         
         await _characterRepository.SaveCharacterAsync(data.Character);
@@ -162,7 +161,6 @@ public class CharactersController : Controller
             IsNew = isNew,
             Character = character,
             PrerequisiteNSFW = character.Prerequisites?.Contains(ServiceFeatures.NSFW) == true,
-            PrerequisiteGPT3 = character.Prerequisites?.Contains(ServiceFeatures.GPT3) == true,
             TextGenServices = new[]
             {
                 new OptionViewModel("", "Select automatically"),

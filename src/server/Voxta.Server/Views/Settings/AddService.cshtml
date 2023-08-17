@@ -1,4 +1,5 @@
-﻿@model Voxta.Server.ViewModels.Settings.AddServiceViewModel
+﻿@using Voxta.Abstractions.Services
+@model Voxta.Server.ViewModels.Settings.AddServiceViewModel
 @{
     Layout = "_Layout";
     ViewBag.Title = "Settings - Add Service";
@@ -43,7 +44,7 @@
             <p>At least one service of each type must be configured and enabled.</p>
             <ul class="list-unstyled">
                 <li>
-                    @if (Model.Services.Any(s => s.Definition.TextGen && s.EnabledOccurrences > 0))
+                    @if (Model.Services.Any(s => s.Definition.TextGen.IsSupported() && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -54,7 +55,7 @@
                     Text Generation
                 </li>
                 <li>
-                    @if (Model.Services.Any(s => s.Definition.TTS && s.EnabledOccurrences > 0))
+                    @if (Model.Services.Any(s => s.Definition.TTS.IsSupported() && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -65,7 +66,7 @@
                     Text To Speech
                 </li>
                 <li>
-                    @if (Model.Services.Any(s => s.Definition.STT && s.EnabledOccurrences > 0))
+                    @if (Model.Services.Any(s => s.Definition.STT.IsSupported() && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -87,53 +88,43 @@
             <div class="row">
             @foreach (var s in Model.Services)
             {
-                <div class="col-sm-4">
-                    <div class="card mb-3">
+                <div class="col-sm-4 d-flex align-items-stretch">
+                    <div class="card mb-3" style="width: 100%">
                         <div class="card-body">
                             <h3>@s.Definition.Label</h3>
-                            @if (s.Occurrences == 1)
+                            @switch (s.Occurrences)
                             {
-                                <p class="text-muted">This service was already configured once.</p>
-                            } else if (s.Occurrences > 1)
-                            {
-                                <p class="text-muted">This service was already configured @s.Occurrences times.</p>
+                                case 1:
+                                    <p class="text-muted">Already added.</p>
+                                    break;
+                                case > 1:
+                                    <p class="text-muted">Configured @s.Occurrences times.</p>
+                                    break;
                             }
                             <ul class="list-unstyled">
                                 <li>
-                                    @if (s.Definition.TextGen)
-                                    {
-                                        <i class="bi bi-check-circle-fill text-success"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                                    }
+                                    <partial name="Settings/_ServiceQuality" model="@s.Definition.TextGen" />
                                     Text Generation
                                 </li>
                                 <li>
-                                    @if (s.Definition.TTS)
-                                    {
-                                        <i class="bi bi-check-circle-fill text-success"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                                    }
+                                    <partial name="Settings/_ServiceQuality" model="@s.Definition.TTS"/>
                                     Text To Speech
                                 </li>
                                 <li>
-                                    @if (s.Definition.STT)
-                                    {
-                                        <i class="bi bi-check-circle-fill text-success"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                                    }
+                                    <partial name="Settings/_ServiceQuality" model="@s.Definition.STT" />
                                     Speech To Text
                                 </li>
+                                @foreach(var  feature in s.Definition.Features)
+                                {
+                                    <li>
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                        @feature.ToUpper() support
+                                    </li>
+                                }
                             </ul>
-                            <a href="/settings/@s.Definition.ServiceName.ToLowerInvariant()/@Guid.Empty" class="btn btn-primary" title="Configure this service"><i class="bi bi-plus"></i> @(s.Occurrences == 0 ? "Create" : "Add")</a>
+                        </div>
+                        <div class="card-footer text-end">
+                            <a href="/settings/@s.Definition.ServiceName.ToLowerInvariant()/@Guid.Empty" class="btn btn-@(s.Occurrences > 0 ? "secondary" : "primary")" title="Configure this service"><i class="bi bi-plus"></i> @(s.Occurrences == 0 ? "Create" : "Add")</a>
                         </div>
                     </div>
                 </div>

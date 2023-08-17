@@ -47,7 +47,6 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
     {
         if (string.IsNullOrEmpty(settings.Token)) return false;
         if (!culture.StartsWith("en") && !culture.StartsWith("jp")) return false;
-        if (prerequisites.Contains(ServiceFeatures.GPT3) && settings.Model == NovelAISettings.ClioV1) return false;
         if (!ValidateSettings(settings)) return true;
         if (dry) return true;
 

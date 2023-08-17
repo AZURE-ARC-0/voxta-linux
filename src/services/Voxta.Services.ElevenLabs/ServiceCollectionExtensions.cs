@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.ElevenLabs;
 
 // ReSharper disable once CheckNamespace
@@ -17,11 +18,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = ElevenLabsConstants.ServiceName,
             Label = "11ElevenLabs",
-            TextGen = false,
-            STT = false,
-            TTS = true,
-            Summarization = false,
-            ActionInference = false,
+            TextGen = ServiceDefinitionCategoryScore.NotSupported,
+            STT = ServiceDefinitionCategoryScore.NotSupported,
+            TTS = ServiceDefinitionCategoryScore.High,
+            Summarization = ServiceDefinitionCategoryScore.NotSupported,
+            ActionInference = ServiceDefinitionCategoryScore.NotSupported,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(ElevenLabsSettings),
         });
     }

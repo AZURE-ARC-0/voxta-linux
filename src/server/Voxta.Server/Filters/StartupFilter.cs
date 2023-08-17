@@ -57,10 +57,11 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
         return next;
     }
 
-    private void CleanupProfile(ServicesList servicesList, ConfiguredService[] services, Func<ServiceDefinition, bool> filter)
+    private void CleanupProfile(ServicesList servicesList, ConfiguredService[] services, Func<ServiceDefinition, ServiceDefinitionCategoryScore> getScore)
     {
         // If any services are missing from servicesList, add them
         var links = new List<ServiceLink>(servicesList.Services);
+        var added = false;
         foreach (var service in services)
         {
             var definition = _serviceDefinitions.Get(service.ServiceName);
@@ -79,13 +80,17 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
                         ServiceName = service.ServiceName,
                         ServiceId = service.Id,
                     });
+                    added = true;
                 }
             }
         }
         
         // Invalid entry
-        links.RemoveAll(l => !filter(_serviceDefinitions.Get(l.ServiceName)));
+        links.RemoveAll(l => !getScore(_serviceDefinitions.Get(l.ServiceName)).IsSupported());
         
-        servicesList.Services = links.ToArray();
+        // Reorder if new services were added
+        servicesList.Services = added
+            ? links.OrderByDescending(x => getScore(_serviceDefinitions.Get(x.ServiceName))).ToArray()
+            : links.ToArray();
     }
 }

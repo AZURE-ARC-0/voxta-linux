@@ -55,7 +55,7 @@ public class SettingsController : Controller
             {
                 Type = "stt",
                 Title = "Speech To Text Services",
-                ServiceLinks = GetServiceLinks(profile.SpeechToText, linkVms, s => s.ServiceDefinition.STT),
+                ServiceLinks = GetServiceLinks(profile.SpeechToText, linkVms, s => s.ServiceDefinition.STT.IsSupported()),
                 Help = """
                        <p>Allows you to speak using your voice.</p>
                        <p>Azure Speech Service is highly recommended because it supports punctuation and works extremely well. It is also free up to a point. Otherwise, Vosk is free, fast and runs locally, despite being inferior to Azure.</p>
@@ -65,7 +65,7 @@ public class SettingsController : Controller
             {
                 Type = "textgen",
                 Title = "Text Generation Services",
-                ServiceLinks = GetServiceLinks(profile.TextGen, linkVms, s => s.ServiceDefinition.TextGen),
+                ServiceLinks = GetServiceLinks(profile.TextGen, linkVms, s => s.ServiceDefinition.TextGen.IsSupported()),
                 Help = """
                        <p>The brain of the AI, this is what writes the replies.</p>
                        <p>Some recommendations:</p>
@@ -89,7 +89,7 @@ public class SettingsController : Controller
             {
                 Type = "tts",
                 Title = "Text To Speech Services",
-                ServiceLinks = GetServiceLinks(profile.TextToSpeech, linkVms, s => s.ServiceDefinition.TTS),
+                ServiceLinks = GetServiceLinks(profile.TextToSpeech, linkVms, s => s.ServiceDefinition.TTS.IsSupported()),
                 Help = """
                    <p>This is what gives a voice to the character.</p>
                    <p>Some recommendations:</p>
@@ -113,7 +113,7 @@ public class SettingsController : Controller
             {
                 Type = "action_inference",
                 Title = "Action Inference Services",
-                ServiceLinks = GetServiceLinks(profile.ActionInference, linkVms, s => s.ServiceDefinition.ActionInference),
+                ServiceLinks = GetServiceLinks(profile.ActionInference, linkVms, s => s.ServiceDefinition.ActionInference.IsSupported()),
                 Help = """
                        <p>This is what allows the AI to do things with their avatar in virtual reality.</p>
                        <p>You should use OpenAI, even for NSFW, unless you want to experiment with other LLMs. Keep in mind, the LLM must be good to do action inference correctly.</p>
@@ -123,7 +123,7 @@ public class SettingsController : Controller
             {
                 Type = "summarization",
                 Title = "Summarization Services",
-                ServiceLinks = GetServiceLinks(profile.Summarization, linkVms, s => s.ServiceDefinition.Summarization),
+                ServiceLinks = GetServiceLinks(profile.Summarization, linkVms, s => s.ServiceDefinition.Summarization.IsSupported()),
                 Help = """
                    <p>This is what allows longer conversations by compression memories.</p>
                    <p>Summarization is used to replace long chat history by summaries. This results in a stronger character adherence and faster inference.</p>
@@ -152,9 +152,10 @@ public class SettingsController : Controller
     {
         var filtered = linkVms.Where(filter).ToList();
         var result = services.Services
-            .Select(x => linkVms.FirstOrDefault(l => l.ServiceId == x.ServiceId) ?? filtered.First(l => l.ServiceName == x.ServiceName))
+            .Select(x => linkVms.FirstOrDefault(l => l.ServiceId == x.ServiceId) ?? filtered.FirstOrDefault(l => l.ServiceName == x.ServiceName))
+            .Where(x => x != null)
             .ToList();
-        return result;
+        return result!;
     }
 
     [HttpPost("/settings/reorder")]

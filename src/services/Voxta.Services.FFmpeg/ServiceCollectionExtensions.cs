@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.FFmpeg;
 
 // ReSharper disable once CheckNamespace
@@ -20,11 +21,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = FFmpegConstants.ServiceName,
             Label = "FFmpeg",
-            TextGen = false,
-            STT = true,
-            TTS = false,
-            Summarization = false,
-            ActionInference = false,
+            TextGen = ServiceDefinitionCategoryScore.NotSupported,
+            STT = ServiceDefinitionCategoryScore.Medium,
+            TTS = ServiceDefinitionCategoryScore.NotSupported,
+            Summarization = ServiceDefinitionCategoryScore.NotSupported,
+            ActionInference = ServiceDefinitionCategoryScore.NotSupported,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(FFmpegSettings),
         });
     }

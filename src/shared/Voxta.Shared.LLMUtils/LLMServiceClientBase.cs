@@ -25,7 +25,7 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         Mapper = config.CreateMapper();
     }
     
-    public string[] Features => new[] { ServiceFeatures.NSFW, ServiceFeatures.GPT3 };
+    public string[] Features => new[] { ServiceFeatures.NSFW };
 
     private TSettings? _settings;
 

@@ -78,6 +78,10 @@ public class ServiceSettingsController : Controller
         if (current != null)
             await _servicesRepository.DeleteAsync(current.Id);
 
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
     
@@ -122,6 +126,10 @@ public class ServiceSettingsController : Controller
     {
         await _servicesRepository.DeleteAsync(serviceId);
 
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
 
@@ -162,6 +170,10 @@ public class ServiceSettingsController : Controller
         var current = await _servicesRepository.GetAsync<VoskSettings>(serviceId);
         if (current != null)
             await _servicesRepository.DeleteAsync(current.Id);
+        
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
         
         return RedirectToAction("Settings", "Settings");
     }
@@ -205,6 +217,10 @@ public class ServiceSettingsController : Controller
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
 
@@ -246,6 +262,10 @@ public class ServiceSettingsController : Controller
     public async Task<IActionResult> DeleteTextGenerationWebUISettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
+        
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
         
         return RedirectToAction("Settings", "Settings");
     }
@@ -289,6 +309,10 @@ public class ServiceSettingsController : Controller
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
 
@@ -330,6 +354,10 @@ public class ServiceSettingsController : Controller
     public async Task<IActionResult> DeleteTextGenerationInferenceSettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
+        
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
         
         return RedirectToAction("Settings", "Settings");
     }
@@ -373,6 +401,10 @@ public class ServiceSettingsController : Controller
     {
         await _servicesRepository.DeleteAsync(serviceId);
 
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
 
@@ -415,6 +447,10 @@ public class ServiceSettingsController : Controller
     public async Task<IActionResult> DeleteOpenAISettingsAsync([FromRoute] Guid serviceId)
     {
         await _servicesRepository.DeleteAsync(serviceId);
+        
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
         
         return RedirectToAction("Settings", "Settings");
     }
@@ -464,6 +500,10 @@ public class ServiceSettingsController : Controller
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
     
@@ -510,6 +550,10 @@ public class ServiceSettingsController : Controller
     {
         await _servicesRepository.DeleteAsync(serviceId);
         
+        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        ClearService(profile, serviceId);
+        await _profileRepository.SaveProfileAsync(profile);
+        
         return RedirectToAction("Settings", "Settings");
     }
 
@@ -517,7 +561,50 @@ public class ServiceSettingsController : Controller
     {
         var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
         var definition = _serviceRegistry.Get(settings.ServiceName) ?? throw new InvalidOperationException("No such service type");
-        if (profile.EnsureService(settings, definition))
+        if (EnsureService(profile, settings, definition))
             await _profileRepository.SaveProfileAsync(profile);
+    }
+
+    public bool EnsureService(ProfileSettings profile, ConfiguredService settings, ServiceDefinition serviceDefinition)
+    {
+        var modified = false;
+        if (serviceDefinition.TTS.IsSupported())
+            modified = modified || EnsureService(profile.TextToSpeech, settings, serviceDefinition, s => s.TTS);
+        if (serviceDefinition.STT.IsSupported())
+            modified = modified || EnsureService(profile.SpeechToText, settings, serviceDefinition, s => s.STT);
+        if (serviceDefinition.TextGen.IsSupported())
+            modified = modified || EnsureService(profile.TextGen, settings, serviceDefinition, s => s.TextGen);
+        if (serviceDefinition.ActionInference.IsSupported())
+            modified = modified || EnsureService(profile.ActionInference, settings, serviceDefinition, s => s.ActionInference);
+        if (serviceDefinition.Summarization.IsSupported())
+            modified = modified || EnsureService(profile.Summarization, settings, serviceDefinition, s => s.Summarization);
+        return modified;
+    }
+
+    private bool EnsureService(ServicesList servicesList, ConfiguredService settings, ServiceDefinition serviceDefinition, Func<ServiceDefinition, ServiceDefinitionCategoryScore> getScore)
+    {
+        if (servicesList.Services.Any(x => x.ServiceId == settings.Id))
+            return false;
+
+        var score = getScore(serviceDefinition);
+        var services = new List<ServiceLink>(servicesList.Services);
+        var indexOf = services.ToList().FindIndex(x => getScore(_serviceRegistry.Get(x.ServiceName)) <= score);
+        var newService = new ServiceLink { ServiceName = settings.ServiceName, ServiceId = settings.Id };
+        if (indexOf == -1)
+            services.Add(newService);
+        else
+            services.Insert(indexOf, newService);
+
+        servicesList.Services = services.ToArray();
+        return true;
+    }
+
+    public void ClearService(ProfileSettings profile, Guid serviceId)
+    {
+        profile.TextGen.Services = profile.TextGen.Services.Where(x => x.ServiceId != serviceId).ToArray();
+        profile.TextToSpeech.Services = profile.TextToSpeech.Services.Where(x => x.ServiceId != serviceId).ToArray();
+        profile.SpeechToText.Services = profile.SpeechToText.Services.Where(x => x.ServiceId != serviceId).ToArray();
+        profile.ActionInference.Services = profile.ActionInference.Services.Where(x => x.ServiceId != serviceId).ToArray();
+        profile.Summarization.Services = profile.Summarization.Services.Where(x => x.ServiceId != serviceId).ToArray();
     }
 }

@@ -1,0 +1,18 @@
+﻿@using Voxta.Abstractions.Services
+@model Voxta.Abstractions.Services.ServiceDefinitionCategoryScore
+
+@switch (Model)
+{
+    case ServiceDefinitionCategoryScore.High:
+        <i class="bi bi-star-fill text-success" title="This service is excellent and strongly recommended"></i>
+        break;
+    case ServiceDefinitionCategoryScore.Medium:
+        <i class="bi bi-check-circle-fill text-success" title="This is a good service to use"></i>
+        break;
+    case ServiceDefinitionCategoryScore.Low:
+        <i class="bi bi-check-circle-fill text-warning" title="This service works but does not offer an optimal experience"></i>
+        break;
+    default:
+        <i class="bi bi-dash-circle-fill text-secondary" title="This service is not supported or disabled"></i>
+        break;
+}

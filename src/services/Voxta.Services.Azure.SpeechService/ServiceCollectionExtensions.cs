@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.AzureSpeechService;
 
 // ReSharper disable once CheckNamespace
@@ -18,11 +19,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = AzureSpeechServiceConstants.ServiceName,
             Label = "Azure Speech Service",
-            TextGen = false,
-            STT = true,
-            TTS = true,
-            Summarization = false,
-            ActionInference = false,
+            TextGen = ServiceDefinitionCategoryScore.NotSupported,
+            STT = ServiceDefinitionCategoryScore.High,
+            TTS = ServiceDefinitionCategoryScore.Medium,
+            Summarization = ServiceDefinitionCategoryScore.NotSupported,
+            ActionInference = ServiceDefinitionCategoryScore.NotSupported,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(AzureSpeechServiceSettings),
         });
     }

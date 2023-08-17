@@ -19,11 +19,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = OpenAIConstants.ServiceName,
             Label = "OpenAI",
-            TextGen = true,
-            STT = false,
-            TTS = false,
-            Summarization = true,
-            ActionInference = true,
+            TextGen = ServiceDefinitionCategoryScore.High,
+            STT = ServiceDefinitionCategoryScore.NotSupported,
+            TTS = ServiceDefinitionCategoryScore.NotSupported,
+            Summarization = ServiceDefinitionCategoryScore.High,
+            ActionInference = ServiceDefinitionCategoryScore.High,
+            Features = Array.Empty<string>(),
             SettingsType = typeof(OpenAISettings),
         });
     }

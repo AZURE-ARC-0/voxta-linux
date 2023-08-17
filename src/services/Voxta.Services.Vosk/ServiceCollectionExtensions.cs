@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.Vosk;
 
 // ReSharper disable once CheckNamespace
@@ -18,11 +19,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = VoskConstants.ServiceName,
             Label = "Vosk",
-            TextGen = false,
-            STT = true,
-            TTS = false,
-            Summarization = false,
-            ActionInference = true,
+            TextGen = ServiceDefinitionCategoryScore.NotSupported,
+            STT = ServiceDefinitionCategoryScore.Low,
+            TTS = ServiceDefinitionCategoryScore.NotSupported,
+            Summarization = ServiceDefinitionCategoryScore.NotSupported,
+            ActionInference = ServiceDefinitionCategoryScore.NotSupported,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(VoskSettings),
         });
     }

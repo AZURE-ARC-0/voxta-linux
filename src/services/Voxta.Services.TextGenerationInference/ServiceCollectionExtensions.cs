@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.TextGenerationInference;
 
 // ReSharper disable once CheckNamespace
@@ -19,11 +20,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = TextGenerationInferenceConstants.ServiceName,
             Label = "HuggingFace Text Generation Inference",
-            TextGen = true,
-            STT = false,
-            TTS = false,
-            Summarization = true,
-            ActionInference = true,
+            TextGen = ServiceDefinitionCategoryScore.Medium,
+            STT = ServiceDefinitionCategoryScore.NotSupported,
+            TTS = ServiceDefinitionCategoryScore.NotSupported,
+            Summarization = ServiceDefinitionCategoryScore.Medium,
+            ActionInference = ServiceDefinitionCategoryScore.Medium,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(TextGenerationInferenceSettings),
         });
     }

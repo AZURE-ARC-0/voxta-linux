@@ -24,11 +24,12 @@ public class ServiceDefinitionsRegistry : IServiceDefinitionsRegistry
             {
                 ServiceName = serviceName,
                 Label = serviceName + " (Unknown)",
-                Summarization = false,
-                ActionInference = false,
-                TextGen = false,
-                STT = false,
-                TTS = false,
+                Summarization = ServiceDefinitionCategoryScore.NotSupported,
+                ActionInference = ServiceDefinitionCategoryScore.NotSupported,
+                TextGen = ServiceDefinitionCategoryScore.NotSupported,
+                STT = ServiceDefinitionCategoryScore.NotSupported,
+                TTS = ServiceDefinitionCategoryScore.NotSupported,
+                Features = Array.Empty<string>(),
                 SettingsType = null,
             };
     }
@@ -37,18 +38,4 @@ public class ServiceDefinitionsRegistry : IServiceDefinitionsRegistry
     {
         return _services.Values;
     }
-}
-
-public class ServiceDefinition
-{
-    public required string ServiceName { get; init; }
-    public required string Label { get; init; }
-    
-    public required bool TTS { get; init; }
-    public required bool STT { get; init; }
-    public required bool TextGen { get; init; }
-    public required bool ActionInference { get; init; }
-    public required bool Summarization { get; init; }
-    
-    public required Type? SettingsType { get; init; }
 }

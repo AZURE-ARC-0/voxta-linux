@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.NovelAI;
 
 // ReSharper disable once CheckNamespace
@@ -21,11 +22,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = NovelAIConstants.ServiceName,
             Label = "NovelAI",
-            TextGen = true,
-            STT = false,
-            TTS = true,
-            Summarization = true,
-            ActionInference = true,
+            TextGen = ServiceDefinitionCategoryScore.Medium,
+            STT = ServiceDefinitionCategoryScore.NotSupported,
+            TTS = ServiceDefinitionCategoryScore.High,
+            Summarization = ServiceDefinitionCategoryScore.Medium,
+            ActionInference = ServiceDefinitionCategoryScore.Medium,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(NovelAISettings),
         });
     }

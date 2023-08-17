@@ -1,4 +1,5 @@
-﻿using Voxta.Abstractions.Services;
+﻿using Voxta.Abstractions.Model;
+using Voxta.Abstractions.Services;
 using Voxta.Services.Oobabooga;
 
 // ReSharper disable once CheckNamespace
@@ -19,11 +20,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = OobaboogaConstants.ServiceName,
             Label = "Oobabooga Text Generation Web UI",
-            TextGen = true,
-            STT = false,
-            TTS = false,
-            Summarization = true,
-            ActionInference = true,
+            TextGen = ServiceDefinitionCategoryScore.Medium,
+            STT = ServiceDefinitionCategoryScore.NotSupported,
+            TTS = ServiceDefinitionCategoryScore.NotSupported,
+            Summarization = ServiceDefinitionCategoryScore.Medium,
+            ActionInference = ServiceDefinitionCategoryScore.Medium,
+            Features = new[] { ServiceFeatures.NSFW },
             SettingsType = typeof(OobaboogaSettings),
         });
     }

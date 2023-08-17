@@ -20,11 +20,12 @@ public static class ServiceCollectionExtensions
         {
             ServiceName = WindowsSpeechConstants.ServiceName,
             Label = "Windows Speech",
-            TextGen = false,
-            STT = true,
-            TTS = true,
-            Summarization = false,
-            ActionInference = false,
+            TextGen = ServiceDefinitionCategoryScore.NotSupported,
+            STT = ServiceDefinitionCategoryScore.Low,
+            TTS = ServiceDefinitionCategoryScore.Low,
+            Summarization = ServiceDefinitionCategoryScore.NotSupported,
+            ActionInference = ServiceDefinitionCategoryScore.NotSupported,
+            Features = Array.Empty<string>(),
             SettingsType = typeof(WindowsSpeechSettings),
         });
     }
