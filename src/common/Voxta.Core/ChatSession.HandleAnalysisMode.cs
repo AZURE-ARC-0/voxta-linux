@@ -46,8 +46,9 @@ public partial class ChatSession
         sb.AppendLineLinux("Diagnostics for character " + _chatSessionData.Character.Name);
         sb.AppendLineLinux("Text Generation: " + _textGen.SettingsRef.ServiceName);
         sb.AppendLineLinux("Text To Speech: " + (_speechGenerator.Link?.ServiceName ?? "None") + " with voice " + _speechGenerator.Voice);
-        sb.AppendLineLinux("Action Inference: " + (_actionInference?.SettingsRef.ServiceName ?? "None"));
         sb.AppendLineLinux("Speech To Text: " + (_speechToText?.SettingsRef.ServiceName ?? "None"));
+        sb.AppendLineLinux("Action Inference: " + (_actionInference?.SettingsRef.ServiceName ?? "None"));
+        sb.AppendLineLinux("Summarization: " + (_summarizationService?.SettingsRef.ServiceName ?? "None"));
         await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, cancellationToken);
     }
 
