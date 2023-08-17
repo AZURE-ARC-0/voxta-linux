@@ -141,8 +141,7 @@ public class CharactersController : Controller
             try
             {
                 var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
-                var ttsService = await ttsServiceFactory.CreateBestMatchAsync(profile.TextToSpeech, character.Services.SpeechGen.Service,
-                    character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
+                var ttsService = await ttsServiceFactory.CreateBestMatchRequiredAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, character.Prerequisites ?? Array.Empty<string>(), character.Culture, cancellationToken);
                 voices = await ttsService.GetVoicesAsync(cancellationToken);
             }
             catch (Exception exc)

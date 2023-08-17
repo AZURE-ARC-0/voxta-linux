@@ -5,7 +5,7 @@ namespace Voxta.Core;
 
 public partial class ChatSession
 {
-    private async Task GenerationActionInference(CancellationToken cancellationToken)
+    private async Task GenerateActionInference(CancellationToken cancellationToken)
     {
         if (_actionInference != null && _chatSessionData.Actions is { Length: > 0 })
         {

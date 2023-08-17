@@ -7,17 +7,14 @@ namespace Voxta.Abstractions.Services;
 
 public interface IServiceFactory<TInterface> where TInterface : class
 {
-    IEnumerable<string> ServiceNames { get; }
     Task<TInterface> CreateSpecificAsync(ServiceLink link, string culture, bool dry, CancellationToken cancellationToken);
-    Task<TInterface> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken);
+    Task<TInterface?> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken);
 }
 
 public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInterface : class, IService
 {
     private readonly IServiceRegistry<TInterface> _registry;
     private readonly IServiceProvider _sp;
-
-    public IEnumerable<string> ServiceNames => _registry.Types.Keys;
 
     public ServiceFactory(IServiceRegistry<TInterface> registry, IServiceProvider sp)
     {
@@ -41,7 +38,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         return instance;
     }
 
-    public async Task<TInterface> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken)
+    public async Task<TInterface?> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(preferred?.ServiceName)) preferred = null;
         
@@ -63,7 +60,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
             if (service != null) return service;
         }
 
-        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service compatible with features [{(prerequisites.Length > 0 ? string.Join(", ", prerequisites) : "(none)")}] and culture {culture}");
+        return null;
     }
 
     private async Task<TInterface?> TryCreateOneAsync(ServiceLink serviceLink, string[] prerequisites, string culture, IServicesRepository servicesRepository, CancellationToken cancellationToken)
@@ -79,5 +76,16 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         var instance = (TInterface)_sp.GetRequiredService(type);
         var success = await instance.TryInitializeAsync(serviceRef.Id, prerequisites, culture, false, cancellationToken);
         return success ? instance : null;
+    }
+}
+
+public static class ServiceFactoryExtensions
+{
+    public static async Task<TInterface> CreateBestMatchRequiredAsync<TInterface>(this IServiceFactory<TInterface> factory, ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken)
+        where TInterface : class, IService
+    {
+        var service = await factory.CreateBestMatchAsync(services, preferred, prerequisites, culture, cancellationToken);
+        if (service != null) return service;
+        throw new InvalidOperationException($"There is no {typeof(TInterface).Name} service compatible with features [{(prerequisites.Length > 0 ? string.Join(", ", prerequisites) : "(none)")}] and culture {culture}");
     }
 }

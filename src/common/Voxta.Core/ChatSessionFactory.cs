@@ -76,7 +76,7 @@ public class ChatSessionFactory
 
             var prerequisites = character.Prerequisites ?? Array.Empty<string>();
             var culture = character.Culture;
-            textGen = await _textGenFactory.CreateBestMatchAsync(profile.TextGen, character.Services.TextGen.Service, prerequisites, culture, cancellationToken);
+            textGen = await _textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, character.Services.TextGen.Service, prerequisites, culture, cancellationToken);
             speechToText = useSpeechRecognition ? await _speechToTextServiceFactory.CreateBestMatchAsync(profile.SpeechToText, null, prerequisites, culture, cancellationToken) : null;
             actionInference = startChatMessage.UseActionInference && profile.ActionInference.Services.Any()
                 ? await _animationSelectionFactory.CreateBestMatchAsync(profile.ActionInference, character.Services.ActionInference.Service, prerequisites, culture, cancellationToken)
@@ -87,7 +87,7 @@ public class ChatSessionFactory
             var textProcessor = new ChatTextProcessor(profile, character.Name, cultureInfo, textGen);
             
             var textToSpeechGen = await _textToSpeechFactory.CreateBestMatchAsync(profile.TextToSpeech, character.Services.SpeechGen.Service, prerequisites, culture, cancellationToken);
-            var thinkingSpeech = textToSpeechGen.GetThinkingSpeech();
+            var thinkingSpeech = textToSpeechGen?.GetThinkingSpeech() ?? Array.Empty<string>();
 
             speechGenerator = _speechGeneratorFactory.Create(textToSpeechGen, character.Services.SpeechGen.Voice, culture, startChatMessage.AudioPath, startChatMessage.AcceptedAudioContentTypes, cancellationToken);
 

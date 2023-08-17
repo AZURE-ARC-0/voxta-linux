@@ -28,7 +28,7 @@ public sealed partial class ChatSession : IChatSession
     private readonly ISpeechGenerator _speechGenerator;
     private readonly IActionInferenceService? _actionInference;
     private readonly ISpeechToTextService? _speechToText;
-    private readonly ISummarizationService _summarizationService;
+    private readonly ISummarizationService? _summarizationService;
     private readonly IChatRepository _chatRepository;
     private readonly IChatMessageRepository _chatMessageRepository;
     private readonly IMemoryProvider _memoryProvider;
@@ -45,7 +45,7 @@ public sealed partial class ChatSession : IChatSession
         ISpeechGenerator speechGenerator,
         IActionInferenceService? actionInference,
         ISpeechToTextService? speechToText,
-        ISummarizationService summarizationService,
+        ISummarizationService? summarizationService,
         IChatRepository chatRepository,
         IChatMessageRepository chatMessageRepository,
         IMemoryProvider memoryProvider
