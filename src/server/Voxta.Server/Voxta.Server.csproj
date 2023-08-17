@@ -45,15 +45,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\common\Voxta.Characters\Voxta.Characters.csproj" />
     <ProjectReference Include="..\Voxta.Host.AspNetCore.WebSockets\Voxta.Host.AspNetCore.WebSockets.csproj" />
-
-
-
-
-
-
   </ItemGroup>
-
-
-
 
 </Project>
