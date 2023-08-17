@@ -25,31 +25,35 @@
                 <div class="mb-3">
                     <label asp-for="Character.CreatorNotes">Creator Notes</label>
                     <input asp-for="Character.CreatorNotes" class="form-control"/>
-                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.CreatorNotes)</small>
                     <div class="form-text">Only for display, not used by the AI</div>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.CreatorNotes)</small>
                 </div>
                 
                 <div class="mb-3">
                     <label asp-for="Character.Description">Description</label>
                     <textarea asp-for="Character.Description" class="form-control"></textarea>
+                    <div class="form-text">What the character looks like</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Description)</small>
                 </div>
                 
                 <div class="mb-3">
                     <label asp-for="Character.Personality">Personality</label>
                     <textarea asp-for="Character.Personality" class="form-control"></textarea>
+                    <div class="form-text">How does the character behaves</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Personality)</small>
                 </div>
                 
                 <div class="mb-3">
                     <label asp-for="Character.Scenario">Scenario</label>
                     <textarea asp-for="Character.Scenario" class="form-control"></textarea>
+                    <div class="form-text">In what circumstances are you and the character talking</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Scenario)</small>
                 </div>
                 
                 <div class="mb-3">
                     <label asp-for="Character.FirstMessage">First Message</label>
                     <textarea asp-for="Character.FirstMessage" class="form-control"></textarea>
+                    <div class="form-text">The first message the user will say when talking to you</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.FirstMessage)</small>
                 </div>
                 
@@ -62,7 +66,7 @@
                 <div class="mb-3">
                     <label asp-for="Character.SystemPrompt">System Prompt</label>
                     <textarea asp-for="Character.SystemPrompt" class="form-control"></textarea>
-                    <div class="form-text">Required, most downloaded characters rely on a built-in one and will be empty.</div>
+                    <div class="form-text">Most downloaded characters rely on a built-in one and will leave this empty.</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.SystemPrompt)</small>
                 </div>
                 
@@ -103,21 +107,21 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label asp-for="Character.Services.TextGen.Service">Text Generation Service</label>
-                    <select asp-for="Character.Services.TextGen.Service" asp-items="@(new SelectList(Model.TextGenServices, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
-                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.TextGen.Service)</small>
+                    <label asp-for="TextGen">Text Generation Service</label>
+                    <select asp-for="TextGen" asp-items="@(new SelectList(Model.TextGenServices, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.TextGen)</small>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Character.Services.SpeechGen.Service">Speech Generation Service</label>
-                    <select asp-for="Character.Services.SpeechGen.Service" asp-items="@(new SelectList(Model.TextToSpeechServices, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
-                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Service)</small>
+                    <label asp-for="TextToSpeech">Speech Generation Service</label>
+                    <select asp-for="TextToSpeech" asp-items="@(new SelectList(Model.TextToSpeechServices, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.TextToSpeech)</small>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Character.Services.SpeechGen.Voice">Speech Generation Voice</label>
-                    <select asp-for="Character.Services.SpeechGen.Voice" asp-items="@(new SelectList(Model.Voices, nameof(VoiceInfo.Id), nameof(VoiceInfo.Label)))" class="form-control"></select>
-                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Services.SpeechGen.Voice)</small>
+                    <label asp-for="Voice">Speech Generation Voice</label>
+                    <select asp-for="Voice" asp-items="@(new SelectList(Model.Voices, nameof(VoiceInfo.Id), nameof(VoiceInfo.Label)))" class="form-control"></select>
+                    <small class="text-danger">@Html.ValidationMessageFor(m => m.Voice)</small>
                 </div>
 
                 <div class="form-check">
@@ -131,7 +135,7 @@
         <div class="d-flex justify-content-end mt-3">
             <a href="/characters" class="btn btn-secondary me-2">Back to all characters</a>
             <a class="btn btn-secondary me-2" href="/characters/@Model.Character.Id/download" target="_blank"><i class="bi bi-cloud-arrow-down"></i> Download</a>
-            <a class="btn btn-secondary me-2" href="/characters/@Model.Character.Id/memory" target="_blank"><i class="bi bi-book"></i> Memory</a>
+            <a class="btn btn-secondary me-2" href="/characters/@Model.Character.Id/memory"><i class="bi bi-book"></i> Memory</a>
             @if (Model.Character.ReadOnly)
             {
                 <input type="button" value="Save (Read Only)" class="btn btn-secondary" disabled="disabled"/>
@@ -148,12 +152,12 @@
     </form>
     
     <script type="text/javascript">
-        const speechGenSelect = document.getElementById("Character_Services_SpeechGen_Service");
-        const voicesSelect = document.getElementById("Character_Services_SpeechGen_Voice");
+        const speechGenSelect = document.getElementById("TextToSpeech");
+        const voicesSelect = document.getElementById("Voice");
         const cultureInput = document.getElementById("Character_Culture");
         
         speechGenSelect.onchange = function() {
-            const selectedService = this.value || 'None';
+            const selectedService = this.value || 'none/@Guid.Empty';
             voicesSelect.innerHTML = "";
             
             {

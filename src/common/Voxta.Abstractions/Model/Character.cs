@@ -9,8 +9,8 @@ public class CharacterCardExtended : CharacterCard
     public string[]? Prerequisites { get; set; }
     [RegularExpression(@"^[a-z]{2}-[A-Z]{2}$")]
     public string Culture { get; set; } = "en-US";
-    
-    public required CharacterServicesMap Services { get; set; }
+
+    public required CharacterServicesMap Services { get; set; } = new();
     public CharacterOptions? Options { get; init; }
 }
 

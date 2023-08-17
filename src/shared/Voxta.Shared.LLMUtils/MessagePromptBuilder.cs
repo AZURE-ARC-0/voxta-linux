@@ -54,7 +54,8 @@ public abstract class MessagePromptBuilder
         if (memorySb.Tokens > 0)
         {
             var memoryData = memorySb.ToTextData();
-            systemPrompt += memoryData.Value;
+            systemPrompt.Value += memoryData.Value;
+            systemPrompt.Tokens += memoryData.Tokens;
             totalTokens += memoryData.Tokens;
         }
         

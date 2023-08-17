@@ -6,18 +6,9 @@ using Voxta.Abstractions.Services;
 using Voxta.Characters;
 using Voxta.Common;
 using Voxta.Server.ViewModels;
-using Voxta.Services.KoboldAI;
-using Voxta.Services.ElevenLabs;
-using Voxta.Services.Mocks;
-using Voxta.Services.NovelAI;
-using Voxta.Services.Oobabooga;
-using Voxta.Services.OpenAI;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Server.ViewModels.Characters;
-using Voxta.Services.AzureSpeechService;
-using Voxta.Services.TextGenerationInference;
 #if(WINDOWS)
-using Voxta.Services.WindowsSpeech;
 #endif
 
 namespace Voxta.Server.Controllers;
@@ -29,13 +20,17 @@ public class CharactersController : Controller
     private readonly IMemoryRepository _memoryRepository;
     private readonly ILogger<CharactersController> _logger;
     private readonly IProfileRepository _profileRepository;
+    private readonly IServicesRepository _servicesRepository;
+    private readonly IServiceDefinitionsRegistry _servicesDefinitionsRegistry;
 
-    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository, ILogger<CharactersController> logger)
+    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository, ILogger<CharactersController> logger, IServicesRepository servicesRepository, IServiceDefinitionsRegistry servicesDefinitionsRegistry)
     {
         _characterRepository = characterRepository;
         _profileRepository = profileRepository;
         _memoryRepository = memoryRepository;
         _logger = logger;
+        _servicesRepository = servicesRepository;
+        _servicesDefinitionsRegistry = servicesDefinitionsRegistry;
     }
     
     [HttpGet("/characters")]
@@ -127,9 +122,20 @@ public class CharactersController : Controller
         var prerequisites = new List<string>();
         if (data.PrerequisiteNSFW) prerequisites.Add(ServiceFeatures.NSFW);
         if (prerequisites.Count > 0) data.Character.Prerequisites = prerequisites.ToArray();
+        if (!string.IsNullOrEmpty(data.TextGen))
+        {
+            var textGen = data.TextGen.Split("/");
+            data.Character.Services.TextGen.Service = new ServiceLink(textGen[0], Guid.Parse(textGen[1]));
+        }
+        if (!string.IsNullOrEmpty(data.TextToSpeech))
+        {
+            var tts = data.TextToSpeech.Split("/");
+            data.Character.Services.SpeechGen.Service = new ServiceLink(tts[0], Guid.Parse(tts[1]));
+            data.Character.Services.SpeechGen.Voice = data.Voice;
+        }
         
         await _characterRepository.SaveCharacterAsync(data.Character);
-        return RedirectToAction("Character", new { characterId = data.Character.Id });
+        return RedirectToAction("Characters");
     }
 
     private async Task<CharacterViewModelWithOptions> GenerateCharacterViewModelAsync(IServiceFactory<ITextToSpeechService> ttsServiceFactory, Character character, bool isNew, CancellationToken cancellationToken)
@@ -155,36 +161,28 @@ public class CharactersController : Controller
             voices = VoiceInfo.DefaultVoices;
         }
 
+        var services = await _servicesRepository.GetServicesAsync(cancellationToken);
+
         var vm = new CharacterViewModelWithOptions
         {
             IsNew = isNew,
             Character = character,
             PrerequisiteNSFW = character.Prerequisites?.Contains(ServiceFeatures.NSFW) == true,
-            TextGenServices = new[]
-            {
-                new OptionViewModel("", "Select automatically"),
-                OptionViewModel.Create(OpenAIConstants.ServiceName),
-                OptionViewModel.Create(NovelAIConstants.ServiceName),
-                OptionViewModel.Create(TextGenerationInferenceConstants.ServiceName),
-                OptionViewModel.Create(OobaboogaConstants.ServiceName),
-                OptionViewModel.Create(KoboldAIConstants.ServiceName),
-                #if(DEBUG)
-                OptionViewModel.Create(MockConstants.ServiceName),
-                #endif
-            },
-            TextToSpeechServices = new[]
-            {
-                new OptionViewModel("", "Select automatically"),
-                OptionViewModel.Create(NovelAIConstants.ServiceName),
-                OptionViewModel.Create(ElevenLabsConstants.ServiceName),
-                OptionViewModel.Create(AzureSpeechServiceConstants.ServiceName),
-                #if(WINDOWS)
-                OptionViewModel.Create(WindowsSpeechConstants.ServiceName),
-                #endif
-                #if(DEBUG)
-                OptionViewModel.Create(MockConstants.ServiceName),
-                #endif
-            },
+            TextGenServices = new[] { new OptionViewModel("", "Select automatically") }
+                .Concat(services
+                    .Where(x => _servicesDefinitionsRegistry.Get(x.ServiceName).TextGen.IsSupported())
+                    .Select(x => new OptionViewModel($"{x.ServiceName}/{x.Id}", x.ServiceName))
+                )
+                .ToArray(),
+            TextGen = character.Services.TextGen.Service != null ? $"{character.Services.TextGen.Service.ServiceName}/{character.Services.TextGen.Service.ServiceId}" : "",
+            TextToSpeechServices = new[] { new OptionViewModel("", "Select automatically") }
+                .Concat(services
+                    .Where(x => _servicesDefinitionsRegistry.Get(x.ServiceName).TTS.IsSupported())
+                    .Select(x => new OptionViewModel($"{x.ServiceName}/{x.Id}", x.ServiceName))
+                )
+                .ToArray(),
+            TextToSpeech = character.Services.SpeechGen.Service != null ? $"{character.Services.SpeechGen.Service.ServiceName}/{character.Services.SpeechGen.Service.ServiceId}" : "",
+            Voice = character.Services.SpeechGen.Voice,
             Cultures = CultureUtils.Bcp47LanguageTags.Select(c => new OptionViewModel(c.Name, c.Label)).ToArray(),
             Voices = voices,
         };

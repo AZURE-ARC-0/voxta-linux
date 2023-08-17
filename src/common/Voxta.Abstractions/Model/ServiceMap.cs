@@ -3,5 +3,5 @@
 [Serializable]
 public class ServiceMap
 {
-    public ServiceLink? Service { get; init; }
+    public ServiceLink? Service { get; set; }
 }

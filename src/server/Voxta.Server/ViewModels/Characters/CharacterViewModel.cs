@@ -6,6 +6,9 @@ public class CharacterViewModel
 {
     public required Character Character { get; init; }
     public required bool PrerequisiteNSFW { get; init; }
+    public required string? TextGen { get; init; }
+    public required string? TextToSpeech { get; init; }
+    public required string? Voice { get; init; }
 }
 
 public class CharacterViewModelWithOptions : CharacterViewModel

@@ -32,6 +32,13 @@ public class ServiceLink
     }
     
     [SetsRequiredMembers]
+    public ServiceLink(string serviceName, Guid serviceId)
+    {
+        ServiceName = serviceName;
+        ServiceId = serviceId;
+    }
+    
+    [SetsRequiredMembers]
     public ServiceLink(ConfiguredService service)
     {
         ServiceName = service.ServiceName;
