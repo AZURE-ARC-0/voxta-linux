@@ -36,10 +36,7 @@ public class TextGenerationInferenceTextGenService : TextGenerationInferenceClie
 
     public async ValueTask<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
     {
-        _serviceObserver.Record(ServiceObserverKeys.TextGenService, TextGenerationInferenceConstants.ServiceName);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
-        var text = await SendCompletionRequest(BuildRequestBody(prompt, new[] { "\n" }), cancellationToken);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
-        return text;
+        var body = BuildRequestBody(prompt, new[] { "\n" });
+        return await SendCompletionRequest(body, cancellationToken);
     }
 }

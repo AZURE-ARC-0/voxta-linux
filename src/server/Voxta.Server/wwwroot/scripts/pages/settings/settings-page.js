@@ -21,7 +21,7 @@
             }
         });
 
-        serviceTypeList.addEventListener('drop', ev => {
+        serviceTypeList.addEventListener('drop', async ev => {
             ev.preventDefault();
             placeholder.replaceWith(draggedElement);
 
@@ -32,16 +32,13 @@
             }
             const orderedServices = orderedList.join(',');
 
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/settings/reorder', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.send('serviceType=' + serviceType + '&orderedServices=' + orderedServices);
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    console.log('Order changed: ', xhr.status)
-                }
-            };
+            await fetch('/settings/reorder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'serviceType=' + serviceType + '&orderedServices=' + orderedServices
+            });
         });
 
         const serviceLinks = serviceTypeList.getElementsByClassName('service-ordering-item');
@@ -57,6 +54,31 @@
             serviceLink.addEventListener('dragend', () => {
                 draggedElement = null;
                 placeholder.remove();
+            });
+
+            serviceLink.addEventListener('dblclick', async evt => {
+                const selectedService = evt.target;
+                const enabled = !selectedService.classList.contains('alert-primary');
+                await fetch('/settings/enable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'serviceId=' + selectedService.dataset.serviceid + '&enabled=' + enabled
+                });
+
+                Array.from(document.getElementsByClassName('service-ordering-item')).forEach(element => {
+                    if (element.dataset.servicename !== selectedService.dataset.servicename) return;
+                    if (element.dataset.serviceid !== selectedService.dataset.serviceid) return;
+
+                    if (enabled) {
+                        element.classList.remove('alert-secondary');
+                        element.classList.add('alert-primary');
+                    } else {
+                        element.classList.remove('alert-primary');
+                        element.classList.add('alert-secondary');
+                    }
+                });
             });
         }
     }

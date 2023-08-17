@@ -65,7 +65,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("MockSettings", new { serviceId });
@@ -115,7 +115,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("AzureSpeechServiceSettings", new { serviceId });
@@ -158,7 +158,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("VoskSettings", new { serviceId });
@@ -206,7 +206,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("ElevenLabsSettings", new { serviceId });
@@ -252,7 +252,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("TextGenerationWebUISettings", new { serviceId });
@@ -298,7 +298,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("KoboldAISettings", new { serviceId });
@@ -344,7 +344,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("TextGenerationInferenceSettings", new { serviceId });
@@ -390,7 +390,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("NovelAISettings", new { serviceId });
@@ -437,7 +437,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId, _encryptionProvider);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("OpenAISettings", new { serviceId });
@@ -486,7 +486,7 @@ public class ServiceSettingsController : Controller
             serviceId = Crypto.CreateCryptographicallySecureGuid();
 
         var settings = value.ToSettings(serviceId);
-        await _servicesRepository.SaveAsync(settings);
+        await _servicesRepository.SaveServiceAndSettingsAsync(settings);
         await UpdateProfileAsync(settings);
         
         return RedirectToAction("WindowsSpeechSettings", new { serviceId });

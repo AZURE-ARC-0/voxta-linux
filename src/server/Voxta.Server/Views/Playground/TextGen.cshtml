@@ -13,11 +13,12 @@
             <div class="mb-2">
                 <label asp-for="Character">Character</label>
                 <select asp-for="Character" asp-items="@(new SelectList(Model.Characters, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
-                <div class="form-text">Make sure the services has been configured and enabled.</div>
+                <div class="form-text">Used for using Template and prerequisites.</div>
             </div>
             <div class="mb-2">
                 <label asp-for="Service">Service</label>
                 <select asp-for="Service" asp-items="@(new SelectList(Model.Services, nameof(OptionViewModel.Name), nameof(OptionViewModel.Label)))" class="form-control"></select>
+                <div class="form-text">Automatic will resolve the service using the specified Character prerequisites and culture.</div>
             </div>
             <div class="mb-2">
                 <label asp-for="Template">Template</label>

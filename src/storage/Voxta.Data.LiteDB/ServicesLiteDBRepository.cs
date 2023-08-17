@@ -53,7 +53,14 @@ public class ServicesLiteDBRepository : IServicesRepository
         });
     }
 
-    public Task SaveAsync<T>(ConfiguredService<T> configuredService) where T : SettingsBase
+    public Task SaveServiceAsync(ConfiguredService service)
+    {
+        if (service.Id == Guid.Empty) throw new InvalidOperationException("Id must be set");
+        _servicesCollection.Upsert(service);
+        return Task.CompletedTask;
+    }
+
+    public Task SaveServiceAndSettingsAsync<T>(ConfiguredService<T> configuredService) where T : SettingsBase
     {
         if (configuredService.Id == Guid.Empty) throw new InvalidOperationException("Id must be set");
         configuredService.Settings.Id = configuredService.Id;

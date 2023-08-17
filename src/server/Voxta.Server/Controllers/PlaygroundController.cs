@@ -17,12 +17,14 @@ public class PlaygroundController : Controller
     private readonly IProfileRepository _profileRepository;
     private readonly ICharacterRepository _characterRepository;
     private readonly IServiceObserver _serviceObserver;
+    private readonly IServicesRepository _serviceRepository;
 
-    public PlaygroundController(IProfileRepository profileRepository, ICharacterRepository characterRepository, IServiceObserver serviceObserver)
+    public PlaygroundController(IProfileRepository profileRepository, ICharacterRepository characterRepository, IServiceObserver serviceObserver, IServicesRepository serviceRepository)
     {
         _profileRepository = profileRepository;
         _characterRepository = characterRepository;
         _serviceObserver = serviceObserver;
+        _serviceRepository = serviceRepository;
     }
     
     [HttpGet("/playground")]
@@ -38,7 +40,7 @@ public class PlaygroundController : Controller
         if (profile == null) return RedirectToAction("Settings", "Settings");
         return View(new TextToSpeechPlaygroundViewModel
         {
-            Services = profile.TextToSpeech.Services.Select(l => OptionViewModel.Create(l.ServiceId.ToString(), l.ServiceName)).ToList(),
+            Services = profile.TextToSpeech.Services.Select(l => OptionViewModel.Create($"{l.ServiceName}/{l.ServiceId}", l.ServiceName)).ToList(),
             Cultures = CultureUtils.Bcp47LanguageTags.Select(x => new OptionViewModel(x.Name, x.Label)).ToList(),
         });
     }
@@ -78,8 +80,21 @@ public class PlaygroundController : Controller
         string result;
         try
         {
-            #warning Test this and other Service! occurrences
-            var link = new ServiceLink(vm.Service!);
+            ServiceLink? link;
+            if (string.IsNullOrEmpty(vm.Service))
+            {
+                link = character.Services.TextGen.Service;
+            }
+            else
+            {
+                var cs = Guid.TryParse(vm.Service, out var serviceId)
+                    ? await _serviceRepository.GetServiceByIdAsync(serviceId, cancellationToken)
+                    : await _serviceRepository.GetServiceByNameAsync(vm.Service, cancellationToken);
+                if (cs == null)
+                    throw new NullReferenceException($"Could not find service {vm.Service}");
+                link = new ServiceLink(cs);
+            }
+
             if (data.Template == "Reply")
             {
                 var textGen = await textGenFactory.CreateBestMatchAsync(profile.TextGen, link, Array.Empty<string>(), vm.Culture ?? "en-US", cancellationToken);
@@ -157,7 +172,7 @@ public class PlaygroundController : Controller
     private async Task<TextGenPlaygroundViewModel> GetTextGenViewModel(ProfileSettings profile, string? service, CancellationToken cancellationToken, Character? character)
     {
         var services = new[] { new OptionViewModel("", "Automatic") }
-            .Concat(profile.TextGen.Services.Select(x => OptionViewModel.Create(x.ServiceName, x.ServiceName)))
+            .Concat(profile.TextGen.Services.Where(x => x.ServiceId != null).Select(x => OptionViewModel.Create(x.ServiceId.ToString()!, x.ServiceName)))
             .ToList();
 
         var characters = await _characterRepository.GetCharactersListAsync(cancellationToken);

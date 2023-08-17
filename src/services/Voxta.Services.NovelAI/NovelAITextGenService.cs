@@ -35,10 +35,7 @@ public class NovelAITextGenService : NovelAIClientBase, ITextGenService
 
     public async ValueTask<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
     {
-        _serviceObserver.Record(ServiceObserverKeys.TextGenService, NovelAIConstants.ServiceName);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
-        var text = await SendCompletionRequest(BuildRequestBody(prompt, "special_instruct"), cancellationToken);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, text);
-        return text;
+        var body = BuildRequestBody(prompt, "special_instruct");
+        return await SendCompletionRequest(body, cancellationToken);
     }
 }

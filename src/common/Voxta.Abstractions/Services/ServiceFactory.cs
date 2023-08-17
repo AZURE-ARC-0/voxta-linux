@@ -43,12 +43,14 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
 
     public async Task<TInterface> CreateBestMatchAsync(ServicesList services, ServiceLink? preferred, string[] prerequisites, string culture, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(preferred?.ServiceName)) preferred = null;
+        
         var servicesRepository = _sp.GetRequiredService<IServicesRepository>();
 
         if (preferred != null)
         {
             var service = await TryCreateOneAsync(preferred, prerequisites, culture, servicesRepository, cancellationToken);
-            if (service == null) throw new InvalidOperationException($"Preferred service with name {preferred.ServiceName} and ID {(preferred.ServiceId?.ToString() ?? "Any")} was either not found or was not compatible with features [{(prerequisites.Length > 0 ? string.Join(", ", prerequisites) : "(none)")}] and culture {culture}");
+            if (service == null) throw new InvalidOperationException($"Preferred service with name {preferred.ServiceName} and ID {(preferred.ServiceId?.ToString() ?? "*")} was either not found or was not compatible with features [{(prerequisites.Length > 0 ? string.Join(", ", prerequisites) : "(none)")}] and culture {culture}");
             return service;
         }
 

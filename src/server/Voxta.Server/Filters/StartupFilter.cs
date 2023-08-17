@@ -85,7 +85,10 @@ public class AutoRequestServicesStartupFilter : IStartupFilter
             }
         }
         
-        // Invalid entry
+        // Remove services that are not configured
+        links.RemoveAll(l => services.All(s => s.Id != l.ServiceId));
+        
+        // Remove services that are not supported
         links.RemoveAll(l => !getScore(_serviceDefinitions.Get(l.ServiceName)).IsSupported());
         
         // Reorder if new services were added

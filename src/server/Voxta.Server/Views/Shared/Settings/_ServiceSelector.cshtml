@@ -21,7 +21,7 @@
     }
     @foreach (var service in Model.ServiceLinks)
     {
-        <div id="@($"serviceLink__{Model.Type}_{service.ServiceName}_{service.ServiceId}")" class="service-ordering-item alert alert-@(service.Enabled ? "primary" : "secondary") me-2" draggable="true" data-servicelink="@service.ServiceLinkString">
+        <div id="@($"serviceLink__{Model.Type}_{service.ServiceName}_{service.ServiceId}")" class="service-ordering-item alert alert-@(service.Enabled ? "primary" : "secondary") me-2" draggable="true" data-servicename="@service.ServiceName" data-serviceid="@service.ServiceId" data-servicelink="@service.ServiceLinkString">
             @service.ServiceName
             @if (service.Label != null)
             {

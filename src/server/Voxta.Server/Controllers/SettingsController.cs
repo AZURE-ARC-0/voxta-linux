@@ -158,11 +158,19 @@ public class SettingsController : Controller
         return result!;
     }
 
+    [HttpPost("/settings/enable")]
+    public async Task<IActionResult> EnabledServices([FromForm] string serviceId, [FromForm] bool enabled, CancellationToken cancellationToken)
+    {
+        var service = await _servicesRepository.GetServiceByIdAsync(Guid.Parse(serviceId), cancellationToken) ?? throw new NullReferenceException("Service not found");
+        service.Enabled = enabled;
+        await _servicesRepository.SaveServiceAsync(service);
+        return Ok();
+    }
+
     [HttpPost("/settings/reorder")]
     public async Task<IActionResult> ReorderServices([FromForm] string serviceType, [FromForm] string orderedServices, CancellationToken cancellationToken)
     {
-        #warning Double-click should toggle enabled!!
-        var profile = await _profileRepository.GetRequiredProfileAsync(CancellationToken.None);
+        var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
         switch (serviceType)
         {
             case "stt":

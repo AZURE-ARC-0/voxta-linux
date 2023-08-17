@@ -53,11 +53,21 @@ public class OpenAITextGenClient : OpenAIClientBase, ITextGenService
         return text;
     }
 
-    public ValueTask<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
+    public async ValueTask<string> GenerateAsync(string prompt, CancellationToken cancellationToken)
     {
-        _serviceObserver.Record(ServiceObserverKeys.TextGenService, OpenAIConstants.ServiceName);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenPrompt, prompt);
-        _serviceObserver.Record(ServiceObserverKeys.TextGenResult, "");
-        throw new NotSupportedException("Raw prompt generation is not supported by OpenAI TextGen");
+        var messages = new ChatMessageData[]
+        {
+            new()
+            {
+                ChatId = Guid.Empty,
+                Timestamp = DateTimeOffset.UtcNow,
+                Tokens = 0,
+                Id = Guid.Empty,
+                Role = ChatMessageRole.User,
+                Value = prompt,
+            }
+        };
+        var body = BuildRequestBody(messages);
+        return await SendChatRequestAsync(body, cancellationToken);
     }
 }
