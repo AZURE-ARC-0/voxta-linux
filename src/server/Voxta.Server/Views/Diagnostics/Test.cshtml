@@ -1,0 +1,153 @@
+﻿@model Voxta.Server.ViewModels.Diagnostics.TestViewModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Test";
+}
+
+@section head {
+    <style>
+        .tooltip2 {
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+          border-bottom: 1px dotted black; /*optional, to indicate a tooltip is available */
+        }
+        
+        .tooltip2 .tooltip-text {
+          visibility: hidden;
+          width: 60vw;
+          background-color: #555;
+          color: #fff;
+          text-align: left;
+          padding: 5px;
+          border-radius: 6px;
+          
+          /* Positioning */
+          position: absolute;
+          z-index: 1;
+          bottom: 100%; 
+          left: -50%;
+        
+          /* Fade-in effect */
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+        
+        .tooltip2:hover .tooltip-text {
+          visibility: visible;
+          opacity: 1;
+        }
+    </style>
+}
+
+<div class="container">
+    <h1>Settings</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Help</h2>
+            <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp" aria-expanded="false" aria-controls="collapseHelp">
+                <i class="bi bi-question-circle"></i> General help
+            </button>
+        </div>
+        <div class="card-body">
+            <p>This page will run tests on all services to make sure they work as expected, and report the results.</p>
+        </div>
+    </div>
+    
+    @foreach (var serviceType in Model.Services)
+    {
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>
+                    @serviceType.Title
+                </h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col" style="width: 80px;">Status</th>
+                        <th scope="col" style="width: 250px;">Service</th>
+                        <th scope="col">Message</th>
+                        <th scope="col" style="width: 80px;"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var s in serviceType.Services)
+                    {
+                        <tr>
+                            <td>
+                                @if (!s.IsReady)
+                                {
+                                    <i class="bi bi-dash-circle-fill text-secondary"></i>
+                                }
+                                else if (s.IsHealthy)
+                                {
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                                }
+                            </td>
+                            <td>
+                                @s.Label
+                            </td>
+                            <td>
+                                @if (s.IsTested || s is { IsReady: true,IsHealthy: false })
+                                {
+                                    <code class="tooltip2">
+                                        @s.Status
+                                        @if (!string.IsNullOrEmpty(s.Details))
+                                        {
+                                            <span class="tooltip-text"><pre>@s.Details.Trim()</pre></span>
+                                        }
+                                    </code>
+                                }
+                                else if (!s.IsReady)
+                                {
+                                    <span class="text-muted">Disabled</span>
+                                }
+                                else
+                                {
+                                    <span>Ready</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex">
+                                    <a class="btn btn-sm btn-secondary" href="/settings/@s.ServiceName.ToLower()/@s.ServiceId">Configure</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>Test</h2>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-center text-center">
+                <form asp-action="Test">
+                    <input type="hidden" name="test" value="true"/>
+                    <p class="text-muted pl-2">Click once and wait for the results, it may take some time.</p>
+                    <p><button id="testBtn" type="submit" class="btn btn-primary"><i class="bi bi-journal-check"></i> Test Now</button></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+        <a href="/settings" class="btn btn-secondary me-2">Back to settings</a>
+    </div>
+</div>
+
+<script>
+  document.getElementById('testBtn').addEventListener('click', function() {
+      setTimeout(() => this.disabled = true, 1);
+  });
+</script>

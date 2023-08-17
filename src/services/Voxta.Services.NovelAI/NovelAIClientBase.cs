@@ -38,7 +38,7 @@ public class NovelAIClientBase : LLMServiceClientBase<NovelAISettings, NovelAIPa
     
     protected override async Task<bool> TryInitializeAsync(NovelAISettings settings, string[] prerequisites, string culture, bool dry, CancellationToken cancellationToken)
     {
-        if (await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
+        if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 
         return TryInitializeSync(settings, prerequisites, culture, dry);
     }

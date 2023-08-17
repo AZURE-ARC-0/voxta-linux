@@ -9,6 +9,11 @@ public class ConfiguredService
     public string? Label { get; init; }
     public required string ServiceName { get; set; } = null!;
     public bool Enabled { get; set; } = true;
+
+    public override string ToString()
+    {
+        return string.IsNullOrEmpty(Label) ? ServiceName : $"{ServiceName} ({Label})";
+    }
 }
 
 [Serializable]

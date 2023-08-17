@@ -44,29 +44,19 @@
             <p>At least one service of each type must be configured and enabled.</p>
             <ul class="list-unstyled">
                 <li>
-                    @if (Model.Services.Any(s => s.Definition.TextGen.IsSupported() && s.EnabledOccurrences > 0))
-                    {
-                        <i class="bi bi-check-circle-fill text-success"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                    }
-                    Text Generation
+                    <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.TextGen ?? ServiceDefinitionCategoryScore.NotSupported)"/>
+                    Text Generation (Replies, Summarization and Action Inference) support
                 </li>
                 <li>
-                    @if (Model.Services.Any(s => s.Definition.TTS.IsSupported() && s.EnabledOccurrences > 0))
-                    {
-                        <i class="bi bi-check-circle-fill text-success"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                    }
-                    Text To Speech
+                    <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.TTS ?? ServiceDefinitionCategoryScore.NotSupported)"/>
+                    Text To Speech (Synthesizer) support
                 </li>
                 <li>
-                    @if (Model.Services.Any(s => s.Definition.STT.IsSupported() && s.EnabledOccurrences > 0))
+                    <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.STT ?? ServiceDefinitionCategoryScore.NotSupported)"/>
+                    Speech To Text (Transcription) support
+                </li>
+                <li>
+                    @if (Model.Services.Any(s => s.Definition.Features.Contains(ServiceFeatures.NSFW) && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
                     }
@@ -74,7 +64,7 @@
                     {
                         <i class="bi bi-dash-circle-fill text-secondary"></i>
                     }
-                    Speech To Text
+                    NSFW (Not Safe For Work) support
                 </li>
             </ul>
         </div>
@@ -131,5 +121,9 @@
             }
             </div>
         </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+        <a href="/settings" class="btn btn-secondary me-2">Back to settings</a>
     </div>
 </div>

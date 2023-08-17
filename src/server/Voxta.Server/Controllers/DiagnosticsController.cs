@@ -1,6 +1,7 @@
 ﻿using Voxta.Abstractions.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Voxta.Abstractions.Services;
+using Voxta.Host.AspNetCore.WebSockets.Utils;
 using Voxta.Server.ViewModels.Diagnostics;
 
 namespace Voxta.Server.Controllers;
@@ -10,14 +11,15 @@ public class DiagnosticsController : Controller
 {
     private readonly IPerformanceMetrics _performanceMetrics;
     private readonly IServiceObserver _serviceObserver;
+    private readonly DiagnosticsUtil _diagnosticsUtil;
 
     public DiagnosticsController(
         IPerformanceMetrics performanceMetrics,
-        IServiceObserver serviceObserver
-    )
+        IServiceObserver serviceObserver, DiagnosticsUtil diagnosticsUtil)
     {
         _performanceMetrics = performanceMetrics;
         _serviceObserver = serviceObserver;
+        _diagnosticsUtil = diagnosticsUtil;
     }
 
     [HttpGet("/diagnostics")]
@@ -36,16 +38,48 @@ public class DiagnosticsController : Controller
         return View(vm);
     }
 
-    #warning BRING THIS BACK
     [HttpPost("/diagnostics/test")]
     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
-    public async Task<IActionResult> TestAllSettings([FromForm] bool test, CancellationToken cancellationToken)
+    public async Task<IActionResult> Test([FromForm] bool test, CancellationToken cancellationToken)
     {
         if (!test) throw new InvalidOperationException("Unexpected settings test without test flag.");
-
-        throw new NotImplementedException();
-        //
-        // var vm = await GetSettingsViewModel(() => _diagnosticsUtil.TestAllServicesAsync(cancellationToken), cancellationToken);
-        //  return View("Settings", vm);
+        var services = await _diagnosticsUtil.TestAllServicesAsync(cancellationToken);
+        var vm = new TestViewModel
+        {
+            Services = new SettingsServiceViewModel[]
+            {
+                new()
+                {
+                    Name = "stt",
+                    Title = "Speech To Text Services",
+                    Services = services.SpeechToTextServices,
+                },
+                new()
+                {
+                    Name = "textgen",
+                    Title = "Text Generation Services",
+                    Services = services.TextGenServices,
+                },
+                new()
+                {
+                    Name = "tts",
+                    Title = "Text To Speech Services",
+                    Services = services.TextToSpeechServices,
+                },
+                new()
+                {
+                    Name = "action_inference",
+                    Title = "Action Inference Services",
+                    Services = services.ActionInferenceServices,
+                },
+                new()
+                {
+                    Name = "summarization",
+                    Title = "Summarization Services",
+                    Services = services.SummarizationServices,
+                },
+            }
+        };
+        return View(vm);
     }
 }

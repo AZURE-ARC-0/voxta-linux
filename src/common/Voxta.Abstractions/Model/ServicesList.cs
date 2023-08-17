@@ -30,6 +30,13 @@ public class ServiceLink
     {
         ServiceName = serviceName;
     }
+    
+    [SetsRequiredMembers]
+    public ServiceLink(ConfiguredService service)
+    {
+        ServiceName = service.ServiceName;
+        ServiceId = service.Id;
+    }
 
     public override string ToString()
     {
