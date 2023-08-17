@@ -22,7 +22,7 @@ public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISp
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
-    public event EventHandler<string>? SpeechRecognitionFinished;
+    public event EventHandler<string?>? SpeechRecognitionFinished;
 
     public WindowsSpeechSpeechToText(ISettingsRepository settingsRepository, ILoggerFactory loggerFactory)
         : base(settingsRepository)
@@ -68,6 +68,7 @@ public class WindowsSpeechSpeechToText : ServiceBase<WindowsSpeechSettings>, ISp
 
         _recognizer.SpeechRecognitionRejected += (_, _) => {
             _speaking = false;
+            SpeechRecognitionFinished?.Invoke(this, null);
         };
 
         _recognizer.RecognizeCompleted += (_, _) =>

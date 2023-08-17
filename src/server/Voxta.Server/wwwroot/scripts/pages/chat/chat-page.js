@@ -189,7 +189,11 @@ voxtaClient.addEventListener('speechRecognitionPartial', evt => {
 });
 
 voxtaClient.addEventListener('speechRecognitionEnd', evt => {
-    sendChatMessage(evt.detail.text);
+    if(evt.detail.text) {
+        sendChatMessage(evt.detail.text);
+    } else {
+        audioVisualizer.idle();
+    }
     prompt.value = evt.detail.text;
     prompt.disabled = true;
 });

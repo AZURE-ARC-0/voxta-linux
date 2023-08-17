@@ -23,7 +23,7 @@ public class AzureSpeechServiceSpeechToText : ServiceBase<AzureSpeechServiceSett
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
-    public event EventHandler<string>? SpeechRecognitionFinished;
+    public event EventHandler<string?>? SpeechRecognitionFinished;
 
     public AzureSpeechServiceSpeechToText(IRecordingService recordingService, ISettingsRepository settingsRepository, ILoggerFactory loggerFactory, ILocalEncryptionProvider encryptionProvider)
         : base(settingsRepository)
@@ -91,9 +91,14 @@ public class AzureSpeechServiceSpeechToText : ServiceBase<AzureSpeechServiceSett
                 SpeechRecognitionFinished?.Invoke(this, e);
         };
 
-        _transcriber.Canceled += (_, _) => {
-            #warning Here we should notify the UI to stop the loading indicator
-            _recordingService.Speaking = false;
+        _transcriber.Canceled += (_, _) =>
+        {
+            if (_recordingService.Speaking)
+            {
+                _logger.LogDebug("Speech canceled");
+                _recordingService.Speaking = false;
+                SpeechRecognitionFinished?.Invoke(this, null);
+            }
         };
         
         _recordingService.DataAvailable += (_, e) =>

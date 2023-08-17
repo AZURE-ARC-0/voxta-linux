@@ -31,7 +31,7 @@ public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextS
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
-    public event EventHandler<string>? SpeechRecognitionFinished;
+    public event EventHandler<string?>? SpeechRecognitionFinished;
 
     public VoskSpeechToText(IVoskModelDownloader modelDownloader, IRecordingService recordingService, ISettingsRepository settingsRepository)
         : base(settingsRepository)
@@ -84,11 +84,25 @@ public sealed class VoskSpeechToText : ServiceBase<VoskSettings>, ISpeechToTextS
             _recordingService.Speaking = false;
             var result = _recognizer.Result();
             var json = JsonSerializer.Deserialize<FinalResult>(result, SerializeOptions);
-            if (json == null || string.IsNullOrEmpty(json.Text)) return;
-            if (json.Result == null) return;
-            if (json.Result is [{ Conf: < 0.99 }]) return;
-            if (json.Result.Length == 1 && IsNoise(json.Text)) return;
-            SpeechRecognitionFinished?.Invoke(this, json.Text);
+            string? text;
+            if (json == null || string.IsNullOrEmpty(json.Text)) text = null;
+            else switch (json.Result)
+            {
+                case null:
+                case [{ Conf: < 0.99 }]:
+                    text = null;
+                    break;
+                default:
+                {
+                    text = json.Result.Length switch
+                    {
+                        1 when IsNoise(json.Text) => null,
+                        _ => json.Text
+                    };
+                    break;
+                }
+            }
+            SpeechRecognitionFinished?.Invoke(this, text);
         }
         else
         {

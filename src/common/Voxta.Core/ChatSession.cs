@@ -112,15 +112,15 @@ public sealed partial class ChatSession : IChatSession
         });
     }
 
-    private void OnSpeechRecognitionFinished(object? sender, string e)
+    private void OnSpeechRecognitionFinished(object? sender, string? e)
     {
         _logger.LogInformation("Speech recognition finished: {Text}", e);
-        if (_pauseSpeechRecognitionDuringPlayback) _speechToText?.StopMicrophoneTranscription();
+        if (!string.IsNullOrEmpty(e) && _pauseSpeechRecognitionDuringPlayback) _speechToText?.StopMicrophoneTranscription();
         Enqueue(async ct =>
         {
             await _tunnel.SendAsync(new ServerSpeechRecognitionEndMessage
             {
-                Text = e
+                Text = e == "" ? null : e
             }, ct);
         });
     }

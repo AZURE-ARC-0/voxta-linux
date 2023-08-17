@@ -88,7 +88,7 @@ public class ServerSpeechRecognitionPartialMessage : ServerMessage
 [Serializable]
 public class ServerSpeechRecognitionEndMessage : ServerMessage
 {
-    public required string Text { get; set; }
+    public required string? Text { get; set; }
 }
 
 [Serializable]
