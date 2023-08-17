@@ -12,7 +12,7 @@ public class HomeController : Controller
         var profile = await profileRepository.GetProfileAsync(cancellationToken);
         return profile == null
             ? RedirectToAction("ProfileSettings", "Settings")
-            : RedirectToAction("Chat", "Chat");
+            : RedirectToAction("Talk", "Talk");
     }
     
     [HttpGet("/support")]

@@ -4,17 +4,17 @@ using Voxta.Abstractions.Repositories;
 namespace Voxta.Server.Controllers;
 
 [Controller]
-public class ChatController : Controller
+public class TalkController : Controller
 {
     private readonly IProfileRepository _profileRepository;
 
-    public ChatController(IProfileRepository profileRepository)
+    public TalkController(IProfileRepository profileRepository)
     {
         _profileRepository = profileRepository;
     }
     
-    [HttpGet("/chat")]
-    public async Task<IActionResult> Chat(CancellationToken cancellationToken)
+    [HttpGet("/talk")]
+    public async Task<IActionResult> Talk(CancellationToken cancellationToken)
     {
         var profile = await _profileRepository.GetProfileAsync(cancellationToken);
         if (profile == null) return RedirectToAction("ProfileSettings", "Settings");

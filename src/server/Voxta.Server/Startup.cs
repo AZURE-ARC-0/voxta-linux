@@ -19,7 +19,7 @@ public class Startup
         {
             app.UseExceptionHandler("/Error");
         }
-
+        
         app.UseStaticFiles();
         app.UseRouting();
         app.UseWebSockets();

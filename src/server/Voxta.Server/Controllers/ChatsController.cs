@@ -67,7 +67,7 @@ public class ChatsController : Controller
         });
     }
     
-    [HttpPost("/chat/{id}/messages/{messageId}")]
+    [HttpPost("/talk/{id}/messages/{messageId}")]
     public async Task<IActionResult> Chat([FromRoute] Guid messageId, [FromBody] UpdateMessage value, CancellationToken cancellationToken)
     {
         
