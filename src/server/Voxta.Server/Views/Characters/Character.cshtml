@@ -4,8 +4,22 @@
     ViewBag.Title = Model.Character.Name;
 }
 
-<div class="container py-3">
-    <h1>@(Model.Character.ReadOnly ? "View" : "Edit") Character</h1>
+<div class="container">
+    <h1 class="mb-4">@(Model.Character.ReadOnly ? "View" : "Edit") Character</h1>
+    
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Help</h2>
+            <button class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHelp" aria-expanded="false" aria-controls="collapseHelp">
+                <i class="bi bi-question-circle"></i> General help
+            </button>
+        </div>
+        <div class="card-body collapse" id="collapseHelp">
+            <p>Characters define how the AI will behave. You can check out Tavern cards for inspiration, but keep in mind that Voxta uses speech-first conversations rather than conventional role-play.</p>
+            <p>The sample messages and the first message are important to show the AI how your character will speak. Make sure to spend time writing good examples.</p>
+            <p>You can use the following tags: <code>{{user}}</code>, <code>{{user.description}}</code>, <code>{{char}}</code>, <code>{{user}}</code> and <code>{{now}}</code>.</p>
+        </div>
+    </div>
     
     <form method="post" action="/characters/@Model.Character.Id">
         <input type="hidden" asp-for="Character.Id" class="form-control" readonly="readonly"/>
