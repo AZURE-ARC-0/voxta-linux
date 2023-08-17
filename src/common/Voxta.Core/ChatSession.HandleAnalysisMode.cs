@@ -37,6 +37,8 @@ public partial class ChatSession
         sb.AppendLineLinux("list services");
         sb.AppendLineLinux("list commands");
         sb.AppendLineLinux("reset chat");
+        #warning regenerate
+        #warning rollback
         await SendReplyWithSpeechAsync(sb.ToString(), $"diagnostics_{Guid.NewGuid()}", false, cancellationToken);
     }
 

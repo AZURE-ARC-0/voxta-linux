@@ -64,9 +64,10 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
 
     public (List<ChatMessageData> Messages, int Tokens)? GetMessagesToSummarize(IChatInferenceData chat)
     {
-        using var token = chat.GetReadToken();
-        if (token.Messages.Sum(m => m.Tokens) < Settings.SummarizationTriggerTokens)
+        if(chat.TotalMessagesTokens < Settings.SummarizationTriggerTokens)
             return null;
+        
+        using var token = chat.GetReadToken();
         
         var messagesTokens = 0;
         var messagesToSummarize = new List<ChatMessageData>();

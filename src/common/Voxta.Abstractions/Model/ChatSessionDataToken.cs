@@ -21,15 +21,16 @@ public class ChatSessionDataToken<TMessages, TMemory> : IDisposable
     where TMemory : class, IReadOnlyList<ChatSessionDataMemory>
 {
     private readonly Action _exit;
+    private readonly IChatSessionDataUnsafe _data;
 
-    public IChatSessionData Data { get; }
+    public IChatSessionData Data => _data;
     public TMessages Messages { get; }
     public TMemory Memories { get; }
 
     protected ChatSessionDataToken(IChatSessionDataUnsafe data, Action exit)
     {
         _exit = exit;
-        Data = data;
+        _data = data;
         Messages = data.Messages as TMessages ?? throw new InvalidCastException();
         Memories = data.Memories as TMemory ?? throw new InvalidCastException();
     }
@@ -37,6 +38,7 @@ public class ChatSessionDataToken<TMessages, TMemory> : IDisposable
     public void Dispose()
     {
         GC.SuppressFinalize(this);
+        _data.TotalMessagesTokens = Messages.Sum(m => m.Tokens);
         _exit();
     }
 }

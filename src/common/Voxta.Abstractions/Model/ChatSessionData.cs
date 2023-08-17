@@ -6,6 +6,7 @@ public interface IChatSessionDataUnsafe : IChatEditableData
 {
     List<ChatMessageData> Messages { get; }
     List<ChatSessionDataMemory> Memories { get; }
+    new int TotalMessagesTokens { get; set; }
 }
 
 [Serializable]
@@ -24,6 +25,8 @@ public class ChatSessionData : IChatSessionDataUnsafe
     public TextData? Context { get; set; }
     public string[]? Actions { get; set; }
     public string[]? ThinkingSpeech { get; init; }
+    
+    public int TotalMessagesTokens { get; set; }
 
     List<ChatMessageData> IChatSessionDataUnsafe.Messages { get; } = new();
     List<ChatSessionDataMemory> IChatSessionDataUnsafe.Memories { get; } = new();

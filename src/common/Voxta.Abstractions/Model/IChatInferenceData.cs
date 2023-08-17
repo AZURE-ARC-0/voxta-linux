@@ -10,6 +10,7 @@ public interface IChatSessionData
     CultureInfo CultureInfo { get; }
     TextData? Context { get; }
     string[]? Actions { get; }
+    int TotalMessagesTokens { get; }
 }
 
 public interface IChatInferenceData : IChatSessionData

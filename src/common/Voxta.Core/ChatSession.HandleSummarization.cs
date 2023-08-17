@@ -36,6 +36,8 @@ public partial class ChatSession
 
         _logger.LogInformation("Summarizing memory for {MessagesToSummarizeCount}", messagesToSummarize.Count);
 
+        using var token = _chatSessionData.GetWriteToken();
+        
         var summaryText = await _summarizationService.SummarizeAsync(_chatSessionData, messagesToSummarize, cancellationToken);
         if (string.IsNullOrEmpty(summaryText))
         {
@@ -47,7 +49,6 @@ public partial class ChatSession
         var summaryTokens = _textGen.GetTokenCount(summaryText);
 
         // TODO: Use a transaction here to reduce the risk of exiting while we write messages
-        using var token = _chatSessionData.GetWriteToken();
         var summaryId = Guid.NewGuid();
         messagesToSummarize.ForEach(m => m.SummarizedBy = summaryId);
         await Task.WhenAll(messagesToSummarize.Select(_chatMessageRepository.UpdateMessageAsync));
