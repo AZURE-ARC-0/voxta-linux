@@ -13,7 +13,10 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
     public async Task TestChat()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(chat.User, "Tell me, how do you feel about this?");
+        }
 
         var client = await CreateClientAsync<NovelAITextGenService>(NovelAIConstants.ServiceName);
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
@@ -29,9 +32,12 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
     public async Task TestActionInference()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
-        chat.AddMessage(chat.Character, "This fills me with joy!");
         chat.Actions = new[] { "cry", "think", "leave", "smile", "frown" };
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(chat.User, "Tell me, how do you feel about this?");
+            token.AddMessage(chat.Character, "This fills me with joy!");
+        }
 
         var client = await CreateClientAsync<NovelAIActionInferenceService>(NovelAIConstants.ServiceName);
         var action = await client.SelectActionAsync(chat, CancellationToken.None);
@@ -49,11 +55,14 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
     public async Task TestSummarization()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User, "I love apples, they taste delicious!");
-        chat.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(chat.User, "I love apples, they taste delicious!");
+            token.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
+        }
 
         var client = await CreateClientAsync<NovelAISummarizationService>(NovelAIConstants.ServiceName);
-        var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
+        var summary = await client.SummarizeAsync(chat, chat.GetAllMessages(), CancellationToken.None);
         
         Console.WriteLine("### Prompt");
         Console.WriteLine(ServiceObserver.GetRecord(ServiceObserverKeys.SummarizationPrompt)?.Value);

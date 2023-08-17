@@ -51,7 +51,7 @@ public class TextPromptBuilder : MessagePromptBuilder
         return StringifyMessages(chat, messages, "\nAction: [");
     }
 
-    public string BuildSummarizationPromptString(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize)
+    public string BuildSummarizationPromptString(IChatInferenceData chat, IReadOnlyList<ChatMessageData> messagesToSummarize)
     {
         var messages = BuildSummarizationPrompt(chat, messagesToSummarize);
         return StringifyMessages(chat, messages, "");

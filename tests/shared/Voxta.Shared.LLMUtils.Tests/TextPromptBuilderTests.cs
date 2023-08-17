@@ -41,9 +41,12 @@ public class TextPromptBuilderTests
             },
             Character = character,
         };
-        chat.AddMessage(user, "Hello");
-        chat.AddMessage(character, "World");
-        chat.AddMessage(user, "Question");
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(user, "Hello");
+            token.AddMessage(character, "World");
+            token.AddMessage(user, "Question");
+        }
         
         var actual = _builder.BuildReplyPromptString(chat, 0, 4096);
 
@@ -88,9 +91,12 @@ public class TextPromptBuilderTests
             Actions = new[] { "action1", "action2" },
             Context = "some-context",
         };
-        chat.AddMessage(user, "Hello");
-        chat.AddMessage(character, "World");
-        chat.AddMessage(user, "Question");
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(user, "Hello");
+            token.AddMessage(character, "World");
+            token.AddMessage(user, "Question");
+        }
         
         var actual = _builder.BuildReplyPromptString(chat, 0, 4096);
 
@@ -132,13 +138,16 @@ public class TextPromptBuilderTests
             },
             Character = character,
         };
-        chat.AddMessage(user, "Hello");
-        chat.AddMessage(character, "World");
-        chat.AddMessage(user, "Question");
-        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-1" });
-        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-2" });
-        chat.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-3" });
-        
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(user, "Hello");
+            token.AddMessage(character, "World");
+            token.AddMessage(user, "Question");
+            token.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-1" });
+            token.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-2" });
+            token.Memories.Add(new ChatSessionDataMemory { Id = Guid.Empty, Text = "memory-3" });
+        }
+
         var actual = _builder.BuildReplyPromptString(chat, 1024, 4096);
 
         Assert.That(actual, Is.EqualTo("""
@@ -187,9 +196,13 @@ public class TextPromptBuilderTests
             Actions = new[] { "action1", "action2" },
             Context = "some-context",
         };
-        chat.AddMessage(user, "Hello");
-        chat.AddMessage(character, "World");
-        chat.AddMessage(user, "Question");
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(user, "Hello");
+            token.AddMessage(character, "World");
+            token.AddMessage(user, "Question");
+        }
+
         var actual = _builder.BuildActionInferencePromptString(chat);
 
         Assert.That(actual, Is.EqualTo("""
@@ -244,10 +257,19 @@ public class TextPromptBuilderTests
             Actions = new[] { "action1", "action2" },
             Context = "some-context",
         };
-        chat.AddMessage(user, "Hello");
-        chat.AddMessage(character, "World");
-        chat.AddMessage(user, "Question");
-        var actual = _builder.BuildSummarizationPromptString(chat, chat.Messages);
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(user, "Hello");
+            token.AddMessage(character, "World");
+            token.AddMessage(user, "Question");
+        }
+
+        IReadOnlyList<ChatMessageData> messagesToSummarize;
+        using (var token = chat.GetReadToken())
+        {
+            messagesToSummarize = token.Messages.ToArray();
+        }
+        var actual = _builder.BuildSummarizationPromptString(chat, messagesToSummarize);
 
         Assert.That(actual, Is.EqualTo("""
            System: You are tasked with extracting knowledge from a conversation for memorization.

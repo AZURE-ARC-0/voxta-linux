@@ -19,8 +19,9 @@ public partial class ChatSession
         _logger.LogInformation("Beginning chat with {CharacterName}: {ChatId}", _chatSessionData.Character.Name, _chatSessionData.Chat.Id);
         _logger.LogInformation("Tex Gen: {ServiceName}", _textGen.SettingsRef.ServiceName);
         _logger.LogInformation("Text To Speech: {ServiceName} (voice: {Voice})", _speechGenerator.Link?.ServiceName ?? "None", _speechGenerator.Voice);
-        _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.SettingsRef.ServiceName ?? "None");
         _logger.LogInformation("Speech To Text: {ServiceName}", _speechToText?.SettingsRef.ServiceName ?? "None");
+        _logger.LogInformation("Action Inference: {ServiceName}", _actionInference?.SettingsRef.ServiceName ?? "None");
+        _logger.LogInformation("Summarization: {ServiceName}", _summarizationService?.SettingsRef.ServiceName ?? "None");
         
         var thinkingSpeechUrls = new List<string>(_chatSessionData.ThinkingSpeech?.Length ?? 0);
         if (_chatSessionData.ThinkingSpeech != null)
@@ -69,7 +70,13 @@ public partial class ChatSession
 
     private async Task SendFirstMessageAsync(CancellationToken cancellationToken)
     {
-        if (_chatSessionData.Messages.Count == 0 && _chatSessionData.Character.FirstMessage.HasValue == true)
+        int messagesCount;
+        using (var token = _chatSessionData.GetReadToken())
+        {
+            messagesCount = token.Messages.Count;
+        }
+        
+        if (messagesCount == 0 && _chatSessionData.Character.FirstMessage.HasValue)
         {
             var reply = await AppendMessageAsync(_chatSessionData.Character, _chatSessionData.Character.FirstMessage);
             _logger.LogInformation("Sending first message: {Message}", reply.Value);
@@ -88,14 +95,15 @@ public partial class ChatSession
 
     private async Task<DateTimeOffset> GetLastUpdateAsync()
     {
+        using var token = _chatSessionData.GetWriteToken();
         while (true)
         {
-            if (_chatSessionData.Messages.Count == 0) return _chatSessionData.Chat.CreatedAt;
+            if (token.Messages.Count == 0) return _chatSessionData.Chat.CreatedAt;
             #warning This is not tested, and should use a flag on the message instead of checking for the string.
-            var lastMessage = _chatSessionData.Messages[^1];
+            var lastMessage = token.Messages[^1];
             if (!lastMessage.Value.StartsWith("[OOC: ")) return lastMessage.Timestamp;
 
-            _chatSessionData.Messages.Remove(lastMessage);
+            token.Messages.Remove(lastMessage);
             await _chatMessageRepository.DeleteMessageAsync(lastMessage.Id);
         }
     }

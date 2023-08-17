@@ -2,9 +2,19 @@
 
 namespace Voxta.Abstractions.Model;
 
-[Serializable]
-public class ChatSessionData : IChatInferenceData
+public interface IChatSessionDataUnsafe : IChatEditableData
 {
+    List<ChatMessageData> Messages { get; }
+    List<ChatSessionDataMemory> Memories { get; }
+}
+
+[Serializable]
+public class ChatSessionData : IChatSessionDataUnsafe
+{
+    private readonly ReaderWriterLockSlim _accessLock = new();
+
+    public Guid Id => Chat.Id;
+    
     public required Chat Chat { get; init; }
     public required string Culture { get; set; } = "en-US";
     public CultureInfo CultureInfo => CultureInfo.GetCultureInfoByIetfLanguageTag(Culture);
@@ -15,43 +25,21 @@ public class ChatSessionData : IChatInferenceData
     public string[]? Actions { get; set; }
     public string[]? ThinkingSpeech { get; init; }
 
-    public IReadOnlyList<ChatMessageData> GetMessages() => Messages.AsReadOnly();
-    public List<ChatMessageData> Messages { get; } = new();
+    List<ChatMessageData> IChatSessionDataUnsafe.Messages { get; } = new();
+    List<ChatSessionDataMemory> IChatSessionDataUnsafe.Memories { get; } = new();
 
     public string? AudioPath { get; init; }
     
-    public IReadOnlyList<ChatSessionDataMemory> GetMemories() => Memories.AsReadOnly();
-    public List<ChatSessionDataMemory> Memories { get; init; } = new();
-
-    public string GetMessagesAsString()
+    
+    public ChatSessionDataReadToken GetReadToken()
     {
-        return string.Join("\n", Messages.Select(m => $"{m.User}: {m.Value}"));
+        _accessLock.EnterReadLock();
+        return new ChatSessionDataReadToken(this, () => _accessLock.ExitReadLock());
     }
-}
-
-[Serializable]
-public class ChatSessionDataCharacter
-{
-    public required TextData Name { get; init; }
-    public required TextData Description { get; init; }
-    public required TextData Personality { get; init; }
-    public required TextData Scenario { get; init; }
-    public TextData FirstMessage { get; init; } = TextData.Empty;
-    public TextData MessageExamples { get; init; } = TextData.Empty;
-    public TextData SystemPrompt { get; init; } = TextData.Empty;
-    public TextData PostHistoryInstructions { get; init; } = TextData.Empty;
-}
-
-[Serializable]
-public class ChatSessionDataUser
-{
-    public required TextData Name { get; init; }
-    public TextData Description { get; init; } = TextData.Empty;
-}
-
-[Serializable]
-public class ChatSessionDataMemory
-{
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public required TextData Text { get; set; }
+    
+    public ChatSessionDataWriteToken GetWriteToken()
+    {
+        _accessLock.EnterWriteLock();
+        return new ChatSessionDataWriteToken(this, () => _accessLock.ExitWriteLock());
+    }
 }

@@ -32,23 +32,24 @@ public class SimpleMemoryProvider : IMemoryProvider
         }
     }
     
-    public void QueryMemoryFast(ChatSessionData chat)
+    public void QueryMemoryFast(IChatEditableData chat)
     {
         var perf = _performanceMetrics.Start("SimpleMemoryProvider");
         
-        foreach (var msg in chat.GetMessages().SkipWhile(m => _lastProcessedMessageId != Guid.Empty && m.Id != _lastProcessedMessageId).Skip(_lastProcessedMessageId == Guid.Empty ? 0 : 1))
+        using var token = chat.GetWriteToken();
+        foreach (var msg in token.Messages.SkipWhile(m => _lastProcessedMessageId != Guid.Empty && m.Id != _lastProcessedMessageId).Skip(_lastProcessedMessageId == Guid.Empty ? 0 : 1))
         {
             if (string.IsNullOrEmpty(msg.Value)) continue;
             foreach (var memory in _memories)
             {
                 if (memory.Source.Keywords.Any(k => msg.Value.Contains(k, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    var indexOfMemory = chat.Memories.FindIndex(m => m.Id == memory.Data.Id);
+                    var indexOfMemory = token.Memories.FindIndex(m => m.Id == memory.Data.Id);
                     if (indexOfMemory == 0)
                         continue;
                     if (indexOfMemory > 0)
-                        chat.Memories.RemoveAt(indexOfMemory);
-                    chat.Memories.Insert(0, memory.Data);
+                        token.Memories.RemoveAt(indexOfMemory);
+                    token.Memories.Insert(0, memory.Data);
                 }
             }
             _lastProcessedMessageId = msg.Id;

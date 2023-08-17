@@ -10,8 +10,9 @@ public class MockSummarizationService : MockServiceBase, ISummarizationService
     {
     }
 
-    public ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
+    public ValueTask<string> SummarizeAsync(IChatInferenceData chat, IReadOnlyList<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
-        return new ValueTask<string>($"Chat had {chat.GetMessages().Count} messages.");
+        using var token = chat.GetReadToken();
+        return new ValueTask<string>($"Chat had {token.Messages.Count} messages.");
     }
 }

@@ -41,11 +41,14 @@ public class Llama2PromptBuilderTests
             },
             Character = character,
         };
-        chat.AddMessage(character, "model_answer_1");
-        chat.AddMessage(user, "user_msg_1");
-        chat.AddMessage(character, "model_answer_2");
-        chat.AddMessage(user, "user_msg_2");
-        
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(character, "model_answer_1");
+            token.AddMessage(user, "user_msg_1");
+            token.AddMessage(character, "model_answer_2");
+            token.AddMessage(user, "user_msg_2");
+        }
+
         var actual = _builder.BuildReplyPromptString(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""

@@ -119,7 +119,10 @@ public class ChatSessionFactory
                 ThinkingSpeech = thinkingSpeech,
                 AudioPath = startChatMessage.AudioPath,
             };
-            chatData.Messages.AddRange(messages);
+            using (var token = chatData.GetWriteToken())
+            {
+                token.Messages.AddRange(messages);
+            }
             // TODO: Optimize by pre-calculating tokens count
 
             await _memoryProvider.Initialize(chat.CharacterId, textProcessor, cancellationToken);

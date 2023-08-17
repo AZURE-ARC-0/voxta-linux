@@ -41,10 +41,13 @@ public class NovelAIPromptBuilderTests
             },
             Character = character
         };
-        chat.AddMessage(user, "Hello");
-        chat.AddMessage(character, "World");
-        chat.AddMessage(user, "Question");
-        
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(user, "Hello");
+            token.AddMessage(character, "World");
+            token.AddMessage(user, "Question");
+        }
+
         var actual = _builder.BuildReplyPromptString(chat, 0, 2000);
 
         Assert.That(actual, Is.EqualTo("""

@@ -19,7 +19,7 @@ public class OpenAISummarizationService : OpenAIClientBase, ISummarizationServic
         _serviceObserver = serviceObserver;
     }
 
-    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
+    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, IReadOnlyList<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
         var perf = _performanceMetrics.Start($"{OpenAIConstants.ServiceName}.Summarization");
         var builder = new OpenAIPromptBuilder(Tokenizer);

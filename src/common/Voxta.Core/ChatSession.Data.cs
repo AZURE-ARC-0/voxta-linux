@@ -6,12 +6,14 @@ public partial class ChatSession
 {
     private Task<ChatMessageData> AppendMessageAsync(ChatSessionDataCharacter character, TextData gen)
     {
-        return SaveMessageAsync(_chatSessionData.AddMessage(character, gen));
+        using var token = _chatSessionData.GetWriteToken();
+        return SaveMessageAsync(token.AddMessage(character, gen));
     }
     
     private Task<ChatMessageData> AppendMessageAsync(ChatSessionDataUser user, TextData gen)
     {
-        return SaveMessageAsync(_chatSessionData.AddMessage(user, gen));
+        using var token = _chatSessionData.GetWriteToken();
+        return SaveMessageAsync(token.AddMessage(user, gen));
     }
     
     private async Task<ChatMessageData> SaveMessageAsync(ChatMessageData message)

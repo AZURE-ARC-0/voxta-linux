@@ -35,15 +35,16 @@ public abstract class MessagePromptBuilder
 
         var totalTokens = systemPrompt.Tokens + postHistoryPrompt?.Tokens ?? 0;
 
+        using var token = chat.GetReadToken();
+
         var memorySb = new StringBuilderWithTokens(_tokenizer, maxMemoryTokens);
         if (maxMemoryTokens > 0)
         {
-            var memories = chat.GetMemories();
-            if (memories.Count > 0)
+            if (token.Memories.Count > 0)
             {
                 memorySb.AppendLineLinux();
                 memorySb.AppendLineLinux($"What {chat.Character.Name} knows:");
-                foreach (var memory in memories)
+                foreach (var memory in token.Memories)
                 {
                     if (!memorySb.AppendLineLinux(memory.Text)) break;
                 }
@@ -60,10 +61,9 @@ public abstract class MessagePromptBuilder
         }
         
         var messages = new List<MessageData> { new() { Role = ChatMessageRole.System, Value = systemPrompt.Value, Tokens = systemPrompt.Tokens } };
-        var chatMessages = chat.GetMessages();
-        for (var i = chatMessages.Count - 1; i >= 0; i--)
+        for (var i = token.Messages.Count - 1; i >= 0; i--)
         {
-            var message = chatMessages[i];
+            var message = token.Messages[i];
             totalTokens += message.Tokens + 4; // https://github.com/openai/openai-python/blob/main/chatml.md
             if (totalTokens >= maxTokens) break;
             var role = message.User == chat.Character.Name.Value ? ChatMessageRole.Assistant : ChatMessageRole.User;
@@ -104,7 +104,8 @@ public abstract class MessagePromptBuilder
         sb.AppendLineLinux();
 
         sb.AppendLineLinux("Conversation:");
-        foreach (var message in chat.GetMessages().TakeLast(8))
+        using var token = chat.GetReadToken();
+        foreach (var message in token.Messages.TakeLast(8))
         {
             sb.AppendLineLinux($"{message.User}: {message.Value}");
         }
@@ -123,7 +124,7 @@ public abstract class MessagePromptBuilder
         return messages;
     }
 
-    public List<MessageData> BuildSummarizationPrompt(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize)
+    public List<MessageData> BuildSummarizationPrompt(IChatInferenceData chat, IReadOnlyList<ChatMessageData> messagesToSummarize)
     {
         var systemMessage = """
              You are tasked with extracting knowledge from a conversation for memorization.

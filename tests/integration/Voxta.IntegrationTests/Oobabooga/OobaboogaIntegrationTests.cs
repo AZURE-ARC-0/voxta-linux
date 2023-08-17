@@ -13,11 +13,14 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
     public async Task TestChat()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User, "I wanted to know more about you.");
-        chat.AddMessage(chat.Character, "I'm all yours!");
-        chat.AddMessage(chat.User, "What would be the perfect date for you?");
-        chat.AddMessage(chat.Character, "Oh, I think I'm blushing... that would be anything, as long as I'm with you!");
-        chat.AddMessage(chat.User, "You're cute, you know that?");
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(chat.User, "I wanted to know more about you.");
+            token.AddMessage(chat.Character, "I'm all yours!");
+            token.AddMessage(chat.User, "What would be the perfect date for you?");
+            token.AddMessage(chat.Character, "Oh, I think I'm blushing... that would be anything, as long as I'm with you!");
+            token.AddMessage(chat.User, "You're cute, you know that?");
+        }
 
         var client = await CreateClientAsync<OobaboogaTextGenService>(OobaboogaConstants.ServiceName);
         var reply = await client.GenerateReplyAsync(chat, CancellationToken.None);
@@ -28,14 +31,17 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         Console.WriteLine("### Result");
         Console.WriteLine(reply);
     }
-    
+
     [Test, Explicit]
     public async Task TestActionInference()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User, "Tell me, how do you feel about this?");
-        chat.AddMessage(chat.Character, "This fills me with joy!");
         chat.Actions = new[] { "cry", "think", "leave", "smile", "frown" };
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(chat.User, "Tell me, how do you feel about this?");
+            token.AddMessage(chat.Character, "This fills me with joy!");
+        }
 
         var client = await CreateClientAsync<OobaboogaActionInferenceService>(OobaboogaConstants.ServiceName);
         var action = await client.SelectActionAsync(chat, CancellationToken.None);
@@ -48,24 +54,26 @@ public class OobaboogaIntegrationTests : IntegrationTestsBase
         
         Assert.That(action, Is.EqualTo("smile"));
     }
-    
+
     [Test, Explicit]
     public async Task TestSummarization()
     {
         var chat = CreateChat(CatherineCharacter.Create());
-        chat.AddMessage(chat.User, "I love apples, they taste delicious!");
-        chat.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
-        chat.AddMessage(chat.User, "Ok, that's uncommon!");
-        chat.AddMessage(chat.Character, "I am uncommon, if you don't like me just log off!");
-        chat.AddMessage(chat.User, "I'm sorry, I didn't mean to offend you.");
-        chat.AddMessage(chat.Character, "It's ok, as long as you accept me for what I am.");
-        chat.AddMessage(chat.User, "So, what should we do then?");
-        chat.AddMessage(chat.Character, "We can talk about what we like, maybe?");
-        chat.AddMessage(chat.User, "Ok, well what do you like?");
-        chat.AddMessage(chat.Character, "I like you! ... I hope that's okay with you?");
-
+        using (var token = chat.GetWriteToken())
+        {
+            token.AddMessage(chat.User, "I love apples, they taste delicious!");
+            token.AddMessage(chat.Character, "Yeah? Personally, I hate them.");
+            token.AddMessage(chat.User, "Ok, that's uncommon!");
+            token.AddMessage(chat.Character, "I am uncommon, if you don't like me just log off!");
+            token.AddMessage(chat.User, "I'm sorry, I didn't mean to offend you.");
+            token.AddMessage(chat.Character, "It's ok, as long as you accept me for what I am.");
+            token.AddMessage(chat.User, "So, what should we do then?");
+            token.AddMessage(chat.Character, "We can talk about what we like, maybe?");
+            token.AddMessage(chat.User, "Ok, well what do you like?");
+            token.AddMessage(chat.Character, "I like you! ... I hope that's okay with you?");
+        }
         var client = await CreateClientAsync<OobaboogaSummarizationService>(OobaboogaConstants.ServiceName);
-        var summary = await client.SummarizeAsync(chat, chat.Messages, CancellationToken.None);
+        var summary = await client.SummarizeAsync(chat, chat.GetAllMessages(), CancellationToken.None);
         
         Console.WriteLine("### Prompt");
         Console.WriteLine(ServiceObserver.GetRecord(ServiceObserverKeys.SummarizationPrompt)?.Value);

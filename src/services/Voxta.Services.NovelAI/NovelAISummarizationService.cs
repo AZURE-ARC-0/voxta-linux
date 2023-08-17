@@ -23,7 +23,7 @@ public class NovelAISummarizationService : NovelAIClientBase, ISummarizationServ
         return settings.Model != NovelAISettings.ClioV1;
     }
 
-    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, List<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
+    public async ValueTask<string> SummarizeAsync(IChatInferenceData chat, IReadOnlyList<ChatMessageData> messagesToSummarize, CancellationToken cancellationToken)
     {
         var builder = new NovelAIPromptBuilder(Tokenizer);
         var prompt = builder.BuildSummarizationPromptString(chat, messagesToSummarize);

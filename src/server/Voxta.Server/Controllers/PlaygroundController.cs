@@ -101,7 +101,7 @@ public class PlaygroundController : Controller
             {
                 var textGen = await textGenFactory.CreateBestMatchRequiredAsync(profile.TextGen, link, prerequisites, vm.Culture ?? "en-US", cancellationToken);
                 var processor = new ChatTextProcessor(profile, character.Name, CultureInfo.GetCultureInfoByIetfLanguageTag(character.Culture), textGen);
-                result = await textGen.GenerateReplyAsync(new ChatSessionData
+                var chat = new ChatSessionData
                 {
                     Chat = null!,
                     Culture = character.Culture,
@@ -113,19 +113,20 @@ public class PlaygroundController : Controller
                         Personality = processor.ProcessText(character.Personality),
                         Scenario = processor.ProcessText(character.Scenario),
                     },
-                    Messages =
-                    {
-                        ChatMessageData.FromText(Guid.Empty, character, character.FirstMessage),
-                        ChatMessageData.FromText(Guid.Empty, profile, "Hi! This is a test conversation. Can you tell me something in character?")
-                    }
-                }, cancellationToken);
+                };
+                using (var token = chat.GetWriteToken())
+                {
+                    token.AddMessage(character, character.FirstMessage);
+                    token.AddMessage(profile, "Hi! This is a test conversation. Can you tell me something in character?");
+                }
+                result = await textGen.GenerateReplyAsync(chat, cancellationToken);
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenService)?.Value ?? data.Service ?? "";
                 vm.Prompt = _serviceObserver.GetRecord(ServiceObserverKeys.TextGenPrompt)?.Value ?? "";
             }
             else if (data.Template == "ActionInference")
             {
                 var svc = await actionInferenceServiceFactory.CreateBestMatchRequiredAsync(profile.ActionInference, link, prerequisites, vm.Culture ?? "en-US", cancellationToken);
-                result = await svc.SelectActionAsync(new ChatSessionData
+                var chat = new ChatSessionData
                 {
                     Chat = null!,
                     Culture = character.Culture,
@@ -138,12 +139,13 @@ public class PlaygroundController : Controller
                         Scenario = character.Scenario,
                     },
                     Actions = new[] { "wave", "sit_down", "stand_up", "break_chair" },
-                    Messages =
-                    {
-                        ChatMessageData.FromText(Guid.Empty, character, character.FirstMessage),
-                        ChatMessageData.FromText(Guid.Empty, profile, "Can you please sit down?")
-                    }
-                }, cancellationToken);
+                };
+                using (var token = chat.GetWriteToken())
+                {
+                    token.AddMessage(character, character.FirstMessage);
+                    token.AddMessage(profile, "Can you please sit down?");
+                }
+                result = await svc.SelectActionAsync(chat, cancellationToken);
                 vm.Service = _serviceObserver.GetRecord(ServiceObserverKeys.ActionInferenceService)?.Value ?? data.Service ?? "";
                 vm.Prompt = vm.Service == OpenAIConstants.ServiceName
                     ? "System:\n" +

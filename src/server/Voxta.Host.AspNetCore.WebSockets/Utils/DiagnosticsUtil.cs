@@ -168,8 +168,11 @@ public class DiagnosticsUtil
                         FirstMessage = "Please specify your test request.",
                     }
                 };
-                chat.AddMessage(chat.Character, chat.Character.FirstMessage);
-                chat.AddMessage(chat.User, "I need to test if you are working correctly. You must answer with the word 'success'.");
+                using (var token = chat.GetWriteToken())
+                {
+                    token.AddMessage(chat.Character, chat.Character.FirstMessage);
+                    token.AddMessage(chat.User, "I need to test if you are working correctly. You must answer with the word 'success'.");
+                }
                 var result = await service.GenerateReplyAsync(chat, cancellationToken);
                 return ("Response: " + result, result.Contains("success", StringComparison.InvariantCultureIgnoreCase));
             }
@@ -242,7 +245,10 @@ public class DiagnosticsUtil
                     },
                     Actions = actions
                 };
-                chat.AddMessage(chat.Character, "Nice, looks like everything is working fine!");
+                using (var token = chat.GetWriteToken())
+                {
+                    token.AddMessage(chat.Character, "Nice, looks like everything is working fine!");
+                }
                 var result = await service.SelectActionAsync(chat, cancellationToken);
                 return ("Action: " + result, result == "test_successful");
             }
@@ -274,9 +280,18 @@ public class DiagnosticsUtil
                     },
                     Actions = actions
                 };
-                chat.AddMessage(chat.Character, "I like apples. Do you like apples?");
-                chat.AddMessage(chat.User, "No, I don't like them at all.");
-                var result = await service.SummarizeAsync(chat, chat.Messages, cancellationToken);
+                using (var token = chat.GetWriteToken())
+                {
+                    token.AddMessage(chat.Character, "I like apples. Do you like apples?");
+                    token.AddMessage(chat.User, "No, I don't like them at all.");
+                }
+
+                IReadOnlyList<ChatMessageData> messagesToSummarize;
+                using (var token = chat.GetReadToken())
+                {
+                    messagesToSummarize = token.Messages.ToArray();
+                }
+                var result = await service.SummarizeAsync(chat, messagesToSummarize, cancellationToken);
                 return ("Summary: " + result, result.Contains("apple", StringComparison.InvariantCultureIgnoreCase));
             }
         );

@@ -15,7 +15,12 @@ public partial class ChatSession
         
         if (speechInterruptionRatio is > 0.05f and < 0.95f)
         {
-            var lastCharacterMessage = _chatSessionData.Messages.LastOrDefault();
+            ChatMessageData? lastCharacterMessage;
+            using (var token = _chatSessionData.GetReadToken())
+            {
+                lastCharacterMessage = token.Messages.LastOrDefault();
+            }
+
             if (lastCharacterMessage?.User == _chatSessionData.Character.Name.Value)
             {
                 var cutoff = Math.Clamp((int)Math.Round(lastCharacterMessage.Value.Length * speechInterruptionRatio), 1, lastCharacterMessage.Value.Length - 2);
@@ -83,7 +88,7 @@ public partial class ChatSession
         var genData = new TextData { Value = generated, Tokens = _textGen.GetTokenCount(generated) };
         var reply = await AppendMessageAsync(_chatSessionData.Character, genData);
 
-        await LaunchMemorySummarizationAsync(queueCancellationToken);
+        await SummarizeMemoryAsync(queueCancellationToken);
         
         _logger.LogInformation("{Character} replied with: {Text}", _chatSessionData.Character.Name, reply.Value);
 

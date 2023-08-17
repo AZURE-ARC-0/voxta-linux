@@ -55,8 +55,11 @@ public partial class ChatSession
     {
         _chatSessionData.Actions = null;
         _chatSessionData.Context = null;
-        _chatSessionData.Memories.Clear();
-        _chatSessionData.Messages.Clear();
+        using (var token = _chatSessionData.GetWriteToken())
+        {
+            token.Memories.Clear();
+            token.Messages.Clear();
+        }
         _chatSessionState.State = ChatSessionStates.Live;
         await SendFirstMessageAsync(cancellationToken);
     }
