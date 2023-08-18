@@ -14,7 +14,7 @@
             setTimeout(() => {
                 this.elem.style.opacity = '0';
                 this.elem.style.transform = 'translateY(50px)';
-            }, 5000);
+            }, 10000);
         }
     }
 }
