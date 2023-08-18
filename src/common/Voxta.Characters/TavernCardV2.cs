@@ -86,7 +86,7 @@ public class CharacterBookEntry
     [JsonPropertyName("keys")]
     public required string[] Keys { get; set; }
     
-    [JsonPropertyName("name")]
+    [JsonPropertyName("Content")]
     public required string Content { get; set; }
     
     [JsonPropertyName("extensions")]
