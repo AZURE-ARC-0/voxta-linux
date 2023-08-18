@@ -101,17 +101,36 @@ voxtaClient.addEventListener('charactersListLoaded', evt => {
     if (evt.detail.characters.length === 0) {
         createElement(characterButtons, 'p', 'text-center text-muted', 'No characters found');
     }
+    
+    const charactersContainer = document.createElement('div');
+    charactersContainer.className = 'charactersContainer';
+    characterButtons.appendChild(charactersContainer);
+    
     evt.detail.characters.forEach(character => {
-        const btn = createButton(characterButtons, 'btn btn-secondary', character.name, () => {
+        const characterDiv = document.createElement('div');
+        characterDiv.className = 'character';
+        characterDiv.onclick = () => {
             removeAllChildNodes(chatButtons);
             selectedCharacter = character;
             voxtaClient.loadChatsList(character.id);
             characterButtons.classList.remove('voxta_show');
             chatButtons.classList.add('voxta_show');
-        });
-        btn.title = character.description;
+        };
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'avatar';
+        avatarDiv.style.backgroundImage = `url('${character.avatarUrl}')`;
+        characterDiv.appendChild(avatarDiv);
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'name';
+        nameDiv.textContent = character.name;
+        characterDiv.appendChild(nameDiv);
+
+        charactersContainer.appendChild(characterDiv);
     });
-    createButton(characterButtons, 'btn btn-secondary colspan', 'Back', () => {
+
+    createButton(characterButtons, 'btn btn-secondary', 'Back', () => {
         characterButtons.classList.remove('voxta_show');
         splash.classList.add('voxta_show');
     });
@@ -119,27 +138,35 @@ voxtaClient.addEventListener('charactersListLoaded', evt => {
 
 voxtaClient.addEventListener('chatsListLoaded', evt => {
     removeAllChildNodes(chatButtons);
-    createElement(chatButtons, 'h2', 'text-center colspan', selectedCharacter.name);
+    createElement(chatButtons, 'h2', 'text-center', selectedCharacter.name);
+
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'avatar';
+    avatarDiv.style.backgroundImage = `url('${selectedCharacter.avatarUrl}')`;
+    avatarDiv.style.width = '100%';
+    avatarDiv.style.height = '180px';
+    chatButtons.appendChild(avatarDiv);
+    
     if (evt.detail.chats.length === 0) {
-        createElement(chatButtons, 'p', 'text-muted text-center colspan', 'No chats found');
-        createButton(chatButtons, 'btn btn-secondary colspan', 'New chat', () => {
+        createElement(chatButtons, 'p', 'text-muted text-center', 'No chats found');
+        createButton(chatButtons, 'btn btn-secondary', 'New chat', () => {
             audioVisualizer.think();
             voxtaClient.newChat({characterId: selectedCharacter.id});
             chatButtons.classList.remove('voxta_show');
         });
     } else {
-        evt.detail.chats.forEach(chat => createButton(chatButtons, 'btn btn-secondary colspan', 'Continue', () => {
+        evt.detail.chats.forEach(chat => createButton(chatButtons, 'btn btn-secondary', 'Continue', () => {
             audioVisualizer.think();
             voxtaClient.resumeChat(chat.id);
             chatButtons.classList.remove('voxta_show');
         }));
-        createButton(chatButtons, 'btn btn-secondary colspan', 'Clear and reset chat', () => {
+        createButton(chatButtons, 'btn btn-secondary', 'Clear and reset chat', () => {
             audioVisualizer.think();
             voxtaClient.newChat({characterId: selectedCharacter.id});
             chatButtons.classList.remove('voxta_show');
         });
     }
-    createButton(chatButtons, 'btn btn-secondary colspan', 'Back', () => {
+    createButton(chatButtons, 'btn btn-secondary', 'Back', () => {
         chatButtons.classList.remove('voxta_show');
         splash.classList.add('voxta_show');
     });

@@ -24,13 +24,39 @@ canvas {
     position: absolute;
     z-index: 10;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
     gap: 10px;
+    max-width: 50%;
 }
 
-.colspan {
-    grid-column-start: 1;
-    grid-column-end: 3;
+.charactersContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.character {
+    width: 100px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.charactersContainer div.character:last-child {
+    margin-right: 0;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+    background-color: #1c1b1b;
+    margin-bottom: 10px;
 }
 
 #message {

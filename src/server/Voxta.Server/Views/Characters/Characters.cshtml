@@ -30,7 +30,7 @@
                             <td class="align-middle">
                                 @if (character.AvatarUrl != null)
                                 {
-                                    <img src="@character.AvatarUrl" alt="Avatar of @character.Name" width="60" height="60" />
+                                    <div style="width: 60px; height: 60px; background-image: url('@character.AvatarUrl'); background-size: cover; background-position: center;"></div>
                                 }
                                 else
                                 {
