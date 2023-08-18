@@ -15,4 +15,5 @@ public class ProfileViewModel
     
     public required bool PauseSpeechRecognitionDuringPlayback { get; init; }
     public required bool IgnorePrerequisites { get; init; }
+    public bool HideNSFW { get; set; }
 }

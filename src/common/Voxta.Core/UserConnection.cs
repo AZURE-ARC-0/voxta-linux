@@ -119,6 +119,9 @@ public sealed partial class UserConnection : IUserConnection
     private async Task LoadCharactersListAsync(CancellationToken cancellationToken)
     {
         var characters = await _charactersRepository.GetCharactersListAsync(cancellationToken);
+        var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
+        if (profile.HideNSFW)
+            characters = characters.Where(c => !c.Prerequisites.Contains(ServiceFeatures.NSFW)).ToArray();
         await _tunnel.SendAsync(new ServerCharactersListLoadedMessage
         {
             Characters = characters,

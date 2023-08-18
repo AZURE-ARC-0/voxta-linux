@@ -56,17 +56,20 @@
                     Speech To Text (Transcription) support:
                     <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.STT ?? ServiceDefinitionCategoryScore.NotSupported)"/>
                 </li>
-                <li>
-                    NSFW (Not Safe For Work) support
-                    @if (Model.Services.Any(s => s.Definition.Features.Contains(ServiceFeatures.NSFW) && s.EnabledOccurrences > 0))
-                    {
-                        <i class="bi bi-check-circle-fill text-success"></i>
-                    }
-                    else
-                    {
-                        <i class="bi bi-dash-circle-fill text-secondary"></i>
-                    }
-                </li>
+                @if (!Model.HideNSFW)
+                {
+                    <li>
+                        NSFW (Not Safe For Work) support
+                        @if (Model.Services.Any(s => s.Definition.Features.Contains(ServiceFeatures.NSFW) && s.EnabledOccurrences > 0))
+                        {
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-dash-circle-fill text-secondary"></i>
+                        }
+                    </li>
+                }
             </ul>
         </div>
     </div>
@@ -111,12 +114,15 @@
                                     <partial name="Settings/_ServiceQuality" model="@s.Definition.STT" />
                                     Speech To Text
                                 </li>
-                                @foreach(var  feature in s.Definition.Features)
+                                @foreach(var feature in s.Definition.Features)
                                 {
-                                    <li>
-                                        <i class="bi bi-check-circle-fill text-success"></i>
-                                        @feature.ToUpper() support
-                                    </li>
+                                    @if (!Model.HideNSFW || feature != ServiceFeatures.NSFW)
+                                    {
+                                        <li>
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            @feature.ToUpper() support
+                                        </li>
+                                    }
                                 }
                                 <li>
                                     <i class="bi bi-info-circle text-secondary"></i>

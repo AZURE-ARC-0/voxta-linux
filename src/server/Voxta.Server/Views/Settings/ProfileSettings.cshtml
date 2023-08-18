@@ -68,6 +68,12 @@
                     <div class="form-text">Stops recording while the character speaks. The character may interrupt itself without this. You can disable if you have headphones.</div>
                     <span asp-validation-for="PauseSpeechRecognitionDuringPlayback" class="text-danger"></span>
                 </div>
+                <div class="form-check mb-3">
+                    <input asp-for="HideNSFW" type="checkbox" class="form-check-input"/>
+                    <label asp-for="HideNSFW">Hide NSFW options and characters</label>
+                    <div class="form-text">If you have some characters you want to keep to yourself!</div>
+                    <span asp-validation-for="HideNSFW" class="text-danger"></span>
+                </div>
                 <h3>Speech To Text Options</h3>
                 <div class="form-check">
                     <input asp-for="IgnorePrerequisites" type="checkbox" class="form-check-input"/>

@@ -4,6 +4,7 @@ namespace Voxta.Server.ViewModels.Settings;
 
 public class AddServiceViewModel
 {
+    public bool HideNSFW { get; set; }
     public required ServiceEntryViewModel[] Services { get; init; }
 
     public class ServiceEntryViewModel

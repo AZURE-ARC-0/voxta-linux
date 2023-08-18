@@ -40,6 +40,9 @@ public class CharactersController : Controller
     public async Task<IActionResult> Characters(CancellationToken cancellationToken)
     {
         var model = await _characterRepository.GetCharactersListAsync(cancellationToken);
+        var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
+        if (profile.HideNSFW)
+            model = model.Where(c => !c.Prerequisites.Contains(ServiceFeatures.NSFW)).ToArray();
         return View(model);
     }
     

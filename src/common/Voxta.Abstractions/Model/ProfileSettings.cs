@@ -26,6 +26,7 @@ public class ProfileSettings
     
     public bool PauseSpeechRecognitionDuringPlayback { get; set; } = true;
     public bool IgnorePrerequisites { get; set; }
+    public bool HideNSFW { get; set; }
     
     public ServicesList ActionInference { get; set; } = new();
     public ServicesList SpeechToText { get; set; } = new();

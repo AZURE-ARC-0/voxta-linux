@@ -216,6 +216,7 @@ public class SettingsController : Controller
     [HttpGet("/settings/add")]
     public async Task<IActionResult> AddService([FromServices] IServiceDefinitionsRegistry serviceDefinitionsRegistry, CancellationToken cancellationToken)
     {
+        var profile = await _profileRepository.GetRequiredProfileAsync(cancellationToken);
         var configured = await _servicesRepository.GetServicesAsync(cancellationToken);
         var services = serviceDefinitionsRegistry.List()
             .OrderBy(s => !s.Recommended)
@@ -229,6 +230,7 @@ public class SettingsController : Controller
             .ToArray();
         return View(new AddServiceViewModel
         {
+            HideNSFW = profile.HideNSFW,
             Services = services
         });
     }
@@ -247,6 +249,7 @@ public class SettingsController : Controller
             AgreesToTerms = exists,
             PauseSpeechRecognitionDuringPlayback = profile.PauseSpeechRecognitionDuringPlayback,
             IgnorePrerequisites = profile.IgnorePrerequisites,
+            HideNSFW = profile.HideNSFW,
         };
         return View(vm);
     }
@@ -265,6 +268,7 @@ public class SettingsController : Controller
         profile.Description = value.Description;
         profile.PauseSpeechRecognitionDuringPlayback = value.PauseSpeechRecognitionDuringPlayback;
         profile.IgnorePrerequisites = value.IgnorePrerequisites;
+        profile.HideNSFW = value.HideNSFW;
 
         await _profileRepository.SaveProfileAsync(profile);
         
