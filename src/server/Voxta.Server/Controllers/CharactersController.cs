@@ -210,10 +210,14 @@ public class CharactersController : Controller
 
         var file = files[0];
         await using var stream = file.OpenReadStream();
+        await using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        await stream.DisposeAsync();
+        
         var card = Path.GetExtension(file.FileName).ToLowerInvariant() switch
         {
-            ".json" => JsonSerializer.Deserialize<TavernCardV2>(stream),
-            ".png" => await TavernCardV2Import.ExtractCardDataAsync(stream),
+            ".json" => JsonSerializer.Deserialize<TavernCardV2>(ms),
+            ".png" => await TavernCardV2Import.ExtractCardDataAsync(ms),
             _ => throw new NotSupportedException($"Unsupported file type: {Path.GetExtension(file.FileName)}"),
         };
         if (card?.Data == null) throw new InvalidOperationException("Invalid V2 card file: no data");
@@ -226,6 +230,13 @@ public class CharactersController : Controller
         {
             await _memoryRepository.SaveBookAsync(book);
         }
+        
+        ms.Seek(0, SeekOrigin.Begin);
+        // Write the contents of ms to the wwwroot/uploads/characters/{characterId}.png file
+        var path = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "characters", character.Id + ".png");
+        await using (var fileStream = new FileStream(path, FileMode.Create))
+            await ms.CopyToAsync(fileStream);
+        character.AvatarUrl = $"/uploads/characters/{character.Id}.png";
         
         return RedirectToAction("Character", new { charId = character.Id });
     }
