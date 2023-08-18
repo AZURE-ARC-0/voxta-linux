@@ -25,6 +25,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.NotSupported,
             ActionInference = ServiceDefinitionCategoryScore.NotSupported,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = true,
+            Notes = "The very best speech transcription, their voice synthesizer is fair. Multilingual support. Free tier available.",
             SettingsType = typeof(AzureSpeechServiceSettings),
         });
     }

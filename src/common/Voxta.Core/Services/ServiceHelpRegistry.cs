@@ -23,6 +23,8 @@ public class ServiceDefinitionsRegistry : IServiceDefinitionsRegistry
                 STT = ServiceDefinitionCategoryScore.NotSupported,
                 TTS = ServiceDefinitionCategoryScore.NotSupported,
                 Features = Array.Empty<string>(),
+                Recommended = false,
+                Notes = "This service is not supported.",
                 SettingsType = null,
             };
     }

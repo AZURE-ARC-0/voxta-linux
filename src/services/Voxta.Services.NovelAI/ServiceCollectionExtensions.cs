@@ -28,6 +28,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.Medium,
             ActionInference = ServiceDefinitionCategoryScore.Medium,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = true,
+            Notes = "Amazing text to speech and large language model. Paid. Supports English and Japanese.",
             SettingsType = typeof(NovelAISettings),
         });
     }

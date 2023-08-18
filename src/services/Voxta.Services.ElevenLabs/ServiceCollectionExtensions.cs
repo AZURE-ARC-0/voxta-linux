@@ -24,6 +24,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.NotSupported,
             ActionInference = ServiceDefinitionCategoryScore.NotSupported,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = true,
+            Notes = "The very best voice synthesizer available. Multilingual support. Expensive.",
             SettingsType = typeof(ElevenLabsSettings),
         });
     }

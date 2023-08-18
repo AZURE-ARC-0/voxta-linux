@@ -25,8 +25,9 @@ public static class ServiceCollectionExtensions
             TTS = ServiceDefinitionCategoryScore.NotSupported,
             Summarization = ServiceDefinitionCategoryScore.Medium,
             ActionInference = ServiceDefinitionCategoryScore.Medium,
-            #warning Add cultures and a small explanation
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = true,
+            Notes = "One of the most popular ways to run your own local large language models.",
             SettingsType = typeof(OobaboogaSettings),
         });
     }

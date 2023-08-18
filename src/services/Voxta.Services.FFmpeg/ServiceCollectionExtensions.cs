@@ -27,6 +27,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.NotSupported,
             ActionInference = ServiceDefinitionCategoryScore.NotSupported,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = false,
+            Notes = "Linux support.",
             SettingsType = typeof(FFmpegSettings),
         });
     }

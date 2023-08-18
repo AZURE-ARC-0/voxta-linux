@@ -26,6 +26,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.Medium,
             ActionInference = ServiceDefinitionCategoryScore.Medium,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = false,
+            Notes = "HuggingFace's open source local large language models host. Did not gave great results in our tests, but maybe our implementation is wrong.",
             SettingsType = typeof(TextGenerationInferenceSettings),
         });
     }

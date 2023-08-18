@@ -42,20 +42,22 @@
         </div>
         <div class="card-body">
             <p>At least one service of each type must be configured and enabled.</p>
-            <ul class="list-unstyled">
+            <p>Here is your current level of readiness for each category:</p>
+            <ul>
                 <li>
+                    Text Generation (Replies, Summarization and Action Inference) support:
                     <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.TextGen ?? ServiceDefinitionCategoryScore.NotSupported)"/>
-                    Text Generation (Replies, Summarization and Action Inference) support
                 </li>
                 <li>
+                    Text To Speech (Synthesizer) support:
                     <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.TTS ?? ServiceDefinitionCategoryScore.NotSupported)"/>
-                    Text To Speech (Synthesizer) support
                 </li>
                 <li>
+                    Speech To Text (Transcription) support:
                     <partial name="Settings/_ServiceQuality" model="@Model.Services.Where(x => x.EnabledOccurrences > 0).DefaultIfEmpty().Max(x => x?.Definition.STT ?? ServiceDefinitionCategoryScore.NotSupported)"/>
-                    Speech To Text (Transcription) support
                 </li>
                 <li>
+                    NSFW (Not Safe For Work) support
                     @if (Model.Services.Any(s => s.Definition.Features.Contains(ServiceFeatures.NSFW) && s.EnabledOccurrences > 0))
                     {
                         <i class="bi bi-check-circle-fill text-success"></i>
@@ -64,7 +66,6 @@
                     {
                         <i class="bi bi-dash-circle-fill text-secondary"></i>
                     }
-                    NSFW (Not Safe For Work) support
                 </li>
             </ul>
         </div>
@@ -81,7 +82,13 @@
                 <div class="col-sm-4 d-flex align-items-stretch">
                     <div class="card mb-3" style="width: 100%">
                         <div class="card-body">
-                            <h3>@s.Definition.Label</h3>
+                            <h3>
+                                @s.Definition.Label
+                                @if (s.Definition.Recommended)
+                                {
+                                    <i class="bi bi-stars text-secondary"></i>
+                                }
+                            </h3>
                             @switch (s.Occurrences)
                             {
                                 case 1:
@@ -111,6 +118,10 @@
                                         @feature.ToUpper() support
                                     </li>
                                 }
+                                <li>
+                                    <i class="bi bi-info-circle text-secondary"></i>
+                                    @s.Definition.Notes
+                                </li>
                             </ul>
                         </div>
                         <div class="card-footer text-end">

@@ -26,6 +26,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.NotSupported,
             ActionInference = ServiceDefinitionCategoryScore.NotSupported,
             Features = Array.Empty<string>(),
+            Recommended = false,
+            Notes = "Fair quality speech transcription and synthesizer. Supports your installed languages. Censored.",
             SettingsType = typeof(WindowsSpeechSettings),
         });
     }

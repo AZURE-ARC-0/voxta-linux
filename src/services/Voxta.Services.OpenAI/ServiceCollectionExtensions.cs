@@ -25,6 +25,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.High,
             ActionInference = ServiceDefinitionCategoryScore.High,
             Features = Array.Empty<string>(),
+            Recommended = true,
+            Notes = "The reference for large language models. Supports most languages. Paid. NSFW content is not allowed.",
             SettingsType = typeof(OpenAISettings),
         });
     }

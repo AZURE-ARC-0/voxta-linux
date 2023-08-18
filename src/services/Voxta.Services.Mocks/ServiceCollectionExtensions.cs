@@ -27,6 +27,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.Low,
             ActionInference = ServiceDefinitionCategoryScore.Low,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = false,
+            Notes = "Only used for testing.",
             SettingsType = typeof(MockSettings),
         });
     }

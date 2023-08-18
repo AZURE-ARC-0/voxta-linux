@@ -13,6 +13,9 @@ public class ServiceDefinition
     
     public required string[] Features { get; init; }
     
+    public required bool Recommended { get; init; }
+    public required string Notes { get; init; }
+    
     public required Type? SettingsType { get; init; }
 }
 

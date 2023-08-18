@@ -218,7 +218,8 @@ public class SettingsController : Controller
     {
         var configured = await _servicesRepository.GetServicesAsync(cancellationToken);
         var services = serviceDefinitionsRegistry.List()
-            .OrderBy(s => s.ServiceName)
+            .OrderBy(s => !s.Recommended)
+            .ThenBy(s => s.ServiceName)
             .Select(s => new AddServiceViewModel.ServiceEntryViewModel
             {
                 Definition = s,

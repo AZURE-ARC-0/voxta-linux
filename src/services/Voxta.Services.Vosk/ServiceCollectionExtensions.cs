@@ -25,6 +25,8 @@ public static class ServiceCollectionExtensions
             Summarization = ServiceDefinitionCategoryScore.NotSupported,
             ActionInference = ServiceDefinitionCategoryScore.NotSupported,
             Features = new[] { ServiceFeatures.NSFW },
+            Recommended = false,
+            Notes = "Local speech transcription. You can download models for your language. Fair quality.",
             SettingsType = typeof(VoskSettings),
         });
     }
