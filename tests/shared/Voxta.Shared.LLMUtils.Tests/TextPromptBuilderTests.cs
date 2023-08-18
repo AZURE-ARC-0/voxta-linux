@@ -51,7 +51,7 @@ public class TextPromptBuilderTests
         var actual = _builder.BuildReplyPromptString(chat, 0, 4096);
 
         Assert.That(actual, Is.EqualTo("""
-            System: This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe.
+            System: This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe. Text between [brackets] provides additional information about the conversation context.
             
             Description of Jane: some-description
             Personality of Jane: some-personality
@@ -151,7 +151,7 @@ public class TextPromptBuilderTests
         var actual = _builder.BuildReplyPromptString(chat, 1024, 4096);
 
         Assert.That(actual, Is.EqualTo("""
-           System: This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe.
+           System: This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe. Text between [brackets] provides additional information about the conversation context.
            
            Description of Jane: some-description
            Personality of Jane: some-personality
@@ -276,7 +276,7 @@ public class TextPromptBuilderTests
            Joe: You must write facts about Jane and Joe from their conversation.
            Facts must be short. Be specific. Write in a way that identifies the user associated with the fact. Use words from the conversation when possible.
            Prefer facts about: physical descriptions, emotional state, relationship progression, gender, sexual orientation, preferences, events.
-           Write the most useful facts first.
+           Write the most useful facts first. Only write useful and new facts.
 
            <START>
            Joe: Hello

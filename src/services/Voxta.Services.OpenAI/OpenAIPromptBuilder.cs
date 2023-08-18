@@ -1,6 +1,6 @@
 ﻿using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
-using Voxta.Services.MessageBased;
+using Voxta.Shared.LLMUtils;
 
 namespace Voxta.Services.OpenAI;
 

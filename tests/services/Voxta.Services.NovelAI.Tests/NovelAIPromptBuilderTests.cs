@@ -51,7 +51,7 @@ public class NovelAIPromptBuilderTests
         var actual = _builder.BuildReplyPromptString(chat, 0, 2000);
 
         Assert.That(actual, Is.EqualTo("""
-            This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe.
+            This is a spoken conversation between Joe and Jane. You are playing the role of Jane. The current date and time is Saturday, February 3, 2001 4:05 AM. Keep the conversation flowing, actively engage with Joe. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about Joe. Text between [brackets] provides additional information about the conversation context.
             
             Description of Jane: some-description
             Personality of Jane: some-personality

@@ -48,7 +48,7 @@ public class ServiceFactory<TInterface> : IServiceFactory<TInterface> where TInt
         }
 
         if (services.Services.Length == 0)
-            throw new InvalidOperationException($"There is not {typeof(TInterface).Name} service configured");
+            throw new InvalidOperationException($"There is no services of type '{typeof(TInterface).Name}' configured");
         
         foreach (var serviceLink in services.Services)
         {

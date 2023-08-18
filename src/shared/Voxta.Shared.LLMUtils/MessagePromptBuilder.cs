@@ -1,9 +1,8 @@
 ﻿using Voxta.Abstractions.Model;
 using Voxta.Abstractions.System;
 using Voxta.Abstractions.Tokenizers;
-using Voxta.Shared.LLMUtils;
 
-namespace Voxta.Services.MessageBased;
+namespace Voxta.Shared.LLMUtils;
 
 public abstract class MessagePromptBuilder
 {
@@ -170,7 +169,7 @@ public abstract class MessagePromptBuilder
         if (character.SystemPrompt.HasValue)
             sb.AppendLineLinux(character.SystemPrompt.Value);
         else
-            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about {chat.User.Name}.");
+            sb.AppendLineLinux($"This is a spoken conversation between {chat.User.Name} and {character.Name}. You are playing the role of {character.Name}. The current date and time is {_timeProvider.LocalNow.ToString("f", chat.CultureInfo)}. Keep the conversation flowing, actively engage with {chat.User.Name}. Stay in character. Emojis are prohibited, only use spoken words. Avoid making up facts about {chat.User.Name}. Text between [brackets] provides additional information about the conversation context.");
         
         sb.AppendLineLinux();
         

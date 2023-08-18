@@ -23,9 +23,15 @@ public class ChatSessionTests
     public void Setup()
     {
         _serverErrors = new List<string>();
-        
         _tunnelMock = new Mock<IUserConnectionTunnel>();
+        _timeProvider = new Mock<ITimeProvider>();
+        
         _textGen = new Mock<ITextGenService>();
+        _textGen.Setup(m => m.SettingsRef).Returns(new ServiceSettingsRef { ServiceName = "Test", ServiceId = Guid.Empty });
+        var summarization = new Mock<ISummarizationService>();
+        summarization.Setup(m => m.SettingsRef).Returns(new ServiceSettingsRef { ServiceName = "Test", ServiceId = Guid.Empty });
+        _speechGenerator = new Mock<ISpeechGenerator>();
+
         _chatSessionData = new ChatSessionData
         {
             Culture = "en-US",
@@ -46,24 +52,24 @@ public class ChatSessionTests
             },
             AudioPath = "/audio-path",
         };
+        
         var chatTextProcessor = new Mock<IChatTextProcessor>();
         chatTextProcessor.Setup(m => m.ProcessText(It.IsAny<string?>())).Returns((string? text) => text ?? "");
+        
         var profile = new ProfileSettings
         {
             Name = "User",
             Description = "User Description",
             PauseSpeechRecognitionDuringPlayback = false,
         };
-        _timeProvider = new Mock<ITimeProvider>();
+
         var chatSessionState = new ChatSessionState(_timeProvider.Object);
-        _speechGenerator = new Mock<ISpeechGenerator>();
         var chatRepository = new Mock<IChatRepository>();
         var chatMessageRepository = new Mock<IChatMessageRepository>();
         var performanceMetrics = new Mock<IPerformanceMetrics>();
         performanceMetrics.Setup(m => m.Start(It.IsAny<string>())).Returns(Mock.Of<IPerformanceMetricsTracker>());
         var memoryProvider = new Mock<IMemoryProvider>();
         memoryProvider.Setup(m => m.QueryMemoryFast(It.IsAny<ChatSessionData>()));
-        var summarizer = new Mock<ISummarizationService>();
         
         _session = new ChatSession(
             _tunnelMock.Object,
@@ -77,7 +83,7 @@ public class ChatSessionTests
             _speechGenerator.Object,
             null,
             null,
-            summarizer.Object,
+            summarization.Object,
             chatRepository.Object,
             chatMessageRepository.Object,
             memoryProvider.Object
@@ -154,7 +160,7 @@ public class ChatSessionTests
             Assert.That(_chatSessionData.GetMessagesAsString(), Is.EqualTo("""
                 User: Hello!
                 Assistant: This speech will...
-                User: *interrupts {{char}}* Stop!
+                User: [interrupts Assistant] Stop!
                 Assistant: How rude!
                 """.ReplaceLineEndings("\n")));
             Assert.That(_tunnelMock.Invocations[0].Arguments.OfType<ServerReplyMessage>().FirstOrDefault()?.Text, Is.EqualTo("This speech will be interrupted."));

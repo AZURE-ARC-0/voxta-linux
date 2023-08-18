@@ -36,6 +36,15 @@ public class WebSocketTest
             TextToSpeech = new ServicesList { Services = new[] { new ServiceLink("Mocks") } },
             ActionInference = new ServicesList { Services = new[] { new ServiceLink("Mocks") } },
         });
+
+        var servicesRepo = new Mock<IServicesRepository>();
+        servicesRepo.Setup(mock => mock.GetServiceByNameAsync("Mocks", It.IsAny<CancellationToken>())).ReturnsAsync(
+            new ConfiguredService
+            {
+                Id = Guid.Empty,
+                Enabled = true,
+                ServiceName = "Mocks",
+            });
             
         var webDir = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, "..", "..", "..", "..", "..", "..", "..", "src", "server", "Voxta.Server"));
         var builder = WebHost.CreateDefaultBuilder()
@@ -44,6 +53,7 @@ public class WebSocketTest
             .ConfigureTestServices(sc =>
             {
                 sc.AddTransient<IProfileRepository>(_ => profileRepo.Object);
+                sc.AddTransient<IServicesRepository>(_ => servicesRepo.Object);
             });
         _server = new TestServer(builder);
         _httpClient = _server.CreateClient();

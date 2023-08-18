@@ -55,7 +55,6 @@ public class Llama2PromptBuilderTests
            <s>[INST] <<SYS>>
            system_prompt
            
-           Only write a single reply from Jane for natural speech.
            <</SYS>>
 
            [/INST] model_answer_1 </s><s>[INST] user_msg_1 [/INST] model_answer_2 </s><s>[INST] user_msg_2 [/INST]
