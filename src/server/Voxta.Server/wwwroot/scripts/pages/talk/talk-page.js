@@ -32,7 +32,6 @@ const playThinkingSpeech = () => {
 const sendChatMessage = text => {
     playThinkingSpeech();
     audioVisualizer.think();
-    prompt.disabled = true;
     voxtaClient.send(
         text,
         "Chatting with speech and no webcam.",
@@ -178,13 +177,13 @@ voxtaClient.addEventListener('ready', evt => {
     audioVisualizer.idle();
     canvas.classList.add('voxta_show');
     promptBox.classList.add('voxta_show');
+    prompt.disabled = false;
     notifications.notify(`Chat started with text gen ${evt.detail.services.textGen.service?.serviceName}, text to speech ${evt.detail.services.speechGen.service?.serviceName ?? 'none'}, speech to text ${evt.detail.services.speechToText.service?.serviceName ?? 'none'}`, 'success');
 });
 
 voxtaClient.addEventListener('reply', evt => {
     messageBox.classList.add('voxta_show');
     messageBox.innerText = evt.detail.text;
-    prompt.disabled = false;
 });
 
 voxtaClient.addEventListener('speech', evt => {
@@ -222,7 +221,6 @@ voxtaClient.addEventListener('speechRecognitionEnd', evt => {
         audioVisualizer.idle();
     }
     prompt.value = evt.detail.text;
-    prompt.disabled = true;
 });
 
 voxtaClient.addEventListener('error', evt => {
