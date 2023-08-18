@@ -13,8 +13,7 @@ namespace Voxta.Services.OpenAI;
 
 public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, OpenAIParameters, OpenAIRequestBody>
 {
-    private static readonly ITokenizer SharedTokenizer = DeepDevTokenizer.Create();
-    protected override ITokenizer Tokenizer => SharedTokenizer;
+    protected override ITokenizer Tokenizer => _tokenizer ?? throw new NullReferenceException("Tokenizer was not initialized.");
     
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
@@ -27,6 +26,7 @@ public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, Op
     private readonly ILocalEncryptionProvider _encryptionProvider;
     private readonly HttpClient _httpClient;
     private string _model = "gpt-3.5-turbo";
+    private ITokenizer? _tokenizer;
 
     protected OpenAIClientBase(IHttpClientFactory httpClientFactory, ISettingsRepository settingsRepository, ILocalEncryptionProvider encryptionProvider)
         : base(settingsRepository)
@@ -40,14 +40,10 @@ public abstract class OpenAIClientBase : LLMServiceClientBase<OpenAISettings, Op
     {
         if (!await base.TryInitializeAsync(settings, prerequisites, culture, dry, cancellationToken)) return false;
 
-        return TryInitializeSync(settings, dry);
-    }
-
-    private bool TryInitializeSync(OpenAISettings settings, bool dry)
-    {
         if (string.IsNullOrEmpty(settings.ApiKey)) return false;
         if (dry) return true;
 
+        _tokenizer = await DeepDevTokenizer.GetSharedInstanceAsync();
         _httpClient.BaseAddress = new Uri("https://api.openai.com/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _encryptionProvider.Decrypt(settings.ApiKey));
         _model = settings.Model;

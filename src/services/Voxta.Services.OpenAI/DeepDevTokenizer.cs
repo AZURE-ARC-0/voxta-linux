@@ -4,15 +4,19 @@ namespace Voxta.Services.OpenAI;
 
 public class DeepDevTokenizer : Voxta.Abstractions.Tokenizers.ITokenizer
 {
-    public static Voxta.Abstractions.Tokenizers.ITokenizer Create()
+    private static readonly Lazy<Task<Voxta.Abstractions.Tokenizers.ITokenizer>> Shared = new(CreateAsync);
+    
+    public static Task<Voxta.Abstractions.Tokenizers.ITokenizer> GetSharedInstanceAsync() => Shared.Value;
+
+    private static async Task<Voxta.Abstractions.Tokenizers.ITokenizer> CreateAsync()
     {
-        var deepDevTokenizer = TokenizerBuilder.CreateByModelName("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
+        var deepDevTokenizer = await TokenizerBuilder.CreateByModelNameAsync("gpt-3.5-turbo", OpenAISpecialTokens.SpecialTokens);
         return new DeepDevTokenizer(deepDevTokenizer);
     }
     
     private readonly ITokenizer _deepDevTokenizer;
 
-    public DeepDevTokenizer(ITokenizer deepDevTokenizer)
+    private DeepDevTokenizer(ITokenizer deepDevTokenizer)
     {
         _deepDevTokenizer = deepDevTokenizer;
     }
