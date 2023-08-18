@@ -16,7 +16,7 @@ public sealed class FFmpegSpeechToText : ServiceBase<FFmpegSettings>, ISpeechToT
 
     public event EventHandler? SpeechRecognitionStarted;
     public event EventHandler<string>? SpeechRecognitionPartial;
-    public event EventHandler<string>? SpeechRecognitionFinished;
+    public event EventHandler<string?>? SpeechRecognitionFinished;
 
     public FFmpegSpeechToText(IRecordingService recordingService, ISettingsRepository settingsRepository)
         : base(settingsRepository)
