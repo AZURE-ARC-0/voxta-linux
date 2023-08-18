@@ -101,6 +101,9 @@ public class CharactersController : Controller
     public async Task<IActionResult> Delete([FromForm] Guid charId)
     {
         await _characterRepository.DeleteAsync(charId);
+        var path = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "characters", charId + ".png");
+        if (System.IO.File.Exists(path))
+            System.IO.File.Delete(path);
         return RedirectToAction("Characters");
     }
     
