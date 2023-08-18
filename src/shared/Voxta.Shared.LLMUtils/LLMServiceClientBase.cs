@@ -62,27 +62,8 @@ public abstract class LLMServiceClientBase<TSettings, TInputParameters, TOutputP
         return Tokenizer.CountTokens(message);
     }
 
-    public (List<ChatMessageData> Messages, int Tokens)? GetMessagesToSummarize(IChatInferenceData chat)
-    {
-        if(chat.TotalMessagesTokens < Settings.SummarizationTriggerTokens)
-            return null;
-        
-        using var token = chat.GetReadToken();
-        
-        var messagesTokens = 0;
-        var messagesToSummarize = new List<ChatMessageData>();
-        foreach (var message in token.Messages)
-        {
-            if (messagesTokens + message.Tokens > Settings.SummarizationDigestTokens) break;
-            messagesTokens += message.Tokens;
-            messagesToSummarize.Add(message);
-        }
-
-        if (messagesToSummarize.Count == 0)
-            throw new InvalidOperationException("Cannot summarize, not enough tokens for a single message");
-
-        return (messagesToSummarize, messagesTokens);
-    }
+    public int SummarizationTriggerTokens => Settings.SummarizationTriggerTokens;
+    public int SummarizationDigestTokens => Settings.SummarizationDigestTokens;
 
     protected TOutputParameters CreateParameters()
     {

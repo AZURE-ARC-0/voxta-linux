@@ -10,10 +10,7 @@ public class MockTextGenService : MockServiceBase, ITextGenService
     {
     }
 
-    public (List<ChatMessageData> Messages, int Tokens)? GetMessagesToSummarize(IChatInferenceData chat)
-    {
-        return null;
-    }
+    public int SummarizationTriggerTokens => int.MaxValue;
 
     public int GetTokenCount(string message)
     {

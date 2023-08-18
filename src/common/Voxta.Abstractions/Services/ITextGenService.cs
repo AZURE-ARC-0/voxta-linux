@@ -4,7 +4,7 @@ namespace Voxta.Abstractions.Services;
 
 public interface ITextGenService : ITokenCounter, IService
 {
-    (List<ChatMessageData> Messages, int Tokens)? GetMessagesToSummarize(IChatInferenceData chat);
+    int SummarizationTriggerTokens { get; }
     ValueTask<string> GenerateReplyAsync(IChatInferenceData chat, CancellationToken cancellationToken);
     ValueTask<string > GenerateAsync(string prompt, CancellationToken cancellationToken);
 }

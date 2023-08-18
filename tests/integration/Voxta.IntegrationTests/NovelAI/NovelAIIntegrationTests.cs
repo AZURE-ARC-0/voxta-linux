@@ -15,7 +15,11 @@ public class NovelAIIntegrationTests : IntegrationTestsBase
         var chat = CreateChat(CatherineCharacter.Create());
         using (var token = chat.GetWriteToken())
         {
-            token.AddMessage(chat.User, "Tell me, how do you feel about this?");
+            token.AddMessage(chat.User, "I wanted to know more about you.");
+            token.AddMessage(chat.Character, "I'm all yours!");
+            token.AddMessage(chat.User, "What would be the perfect date for you?");
+            token.AddMessage(chat.Character, "Oh, I think I'm blushing... that would be anything, as long as I'm with you!");
+            token.AddMessage(chat.User, "You're cute, you know that?");
         }
 
         var client = await CreateClientAsync<NovelAITextGenService>(NovelAIConstants.ServiceName);

@@ -27,17 +27,24 @@ public partial class ChatSession
     private async Task SummarizeMemoryUnsafeAsync(CancellationToken cancellationToken)
     {
         if (_summarizationService == null) return;
+        if (_chatSessionData.TotalMessagesTokens < _textGen.SummarizationTriggerTokens) return;
+        using var token = _chatSessionData.GetWriteToken();
+        if (_chatSessionData.TotalMessagesTokens < _textGen.SummarizationTriggerTokens) return;
+        
+        var messagesToSummarizeTokens = 0;
+        var messagesToSummarize = new List<ChatMessageData>();
+        foreach (var message in token.Messages)
+        {
+            if (messagesToSummarizeTokens + message.Tokens > _summarizationService.SummarizationDigestTokens) break;
+            messagesToSummarizeTokens += message.Tokens;
+            messagesToSummarize.Add(message);
+        }
 
-        var summarizePlan = _textGen.GetMessagesToSummarize(_chatSessionData);
-
-        if (summarizePlan == null) return;
-
-        var (messagesToSummarize, messagesTokens) = summarizePlan.Value;
+        if (messagesToSummarize.Count == 0)
+            throw new InvalidOperationException("Cannot summarize, not enough tokens for a single message");
 
         _logger.LogInformation("Summarizing memory for {MessagesToSummarizeCount}", messagesToSummarize.Count);
 
-        using var token = _chatSessionData.GetWriteToken();
-        
         var summaryText = await _summarizationService.SummarizeAsync(_chatSessionData, messagesToSummarize, cancellationToken);
         if (string.IsNullOrEmpty(summaryText))
         {
@@ -67,6 +74,6 @@ public partial class ChatSession
         token.Messages.Insert(0, summarizedMessage);
         await SaveMessageAsync(summarizedMessage);
 
-        _logger.LogInformation("Summarized memory (reduced from {MessageTokens} to {SummaryTokens}): {SummaryText}", messagesTokens, summaryTokens, summaryText);
+        _logger.LogInformation("Summarized memory (reduced from {MessageTokens} to {SummaryTokens}): {SummaryText}", messagesToSummarizeTokens, summaryTokens, summaryText);
     }
 }
