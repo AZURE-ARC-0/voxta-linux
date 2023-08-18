@@ -23,8 +23,9 @@ public class CharactersController : Controller
     private readonly IProfileRepository _profileRepository;
     private readonly IServicesRepository _servicesRepository;
     private readonly IServiceDefinitionsRegistry _servicesDefinitionsRegistry;
+    private readonly IWebHostEnvironment _hostingEnvironment;
 
-    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository, ILogger<CharactersController> logger, IServicesRepository servicesRepository, IServiceDefinitionsRegistry servicesDefinitionsRegistry)
+    public CharactersController(ICharacterRepository characterRepository, IProfileRepository profileRepository, IMemoryRepository memoryRepository, ILogger<CharactersController> logger, IServicesRepository servicesRepository, IServiceDefinitionsRegistry servicesDefinitionsRegistry, IWebHostEnvironment hostingEnvironment)
     {
         _characterRepository = characterRepository;
         _profileRepository = profileRepository;
@@ -32,6 +33,7 @@ public class CharactersController : Controller
         _logger = logger;
         _servicesRepository = servicesRepository;
         _servicesDefinitionsRegistry = servicesDefinitionsRegistry;
+        _hostingEnvironment = hostingEnvironment;
     }
     
     [HttpGet("/characters")]
@@ -133,6 +135,15 @@ public class CharactersController : Controller
             var tts = data.TextToSpeech.Split("/");
             data.Character.Services.SpeechGen.Service = new ServiceLink(tts[0], Guid.Parse(tts[1]));
             data.Character.Services.SpeechGen.Voice = data.Voice;
+        }
+
+        if (data.AvatarUpload != null)
+        {
+            var path = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", "characters", charId + ".png");
+            await using (var stream = new FileStream(path, FileMode.Create))
+                await data.AvatarUpload.CopyToAsync(stream, cancellationToken);
+
+            data.Character.AvatarUrl = $"/uploads/characters/{charId}.png";
         }
         
         await _characterRepository.SaveCharacterAsync(data.Character);

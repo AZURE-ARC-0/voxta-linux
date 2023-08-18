@@ -9,6 +9,7 @@ public static class GeorgeCharacter
         Id = Guid.Parse("6227dc38-f656-413f-bba8-773380bad9d9"),
         ReadOnly = true,
         Name = "George",
+        AvatarUrl = "/uploads/characters/6227dc38-f656-413f-bba8-773380bad9d9.png",
         CreatorNotes = "Helpful and friendly.",
         Scenario = "{{char}} is a brilliant computer program. He likes helping {{user}} but also tease them.",
         MessageExamples = """

@@ -21,7 +21,7 @@
         </div>
     </div>
     
-    <form method="post" action="/characters/@Model.Character.Id">
+    <form method="post" action="/characters/@Model.Character.Id" enctype="multipart/form-data">
         <input type="hidden" asp-for="Character.Id" class="form-control" readonly="readonly"/>
 
         <div class="card mb-3">
@@ -29,6 +29,22 @@
                 <h2>Character Card</h2>
             </div>
             <div class="card-body">
+                <div class="mb-3 d-flex">
+                    <div class="flex-grow-1 mr-3">
+                        <input type="hidden" asp-for="Character.AvatarUrl"/>
+                        <label asp-for="AvatarUpload">Image</label>
+                        <input type="file" asp-for="AvatarUpload" class="form-control" accept="image/*"/>
+                        <div class="form-text">Please upload a square, 200x200 images. There's no resize or crop!</div>
+                        <small class="text-danger">@Html.ValidationMessageFor(m => m.AvatarUpload)</small>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Character.AvatarUrl))
+                    {
+                        <div>
+                            <img src="@Model.Character.AvatarUrl" alt="Current Image" class="img-thumbnail"/>
+                        </div>
+                    }
+                </div>
+                
                 <div class="mb-3">
                     <label asp-for="Character.Name">Name</label>
                     <input asp-for="Character.Name" class="form-control"/>
@@ -42,54 +58,54 @@
                     <div class="form-text">Only for display, not used by the AI</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.CreatorNotes)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.Description">Description</label>
                     <textarea asp-for="Character.Description" class="form-control"></textarea>
                     <div class="form-text">What the character looks like</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Description)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.Personality">Personality</label>
                     <textarea asp-for="Character.Personality" class="form-control"></textarea>
                     <div class="form-text">How does the character behaves</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Personality)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.Scenario">Scenario</label>
                     <textarea asp-for="Character.Scenario" class="form-control"></textarea>
                     <div class="form-text">In what circumstances are you and the character talking</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.Scenario)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.FirstMessage">First Message</label>
                     <textarea asp-for="Character.FirstMessage" class="form-control"></textarea>
                     <div class="form-text">The first message the user will say when talking to you</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.FirstMessage)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.MessageExamples">Message Examples</label>
                     <textarea asp-for="Character.MessageExamples" class="form-control"></textarea>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.MessageExamples)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.SystemPrompt">System Prompt</label>
                     <textarea asp-for="Character.SystemPrompt" class="form-control"></textarea>
                     <div class="form-text">Most downloaded characters rely on a built-in one and will leave this empty.</div>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.SystemPrompt)</small>
                 </div>
-                
+
                 <div class="mb-3">
                     <label asp-for="Character.PostHistoryInstructions">Post History Instructions: <span class="text-muted">Also known as UJB</span></label>
                     <textarea asp-for="Character.PostHistoryInstructions" class="form-control"></textarea>
                     <small class="text-danger">@Html.ValidationMessageFor(m => m.Character.PostHistoryInstructions)</small>
                 </div>
-                
+
                 <p class="d-flex justify-content-end mt-3">
                     <a href="https://github.com/malfoyslastname/character-card-spec-v2" target="_blank">Character Card Spec V2</a>
                 </p>

@@ -5,4 +5,7 @@ src/server/Voxta.Server/Data/*
 !src/server/Voxta.Server/Data/README.txt
 !src/server/Voxta.Server/Data/Audio
 src/server/Voxta.Server/Models/*
+src/server/Voxta.Server/wwwroot/uploads/characters/*
+!src/server/Voxta.Server/wwwroot/uploads/characters/67e139a4-e30e-4603-a083-6e89719a9bb1.png
+!src/server/Voxta.Server/wwwroot/uploads/characters/6227dc38-f656-413f-bba8-773380bad9d9.png
 *.db

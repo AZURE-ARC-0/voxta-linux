@@ -39,6 +39,7 @@ public class ServerCharactersListLoadedMessage : ServerMessage
         public required bool ReadOnly { get; init; }
         public required string Culture { get; set; }
         public required string[] Prerequisites { get; set; }
+        public required string? AvatarUrl { get; set; }
     }
 }
 

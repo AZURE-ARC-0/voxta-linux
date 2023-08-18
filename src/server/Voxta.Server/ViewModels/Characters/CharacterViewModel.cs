@@ -9,6 +9,7 @@ public class CharacterViewModel
     public required string? TextGen { get; init; }
     public required string? TextToSpeech { get; init; }
     public required string? Voice { get; init; }
+    public IFormFile? AvatarUpload { get; init; }
 }
 
 public class CharacterViewModelWithOptions : CharacterViewModel

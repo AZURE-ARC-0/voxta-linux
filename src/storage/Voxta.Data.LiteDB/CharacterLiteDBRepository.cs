@@ -21,7 +21,7 @@ public class CharacterLiteDBRepository : ICharacterRepository
     public Task<ServerCharactersListLoadedMessage.CharactersListItem[]> GetCharactersListAsync(CancellationToken cancellationToken)
     {
         var cards = _charactersCollection.Query()
-            .Select(x => new { x.Id, x.Name, x.CreatorNotes, x.Services, x.ReadOnly, x.Culture, x.Prerequisites })
+            .Select(x => new { x.Id, x.Name, x.CreatorNotes, x.Services, x.ReadOnly, x.Culture, x.Prerequisites, x.AvatarUrl })
             .ToList();
 
         var result = cards
@@ -34,6 +34,7 @@ public class CharacterLiteDBRepository : ICharacterRepository
                 Culture = b.Culture,
                 // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
                 Prerequisites = b.Prerequisites ?? Array.Empty<string>(),
+                AvatarUrl = b.AvatarUrl,
             })
             .OrderBy(x => x.Name)
             .ToArray();

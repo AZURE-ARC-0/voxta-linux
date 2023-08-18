@@ -15,6 +15,7 @@
             <table class="table mb-0">
                 <thead>
                 <tr>
+                    <th style="width: 60px;"></th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Requirements</th>
@@ -26,24 +27,34 @@
                     @foreach (var character in Model.OrderBy(x => x.ReadOnly).ThenBy(x => x.Name))
                     {
                         <tr>
-                            <td>
+                            <td class="align-middle">
+                                @if (character.AvatarUrl != null)
+                                {
+                                    <img src="@character.AvatarUrl" alt="Avatar of @character.Name" width="60" height="60" />
+                                }
+                                else
+                                {
+                                    <div style="width:60px; height:60px;"></div>
+                                }
+                            </td>
+                            <td class="align-middle">
                                 @character.Name
                                 @if (character.ReadOnly)
                                 {
                                     <span class="badge badge-secondary">built-in</span>
                                 }
                             </td>
-                            <td>
+                            <td class="align-middle">
                                 @character.Description
                             </td>
-                            <td>
+                            <td class="align-middle">
                                 <span class="badge badge-secondary">@character.Culture</span>
-                                @foreach(var prerequisite in character.Prerequisites)
+                                @foreach (var prerequisite in character.Prerequisites)
                                 {
                                     <span class="badge badge-dark">@prerequisite</span>
                                 }
                             </td>
-                            <td class="text-end">
+                            <td class="align-middle text-end">
                                 <div class="d-flex gap-2 justify-content-end">
                                     @if (!character.ReadOnly)
                                     {
