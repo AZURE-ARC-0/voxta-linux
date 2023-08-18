@@ -108,6 +108,14 @@ public class NovelAITextToSpeechService : ServiceBase<NovelAISettings>, ITextToS
             return;
         }
         
+        if (audioResponse.Content.Headers.ContentType?.MediaType != "audio/webm")
+        {
+            var reason = await audioResponse.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogError("NovelAI generated unexpected audio type: {ContentType}. Body: {Body}", audioResponse.Content.Headers.ContentType?.MediaType ?? "NULL", reason);
+            await tunnel.ErrorAsync(new NovelAIException($"Unable to generate speech: {reason}"), cancellationToken);
+            return;
+        }
+        
         await using var stream = await audioResponse.Content.ReadAsStreamAsync(cancellationToken);
         await tunnel.SendAsync(new AudioData(stream, audioResponse.Content.Headers.ContentType?.MediaType ?? "audio/webm"), cancellationToken);
         ttsPerf.Done();
